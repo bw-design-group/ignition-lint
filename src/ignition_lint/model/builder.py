@@ -250,6 +250,32 @@ class ViewModelBuilder:
 			return access_value == 'PRIVATE'
 		return None
 
+	def _extract_property_name(self, path: str) -> str:
+		"""
+		Extract the property name from a path, removing array indices.
+
+		Array properties are flattened to paths like:
+		  custom.myList[0], custom.myList[1], custom.myList[2]
+
+		This method strips the array index notation to return just the base property name:
+		  custom.myList[0] -> myList
+		  custom.myProperty -> myProperty
+
+		Args:
+			path: The full property path
+
+		Returns:
+			The property name without array indices
+		"""
+		# Get the last segment of the path
+		last_segment = path.split(".")[-1]
+
+		# Remove array index notation (e.g., [0], [1], [2])
+		# Pattern matches: [digits] at the end of the string
+		property_name = re.sub(r'\[\d+\]$', '', last_segment)
+
+		return property_name
+
 	def _collect_components(self):
 		# First, identify components by looking for meta.name entries
 		for path, value in self.flattened_json.items():
@@ -440,6 +466,10 @@ class ViewModelBuilder:
 					self.model['scripts'].append(handler)
 
 	def _collect_properties(self):
+		# Track processed properties to avoid duplicates from array elements
+		# Key format: "base_path.property_name" (without array indices)
+		processed_properties = set()
+
 		for path, value in self.flattened_json.items():
 			# Skip meta properties, bindings, scripts, events - we already processed those
 			processed_props = ['meta', 'binding', 'scripts', 'events']
@@ -454,10 +484,22 @@ class ViewModelBuilder:
 			if path.startswith('custom.') or path.startswith('params.'):
 				# Check if this is a persistent property
 				if self._is_property_persistent(path):
-					property_name = path.split(".")[-1]
+					property_name = self._extract_property_name(path)
+
+					# Create a unique identifier for this property (without array indices)
+					# Strip array indices from path to get base path
+					base_path = re.sub(r'\[\d+\]', '', path)
+					property_id = f"{base_path}"
+
+					# Skip if we've already processed this property (avoid duplicates from arrays)
+					if property_id in processed_properties:
+						continue
+
+					processed_properties.add(property_id)
+
 					persistent = self._get_property_persistence(path)
 					private_access = self._get_property_access_mode(path)
-					prop = Property(path, property_name, value, persistent=persistent, private_access=private_access)
+					prop = Property(base_path, property_name, value, persistent=persistent, private_access=private_access)
 					self.model['properties'].append(prop)
 				continue
 
@@ -474,11 +516,21 @@ class ViewModelBuilder:
 				if '.custom.' in path and not self._is_property_persistent(path):
 					continue
 
-				property_name = path.split(".")[-1]
+				property_name = self._extract_property_name(path)
+
+				# Create a unique identifier for this property (without array indices)
+				base_path = re.sub(r'\[\d+\]', '', path)
+				property_id = f"{base_path}"
+
+				# Skip if we've already processed this property (avoid duplicates from arrays)
+				if property_id in processed_properties:
+					continue
+
+				processed_properties.add(property_id)
 
 				persistent = self._get_property_persistence(path)
 				private_access = self._get_property_access_mode(path)
-				prop = Property(path, property_name, value, persistent=persistent, private_access=private_access)
+				prop = Property(base_path, property_name, value, persistent=persistent, private_access=private_access)
 				self.model['properties'].append(prop)
 				# Add the property to the component
 				if component_path in self.model['components']:
