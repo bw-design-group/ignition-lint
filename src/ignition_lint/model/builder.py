@@ -424,11 +424,12 @@ class ViewModelBuilder:
 
 				event_path = event_path_parts
 
-				# Extract event type from path (e.g., 'onActionPerformed', 'onStartup')
-				# Standard Ignition events don't use domains, just event types
-				event_type_match = re.search(r'\.events\.([^.]+)$', event_path_parts)
-				if event_type_match:
-					event_type = event_type_match.group(1)  # e.g., 'onActionPerformed', 'onStartup'
+				# Extract domain and event type from path
+				# Format: .events.{domain}.{eventType} (e.g., .events.component.onActionPerformed)
+				event_match = re.search(r'\.events\.([^.]+)\.([^.]+)$', event_path_parts)
+				if event_match:
+					domain = event_match.group(1)  # e.g., 'component', 'dom'
+					event_type = event_match.group(2)  # e.g., 'onActionPerformed', 'onStartup'
 
 					# Get the scope from the same event path
 					scope_path = f"{event_path_parts}.scope"
@@ -436,7 +437,7 @@ class ViewModelBuilder:
 
 					# Create a script event handler
 					handler = EventHandlerScript(
-						event_path, "component", event_type, script, scope=scope
+						event_path, domain, event_type, script, scope=scope
 					)
 					self.model['event_handlers'].append(handler)
 					self.model['scripts'].append(handler)

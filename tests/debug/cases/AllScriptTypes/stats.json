@@ -1,0 +1,105 @@
+{
+  "components_by_type": {
+    "ia.container.flex": 1,
+    "ia.input.button": 2
+  },
+  "model_keys": [
+    "components",
+    "bindings",
+    "scripts",
+    "event_handlers",
+    "message_handlers",
+    "custom_methods",
+    "expression_bindings",
+    "expression_struct_bindings",
+    "property_bindings",
+    "tag_bindings",
+    "query_bindings",
+    "script_transforms",
+    "properties"
+  ],
+  "node_type_counts": {
+    "component": 3,
+    "custom_method": 2,
+    "event_handler": 2,
+    "expression_binding": 3,
+    "message_handler": 1,
+    "property": 6,
+    "transform": 2
+  },
+  "rule_coverage": {
+    "BadComponentReferenceRule": {
+      "applicable_node_count": 10,
+      "target_types": [
+        "custom_method",
+        "event_handler",
+        "expression_binding",
+        "message_handler",
+        "transform"
+      ]
+    },
+    "ExampleBindingCountRule": {
+      "applicable_node_count": 6,
+      "target_types": [
+        "component",
+        "expression_binding",
+        "expression_struct_binding",
+        "property_binding",
+        "query_binding",
+        "tag_binding"
+      ]
+    },
+    "ExampleMixedSeverityRule": {
+      "applicable_node_count": 3,
+      "target_types": [
+        "component"
+      ]
+    },
+    "ExampleNameLengthRule": {
+      "applicable_node_count": 3,
+      "target_types": [
+        "component"
+      ]
+    },
+    "NamePatternRule": {
+      "applicable_node_count": 3,
+      "target_types": [
+        "component"
+      ]
+    },
+    "PollingIntervalRule": {
+      "applicable_node_count": 3,
+      "target_types": [
+        "expression_binding",
+        "expression_struct_binding",
+        "property_binding",
+        "query_binding",
+        "tag_binding"
+      ]
+    },
+    "PylintScriptRule": {
+      "applicable_node_count": 7,
+      "target_types": [
+        "custom_method",
+        "event_handler",
+        "message_handler",
+        "transform"
+      ]
+    },
+    "UnusedCustomPropertiesRule": {
+      "applicable_node_count": 19,
+      "target_types": [
+        "component",
+        "custom_method",
+        "event_handler",
+        "expression_binding",
+        "message_handler",
+        "property",
+        "property_binding",
+        "tag_binding",
+        "transform"
+      ]
+    }
+  },
+  "total_nodes": 19
+}
