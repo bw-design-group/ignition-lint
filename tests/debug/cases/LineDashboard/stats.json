@@ -26,6 +26,7 @@
   "node_type_counts": {
     "component": 19,
     "custom_method": 2,
+    "event_handler": 9,
     "expression_binding": 9,
     "expression_struct_binding": 4,
     "message_handler": 1,
@@ -36,7 +37,7 @@
   },
   "rule_coverage": {
     "BadComponentReferenceRule": {
-      "applicable_node_count": 21,
+      "applicable_node_count": 30,
       "target_types": [
         "custom_method",
         "event_handler",
@@ -85,7 +86,7 @@
       ]
     },
     "PylintScriptRule": {
-      "applicable_node_count": 12,
+      "applicable_node_count": 21,
       "target_types": [
         "custom_method",
         "event_handler",
@@ -94,7 +95,7 @@
       ]
     },
     "UnusedCustomPropertiesRule": {
-      "applicable_node_count": 187,
+      "applicable_node_count": 196,
       "target_types": [
         "component",
         "custom_method",
@@ -108,5 +109,5 @@
       ]
     }
   },
-  "total_nodes": 191
+  "total_nodes": 200
 }

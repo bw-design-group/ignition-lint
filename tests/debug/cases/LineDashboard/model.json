@@ -460,8 +460,90 @@
     ]
   },
   "event_handlers": {
-    "count": 0,
-    "nodes": []
+    "count": 9,
+    "nodes": [
+      {
+        "event_domain": "dom",
+        "event_type": "onClick",
+        "node_type": "event_handler",
+        "path": "root.root.children[0].Header.children[0].FlexContainer.children[1].Left Labels.children[0].Name.children[0].Line Name.events.dom.onClick",
+        "scope": "G",
+        "script_length": 9,
+        "script_preview": "\treturn 3"
+      },
+      {
+        "event_domain": "dom",
+        "event_type": "onContextMenu",
+        "node_type": "event_handler",
+        "path": "root.root.children[0].Header.children[0].FlexContainer.children[1].Left Labels.children[0].Name.children[0].Line Name.events.dom.onContextMenu",
+        "scope": "G",
+        "script_length": 9,
+        "script_preview": "\treturn 4"
+      },
+      {
+        "event_domain": "dom",
+        "event_type": "onDoubleClick",
+        "node_type": "event_handler",
+        "path": "root.root.children[0].Header.children[0].FlexContainer.children[1].Left Labels.children[0].Name.children[0].Line Name.events.dom.onDoubleClick",
+        "scope": "G",
+        "script_length": 9,
+        "script_preview": "\treturn 5"
+      },
+      {
+        "event_domain": "system",
+        "event_type": "onShutdown",
+        "node_type": "event_handler",
+        "path": "root.root.children[0].Header.children[0].FlexContainer.children[1].Left Labels.children[0].Name.children[0].Line Name.events.system.onShutdown",
+        "scope": "G",
+        "script_length": 9,
+        "script_preview": "\treturn 2"
+      },
+      {
+        "event_domain": "system",
+        "event_type": "onStartup",
+        "node_type": "event_handler",
+        "path": "root.root.children[0].Header.children[0].FlexContainer.children[1].Left Labels.children[0].Name.children[0].Line Name.events.system.onStartup",
+        "scope": "G",
+        "script_length": 9,
+        "script_preview": "\treturn 1"
+      },
+      {
+        "event_domain": "dom",
+        "event_type": "onClick",
+        "node_type": "event_handler",
+        "path": "root.root.children[0].Header.children[0].FlexContainer.children[1].Left Labels.children[0].Name.children[1].Custom Dashboard Button.events.dom.onClick",
+        "scope": "G",
+        "script_length": 34,
+        "script_preview": "\tself.openCustomDash(newTab=False)"
+      },
+      {
+        "event_domain": "component",
+        "event_type": "onItemClicked",
+        "node_type": "event_handler",
+        "path": "root.root.children[0].Header.children[0].FlexContainer.children[1].Left Labels.children[1].Breadcrumb.events.component.onItemClicked",
+        "scope": "G",
+        "script_length": 117,
+        "script_preview": "\tself.session.custom.previous_url = self.session.custom.current_url\n\tself.session.custom.current_url..."
+      },
+      {
+        "event_domain": "dom",
+        "event_type": "onPointerEnter",
+        "node_type": "event_handler",
+        "path": "root.root.children[0].Header.children[0].FlexContainer.children[1].Left Labels.children[1].Breadcrumb.events.dom.onPointerEnter",
+        "scope": "G",
+        "script_length": 146,
+        "script_preview": "\n\tself.meta.contextMenu.items[0].method.params.eq_path_url = event.target\n\tself.meta.contextMenu.ite..."
+      },
+      {
+        "event_domain": "dom",
+        "event_type": "onClick",
+        "node_type": "event_handler",
+        "path": "root.root.children[0].Header.children[0].FlexContainer.children[2].KPI Repeater Static.events.dom.onClick",
+        "scope": "G",
+        "script_length": 107,
+        "script_preview": "\tsystem.perspective.sendMessage('selected-navigation', payload={'nav_name': \"Dashboards\"}, scope='se..."
+      }
+    ]
   },
   "expression_bindings": {
     "count": 9,
@@ -1647,7 +1729,7 @@
     ]
   },
   "scripts": {
-    "count": 12,
+    "count": 21,
     "nodes": [
       {
         "binding_path": "propConfig.custom.kpiData",
@@ -1744,6 +1826,87 @@
         "path": "root.root.children[0].Header.children[0].FlexContainer.children[1].Left Labels.children[1].Breadcrumb.scripts.customMethods[0]",
         "script_length": 98,
         "script_preview": "\tsystem.perspective.navigate(url, params={\"eq_path_url\": \"/home/%s\" % eq_path_url}, newTab=newTab)"
+      },
+      {
+        "event_domain": "dom",
+        "event_type": "onClick",
+        "node_type": "event_handler",
+        "path": "root.root.children[0].Header.children[0].FlexContainer.children[1].Left Labels.children[0].Name.children[0].Line Name.events.dom.onClick",
+        "scope": "G",
+        "script_length": 9,
+        "script_preview": "\treturn 3"
+      },
+      {
+        "event_domain": "dom",
+        "event_type": "onContextMenu",
+        "node_type": "event_handler",
+        "path": "root.root.children[0].Header.children[0].FlexContainer.children[1].Left Labels.children[0].Name.children[0].Line Name.events.dom.onContextMenu",
+        "scope": "G",
+        "script_length": 9,
+        "script_preview": "\treturn 4"
+      },
+      {
+        "event_domain": "dom",
+        "event_type": "onDoubleClick",
+        "node_type": "event_handler",
+        "path": "root.root.children[0].Header.children[0].FlexContainer.children[1].Left Labels.children[0].Name.children[0].Line Name.events.dom.onDoubleClick",
+        "scope": "G",
+        "script_length": 9,
+        "script_preview": "\treturn 5"
+      },
+      {
+        "event_domain": "system",
+        "event_type": "onShutdown",
+        "node_type": "event_handler",
+        "path": "root.root.children[0].Header.children[0].FlexContainer.children[1].Left Labels.children[0].Name.children[0].Line Name.events.system.onShutdown",
+        "scope": "G",
+        "script_length": 9,
+        "script_preview": "\treturn 2"
+      },
+      {
+        "event_domain": "system",
+        "event_type": "onStartup",
+        "node_type": "event_handler",
+        "path": "root.root.children[0].Header.children[0].FlexContainer.children[1].Left Labels.children[0].Name.children[0].Line Name.events.system.onStartup",
+        "scope": "G",
+        "script_length": 9,
+        "script_preview": "\treturn 1"
+      },
+      {
+        "event_domain": "dom",
+        "event_type": "onClick",
+        "node_type": "event_handler",
+        "path": "root.root.children[0].Header.children[0].FlexContainer.children[1].Left Labels.children[0].Name.children[1].Custom Dashboard Button.events.dom.onClick",
+        "scope": "G",
+        "script_length": 34,
+        "script_preview": "\tself.openCustomDash(newTab=False)"
+      },
+      {
+        "event_domain": "component",
+        "event_type": "onItemClicked",
+        "node_type": "event_handler",
+        "path": "root.root.children[0].Header.children[0].FlexContainer.children[1].Left Labels.children[1].Breadcrumb.events.component.onItemClicked",
+        "scope": "G",
+        "script_length": 117,
+        "script_preview": "\tself.session.custom.previous_url = self.session.custom.current_url\n\tself.session.custom.current_url..."
+      },
+      {
+        "event_domain": "dom",
+        "event_type": "onPointerEnter",
+        "node_type": "event_handler",
+        "path": "root.root.children[0].Header.children[0].FlexContainer.children[1].Left Labels.children[1].Breadcrumb.events.dom.onPointerEnter",
+        "scope": "G",
+        "script_length": 146,
+        "script_preview": "\n\tself.meta.contextMenu.items[0].method.params.eq_path_url = event.target\n\tself.meta.contextMenu.ite..."
+      },
+      {
+        "event_domain": "dom",
+        "event_type": "onClick",
+        "node_type": "event_handler",
+        "path": "root.root.children[0].Header.children[0].FlexContainer.children[2].KPI Repeater Static.events.dom.onClick",
+        "scope": "G",
+        "script_length": 107,
+        "script_preview": "\tsystem.perspective.sendMessage('selected-navigation', payload={'nav_name': \"Dashboards\"}, scope='se..."
       }
     ]
   },

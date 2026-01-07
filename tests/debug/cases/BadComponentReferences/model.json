@@ -87,8 +87,18 @@
     ]
   },
   "event_handlers": {
-    "count": 0,
-    "nodes": []
+    "count": 1,
+    "nodes": [
+      {
+        "event_domain": "component",
+        "event_type": "onActionPerformed",
+        "node_type": "event_handler",
+        "path": "root.root.children[0].BadButton.events.component.onActionPerformed",
+        "scope": "G",
+        "script_length": 206,
+        "script_preview": "\n# Bad pattern 1: getSibling\nsibling = self.getSibling('StatusLabel')\nsibling.props.text = 'Button c..."
+      }
+    ]
   },
   "expression_bindings": {
     "count": 2,
@@ -237,7 +247,7 @@
     "nodes": []
   },
   "scripts": {
-    "count": 3,
+    "count": 4,
     "nodes": [
       {
         "message_type": "update-status",
@@ -268,6 +278,15 @@
         "path": "root.root.children[3].CustomMethodComponent.scripts.customMethods[1]",
         "script_length": 293,
         "script_preview": "\n# Multiple bad patterns in one method\nif direction == 'up':\n    return self.getParent().props.name\n..."
+      },
+      {
+        "event_domain": "component",
+        "event_type": "onActionPerformed",
+        "node_type": "event_handler",
+        "path": "root.root.children[0].BadButton.events.component.onActionPerformed",
+        "scope": "G",
+        "script_length": 206,
+        "script_preview": "\n# Bad pattern 1: getSibling\nsibling = self.getSibling('StatusLabel')\nsibling.props.text = 'Button c..."
       }
     ]
   },

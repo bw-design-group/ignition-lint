@@ -93,8 +93,18 @@
     ]
   },
   "event_handlers": {
-    "count": 0,
-    "nodes": []
+    "count": 1,
+    "nodes": [
+      {
+        "event_domain": "component",
+        "event_type": "onActionPerformed",
+        "node_type": "event_handler",
+        "path": "root.root.children[1].Button.events.component.onActionPerformed",
+        "scope": "G",
+        "script_length": 13,
+        "script_preview": "\treturn event"
+      }
+    ]
   },
   "expression_bindings": {
     "count": 5,
@@ -219,7 +229,7 @@
     "nodes": []
   },
   "scripts": {
-    "count": 1,
+    "count": 2,
     "nodes": [
       {
         "name": "customBindingRefresh",
@@ -231,6 +241,15 @@
         "path": "root.root.children[1].Button.scripts.customMethods[0]",
         "script_length": 51,
         "script_preview": "\t# implement your method here\n\treturn var10 * var11"
+      },
+      {
+        "event_domain": "component",
+        "event_type": "onActionPerformed",
+        "node_type": "event_handler",
+        "path": "root.root.children[1].Button.events.component.onActionPerformed",
+        "scope": "G",
+        "script_length": 13,
+        "script_preview": "\treturn event"
       }
     ]
   },
