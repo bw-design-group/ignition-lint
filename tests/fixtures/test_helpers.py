@@ -225,7 +225,7 @@ def create_mock_script(script_type: str, source_code: str, component_name: str =
 						"transforms": [
 							{
 								"type": "script",
-								"script": source_code
+								"code": source_code
 							}
 						]
 					}
