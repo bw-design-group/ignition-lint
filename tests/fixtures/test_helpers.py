@@ -246,7 +246,8 @@ def create_mock_script(script_type: str, source_code: str, component_name: str =
 		}
 
 	elif script_type == "event_handler":
-		# Event handlers are at component level events
+		# Event handlers are at component level events with domain
+		# Format: events.{domain}.{eventType}
 		view_data = {
 			"custom": {},
 			"params": {},
@@ -259,9 +260,14 @@ def create_mock_script(script_type: str, source_code: str, component_name: str =
 						"type": "ia.input.button",
 						"props": {"text": "Test Button"},
 						"events": {
-							"onActionPerformed": {
-								"script": source_code,
-								"scope": "L"
+							"component": {
+								"onActionPerformed": {
+									"config": {
+										"script": source_code
+									},
+									"scope": "G",
+									"type": "script"
+								}
 							}
 						}
 					}
