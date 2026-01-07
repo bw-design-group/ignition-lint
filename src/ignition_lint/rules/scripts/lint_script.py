@@ -4,11 +4,12 @@ It collects all script nodes, combines them into a single temporary file, and ru
 """
 
 import datetime
-import tempfile
 import os
 import re
 import shutil
-from typing import Dict, List, Tuple
+import sys
+import tempfile
+from typing import Dict, List, Optional, Tuple
 
 from io import StringIO
 from pylint import lint
@@ -21,9 +22,35 @@ from ...model.node_types import ScriptNode
 class PylintScriptRule(ScriptRule):
 	"""Rule to run pylint on all script types using the simplified interface."""
 
-	def __init__(self, severity="error"):
+	def __init__(self, severity="error", pylintrc=None):
 		super().__init__(severity=severity)  # Targets all script types by default
 		self.debug = True
+		self.pylintrc = self._resolve_pylintrc_path(pylintrc)
+
+	def _resolve_pylintrc_path(self, pylintrc: Optional[str]) -> Optional[str]:
+		"""Resolve the pylintrc file path with fallback to standard location."""
+		# If a specific pylintrc is provided, use it if it exists
+		if pylintrc:
+			if os.path.isabs(pylintrc):
+				if os.path.exists(pylintrc):
+					return pylintrc
+			else:
+				# Try relative to current working directory
+				abs_path = os.path.join(os.getcwd(), pylintrc)
+				if os.path.exists(abs_path):
+					return abs_path
+
+		# Fall back to standard location: .config/ignition.pylintrc
+		# Search from current directory up to find the project root
+		current_path = os.getcwd()
+		while current_path != os.path.dirname(current_path):  # Until we reach root
+			standard_pylintrc = os.path.join(current_path, ".config", "ignition.pylintrc")
+			if os.path.exists(standard_pylintrc):
+				return standard_pylintrc
+			current_path = os.path.dirname(current_path)
+
+		# No pylintrc found - will use pylint defaults or inline config
+		return None
 
 	@property
 	def error_message(self) -> str:
@@ -94,8 +121,9 @@ class PylintScriptRule(ScriptRule):
 		line_count = 1
 
 		combined_scripts = [
-			"#pylint: disable=unused-argument,missing-docstring,invalid-name,redefined-outer-name",
+			"#pylint: disable=unused-argument,missing-docstring,redefined-outer-name,function-redefined",
 			"# Stub for common globals, and to simulate the Ignition environment",
+			"# Note: function-redefined is disabled because multiple scripts may define the same function names",
 			"system = None  # Simulated Ignition system object",
 			"self = {} # Simulated self object for script context",
 			"event = {}  # Simulated event object",
@@ -136,15 +164,44 @@ class PylintScriptRule(ScriptRule):
 			_save_debug_file(temp_file_path, debug_dir)
 
 		pylint_output = StringIO()
-		args = [
-			'--disable=all',
-			'--enable=unused-import,undefined-variable,syntax-error',
+
+		# Build pylint arguments
+		args = []
+
+		# Use custom or standard pylintrc if available
+		if self.pylintrc:
+			args.extend(['--rcfile', self.pylintrc])
+			if self.debug:
+				with open(os.path.join(debug_dir, "pylintrc_used.txt"), 'w', encoding='utf-8') as f:
+					f.write(f"Using pylintrc: {self.pylintrc}\n")
+		else:
+			# Fallback to inline configuration if no pylintrc found
+			args.extend([
+				'--disable=all',
+				'--enable=unused-import,undefined-variable,syntax-error,invalid-name',
+			])
+			if self.debug:
+				with open(os.path.join(debug_dir, "pylintrc_used.txt"), 'w', encoding='utf-8') as f:
+					f.write("No pylintrc found - using inline configuration\n")
+
+		# Common arguments
+		args.extend([
 			'--output-format=text',
 			'--score=no',
 			temp_file_path,
-		]
+		])
 
-		lint.Run(args, reporter=TextReporter(pylint_output), exit=False)
+		# Redirect stdout/stderr to capture all pylint output
+		old_stdout = sys.stdout
+		old_stderr = sys.stderr
+		try:
+			sys.stdout = pylint_output
+			sys.stderr = pylint_output
+			lint.Run(args, reporter=TextReporter(pylint_output), exit=False)
+		finally:
+			sys.stdout = old_stdout
+			sys.stderr = old_stderr
+
 		output = pylint_output.getvalue()
 
 		if self.debug:
@@ -175,7 +232,7 @@ class PylintScriptRule(ScriptRule):
 			except (ValueError, IndexError) as e:
 				self._log_parse_error(line, e, debug_dir)
 
-	def _find_script_for_line(self, line_num: int, line_map: Dict[int, str]) -> str:
+	def _find_script_for_line(self, line_num: int, line_map: Dict[int, str]) -> Optional[str]:
 		"""Find which script a line number belongs to."""
 		for ln in sorted(line_map.keys(), reverse=True):
 			if ln <= line_num:

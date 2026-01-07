@@ -376,12 +376,28 @@
     ]
   },
   "script_transforms": {
-    "count": 0,
-    "nodes": []
+    "count": 1,
+    "nodes": [
+      {
+        "binding_path": "propConfig.custom.transformScript",
+        "node_type": "transform",
+        "path": "propConfig.custom.transformScript.binding.transforms[0]",
+        "script_length": 28,
+        "script_preview": "\treturn \"This is the script\""
+      }
+    ]
   },
   "scripts": {
-    "count": 0,
-    "nodes": []
+    "count": 1,
+    "nodes": [
+      {
+        "binding_path": "propConfig.custom.transformScript",
+        "node_type": "transform",
+        "path": "propConfig.custom.transformScript.binding.transforms[0]",
+        "script_length": 28,
+        "script_preview": "\treturn \"This is the script\""
+      }
+    ]
   },
   "tag_bindings": {
     "count": 3,

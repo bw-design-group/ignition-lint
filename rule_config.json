@@ -2,7 +2,10 @@
   "_comment": "Configuration with rules enabled by default. Severity levels are defined by rule developers - users don't configure severity.",
   "PylintScriptRule": {
     "enabled": true,
-    "kwargs": {}
+    "kwargs": {
+      "_comment": "Optional: Specify a custom pylintrc file path. If not specified, uses .config/ignition.pylintrc",
+      "pylintrc": null
+    }
   },
   "PollingIntervalRule": {
     "enabled": true,
@@ -40,6 +43,10 @@
       "PollingIntervalRule": "error - performance issues that can cause system problems",
       "PylintScriptRule": "error - syntax errors, undefined variables, etc."
     },
-    "note": "Users cannot configure severity levels - they are determined by what each rule checks."
+    "note": "Users cannot configure severity levels - they are determined by what each rule checks.",
+    "PylintScriptRule_config": {
+      "pylintrc": "Path to custom pylintrc file. Defaults to .config/ignition.pylintrc if not specified.",
+      "example": "\"pylintrc\": \"/path/to/custom.pylintrc\" or \"pylintrc\": \"relative/path/.pylintrc\""
+    }
   }
 }

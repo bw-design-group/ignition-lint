@@ -27,22 +27,22 @@
     "BadComponentReferenceRule": {
       "applicable_node_count": 0,
       "target_types": [
-        "custom_method",
-        "transform",
         "expression_binding",
+        "event_handler",
         "message_handler",
-        "event_handler"
+        "transform",
+        "custom_method"
       ]
     },
     "ExampleBindingCountRule": {
       "applicable_node_count": 7,
       "target_types": [
-        "query_binding",
-        "expression_struct_binding",
-        "component",
         "expression_binding",
+        "component",
+        "property_binding",
         "tag_binding",
-        "property_binding"
+        "expression_struct_binding",
+        "query_binding"
       ]
     },
     "ExampleMixedSeverityRule": {
@@ -76,24 +76,24 @@
     "PylintScriptRule": {
       "applicable_node_count": 0,
       "target_types": [
-        "custom_method",
-        "message_handler",
         "transform",
-        "event_handler"
+        "custom_method",
+        "event_handler",
+        "message_handler"
       ]
     },
     "UnusedCustomPropertiesRule": {
       "applicable_node_count": 42,
       "target_types": [
-        "custom_method",
-        "transform",
         "expression_binding",
+        "event_handler",
         "message_handler",
         "tag_binding",
+        "custom_method",
         "component",
+        "transform",
         "property",
-        "property_binding",
-        "event_handler"
+        "property_binding"
       ]
     }
   },

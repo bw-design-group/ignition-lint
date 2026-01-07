@@ -85,10 +85,11 @@ class ViewModelBuilder:
 		config = {}
 		config_prefix = f"{binding_path}.binding.config."
 		for path, value in self.flattened_json.items():
-			if (path.startswith(config_prefix) and
-				not path.startswith(f"{config_prefix}references.") and
-				not path.endswith("tagPath") and
-				not path.endswith("mode")):
+			if (
+				path.startswith(config_prefix) and
+				not path.startswith(f"{config_prefix}references.") and not path.endswith("tagPath") and
+				not path.endswith("mode")
+			):
 				# Extract the config key
 				key = path[len(config_prefix):]
 				config[key] = value
@@ -138,7 +139,8 @@ class ViewModelBuilder:
 		config = {}
 		config_prefix = f"{binding_path}.binding.config."
 		for path, value in self.flattened_json.items():
-			if path.startswith(config_prefix) and not path.startswith(f"{config_prefix}parameters.") and not path.endswith("queryPath"):
+			if path.startswith(config_prefix) and not path.startswith(f"{config_prefix}parameters."
+											) and not path.endswith("queryPath"):
 				# Extract the config key
 				key = path[len(config_prefix):]
 				config[key] = value
@@ -158,7 +160,7 @@ class ViewModelBuilder:
 
 		# Get transform script for each path
 		for transform_path in transform_paths:
-			script_path = f"{transform_path}.script"
+			script_path = f"{transform_path}.code"
 			if script_path in self.flattened_json:
 				transforms.append((transform_path, self.flattened_json[script_path]))
 
@@ -457,7 +459,10 @@ class ViewModelBuilder:
 					property_name = path.split(".")[-1]
 					persistent = self._get_property_persistence(path)
 					private_access = self._get_property_access_mode(path)
-					prop = Property(path, property_name, value, persistent=persistent, private_access=private_access)
+					prop = Property(
+						path, property_name, value, persistent=persistent,
+						private_access=private_access
+					)
 					self.model['properties'].append(prop)
 				continue
 
@@ -478,7 +483,9 @@ class ViewModelBuilder:
 
 				persistent = self._get_property_persistence(path)
 				private_access = self._get_property_access_mode(path)
-				prop = Property(path, property_name, value, persistent=persistent, private_access=private_access)
+				prop = Property(
+					path, property_name, value, persistent=persistent, private_access=private_access
+				)
 				self.model['properties'].append(prop)
 				# Add the property to the component
 				if component_path in self.model['components']:

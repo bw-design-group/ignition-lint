@@ -1579,12 +1579,139 @@
     "nodes": []
   },
   "script_transforms": {
-    "count": 0,
-    "nodes": []
+    "count": 9,
+    "nodes": [
+      {
+        "binding_path": "propConfig.custom.kpiData",
+        "node_type": "transform",
+        "path": "propConfig.custom.kpiData.binding.transforms[0]",
+        "script_length": 137,
+        "script_preview": "\tdata = General.Sepasoft.Calculations.totalize_cute_kpi_and_recalculate(value)\n\tdata['Equipment Path..."
+      },
+      {
+        "binding_path": "propConfig.custom.kpiHourlyData",
+        "node_type": "transform",
+        "path": "propConfig.custom.kpiHourlyData.binding.transforms[0]",
+        "script_length": 272,
+        "script_preview": "\tstart = self.custom.time.start\n\tend = self.custom.time.end\n\tif not start or not end:\n\t\treturn []\n\th..."
+      },
+      {
+        "binding_path": "propConfig.custom.kpiTagData",
+        "node_type": "transform",
+        "path": "propConfig.custom.kpiTagData.binding.transforms[0]",
+        "script_length": 85,
+        "script_preview": "\tif not value:\n\t\treturn\n\treturn General.Conversion.convert_dataset_to_list(value)\n\t\n\t"
+      },
+      {
+        "binding_path": "propConfig.custom.kpiTargets",
+        "node_type": "transform",
+        "path": "propConfig.custom.kpiTargets.binding.transforms[0]",
+        "script_length": 157,
+        "script_preview": "\tif any([val == None or val == '' for val in dict(value).values()]):\n\t\treturn []\n\treturn Widgets.KPI..."
+      },
+      {
+        "binding_path": "propConfig.custom.time",
+        "node_type": "transform",
+        "path": "propConfig.custom.time.binding.transforms[0]",
+        "script_length": 52,
+        "script_preview": "\treturn {\"update\": None, \"start\": None, \"end\": None}"
+      },
+      {
+        "binding_path": "root.root.children[0].Header.children[0].FlexContainer.children[0].Line Image.propConfig.props.params.img_path",
+        "node_type": "transform",
+        "path": "root.root.children[0].Header.children[0].FlexContainer.children[0].Line Image.propConfig.props.params.img_path.binding.transforms[0]",
+        "script_length": 118,
+        "script_preview": "\tdanone_path = DanPT.Model.get_danone_path_from_url(value)\n\treturn Views.ImageManagement.get_image_u..."
+      },
+      {
+        "binding_path": "root.root.children[0].Header.children[0].FlexContainer.children[1].Left Labels.children[0].Name.children[0].Line Name.propConfig.props.text",
+        "node_type": "transform",
+        "path": "root.root.children[0].Header.children[0].FlexContainer.children[1].Left Labels.children[0].Name.children[0].Line Name.propConfig.props.text.binding.transforms[0]",
+        "script_length": 47,
+        "script_preview": "\treturn \"%s Line Level\" % value.split('\\\\')[-1]"
+      },
+      {
+        "binding_path": "root.root.children[0].Header.children[0].FlexContainer.children[1].Left Labels.children[1].Breadcrumb.propConfig.props.items",
+        "node_type": "transform",
+        "path": "root.root.children[0].Header.children[0].FlexContainer.children[1].Left Labels.children[1].Breadcrumb.propConfig.props.items.binding.transforms[0]",
+        "script_length": 70,
+        "script_preview": "\treturn Views.Dashboard.build_breadcrumb_components(value.eq_path_url)"
+      },
+      {
+        "binding_path": "root.root.children[0].Header.children[0].FlexContainer.children[2].KPI Repeater Static.propConfig.props.instances",
+        "node_type": "transform",
+        "path": "root.root.children[0].Header.children[0].FlexContainer.children[2].KPI Repeater Static.propConfig.props.instances.binding.transforms[0]",
+        "script_length": 145,
+        "script_preview": "\tkpi_list = [\"OE\", \"PE\", \"PR\", \"Produced\"]\n\ttargets = dict(value.targets)\n\treturn Widgets.KPI.format..."
+      }
+    ]
   },
   "scripts": {
-    "count": 3,
+    "count": 12,
     "nodes": [
+      {
+        "binding_path": "propConfig.custom.kpiData",
+        "node_type": "transform",
+        "path": "propConfig.custom.kpiData.binding.transforms[0]",
+        "script_length": 137,
+        "script_preview": "\tdata = General.Sepasoft.Calculations.totalize_cute_kpi_and_recalculate(value)\n\tdata['Equipment Path..."
+      },
+      {
+        "binding_path": "propConfig.custom.kpiHourlyData",
+        "node_type": "transform",
+        "path": "propConfig.custom.kpiHourlyData.binding.transforms[0]",
+        "script_length": 272,
+        "script_preview": "\tstart = self.custom.time.start\n\tend = self.custom.time.end\n\tif not start or not end:\n\t\treturn []\n\th..."
+      },
+      {
+        "binding_path": "propConfig.custom.kpiTagData",
+        "node_type": "transform",
+        "path": "propConfig.custom.kpiTagData.binding.transforms[0]",
+        "script_length": 85,
+        "script_preview": "\tif not value:\n\t\treturn\n\treturn General.Conversion.convert_dataset_to_list(value)\n\t\n\t"
+      },
+      {
+        "binding_path": "propConfig.custom.kpiTargets",
+        "node_type": "transform",
+        "path": "propConfig.custom.kpiTargets.binding.transforms[0]",
+        "script_length": 157,
+        "script_preview": "\tif any([val == None or val == '' for val in dict(value).values()]):\n\t\treturn []\n\treturn Widgets.KPI..."
+      },
+      {
+        "binding_path": "propConfig.custom.time",
+        "node_type": "transform",
+        "path": "propConfig.custom.time.binding.transforms[0]",
+        "script_length": 52,
+        "script_preview": "\treturn {\"update\": None, \"start\": None, \"end\": None}"
+      },
+      {
+        "binding_path": "root.root.children[0].Header.children[0].FlexContainer.children[0].Line Image.propConfig.props.params.img_path",
+        "node_type": "transform",
+        "path": "root.root.children[0].Header.children[0].FlexContainer.children[0].Line Image.propConfig.props.params.img_path.binding.transforms[0]",
+        "script_length": 118,
+        "script_preview": "\tdanone_path = DanPT.Model.get_danone_path_from_url(value)\n\treturn Views.ImageManagement.get_image_u..."
+      },
+      {
+        "binding_path": "root.root.children[0].Header.children[0].FlexContainer.children[1].Left Labels.children[0].Name.children[0].Line Name.propConfig.props.text",
+        "node_type": "transform",
+        "path": "root.root.children[0].Header.children[0].FlexContainer.children[1].Left Labels.children[0].Name.children[0].Line Name.propConfig.props.text.binding.transforms[0]",
+        "script_length": 47,
+        "script_preview": "\treturn \"%s Line Level\" % value.split('\\\\')[-1]"
+      },
+      {
+        "binding_path": "root.root.children[0].Header.children[0].FlexContainer.children[1].Left Labels.children[1].Breadcrumb.propConfig.props.items",
+        "node_type": "transform",
+        "path": "root.root.children[0].Header.children[0].FlexContainer.children[1].Left Labels.children[1].Breadcrumb.propConfig.props.items.binding.transforms[0]",
+        "script_length": 70,
+        "script_preview": "\treturn Views.Dashboard.build_breadcrumb_components(value.eq_path_url)"
+      },
+      {
+        "binding_path": "root.root.children[0].Header.children[0].FlexContainer.children[2].KPI Repeater Static.propConfig.props.instances",
+        "node_type": "transform",
+        "path": "root.root.children[0].Header.children[0].FlexContainer.children[2].KPI Repeater Static.propConfig.props.instances.binding.transforms[0]",
+        "script_length": 145,
+        "script_preview": "\tkpi_list = [\"OE\", \"PE\", \"PR\", \"Produced\"]\n\ttargets = dict(value.targets)\n\treturn Widgets.KPI.format..."
+      },
       {
         "message_type": "setTimeSelection",
         "node_type": "message_handler",
