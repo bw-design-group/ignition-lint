@@ -527,7 +527,7 @@ The following rules are currently implemented and available for use:
 |------|------|-------------|----------------------|-----------------|
 | `NamePatternRule` | Warning | Validates naming conventions for components and other elements | `convention`, `target_node_types`, `custom_pattern`, `node_type_specific_rules` | ✅ |
 | `PollingIntervalRule` | Error | Ensures polling intervals meet minimum thresholds to prevent performance issues | `minimum_interval` (default: 10000ms) | ✅ |
-| `PylintScriptRule` | Error | Runs Pylint analysis on all scripts to detect syntax errors, undefined variables, and code quality issues | None (uses default Pylint configuration) | ✅ |
+| `PylintScriptRule` | Error | Runs Pylint analysis on all scripts to detect syntax errors, undefined variables, and code quality issues | `pylintrc` (path to custom pylintrc file, defaults to `.config/ignition.pylintrc`) | ✅ |
 | `UnusedCustomPropertiesRule` | Warning | Detects custom properties and view parameters that are defined but never referenced | None | ✅ |
 | `BadComponentReferenceRule` | Error | Identifies brittle component object traversal patterns (getSibling, getParent, etc.) | `forbidden_patterns`, `case_sensitive` | ✅ |
 
@@ -574,7 +574,7 @@ Prevents performance issues by enforcing minimum polling intervals in `now()` ex
 #### PylintScriptRule
 Comprehensive Python code analysis using Pylint for all script types:
 - Custom method scripts
-- Event handler scripts
+- Event handler scripts (all domains: component, dom, system)
 - Message handler scripts
 - Transform scripts
 
@@ -584,6 +584,36 @@ Comprehensive Python code analysis using Pylint for all script types:
 - Unused imports
 - Code style violations
 - Logical errors
+
+**Configuration:**
+```json
+{
+  "PylintScriptRule": {
+    "enabled": true,
+    "kwargs": {
+      "pylintrc": ".config/ignition.pylintrc"
+    }
+  }
+}
+```
+
+**Pylintrc File:**
+- Specify a custom pylintrc file path using the `pylintrc` parameter
+- Supports both absolute paths (`/path/to/.pylintrc`) and relative paths (relative to working directory)
+- Falls back to `.config/ignition.pylintrc` if not specified
+- If no pylintrc is found, Pylint uses its default configuration
+
+**Example Custom Configuration:**
+```json
+{
+  "PylintScriptRule": {
+    "enabled": true,
+    "kwargs": {
+      "pylintrc": "config/my-custom-pylintrc"
+    }
+  }
+}
+```
 
 #### UnusedCustomPropertiesRule
 Identifies unused custom properties and view parameters to reduce view complexity.
