@@ -22,30 +22,31 @@
   "node_type_counts": {
     "component": 6,
     "custom_method": 2,
+    "event_handler": 1,
     "expression_binding": 2,
     "message_handler": 1,
     "property": 13
   },
   "rule_coverage": {
     "BadComponentReferenceRule": {
-      "applicable_node_count": 5,
+      "applicable_node_count": 6,
       "target_types": [
         "custom_method",
-        "transform",
+        "event_handler",
         "expression_binding",
         "message_handler",
-        "event_handler"
+        "transform"
       ]
     },
     "ExampleBindingCountRule": {
       "applicable_node_count": 8,
       "target_types": [
-        "query_binding",
-        "expression_struct_binding",
         "component",
         "expression_binding",
-        "tag_binding",
-        "property_binding"
+        "expression_struct_binding",
+        "property_binding",
+        "query_binding",
+        "tag_binding"
       ]
     },
     "ExampleMixedSeverityRule": {
@@ -70,35 +71,35 @@
       "applicable_node_count": 2,
       "target_types": [
         "expression_binding",
-        "tag_binding",
-        "query_binding",
         "expression_struct_binding",
-        "property_binding"
+        "property_binding",
+        "query_binding",
+        "tag_binding"
       ]
     },
     "PylintScriptRule": {
-      "applicable_node_count": 3,
+      "applicable_node_count": 4,
       "target_types": [
         "custom_method",
+        "event_handler",
         "message_handler",
-        "transform",
-        "event_handler"
+        "transform"
       ]
     },
     "UnusedCustomPropertiesRule": {
-      "applicable_node_count": 24,
+      "applicable_node_count": 25,
       "target_types": [
+        "component",
         "custom_method",
-        "transform",
+        "event_handler",
         "expression_binding",
         "message_handler",
-        "tag_binding",
-        "component",
         "property",
         "property_binding",
-        "event_handler"
+        "tag_binding",
+        "transform"
       ]
     }
   },
-  "total_nodes": 24
+  "total_nodes": 25
 }

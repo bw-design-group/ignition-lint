@@ -64,21 +64,21 @@
       {
         "name": "componentCustomParam",
         "node_type": "property",
-        "path": "root.root.children[0].IconPascalCase.custom.componentCustomParam",
+        "path": "root.root.children.IconPascalCase.custom.componentCustomParam",
         "value": "value",
         "value_type": "str"
       },
       {
         "name": "basis",
         "node_type": "property",
-        "path": "root.root.children[0].IconPascalCase.position.basis",
+        "path": "root.root.children.IconPascalCase.position.basis",
         "value": "30px",
         "value_type": "str"
       },
       {
         "name": "path",
         "node_type": "property",
-        "path": "root.root.children[0].IconPascalCase.props.path",
+        "path": "root.root.children.IconPascalCase.props.path",
         "value": "material/insert_emoticon",
         "value_type": "str"
       },

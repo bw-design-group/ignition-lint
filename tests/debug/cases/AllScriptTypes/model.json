@@ -1,0 +1,292 @@
+{
+  "bindings": {
+    "count": 3,
+    "nodes": [
+      {
+        "config": {},
+        "expression": "'Data'",
+        "node_type": "expression_binding",
+        "path": "propConfig.custom.bad"
+      },
+      {
+        "config": {},
+        "expression": "'Data'",
+        "node_type": "expression_binding",
+        "path": "propConfig.custom.good"
+      },
+      {
+        "config": {},
+        "expression": "{view.custom.good} + \" + \" + {view.custom.bad}",
+        "node_type": "expression_binding",
+        "path": "root.root.children[0].ActionButton.propConfig.props.text"
+      }
+    ]
+  },
+  "components": {
+    "count": 3,
+    "nodes": [
+      {
+        "name": "ActionButton",
+        "node_type": "component",
+        "path": "root.root.children[0].ActionButton",
+        "properties_count": 0,
+        "type": "ia.input.button"
+      },
+      {
+        "name": "BadActionButton",
+        "node_type": "component",
+        "path": "root.root.children[1].BadActionButton",
+        "properties_count": 0,
+        "type": "ia.input.button"
+      },
+      {
+        "name": "root",
+        "node_type": "component",
+        "path": "root.root",
+        "properties_count": 0,
+        "type": "ia.container.flex"
+      }
+    ]
+  },
+  "custom_methods": {
+    "count": 2,
+    "nodes": [
+      {
+        "name": "good_method",
+        "node_type": "custom_method",
+        "params": [
+          "count"
+        ],
+        "path": "root.root.children[0].ActionButton.scripts.customMethods[0]",
+        "script_length": 101,
+        "script_preview": "\t# implement your method here\n\tmessage = 'good data: %s' % (count)\n\tsystem.perspective.print(message..."
+      },
+      {
+        "name": "bad_method_variables",
+        "node_type": "custom_method",
+        "params": [
+          "count"
+        ],
+        "path": "root.root.children[0].ActionButton.scripts.customMethods[1]",
+        "script_length": 193,
+        "script_preview": "\t# implement your method here\n\tBAD_UPPER = 0\n\tBaD_MIXED = 1\n\ttemp_var = 2\n\tbadCamel = 3\n\t\n\tmessage =..."
+      }
+    ]
+  },
+  "event_handlers": {
+    "count": 2,
+    "nodes": [
+      {
+        "event_domain": "component",
+        "event_type": "onActionPerformed",
+        "node_type": "event_handler",
+        "path": "root.root.children[0].ActionButton.events.component.onActionPerformed",
+        "scope": "G",
+        "script_length": 49,
+        "script_preview": "\tsystem.perspective.print('ActionButton Pressed')"
+      },
+      {
+        "event_domain": "component",
+        "event_type": "onActionPerformed",
+        "node_type": "event_handler",
+        "path": "root.root.children[1].BadActionButton.events.component.onActionPerformed",
+        "scope": "G",
+        "script_length": 49,
+        "script_preview": "\ttemp_var = 1\n\tsystem.perspective.print('unused')"
+      }
+    ]
+  },
+  "expression_bindings": {
+    "count": 3,
+    "nodes": [
+      {
+        "config": {},
+        "expression": "'Data'",
+        "node_type": "expression_binding",
+        "path": "propConfig.custom.bad"
+      },
+      {
+        "config": {},
+        "expression": "'Data'",
+        "node_type": "expression_binding",
+        "path": "propConfig.custom.good"
+      },
+      {
+        "config": {},
+        "expression": "{view.custom.good} + \" + \" + {view.custom.bad}",
+        "node_type": "expression_binding",
+        "path": "root.root.children[0].ActionButton.propConfig.props.text"
+      }
+    ]
+  },
+  "expression_struct_bindings": {
+    "count": 0,
+    "nodes": []
+  },
+  "message_handlers": {
+    "count": 1,
+    "nodes": [
+      {
+        "message_type": "good-msg-handler",
+        "node_type": "message_handler",
+        "path": "root.root.children[0].ActionButton.scripts.messageHandlers[0]",
+        "scope": {
+          "page": true,
+          "session": false,
+          "view": false
+        },
+        "script_length": 71,
+        "script_preview": "\t# implement your handler here\n\tsystem.perspective.print('msg handler')"
+      }
+    ]
+  },
+  "properties": {
+    "count": 6,
+    "nodes": [
+      {
+        "name": "bad",
+        "node_type": "property",
+        "path": "custom.bad",
+        "persistent": true,
+        "value": "Bad Data",
+        "value_type": "str"
+      },
+      {
+        "name": "good",
+        "node_type": "property",
+        "path": "custom.good",
+        "persistent": true,
+        "value": "Good Data",
+        "value_type": "str"
+      },
+      {
+        "name": "basis",
+        "node_type": "property",
+        "path": "root.root.children.ActionButton.position.basis",
+        "value": "34px",
+        "value_type": "str"
+      },
+      {
+        "name": "basis",
+        "node_type": "property",
+        "path": "root.root.children.BadActionButton.position.basis",
+        "value": "34px",
+        "value_type": "str"
+      },
+      {
+        "name": "text",
+        "node_type": "property",
+        "path": "root.root.children.BadActionButton.props.text",
+        "value": "Bad Action",
+        "value_type": "str"
+      },
+      {
+        "name": "direction",
+        "node_type": "property",
+        "path": "root.root.props.direction",
+        "value": "column",
+        "value_type": "str"
+      }
+    ]
+  },
+  "property_bindings": {
+    "count": 0,
+    "nodes": []
+  },
+  "query_bindings": {
+    "count": 0,
+    "nodes": []
+  },
+  "script_transforms": {
+    "count": 2,
+    "nodes": [
+      {
+        "binding_path": "propConfig.custom.bad",
+        "node_type": "transform",
+        "path": "propConfig.custom.bad.binding.transforms[0]",
+        "script_length": 40,
+        "script_preview": "\ttemp_var = 1\n\treturn 'Bad %s' % (value)"
+      },
+      {
+        "binding_path": "propConfig.custom.good",
+        "node_type": "transform",
+        "path": "propConfig.custom.good.binding.transforms[0]",
+        "script_length": 27,
+        "script_preview": "\treturn 'Good %s' % (value)"
+      }
+    ]
+  },
+  "scripts": {
+    "count": 7,
+    "nodes": [
+      {
+        "binding_path": "propConfig.custom.bad",
+        "node_type": "transform",
+        "path": "propConfig.custom.bad.binding.transforms[0]",
+        "script_length": 40,
+        "script_preview": "\ttemp_var = 1\n\treturn 'Bad %s' % (value)"
+      },
+      {
+        "binding_path": "propConfig.custom.good",
+        "node_type": "transform",
+        "path": "propConfig.custom.good.binding.transforms[0]",
+        "script_length": 27,
+        "script_preview": "\treturn 'Good %s' % (value)"
+      },
+      {
+        "message_type": "good-msg-handler",
+        "node_type": "message_handler",
+        "path": "root.root.children[0].ActionButton.scripts.messageHandlers[0]",
+        "scope": {
+          "page": true,
+          "session": false,
+          "view": false
+        },
+        "script_length": 71,
+        "script_preview": "\t# implement your handler here\n\tsystem.perspective.print('msg handler')"
+      },
+      {
+        "name": "good_method",
+        "node_type": "custom_method",
+        "params": [
+          "count"
+        ],
+        "path": "root.root.children[0].ActionButton.scripts.customMethods[0]",
+        "script_length": 101,
+        "script_preview": "\t# implement your method here\n\tmessage = 'good data: %s' % (count)\n\tsystem.perspective.print(message..."
+      },
+      {
+        "name": "bad_method_variables",
+        "node_type": "custom_method",
+        "params": [
+          "count"
+        ],
+        "path": "root.root.children[0].ActionButton.scripts.customMethods[1]",
+        "script_length": 193,
+        "script_preview": "\t# implement your method here\n\tBAD_UPPER = 0\n\tBaD_MIXED = 1\n\ttemp_var = 2\n\tbadCamel = 3\n\t\n\tmessage =..."
+      },
+      {
+        "event_domain": "component",
+        "event_type": "onActionPerformed",
+        "node_type": "event_handler",
+        "path": "root.root.children[0].ActionButton.events.component.onActionPerformed",
+        "scope": "G",
+        "script_length": 49,
+        "script_preview": "\tsystem.perspective.print('ActionButton Pressed')"
+      },
+      {
+        "event_domain": "component",
+        "event_type": "onActionPerformed",
+        "node_type": "event_handler",
+        "path": "root.root.children[1].BadActionButton.events.component.onActionPerformed",
+        "scope": "G",
+        "script_length": 49,
+        "script_preview": "\ttemp_var = 1\n\tsystem.perspective.print('unused')"
+      }
+    ]
+  },
+  "tag_bindings": {
+    "count": 0,
+    "nodes": []
+  }
+}

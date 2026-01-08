@@ -133,7 +133,7 @@ class LintEngine:
 			if rule.target_node_types:
 				applicable_nodes = NodeUtils.filter_by_types(all_nodes, rule.target_node_types)
 				coverage[rule_name] = {
-					'target_types': [nt.value for nt in rule.target_node_types],
+					'target_types': sorted([nt.value for nt in rule.target_node_types]),
 					'applicable_node_count': len(applicable_nodes)
 				}
 			else:
@@ -186,7 +186,7 @@ class LintEngine:
 				applicable_nodes = NodeUtils.filter_by_types(all_nodes, rule.target_node_types)
 
 				analysis[rule_name] = {
-					'target_types': [nt.value for nt in rule.target_node_types],
+					'target_types': sorted([nt.value for nt in rule.target_node_types]),
 					'applicable_nodes': len(applicable_nodes),
 					'sample_paths': [node.path for node in applicable_nodes[:5]
 							],  # First 5 as examples
