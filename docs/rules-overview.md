@@ -27,6 +27,7 @@ This document provides a high-level overview of all available linting rules in t
 - Forbidden name patterns
 - Abbreviation handling and validation
 - Node-specific naming patterns
+- **Note**: CSS properties in `style` and `elementStyle` objects are automatically exempted from validation (they remain in kebab-case per CSS spec)
 
 **Configuration options:**
 - `convention`: Predefined patterns (PascalCase, camelCase, snake_case, kebab-case, UPPER_CASE)

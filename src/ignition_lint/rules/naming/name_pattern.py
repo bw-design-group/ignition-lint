@@ -313,6 +313,28 @@ class NamePatternRule(LintingRule):
 				return None
 		return None
 
+	def _is_css_property(self, node: ViewNode) -> bool:
+		"""
+		Check if a property is a CSS property (in style or elementStyle).
+		CSS properties should always be in kebab-case and should not be validated.
+
+		Args:
+			node: The property node to check
+
+		Returns:
+			True if the property is a CSS property, False otherwise
+		"""
+		if node.node_type != NodeType.PROPERTY:
+			return False
+
+		# Check if the path contains .style. or .elementStyle.
+		# Examples:
+		#   root.root.props.style.touch-action -> CSS property
+		#   root.FlexRepeater.props.elementStyle.flex-direction -> CSS property
+		#   custom.myProperty -> NOT a CSS property
+		path = node.path
+		return '.style.' in path or '.elementStyle.' in path
+
 	def _validate_name(self, node: ViewNode, name: str) -> list:
 		"""
 		Validate a name according to the rules and return a list of error messages.
@@ -395,6 +417,9 @@ class NamePatternRule(LintingRule):
 		self.visit_generic(node)
 
 	def visit_property(self, node: ViewNode):
+		# Skip validation for CSS properties (in style or elementStyle)
+		if self._is_css_property(node):
+			return
 		self.visit_generic(node)
 
 	def visit_event_handler(self, node: ViewNode):

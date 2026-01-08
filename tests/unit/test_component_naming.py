@@ -499,5 +499,234 @@ class TestStandardNamingConventions(BaseRuleTest):
 		)
 
 
+class TestNamePatternArrayProperties(BaseRuleTest):
+	"""Test that array properties are treated as a single property, not multiple properties."""
+
+	def test_array_property_validated_once(self):
+		"""Array property should be validated once for the base name, not once per element."""
+		rule_config = get_test_config(
+			"NamePatternRule",
+			target_node_types=["property"],
+			convention="camelCase",
+			severity="error"
+		)
+
+		# Create a view with an array property that violates camelCase
+		view_data = {
+			"custom": {
+				"MyArrayProperty": ["item1", "item2", "item3"]  # PascalCase - should fail
+			},
+			"params": {},
+			"props": {},
+			"root": {
+				"meta": {
+					"name": "root"
+				},
+				"type": "ia.container.coord"
+			}
+		}
+
+		# Write test view file
+		import json
+		import tempfile
+		from pathlib import Path
+		with tempfile.NamedTemporaryFile(mode='w', suffix='.json', delete=False) as f:
+			json.dump(view_data, f)
+			view_file = Path(f.name)
+
+		try:
+			# Run the linter
+			self.run_lint_on_file(view_file, rule_config)
+			errors = self.get_errors_for_rule("NamePatternRule")
+
+			# Should have exactly 1 error for MyArrayProperty, not 3 (one per element)
+			self.assertEqual(len(errors), 1,
+				f"Expected 1 error for array property, got {len(errors)}: {errors}")
+
+			# Error should reference the base property name, not an indexed element
+			self.assertIn("MyArrayProperty", errors[0])
+			self.assertNotIn("[0]", errors[0], "Error should not reference array index [0]")
+			self.assertNotIn("[1]", errors[0], "Error should not reference array index [1]")
+			self.assertNotIn("[2]", errors[0], "Error should not reference array index [2]")
+		finally:
+			view_file.unlink()
+
+	def test_array_property_with_valid_name(self):
+		"""Array property with valid name should pass validation."""
+		rule_config = get_test_config(
+			"NamePatternRule",
+			target_node_types=["property"],
+			convention="camelCase",
+			severity="error"
+		)
+
+		# Create a view with an array property that follows camelCase
+		view_data = {
+			"custom": {
+				"myArrayProperty": ["item1", "item2", "item3"]  # camelCase - should pass
+			},
+			"params": {},
+			"props": {},
+			"root": {
+				"meta": {
+					"name": "root"
+				},
+				"type": "ia.container.coord"
+			}
+		}
+
+		# Write test view file
+		import json
+		import tempfile
+		from pathlib import Path
+		with tempfile.NamedTemporaryFile(mode='w', suffix='.json', delete=False) as f:
+			json.dump(view_data, f)
+			view_file = Path(f.name)
+
+		try:
+			# Array property with valid name should pass
+			self.assert_rule_passes(view_file, rule_config, "NamePatternRule")
+		finally:
+			view_file.unlink()
+
+
+class TestNamePatternCSSProperties(BaseRuleTest):
+	"""Test that CSS properties in style and elementStyle are not flagged as violations."""
+
+	def test_css_properties_in_style_should_pass(self):
+		"""CSS properties in style objects should not be flagged by property naming rules."""
+		rule_config = get_test_config(
+			"NamePatternRule",
+			target_node_types=["property"],
+			convention="camelCase",
+			severity="error"
+		)
+
+		# Create a view with CSS properties in style
+		view_data = {
+			"custom": {},
+			"params": {},
+			"props": {},
+			"root": {
+				"meta": {
+					"name": "root"
+				},
+				"props": {
+					"style": {
+						"touch-action": "none",
+						"background-color": "#ffffff",
+						"font-size": "14px",
+						"z-index": "100"
+					}
+				},
+				"type": "ia.container.coord"
+			}
+		}
+
+		# Write test view file
+		import json
+		import tempfile
+		from pathlib import Path
+		with tempfile.NamedTemporaryFile(mode='w', suffix='.json', delete=False) as f:
+			json.dump(view_data, f)
+			view_file = Path(f.name)
+
+		try:
+			# CSS properties should NOT be flagged as violations
+			self.assert_rule_passes(view_file, rule_config, "NamePatternRule")
+		finally:
+			view_file.unlink()
+
+	def test_css_properties_in_element_style_should_pass(self):
+		"""CSS properties in elementStyle (flex repeater) should not be flagged."""
+		rule_config = get_test_config(
+			"NamePatternRule",
+			target_node_types=["property"],
+			convention="camelCase",
+			severity="error"
+		)
+
+		# Create a view with CSS properties in elementStyle
+		view_data = {
+			"custom": {},
+			"params": {},
+			"props": {},
+			"root": {
+				"children": [
+					{
+						"meta": {
+							"name": "FlexRepeater"
+						},
+						"props": {
+							"elementStyle": {
+								"display": "flex",
+								"flex-direction": "row",
+								"align-items": "center"
+							}
+						},
+						"type": "ia.container.flex"
+					}
+				],
+				"meta": {
+					"name": "root"
+				},
+				"type": "ia.container.coord"
+			}
+		}
+
+		# Write test view file
+		import json
+		import tempfile
+		from pathlib import Path
+		with tempfile.NamedTemporaryFile(mode='w', suffix='.json', delete=False) as f:
+			json.dump(view_data, f)
+			view_file = Path(f.name)
+
+		try:
+			# CSS properties should NOT be flagged as violations
+			self.assert_rule_passes(view_file, rule_config, "NamePatternRule")
+		finally:
+			view_file.unlink()
+
+	def test_regular_properties_still_validated(self):
+		"""Regular properties (not in style) should still be validated."""
+		rule_config = get_test_config(
+			"NamePatternRule",
+			target_node_types=["property"],
+			convention="camelCase",
+			severity="error"
+		)
+
+		# Create a view with regular properties that violate camelCase
+		view_data = {
+			"custom": {
+				"BadPropertyName": "value",  # PascalCase - should fail camelCase rule
+				"another-bad-name": "value"  # kebab-case - should fail camelCase rule
+			},
+			"params": {},
+			"props": {},
+			"root": {
+				"meta": {
+					"name": "root"
+				},
+				"type": "ia.container.coord"
+			}
+		}
+
+		# Write test view file
+		import json
+		import tempfile
+		from pathlib import Path
+		with tempfile.NamedTemporaryFile(mode='w', suffix='.json', delete=False) as f:
+			json.dump(view_data, f)
+			view_file = Path(f.name)
+
+		try:
+			# Regular properties SHOULD be flagged as violations
+			self.assert_rule_fails(view_file, rule_config, "NamePatternRule")
+		finally:
+			view_file.unlink()
+
+
 if __name__ == "__main__":
 	unittest.main()
