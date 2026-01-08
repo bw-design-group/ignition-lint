@@ -708,777 +708,777 @@
       {
         "name": "order",
         "node_type": "property",
-        "path": "root.root.children[0].Header.children[0].FlexContainer.children[0].Line Image.props.loading.order",
+        "path": "root.root.children.Header.children.FlexContainer.children.Line Image.props.loading.order",
         "value": "with-parent",
         "value_type": "str"
       },
       {
         "name": "percent",
         "node_type": "property",
-        "path": "root.root.children[0].Header.children[0].FlexContainer.children[0].Line Image.props.params.percent",
+        "path": "root.root.children.Header.children.FlexContainer.children.Line Image.props.params.percent",
         "value": 0,
         "value_type": "int"
       },
       {
         "name": "size",
         "node_type": "property",
-        "path": "root.root.children[0].Header.children[0].FlexContainer.children[0].Line Image.props.params.size",
+        "path": "root.root.children.Header.children.FlexContainer.children.Line Image.props.params.size",
         "value": "90px",
         "value_type": "str"
       },
       {
         "name": "path",
         "node_type": "property",
-        "path": "root.root.children[0].Header.children[0].FlexContainer.children[0].Line Image.props.path",
+        "path": "root.root.children.Header.children.FlexContainer.children.Line Image.props.path",
         "value": "Widgets/Equipment State/Embedded Views/Equipment Image",
         "value_type": "str"
       },
       {
         "name": "shrink",
         "node_type": "property",
-        "path": "root.root.children[0].Header.children[0].FlexContainer.children[1].Left Labels.children[0].Name.children[0].Line Name.position.shrink",
+        "path": "root.root.children.Header.children.FlexContainer.children.Left Labels.children.Name.children.Line Name.position.shrink",
         "value": 0,
         "value_type": "int"
       },
       {
         "name": "classes",
         "node_type": "property",
-        "path": "root.root.children[0].Header.children[0].FlexContainer.children[1].Left Labels.children[0].Name.children[0].Line Name.props.style.classes",
+        "path": "root.root.children.Header.children.FlexContainer.children.Left Labels.children.Name.children.Line Name.props.style.classes",
         "value": "title",
         "value_type": "str"
       },
       {
         "name": "fontWeight",
         "node_type": "property",
-        "path": "root.root.children[0].Header.children[0].FlexContainer.children[1].Left Labels.children[0].Name.children[0].Line Name.props.style.fontWeight",
+        "path": "root.root.children.Header.children.FlexContainer.children.Left Labels.children.Name.children.Line Name.props.style.fontWeight",
         "value": "bold",
         "value_type": "str"
       },
       {
         "name": "color",
         "node_type": "property",
-        "path": "root.root.children[0].Header.children[0].FlexContainer.children[1].Left Labels.children[0].Name.children[0].Line Name.props.textStyle.color",
+        "path": "root.root.children.Header.children.FlexContainer.children.Left Labels.children.Name.children.Line Name.props.textStyle.color",
         "value": "var(--label)",
         "value_type": "str"
       },
       {
         "name": "shrink",
         "node_type": "property",
-        "path": "root.root.children[0].Header.children[0].FlexContainer.children[1].Left Labels.children[0].Name.children[1].Custom Dashboard Button.position.shrink",
+        "path": "root.root.children.Header.children.FlexContainer.children.Left Labels.children.Name.children.Custom Dashboard Button.position.shrink",
         "value": 0,
         "value_type": "int"
       },
       {
         "name": "height",
         "node_type": "property",
-        "path": "root.root.children[0].Header.children[0].FlexContainer.children[1].Left Labels.children[0].Name.children[1].Custom Dashboard Button.props.image.height",
+        "path": "root.root.children.Header.children.FlexContainer.children.Left Labels.children.Name.children.Custom Dashboard Button.props.image.height",
         "value": 20,
         "value_type": "int"
       },
       {
         "name": "color",
         "node_type": "property",
-        "path": "root.root.children[0].Header.children[0].FlexContainer.children[1].Left Labels.children[0].Name.children[1].Custom Dashboard Button.props.image.icon.color",
+        "path": "root.root.children.Header.children.FlexContainer.children.Left Labels.children.Name.children.Custom Dashboard Button.props.image.icon.color",
         "value": "var(--label-hint)",
         "value_type": "str"
       },
       {
         "name": "path",
         "node_type": "property",
-        "path": "root.root.children[0].Header.children[0].FlexContainer.children[1].Left Labels.children[0].Name.children[1].Custom Dashboard Button.props.image.icon.path",
+        "path": "root.root.children.Header.children.FlexContainer.children.Left Labels.children.Name.children.Custom Dashboard Button.props.image.icon.path",
         "value": "materialiconsround/icons-action-dashboard",
         "value_type": "str"
       },
       {
         "name": "position",
         "node_type": "property",
-        "path": "root.root.children[0].Header.children[0].FlexContainer.children[1].Left Labels.children[0].Name.children[1].Custom Dashboard Button.props.image.position",
+        "path": "root.root.children.Header.children.FlexContainer.children.Left Labels.children.Name.children.Custom Dashboard Button.props.image.position",
         "value": "center",
         "value_type": "str"
       },
       {
         "name": "width",
         "node_type": "property",
-        "path": "root.root.children[0].Header.children[0].FlexContainer.children[1].Left Labels.children[0].Name.children[1].Custom Dashboard Button.props.image.width",
+        "path": "root.root.children.Header.children.FlexContainer.children.Left Labels.children.Name.children.Custom Dashboard Button.props.image.width",
         "value": 20,
         "value_type": "int"
       },
       {
         "name": "primary",
         "node_type": "property",
-        "path": "root.root.children[0].Header.children[0].FlexContainer.children[1].Left Labels.children[0].Name.children[1].Custom Dashboard Button.props.primary",
+        "path": "root.root.children.Header.children.FlexContainer.children.Left Labels.children.Name.children.Custom Dashboard Button.props.primary",
         "value": false,
         "value_type": "bool"
       },
       {
         "name": "height",
         "node_type": "property",
-        "path": "root.root.children[0].Header.children[0].FlexContainer.children[1].Left Labels.children[0].Name.children[1].Custom Dashboard Button.props.style.height",
+        "path": "root.root.children.Header.children.FlexContainer.children.Left Labels.children.Name.children.Custom Dashboard Button.props.style.height",
         "value": "36px",
         "value_type": "str"
       },
       {
         "name": "width",
         "node_type": "property",
-        "path": "root.root.children[0].Header.children[0].FlexContainer.children[1].Left Labels.children[0].Name.children[1].Custom Dashboard Button.props.style.width",
+        "path": "root.root.children.Header.children.FlexContainer.children.Left Labels.children.Name.children.Custom Dashboard Button.props.style.width",
         "value": "36px",
         "value_type": "str"
       },
       {
         "name": "text",
         "node_type": "property",
-        "path": "root.root.children[0].Header.children[0].FlexContainer.children[1].Left Labels.children[0].Name.children[1].Custom Dashboard Button.props.text",
+        "path": "root.root.children.Header.children.FlexContainer.children.Left Labels.children.Name.children.Custom Dashboard Button.props.text",
         "value": "",
         "value_type": "str"
       },
       {
         "name": "shrink",
         "node_type": "property",
-        "path": "root.root.children[0].Header.children[0].FlexContainer.children[1].Left Labels.children[0].Name.position.shrink",
+        "path": "root.root.children.Header.children.FlexContainer.children.Left Labels.children.Name.position.shrink",
         "value": 0,
         "value_type": "int"
       },
       {
         "name": "alignItems",
         "node_type": "property",
-        "path": "root.root.children[0].Header.children[0].FlexContainer.children[1].Left Labels.children[0].Name.props.alignItems",
+        "path": "root.root.children.Header.children.FlexContainer.children.Left Labels.children.Name.props.alignItems",
         "value": "center",
         "value_type": "str"
       },
       {
         "name": "gap",
         "node_type": "property",
-        "path": "root.root.children[0].Header.children[0].FlexContainer.children[1].Left Labels.children[0].Name.props.style.gap",
+        "path": "root.root.children.Header.children.FlexContainer.children.Left Labels.children.Name.props.style.gap",
         "value": "var(--s)",
         "value_type": "str"
       },
       {
         "name": "grow",
         "node_type": "property",
-        "path": "root.root.children[0].Header.children[0].FlexContainer.children[1].Left Labels.children[1].Breadcrumb.position.grow",
+        "path": "root.root.children.Header.children.FlexContainer.children.Left Labels.children.Breadcrumb.position.grow",
         "value": 1,
         "value_type": "int"
       },
       {
         "name": "shrink",
         "node_type": "property",
-        "path": "root.root.children[0].Header.children[0].FlexContainer.children[1].Left Labels.children[1].Breadcrumb.position.shrink",
+        "path": "root.root.children.Header.children.FlexContainer.children.Left Labels.children.Breadcrumb.position.shrink",
         "value": 0,
         "value_type": "int"
       },
       {
         "name": "backgroundColor",
         "node_type": "property",
-        "path": "root.root.children[0].Header.children[0].FlexContainer.children[1].Left Labels.children[1].Breadcrumb.props.itemStyle.backgroundColor",
+        "path": "root.root.children.Header.children.FlexContainer.children.Left Labels.children.Breadcrumb.props.itemStyle.backgroundColor",
         "value": "transparent",
         "value_type": "str"
       },
       {
         "name": "classes",
         "node_type": "property",
-        "path": "root.root.children[0].Header.children[0].FlexContainer.children[1].Left Labels.children[1].Breadcrumb.props.itemStyle.classes",
+        "path": "root.root.children.Header.children.FlexContainer.children.Left Labels.children.Breadcrumb.props.itemStyle.classes",
         "value": "body",
         "value_type": "str"
       },
       {
         "name": "color",
         "node_type": "property",
-        "path": "root.root.children[0].Header.children[0].FlexContainer.children[1].Left Labels.children[1].Breadcrumb.props.itemStyle.color",
+        "path": "root.root.children.Header.children.FlexContainer.children.Left Labels.children.Breadcrumb.props.itemStyle.color",
         "value": "var(--label)",
         "value_type": "str"
       },
       {
         "name": "padding",
         "node_type": "property",
-        "path": "root.root.children[0].Header.children[0].FlexContainer.children[1].Left Labels.children[1].Breadcrumb.props.itemStyle.padding",
+        "path": "root.root.children.Header.children.FlexContainer.children.Left Labels.children.Breadcrumb.props.itemStyle.padding",
         "value": 0,
         "value_type": "int"
       },
       {
         "name": "border",
         "node_type": "property",
-        "path": "root.root.children[0].Header.children[0].FlexContainer.children[1].Left Labels.children[1].Breadcrumb.props.style.border",
+        "path": "root.root.children.Header.children.FlexContainer.children.Left Labels.children.Breadcrumb.props.style.border",
         "value": "none",
         "value_type": "str"
       },
       {
         "name": "classes",
         "node_type": "property",
-        "path": "root.root.children[0].Header.children[0].FlexContainer.children[1].Left Labels.children[1].Breadcrumb.props.style.classes",
+        "path": "root.root.children.Header.children.FlexContainer.children.Left Labels.children.Breadcrumb.props.style.classes",
         "value": "visible",
         "value_type": "str"
       },
       {
         "name": "grow",
         "node_type": "property",
-        "path": "root.root.children[0].Header.children[0].FlexContainer.children[1].Left Labels.position.grow",
+        "path": "root.root.children.Header.children.FlexContainer.children.Left Labels.position.grow",
         "value": 1,
         "value_type": "int"
       },
       {
         "name": "shrink",
         "node_type": "property",
-        "path": "root.root.children[0].Header.children[0].FlexContainer.children[1].Left Labels.position.shrink",
+        "path": "root.root.children.Header.children.FlexContainer.children.Left Labels.position.shrink",
         "value": 0,
         "value_type": "int"
       },
       {
         "name": "direction",
         "node_type": "property",
-        "path": "root.root.children[0].Header.children[0].FlexContainer.children[1].Left Labels.props.direction",
+        "path": "root.root.children.Header.children.FlexContainer.children.Left Labels.props.direction",
         "value": "column",
         "value_type": "str"
       },
       {
         "name": "gap",
         "node_type": "property",
-        "path": "root.root.children[0].Header.children[0].FlexContainer.children[1].Left Labels.props.style.gap",
+        "path": "root.root.children.Header.children.FlexContainer.children.Left Labels.props.style.gap",
         "value": "4px",
         "value_type": "str"
       },
       {
         "name": "overflow",
         "node_type": "property",
-        "path": "root.root.children[0].Header.children[0].FlexContainer.children[1].Left Labels.props.style.overflow",
+        "path": "root.root.children.Header.children.FlexContainer.children.Left Labels.props.style.overflow",
         "value": "visible",
         "value_type": "str"
       },
       {
         "name": "grow",
         "node_type": "property",
-        "path": "root.root.children[0].Header.children[0].FlexContainer.children[2].KPI Repeater Static.position.grow",
+        "path": "root.root.children.Header.children.FlexContainer.children.KPI Repeater Static.position.grow",
         "value": 1,
         "value_type": "int"
       },
       {
         "name": "alignContent",
         "node_type": "property",
-        "path": "root.root.children[0].Header.children[0].FlexContainer.children[2].KPI Repeater Static.props.alignContent",
+        "path": "root.root.children.Header.children.FlexContainer.children.KPI Repeater Static.props.alignContent",
         "value": "flex-end",
         "value_type": "str"
       },
       {
         "name": "alignItems",
         "node_type": "property",
-        "path": "root.root.children[0].Header.children[0].FlexContainer.children[2].KPI Repeater Static.props.alignItems",
+        "path": "root.root.children.Header.children.FlexContainer.children.KPI Repeater Static.props.alignItems",
         "value": "center",
         "value_type": "str"
       },
       {
         "name": "basis",
         "node_type": "property",
-        "path": "root.root.children[0].Header.children[0].FlexContainer.children[2].KPI Repeater Static.props.elementPosition.basis",
+        "path": "root.root.children.Header.children.FlexContainer.children.KPI Repeater Static.props.elementPosition.basis",
         "value": "auto",
         "value_type": "str"
       },
       {
         "name": "grow",
         "node_type": "property",
-        "path": "root.root.children[0].Header.children[0].FlexContainer.children[2].KPI Repeater Static.props.elementPosition.grow",
+        "path": "root.root.children.Header.children.FlexContainer.children.KPI Repeater Static.props.elementPosition.grow",
         "value": 0,
         "value_type": "int"
       },
       {
         "name": "shrink",
         "node_type": "property",
-        "path": "root.root.children[0].Header.children[0].FlexContainer.children[2].KPI Repeater Static.props.elementPosition.shrink",
+        "path": "root.root.children.Header.children.FlexContainer.children.KPI Repeater Static.props.elementPosition.shrink",
         "value": 0,
         "value_type": "int"
       },
       {
         "name": "justify",
         "node_type": "property",
-        "path": "root.root.children[0].Header.children[0].FlexContainer.children[2].KPI Repeater Static.props.justify",
+        "path": "root.root.children.Header.children.FlexContainer.children.KPI Repeater Static.props.justify",
         "value": "flex-end",
         "value_type": "str"
       },
       {
         "name": "order",
         "node_type": "property",
-        "path": "root.root.children[0].Header.children[0].FlexContainer.children[2].KPI Repeater Static.props.loading.order",
+        "path": "root.root.children.Header.children.FlexContainer.children.KPI Repeater Static.props.loading.order",
         "value": "with-parent",
         "value_type": "str"
       },
       {
         "name": "path",
         "node_type": "property",
-        "path": "root.root.children[0].Header.children[0].FlexContainer.children[2].KPI Repeater Static.props.path",
+        "path": "root.root.children.Header.children.FlexContainer.children.KPI Repeater Static.props.path",
         "value": "Dashboards/Embedded View/KPI",
         "value_type": "str"
       },
       {
         "name": "gap",
         "node_type": "property",
-        "path": "root.root.children[0].Header.children[0].FlexContainer.children[2].KPI Repeater Static.props.style.gap",
+        "path": "root.root.children.Header.children.FlexContainer.children.KPI Repeater Static.props.style.gap",
         "value": "var(--s)",
         "value_type": "str"
       },
       {
         "name": "overflow",
         "node_type": "property",
-        "path": "root.root.children[0].Header.children[0].FlexContainer.children[2].KPI Repeater Static.props.style.overflow",
+        "path": "root.root.children.Header.children.FlexContainer.children.KPI Repeater Static.props.style.overflow",
         "value": "visible",
         "value_type": "str"
       },
       {
         "name": "useDefaultViewHeight",
         "node_type": "property",
-        "path": "root.root.children[0].Header.children[0].FlexContainer.children[2].KPI Repeater Static.props.useDefaultViewHeight",
+        "path": "root.root.children.Header.children.FlexContainer.children.KPI Repeater Static.props.useDefaultViewHeight",
         "value": false,
         "value_type": "bool"
       },
       {
         "name": "useDefaultViewWidth",
         "node_type": "property",
-        "path": "root.root.children[0].Header.children[0].FlexContainer.children[2].KPI Repeater Static.props.useDefaultViewWidth",
+        "path": "root.root.children.Header.children.FlexContainer.children.KPI Repeater Static.props.useDefaultViewWidth",
         "value": false,
         "value_type": "bool"
       },
       {
         "name": "wrap",
         "node_type": "property",
-        "path": "root.root.children[0].Header.children[0].FlexContainer.children[2].KPI Repeater Static.props.wrap",
+        "path": "root.root.children.Header.children.FlexContainer.children.KPI Repeater Static.props.wrap",
         "value": "wrap",
         "value_type": "str"
       },
       {
         "name": "grow",
         "node_type": "property",
-        "path": "root.root.children[0].Header.children[0].FlexContainer.position.grow",
+        "path": "root.root.children.Header.children.FlexContainer.position.grow",
         "value": 1,
         "value_type": "int"
       },
       {
         "name": "alignItems",
         "node_type": "property",
-        "path": "root.root.children[0].Header.children[0].FlexContainer.props.alignItems",
+        "path": "root.root.children.Header.children.FlexContainer.props.alignItems",
         "value": "center",
         "value_type": "str"
       },
       {
         "name": "overflow",
         "node_type": "property",
-        "path": "root.root.children[0].Header.children[0].FlexContainer.props.style.overflow",
+        "path": "root.root.children.Header.children.FlexContainer.props.style.overflow",
         "value": "visible",
         "value_type": "str"
       },
       {
         "name": "shrink",
         "node_type": "property",
-        "path": "root.root.children[0].Header.children[1].Production Picker.position.shrink",
+        "path": "root.root.children.Header.children.Production Picker.position.shrink",
         "value": 0,
         "value_type": "int"
       },
       {
         "name": "instances",
         "node_type": "property",
-        "path": "root.root.children[0].Header.children[1].Production Picker.props.instances",
+        "path": "root.root.children.Header.children.Production Picker.props.instances",
         "value": null,
         "value_type": "NoneType"
       },
       {
         "name": "order",
         "node_type": "property",
-        "path": "root.root.children[0].Header.children[1].Production Picker.props.loading.order",
+        "path": "root.root.children.Header.children.Production Picker.props.loading.order",
         "value": "with-parent",
         "value_type": "str"
       },
       {
         "name": "path",
         "node_type": "property",
-        "path": "root.root.children[0].Header.children[1].Production Picker.props.path",
+        "path": "root.root.children.Header.children.Production Picker.props.path",
         "value": "Components/Time Selection/Production Picker",
         "value_type": "str"
       },
       {
         "name": "useDefaultViewHeight",
         "node_type": "property",
-        "path": "root.root.children[0].Header.children[1].Production Picker.props.useDefaultViewHeight",
+        "path": "root.root.children.Header.children.Production Picker.props.useDefaultViewHeight",
         "value": true,
         "value_type": "bool"
       },
       {
         "name": "useDefaultViewWidth",
         "node_type": "property",
-        "path": "root.root.children[0].Header.children[1].Production Picker.props.useDefaultViewWidth",
+        "path": "root.root.children.Header.children.Production Picker.props.useDefaultViewWidth",
         "value": true,
         "value_type": "bool"
       },
       {
         "name": "shrink",
         "node_type": "property",
-        "path": "root.root.children[0].Header.position.shrink",
+        "path": "root.root.children.Header.position.shrink",
         "value": 0,
         "value_type": "int"
       },
       {
         "name": "alignItems",
         "node_type": "property",
-        "path": "root.root.children[0].Header.props.alignItems",
+        "path": "root.root.children.Header.props.alignItems",
         "value": "center",
         "value_type": "str"
       },
       {
         "name": "justify",
         "node_type": "property",
-        "path": "root.root.children[0].Header.props.justify",
+        "path": "root.root.children.Header.props.justify",
         "value": "space-between",
         "value_type": "str"
       },
       {
         "name": "gap",
         "node_type": "property",
-        "path": "root.root.children[0].Header.props.style.gap",
+        "path": "root.root.children.Header.props.style.gap",
         "value": "var(--s)",
         "value_type": "str"
       },
       {
         "name": "isolation",
         "node_type": "property",
-        "path": "root.root.children[0].Header.props.style.isolation",
+        "path": "root.root.children.Header.props.style.isolation",
         "value": "isolate",
         "value_type": "str"
       },
       {
         "name": "overflow",
         "node_type": "property",
-        "path": "root.root.children[0].Header.props.style.overflow",
+        "path": "root.root.children.Header.props.style.overflow",
         "value": "visible",
         "value_type": "str"
       },
       {
         "name": "shrink",
         "node_type": "property",
-        "path": "root.root.children[1].Data.children[0].Left Container.children[0].Production Orders.position.shrink",
+        "path": "root.root.children.Data.children.Left Container.children.Production Orders.position.shrink",
         "value": 0,
         "value_type": "int"
       },
       {
         "name": "order",
         "node_type": "property",
-        "path": "root.root.children[1].Data.children[0].Left Container.children[0].Production Orders.props.loading.order",
+        "path": "root.root.children.Data.children.Left Container.children.Production Orders.props.loading.order",
         "value": "with-parent",
         "value_type": "str"
       },
       {
         "name": "path",
         "node_type": "property",
-        "path": "root.root.children[1].Data.children[0].Left Container.children[0].Production Orders.props.path",
+        "path": "root.root.children.Data.children.Left Container.children.Production Orders.props.path",
         "value": "Widgets/Production Order/Overview",
         "value_type": "str"
       },
       {
         "name": "classes",
         "node_type": "property",
-        "path": "root.root.children[1].Data.children[0].Left Container.children[0].Production Orders.props.style.classes",
+        "path": "root.root.children.Data.children.Left Container.children.Production Orders.props.style.classes",
         "value": "card",
         "value_type": "str"
       },
       {
         "name": "maxHeight",
         "node_type": "property",
-        "path": "root.root.children[1].Data.children[0].Left Container.children[0].Production Orders.props.style.maxHeight",
+        "path": "root.root.children.Data.children.Left Container.children.Production Orders.props.style.maxHeight",
         "value": "40rem",
         "value_type": "str"
       },
       {
         "name": "overflow",
         "node_type": "property",
-        "path": "root.root.children[1].Data.children[0].Left Container.children[0].Production Orders.props.style.overflow",
+        "path": "root.root.children.Data.children.Left Container.children.Production Orders.props.style.overflow",
         "value": "visible",
         "value_type": "str"
       },
       {
         "name": "padding",
         "node_type": "property",
-        "path": "root.root.children[1].Data.children[0].Left Container.children[0].Production Orders.props.style.padding",
+        "path": "root.root.children.Data.children.Left Container.children.Production Orders.props.style.padding",
         "value": "var(--m)",
         "value_type": "str"
       },
       {
         "name": "shrink",
         "node_type": "property",
-        "path": "root.root.children[1].Data.children[0].Left Container.children[1].Equipment States.position.shrink",
+        "path": "root.root.children.Data.children.Left Container.children.Equipment States.position.shrink",
         "value": 0,
         "value_type": "int"
       },
       {
         "name": "order",
         "node_type": "property",
-        "path": "root.root.children[1].Data.children[0].Left Container.children[1].Equipment States.props.loading.order",
+        "path": "root.root.children.Data.children.Left Container.children.Equipment States.props.loading.order",
         "value": "with-parent",
         "value_type": "str"
       },
       {
         "name": "path",
         "node_type": "property",
-        "path": "root.root.children[1].Data.children[0].Left Container.children[1].Equipment States.props.path",
+        "path": "root.root.children.Data.children.Left Container.children.Equipment States.props.path",
         "value": "Widgets/Equipment State/Combination",
         "value_type": "str"
       },
       {
         "name": "classes",
         "node_type": "property",
-        "path": "root.root.children[1].Data.children[0].Left Container.children[1].Equipment States.props.style.classes",
+        "path": "root.root.children.Data.children.Left Container.children.Equipment States.props.style.classes",
         "value": "card",
         "value_type": "str"
       },
       {
         "name": "padding",
         "node_type": "property",
-        "path": "root.root.children[1].Data.children[0].Left Container.children[1].Equipment States.props.style.padding",
+        "path": "root.root.children.Data.children.Left Container.children.Equipment States.props.style.padding",
         "value": "var(--m)",
         "value_type": "str"
       },
       {
         "name": "zoom",
         "node_type": "property",
-        "path": "root.root.children[1].Data.children[0].Left Container.children[1].Equipment States.props.style.zoom",
+        "path": "root.root.children.Data.children.Left Container.children.Equipment States.props.style.zoom",
         "value": "85%",
         "value_type": "str"
       },
       {
         "name": "grow",
         "node_type": "property",
-        "path": "root.root.children[1].Data.children[0].Left Container.children[2].KPI Charts.position.grow",
+        "path": "root.root.children.Data.children.Left Container.children.KPI Charts.position.grow",
         "value": 1,
         "value_type": "int"
       },
       {
         "name": "order",
         "node_type": "property",
-        "path": "root.root.children[1].Data.children[0].Left Container.children[2].KPI Charts.props.loading.order",
+        "path": "root.root.children.Data.children.Left Container.children.KPI Charts.props.loading.order",
         "value": "with-parent",
         "value_type": "str"
       },
       {
         "name": "path",
         "node_type": "property",
-        "path": "root.root.children[1].Data.children[0].Left Container.children[2].KPI Charts.props.path",
+        "path": "root.root.children.Data.children.Left Container.children.KPI Charts.props.path",
         "value": "Widgets/Hour by Hour/Hour by Hour",
         "value_type": "str"
       },
       {
         "name": "classes",
         "node_type": "property",
-        "path": "root.root.children[1].Data.children[0].Left Container.children[2].KPI Charts.props.style.classes",
+        "path": "root.root.children.Data.children.Left Container.children.KPI Charts.props.style.classes",
         "value": "card",
         "value_type": "str"
       },
       {
         "name": "overflow",
         "node_type": "property",
-        "path": "root.root.children[1].Data.children[0].Left Container.children[2].KPI Charts.props.style.overflow",
+        "path": "root.root.children.Data.children.Left Container.children.KPI Charts.props.style.overflow",
         "value": "visible",
         "value_type": "str"
       },
       {
         "name": "padding",
         "node_type": "property",
-        "path": "root.root.children[1].Data.children[0].Left Container.children[2].KPI Charts.props.style.padding",
+        "path": "root.root.children.Data.children.Left Container.children.KPI Charts.props.style.padding",
         "value": "var(--m)",
         "value_type": "str"
       },
       {
         "name": "grow",
         "node_type": "property",
-        "path": "root.root.children[1].Data.children[0].Left Container.position.grow",
+        "path": "root.root.children.Data.children.Left Container.position.grow",
         "value": 1,
         "value_type": "int"
       },
       {
         "name": "direction",
         "node_type": "property",
-        "path": "root.root.children[1].Data.children[0].Left Container.props.direction",
+        "path": "root.root.children.Data.children.Left Container.props.direction",
         "value": "column",
         "value_type": "str"
       },
       {
         "name": "gap",
         "node_type": "property",
-        "path": "root.root.children[1].Data.children[0].Left Container.props.style.gap",
+        "path": "root.root.children.Data.children.Left Container.props.style.gap",
         "value": "var(--s)",
         "value_type": "str"
       },
       {
         "name": "overflow",
         "node_type": "property",
-        "path": "root.root.children[1].Data.children[0].Left Container.props.style.overflow",
+        "path": "root.root.children.Data.children.Left Container.props.style.overflow",
         "value": "visible",
         "value_type": "str"
       },
       {
         "name": "position",
         "node_type": "property",
-        "path": "root.root.children[1].Data.children[1].SplitContainer.children[0].Notifications.position.position",
+        "path": "root.root.children.Data.children.SplitContainer.children.Notifications.position.position",
         "value": "top",
         "value_type": "str"
       },
       {
         "name": "persistent",
         "node_type": "property",
-        "path": "root.root.children[1].Data.children[1].SplitContainer.children[0].Notifications.propConfig.props.params.configuring.persistent",
+        "path": "root.root.children.Data.children.SplitContainer.children.Notifications.propConfig.props.params.configuring.persistent",
         "value": false,
         "value_type": "bool"
       },
       {
         "name": "persistent",
         "node_type": "property",
-        "path": "root.root.children[1].Data.children[1].SplitContainer.children[0].Notifications.propConfig.props.params.widget_id.persistent",
+        "path": "root.root.children.Data.children.SplitContainer.children.Notifications.propConfig.props.params.widget_id.persistent",
         "value": false,
         "value_type": "bool"
       },
       {
         "name": "order",
         "node_type": "property",
-        "path": "root.root.children[1].Data.children[1].SplitContainer.children[0].Notifications.props.loading.order",
+        "path": "root.root.children.Data.children.SplitContainer.children.Notifications.props.loading.order",
         "value": "with-parent",
         "value_type": "str"
       },
       {
         "name": "path",
         "node_type": "property",
-        "path": "root.root.children[1].Data.children[1].SplitContainer.children[0].Notifications.props.path",
+        "path": "root.root.children.Data.children.SplitContainer.children.Notifications.props.path",
         "value": "Widgets/Notification/Notification Feed",
         "value_type": "str"
       },
       {
         "name": "classes",
         "node_type": "property",
-        "path": "root.root.children[1].Data.children[1].SplitContainer.children[0].Notifications.props.style.classes",
+        "path": "root.root.children.Data.children.SplitContainer.children.Notifications.props.style.classes",
         "value": "card",
         "value_type": "str"
       },
       {
         "name": "padding",
         "node_type": "property",
-        "path": "root.root.children[1].Data.children[1].SplitContainer.children[0].Notifications.props.style.padding",
+        "path": "root.root.children.Data.children.SplitContainer.children.Notifications.props.style.padding",
         "value": "var(--m)",
         "value_type": "str"
       },
       {
         "name": "position",
         "node_type": "property",
-        "path": "root.root.children[1].Data.children[1].SplitContainer.children[1].Top Drivers.position.position",
+        "path": "root.root.children.Data.children.SplitContainer.children.Top Drivers.position.position",
         "value": "bottom",
         "value_type": "str"
       },
       {
         "name": "order",
         "node_type": "property",
-        "path": "root.root.children[1].Data.children[1].SplitContainer.children[1].Top Drivers.props.loading.order",
+        "path": "root.root.children.Data.children.SplitContainer.children.Top Drivers.props.loading.order",
         "value": "with-parent",
         "value_type": "str"
       },
       {
         "name": "path",
         "node_type": "property",
-        "path": "root.root.children[1].Data.children[1].SplitContainer.children[1].Top Drivers.props.path",
+        "path": "root.root.children.Data.children.SplitContainer.children.Top Drivers.props.path",
         "value": "Widgets/Top Drivers/Top Driver Line Level",
         "value_type": "str"
       },
       {
         "name": "classes",
         "node_type": "property",
-        "path": "root.root.children[1].Data.children[1].SplitContainer.children[1].Top Drivers.props.style.classes",
+        "path": "root.root.children.Data.children.SplitContainer.children.Top Drivers.props.style.classes",
         "value": "card",
         "value_type": "str"
       },
       {
         "name": "padding",
         "node_type": "property",
-        "path": "root.root.children[1].Data.children[1].SplitContainer.children[1].Top Drivers.props.style.padding",
+        "path": "root.root.children.Data.children.SplitContainer.children.Top Drivers.props.style.padding",
         "value": "var(--m)",
         "value_type": "str"
       },
       {
         "name": "shrink",
         "node_type": "property",
-        "path": "root.root.children[1].Data.children[1].SplitContainer.position.shrink",
+        "path": "root.root.children.Data.children.SplitContainer.position.shrink",
         "value": 0,
         "value_type": "int"
       },
       {
         "name": "orientation",
         "node_type": "property",
-        "path": "root.root.children[1].Data.children[1].SplitContainer.props.orientation",
+        "path": "root.root.children.Data.children.SplitContainer.props.orientation",
         "value": "vertical",
         "value_type": "str"
       },
       {
         "name": "gap",
         "node_type": "property",
-        "path": "root.root.children[1].Data.children[1].SplitContainer.props.style.gap",
+        "path": "root.root.children.Data.children.SplitContainer.props.style.gap",
         "value": "var(--s)",
         "value_type": "str"
       },
       {
         "name": "maxWidth",
         "node_type": "property",
-        "path": "root.root.children[1].Data.children[1].SplitContainer.props.style.maxWidth",
+        "path": "root.root.children.Data.children.SplitContainer.props.style.maxWidth",
         "value": "480px",
         "value_type": "str"
       },
       {
         "name": "overflow",
         "node_type": "property",
-        "path": "root.root.children[1].Data.children[1].SplitContainer.props.style.overflow",
+        "path": "root.root.children.Data.children.SplitContainer.props.style.overflow",
         "value": "visible",
         "value_type": "str"
       },
       {
         "name": "width",
         "node_type": "property",
-        "path": "root.root.children[1].Data.children[1].SplitContainer.props.style.width",
+        "path": "root.root.children.Data.children.SplitContainer.props.style.width",
         "value": "28%",
         "value_type": "str"
       },
       {
         "name": "basis",
         "node_type": "property",
-        "path": "root.root.children[1].Data.position.basis",
+        "path": "root.root.children.Data.position.basis",
         "value": "200px",
         "value_type": "str"
       },
       {
         "name": "grow",
         "node_type": "property",
-        "path": "root.root.children[1].Data.position.grow",
+        "path": "root.root.children.Data.position.grow",
         "value": 1,
         "value_type": "int"
       },
       {
         "name": "background",
         "node_type": "property",
-        "path": "root.root.children[1].Data.props.style.background",
+        "path": "root.root.children.Data.props.style.background",
         "value": "transparent",
         "value_type": "str"
       },
       {
         "name": "border",
         "node_type": "property",
-        "path": "root.root.children[1].Data.props.style.border",
+        "path": "root.root.children.Data.props.style.border",
         "value": "none",
         "value_type": "str"
       },
       {
         "name": "gap",
         "node_type": "property",
-        "path": "root.root.children[1].Data.props.style.gap",
+        "path": "root.root.children.Data.props.style.gap",
         "value": "var(--s)",
         "value_type": "str"
       },
       {
         "name": "isolation",
         "node_type": "property",
-        "path": "root.root.children[1].Data.props.style.isolation",
+        "path": "root.root.children.Data.props.style.isolation",
         "value": "isolate",
         "value_type": "str"
       },
       {
         "name": "overflow",
         "node_type": "property",
-        "path": "root.root.children[1].Data.props.style.overflow",
+        "path": "root.root.children.Data.props.style.overflow",
         "value": "visible",
         "value_type": "str"
       },

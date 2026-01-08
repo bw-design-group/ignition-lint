@@ -21,7 +21,7 @@
     "component": 1,
     "expression_binding": 7,
     "expression_struct_binding": 1,
-    "property": 20,
+    "property": 19,
     "property_binding": 1,
     "query_binding": 1,
     "tag_binding": 3,
@@ -87,7 +87,7 @@
       ]
     },
     "UnusedCustomPropertiesRule": {
-      "applicable_node_count": 33,
+      "applicable_node_count": 32,
       "target_types": [
         "component",
         "custom_method",
@@ -101,5 +101,5 @@
       ]
     }
   },
-  "total_nodes": 35
+  "total_nodes": 34
 }

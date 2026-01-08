@@ -182,21 +182,21 @@
       {
         "name": "basis",
         "node_type": "property",
-        "path": "root.root.children[0].BadPollingDateTimeInput.position.basis",
+        "path": "root.root.children.BadPollingDateTimeInput.position.basis",
         "value": "32px",
         "value_type": "str"
       },
       {
         "name": "formattedValue",
         "node_type": "property",
-        "path": "root.root.children[0].BadPollingDateTimeInput.props.formattedValue",
+        "path": "root.root.children.BadPollingDateTimeInput.props.formattedValue",
         "value": "Sep 29, 2025 6:24 AM",
         "value_type": "str"
       },
       {
         "name": "basis",
         "node_type": "property",
-        "path": "root.root.children[1].Button.position.basis",
+        "path": "root.root.children.Button.position.basis",
         "value": "34px",
         "value_type": "str"
       },

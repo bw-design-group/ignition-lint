@@ -48,14 +48,14 @@
       {
         "name": "basis",
         "node_type": "property",
-        "path": "root.root.children[0].Icon Title Case.position.basis",
+        "path": "root.root.children.Icon Title Case.position.basis",
         "value": "30px",
         "value_type": "str"
       },
       {
         "name": "path",
         "node_type": "property",
-        "path": "root.root.children[0].Icon Title Case.props.path",
+        "path": "root.root.children.Icon Title Case.props.path",
         "value": "material/insert_emoticon",
         "value_type": "str"
       },

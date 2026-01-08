@@ -162,21 +162,21 @@
       {
         "name": "basis",
         "node_type": "property",
-        "path": "root.root.children[0].ActionButton.position.basis",
+        "path": "root.root.children.ActionButton.position.basis",
         "value": "34px",
         "value_type": "str"
       },
       {
         "name": "basis",
         "node_type": "property",
-        "path": "root.root.children[1].BadActionButton.position.basis",
+        "path": "root.root.children.BadActionButton.position.basis",
         "value": "34px",
         "value_type": "str"
       },
       {
         "name": "text",
         "node_type": "property",
-        "path": "root.root.children[1].BadActionButton.props.text",
+        "path": "root.root.children.BadActionButton.props.text",
         "value": "Bad Action",
         "value_type": "str"
       },
