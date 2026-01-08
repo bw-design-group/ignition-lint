@@ -1,0 +1,132 @@
+{
+  "custom": {
+    "bad": "Bad Data",
+    "good": "Good Data"
+  },
+  "params": {},
+  "propConfig": {
+    "custom.bad": {
+      "binding": {
+        "config": {
+          "expression": "\u0027Data\u0027"
+        },
+        "transforms": [
+          {
+            "code": "\ttemp_var \u003d 1\n\treturn \u0027Bad %s\u0027 % (value)",
+            "type": "script"
+          }
+        ],
+        "type": "expr"
+      },
+      "persistent": true
+    },
+    "custom.good": {
+      "binding": {
+        "config": {
+          "expression": "\u0027Data\u0027"
+        },
+        "transforms": [
+          {
+            "code": "\treturn \u0027Good %s\u0027 % (value)",
+            "type": "script"
+          }
+        ],
+        "type": "expr"
+      },
+      "persistent": true
+    }
+  },
+  "props": {},
+  "root": {
+    "children": [
+      {
+        "events": {
+          "component": {
+            "onActionPerformed": {
+              "config": {
+                "script": "\tsystem.perspective.print(\u0027ActionButton Pressed\u0027)"
+              },
+              "scope": "G",
+              "type": "script"
+            }
+          }
+        },
+        "meta": {
+          "name": "ActionButton"
+        },
+        "position": {
+          "basis": "34px"
+        },
+        "propConfig": {
+          "props.text": {
+            "binding": {
+              "config": {
+                "expression": "{view.custom.good} + \" + \" + {view.custom.bad}"
+              },
+              "type": "expr"
+            }
+          }
+        },
+        "scripts": {
+          "customMethods": [
+            {
+              "name": "good_method",
+              "params": [
+                "count"
+              ],
+              "script": "\t# implement your method here\n\tmessage \u003d \u0027good data: %s\u0027 % (count)\n\tsystem.perspective.print(message)"
+            },
+            {
+              "name": "bad_method_variables",
+              "params": [
+                "count"
+              ],
+              "script": "\t# implement your method here\n\tBAD_UPPER \u003d 0\n\tBaD_MIXED \u003d 1\n\ttemp_var \u003d 2\n\tbadCamel \u003d 3\n\t\n\tmessage \u003d \u0027%s, %s, %s, %s\u0027 %(count, BAD_UPPER, BaD_MIXED, badCamel)\n\tsystem.perspective.print(message)"
+            }
+          ],
+          "extensionFunctions": null,
+          "messageHandlers": [
+            {
+              "messageType": "good-msg-handler",
+              "pageScope": true,
+              "script": "\t# implement your handler here\n\tsystem.perspective.print(\u0027msg handler\u0027)",
+              "sessionScope": false,
+              "viewScope": false
+            }
+          ]
+        },
+        "type": "ia.input.button"
+      },
+      {
+        "events": {
+          "component": {
+            "onActionPerformed": {
+              "config": {
+                "script": "\ttemp_var \u003d 1\n\tsystem.perspective.print(\u0027unused\u0027)"
+              },
+              "scope": "G",
+              "type": "script"
+            }
+          }
+        },
+        "meta": {
+          "name": "BadActionButton"
+        },
+        "position": {
+          "basis": "34px"
+        },
+        "props": {
+          "text": "Bad Action"
+        },
+        "type": "ia.input.button"
+      }
+    ],
+    "meta": {
+      "name": "root"
+    },
+    "props": {
+      "direction": "column"
+    },
+    "type": "ia.container.flex"
+  }
+}

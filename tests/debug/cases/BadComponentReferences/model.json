@@ -87,8 +87,18 @@
     ]
   },
   "event_handlers": {
-    "count": 0,
-    "nodes": []
+    "count": 1,
+    "nodes": [
+      {
+        "event_domain": "component",
+        "event_type": "onActionPerformed",
+        "node_type": "event_handler",
+        "path": "root.root.children[0].BadButton.events.component.onActionPerformed",
+        "scope": "G",
+        "script_length": 206,
+        "script_preview": "\n# Bad pattern 1: getSibling\nsibling = self.getSibling('StatusLabel')\nsibling.props.text = 'Button c..."
+      }
+    ]
   },
   "expression_bindings": {
     "count": 2,
@@ -134,70 +144,70 @@
       {
         "name": "shrink",
         "node_type": "property",
-        "path": "root.root.children[0].BadButton.position.shrink",
+        "path": "root.root.children.BadButton.position.shrink",
         "value": 0,
         "value_type": "int"
       },
       {
         "name": "text",
         "node_type": "property",
-        "path": "root.root.children[0].BadButton.props.text",
+        "path": "root.root.children.BadButton.props.text",
         "value": "Click Me",
         "value_type": "str"
       },
       {
         "name": "shrink",
         "node_type": "property",
-        "path": "root.root.children[1].StatusLabel.position.shrink",
+        "path": "root.root.children.StatusLabel.position.shrink",
         "value": 0,
         "value_type": "int"
       },
       {
         "name": "textAlign",
         "node_type": "property",
-        "path": "root.root.children[1].StatusLabel.props.style.textAlign",
+        "path": "root.root.children.StatusLabel.props.style.textAlign",
         "value": "center",
         "value_type": "str"
       },
       {
         "name": "text",
         "node_type": "property",
-        "path": "root.root.children[1].StatusLabel.props.text",
+        "path": "root.root.children.StatusLabel.props.text",
         "value": "Ready",
         "value_type": "str"
       },
       {
         "name": "grow",
         "node_type": "property",
-        "path": "root.root.children[2].ContainerWithBadScript.position.grow",
+        "path": "root.root.children.ContainerWithBadScript.position.grow",
         "value": 1,
         "value_type": "int"
       },
       {
         "name": "shrink",
         "node_type": "property",
-        "path": "root.root.children[3].CustomMethodComponent.position.shrink",
+        "path": "root.root.children.CustomMethodComponent.position.shrink",
         "value": 0,
         "value_type": "int"
       },
       {
         "name": "text",
         "node_type": "property",
-        "path": "root.root.children[3].CustomMethodComponent.props.text",
+        "path": "root.root.children.CustomMethodComponent.props.text",
         "value": "Custom Methods",
         "value_type": "str"
       },
       {
         "name": "shrink",
         "node_type": "property",
-        "path": "root.root.children[4].MessageHandlerComponent.position.shrink",
+        "path": "root.root.children.MessageHandlerComponent.position.shrink",
         "value": 0,
         "value_type": "int"
       },
       {
         "name": "text",
         "node_type": "property",
-        "path": "root.root.children[4].MessageHandlerComponent.props.text",
+        "path": "root.root.children.MessageHandlerComponent.props.text",
         "value": "Message Handler",
         "value_type": "str"
       },
@@ -237,7 +247,7 @@
     "nodes": []
   },
   "scripts": {
-    "count": 3,
+    "count": 4,
     "nodes": [
       {
         "message_type": "update-status",
@@ -268,6 +278,15 @@
         "path": "root.root.children[3].CustomMethodComponent.scripts.customMethods[1]",
         "script_length": 293,
         "script_preview": "\n# Multiple bad patterns in one method\nif direction == 'up':\n    return self.getParent().props.name\n..."
+      },
+      {
+        "event_domain": "component",
+        "event_type": "onActionPerformed",
+        "node_type": "event_handler",
+        "path": "root.root.children[0].BadButton.events.component.onActionPerformed",
+        "scope": "G",
+        "script_length": 206,
+        "script_preview": "\n# Bad pattern 1: getSibling\nsibling = self.getSibling('StatusLabel')\nsibling.props.text = 'Button c..."
       }
     ]
   },

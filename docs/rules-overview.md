@@ -27,6 +27,7 @@ This document provides a high-level overview of all available linting rules in t
 - Forbidden name patterns
 - Abbreviation handling and validation
 - Node-specific naming patterns
+- **Note**: CSS properties in `style` and `elementStyle` objects are automatically exempted from validation (they remain in kebab-case per CSS spec)
 
 **Configuration options:**
 - `convention`: Predefined patterns (PascalCase, camelCase, snake_case, kebab-case, UPPER_CASE)
@@ -130,7 +131,7 @@ These patterns create brittle dependencies on view structure. Changes to compone
 - Python best practices
 
 **Script types analyzed:**
-- Event handlers (onStartup, onShutdown, onClick, etc.)
+- Event handlers (onStartup, onShutdown, onClick, etc.) - all domains (component, dom, system)
 - Message handlers
 - Transform scripts in bindings
 - Custom methods
@@ -143,9 +144,25 @@ These patterns create brittle dependencies on view structure. Changes to compone
 4. Maps results back to original script locations
 
 **Configuration:**
-- Uses project-specific pylint configuration
+```json
+{
+  "PylintScriptRule": {
+    "enabled": true,
+    "kwargs": {
+      "pylintrc": ".config/ignition.pylintrc"
+    }
+  }
+}
+```
+
+**Pylintrc Options:**
+- `pylintrc`: Path to custom pylintrc file (optional)
+  - Supports absolute paths: `/path/to/.pylintrc`
+  - Supports relative paths: `config/.pylintrc` (relative to working directory)
+  - Falls back to `.config/ignition.pylintrc` if not specified
+  - Uses Pylint defaults if no pylintrc file is found
 - Includes Ignition API stubs for proper validation
-- Configurable enabled/disabled checks
+- Configurable enabled/disabled checks via pylintrc
 
 ---
 

@@ -85,10 +85,11 @@ class ViewModelBuilder:
 		config = {}
 		config_prefix = f"{binding_path}.binding.config."
 		for path, value in self.flattened_json.items():
-			if (path.startswith(config_prefix) and
-				not path.startswith(f"{config_prefix}references.") and
-				not path.endswith("tagPath") and
-				not path.endswith("mode")):
+			if (
+				path.startswith(config_prefix) and
+				not path.startswith(f"{config_prefix}references.") and not path.endswith("tagPath") and
+				not path.endswith("mode")
+			):
 				# Extract the config key
 				key = path[len(config_prefix):]
 				config[key] = value
@@ -138,7 +139,8 @@ class ViewModelBuilder:
 		config = {}
 		config_prefix = f"{binding_path}.binding.config."
 		for path, value in self.flattened_json.items():
-			if path.startswith(config_prefix) and not path.startswith(f"{config_prefix}parameters.") and not path.endswith("queryPath"):
+			if path.startswith(config_prefix) and not path.startswith(f"{config_prefix}parameters."
+											) and not path.endswith("queryPath"):
 				# Extract the config key
 				key = path[len(config_prefix):]
 				config[key] = value
@@ -158,7 +160,7 @@ class ViewModelBuilder:
 
 		# Get transform script for each path
 		for transform_path in transform_paths:
-			script_path = f"{transform_path}.script"
+			script_path = f"{transform_path}.code"
 			if script_path in self.flattened_json:
 				transforms.append((transform_path, self.flattened_json[script_path]))
 
@@ -249,6 +251,32 @@ class ViewModelBuilder:
 		if access_value is not None:
 			return access_value == 'PRIVATE'
 		return None
+
+	def _extract_property_name(self, path: str) -> str:
+		"""
+		Extract the property name from a path, removing array indices.
+
+		Array properties are flattened to paths like:
+		  custom.myList[0], custom.myList[1], custom.myList[2]
+
+		This method strips the array index notation to return just the base property name:
+		  custom.myList[0] -> myList
+		  custom.myProperty -> myProperty
+
+		Args:
+			path: The full property path
+
+		Returns:
+			The property name without array indices
+		"""
+		# Get the last segment of the path
+		last_segment = path.split(".")[-1]
+
+		# Remove array index notation (e.g., [0], [1], [2])
+		# Pattern matches: [digits] at the end of the string
+		property_name = re.sub(r'\[\d+\]$', '', last_segment)
+
+		return property_name
 
 	def _collect_components(self):
 		# First, identify components by looking for meta.name entries
@@ -422,11 +450,12 @@ class ViewModelBuilder:
 
 				event_path = event_path_parts
 
-				# Extract event type from path (e.g., 'onActionPerformed', 'onStartup')
-				# Standard Ignition events don't use domains, just event types
-				event_type_match = re.search(r'\.events\.([^.]+)$', event_path_parts)
-				if event_type_match:
-					event_type = event_type_match.group(1)  # e.g., 'onActionPerformed', 'onStartup'
+				# Extract domain and event type from path
+				# Format: .events.{domain}.{eventType} (e.g., .events.component.onActionPerformed)
+				event_match = re.search(r'\.events\.([^.]+)\.([^.]+)$', event_path_parts)
+				if event_match:
+					domain = event_match.group(1)  # e.g., 'component', 'dom'
+					event_type = event_match.group(2)  # e.g., 'onActionPerformed', 'onStartup'
 
 					# Get the scope from the same event path
 					scope_path = f"{event_path_parts}.scope"
@@ -434,12 +463,16 @@ class ViewModelBuilder:
 
 					# Create a script event handler
 					handler = EventHandlerScript(
-						event_path, "component", event_type, script, scope=scope
+						event_path, domain, event_type, script, scope=scope
 					)
 					self.model['event_handlers'].append(handler)
 					self.model['scripts'].append(handler)
 
 	def _collect_properties(self):
+		# Track processed properties to avoid duplicates from array elements
+		# Key format: "base_path.property_name" (without array indices)
+		processed_properties = set()
+
 		for path, value in self.flattened_json.items():
 			# Skip meta properties, bindings, scripts, events - we already processed those
 			processed_props = ['meta', 'binding', 'scripts', 'events']
@@ -454,10 +487,25 @@ class ViewModelBuilder:
 			if path.startswith('custom.') or path.startswith('params.'):
 				# Check if this is a persistent property
 				if self._is_property_persistent(path):
-					property_name = path.split(".")[-1]
+					property_name = self._extract_property_name(path)
+
+					# Create a unique identifier for this property (without array indices)
+					# Strip array indices from path to get base path
+					base_path = re.sub(r'\[\d+\]', '', path)
+					property_id = f"{base_path}"
+
+					# Skip if we've already processed this property (avoid duplicates from arrays)
+					if property_id in processed_properties:
+						continue
+
+					processed_properties.add(property_id)
+
 					persistent = self._get_property_persistence(path)
 					private_access = self._get_property_access_mode(path)
-					prop = Property(path, property_name, value, persistent=persistent, private_access=private_access)
+					prop = Property(
+						base_path, property_name, value, persistent=persistent,
+						private_access=private_access
+					)
 					self.model['properties'].append(prop)
 				continue
 
@@ -474,11 +522,24 @@ class ViewModelBuilder:
 				if '.custom.' in path and not self._is_property_persistent(path):
 					continue
 
-				property_name = path.split(".")[-1]
+				property_name = self._extract_property_name(path)
+
+				# Create a unique identifier for this property (without array indices)
+				base_path = re.sub(r'\[\d+\]', '', path)
+				property_id = f"{base_path}"
+
+				# Skip if we've already processed this property (avoid duplicates from arrays)
+				if property_id in processed_properties:
+					continue
+
+				processed_properties.add(property_id)
 
 				persistent = self._get_property_persistence(path)
 				private_access = self._get_property_access_mode(path)
-				prop = Property(path, property_name, value, persistent=persistent, private_access=private_access)
+				prop = Property(
+					base_path, property_name, value, persistent=persistent,
+					private_access=private_access
+				)
 				self.model['properties'].append(prop)
 				# Add the property to the component
 				if component_path in self.model['components']:

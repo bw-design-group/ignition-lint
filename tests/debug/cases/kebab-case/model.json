@@ -64,21 +64,21 @@
       {
         "name": "component-custom-param",
         "node_type": "property",
-        "path": "root.root.children[0].icon-kebab-case.custom.component-custom-param",
+        "path": "root.root.children.icon-kebab-case.custom.component-custom-param",
         "value": "value",
         "value_type": "str"
       },
       {
         "name": "basis",
         "node_type": "property",
-        "path": "root.root.children[0].icon-kebab-case.position.basis",
+        "path": "root.root.children.icon-kebab-case.position.basis",
         "value": "30px",
         "value_type": "str"
       },
       {
         "name": "path",
         "node_type": "property",
-        "path": "root.root.children[0].icon-kebab-case.props.path",
+        "path": "root.root.children.icon-kebab-case.props.path",
         "value": "material/insert_emoticon",
         "value_type": "str"
       },

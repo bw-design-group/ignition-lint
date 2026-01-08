@@ -64,21 +64,21 @@
       {
         "name": "component_custom_param",
         "node_type": "property",
-        "path": "root.root.children[0].icon_snake_case.custom.component_custom_param",
+        "path": "root.root.children.icon_snake_case.custom.component_custom_param",
         "value": "value",
         "value_type": "str"
       },
       {
         "name": "basis",
         "node_type": "property",
-        "path": "root.root.children[0].icon_snake_case.position.basis",
+        "path": "root.root.children.icon_snake_case.position.basis",
         "value": "30px",
         "value_type": "str"
       },
       {
         "name": "path",
         "node_type": "property",
-        "path": "root.root.children[0].icon_snake_case.props.path",
+        "path": "root.root.children.icon_snake_case.props.path",
         "value": "material/insert_emoticon",
         "value_type": "str"
       },

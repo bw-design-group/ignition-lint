@@ -76,7 +76,8 @@ class LintingRule(NodeVisitor):
 		Returns:
 			Processed configuration dictionary ready for __init__
 		"""
-		return config.copy()
+		# Filter out keys starting with '_' (used for comments and metadata)
+		return {k: v for k, v in config.items() if not k.startswith('_')}
 
 	@classmethod
 	def create_from_config(cls, config: Dict[str, Any]):

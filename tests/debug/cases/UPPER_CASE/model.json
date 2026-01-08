@@ -64,21 +64,21 @@
       {
         "name": "COMPONENT_CUSTOM_PARAM",
         "node_type": "property",
-        "path": "root.root.children[0].ICON_UPPER_CASE.custom.COMPONENT_CUSTOM_PARAM",
+        "path": "root.root.children.ICON_UPPER_CASE.custom.COMPONENT_CUSTOM_PARAM",
         "value": "value",
         "value_type": "str"
       },
       {
         "name": "basis",
         "node_type": "property",
-        "path": "root.root.children[0].ICON_UPPER_CASE.position.basis",
+        "path": "root.root.children.ICON_UPPER_CASE.position.basis",
         "value": "30px",
         "value_type": "str"
       },
       {
         "name": "path",
         "node_type": "property",
-        "path": "root.root.children[0].ICON_UPPER_CASE.props.path",
+        "path": "root.root.children.ICON_UPPER_CASE.props.path",
         "value": "material/insert_emoticon",
         "value_type": "str"
       },
