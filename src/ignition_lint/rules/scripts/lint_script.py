@@ -284,6 +284,7 @@ class PylintScriptRule(ScriptRule):
 		args.extend([
 			'--output-format=text',
 			'--score=no',
+			'--module-rgx=.*',  # Allow any module name (temp files have timestamps)
 			temp_file_path,
 		])
 
