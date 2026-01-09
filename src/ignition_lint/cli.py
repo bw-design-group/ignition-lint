@@ -126,7 +126,7 @@ def print_file_results(file_path: Path, lint_results) -> tuple[int, int]:
 
 	# Print warnings first
 	if warning_count > 0:
-		print(f"\n⚠️  Found {warning_count} warnings in {file_path}:")
+		print(f"\n⚠️  Found {warning_count} warnings:")
 		for rule_name, warning_list in lint_results.warnings.items():
 			if warning_list:
 				print(f"  📋 {rule_name} (warning):")
@@ -135,7 +135,7 @@ def print_file_results(file_path: Path, lint_results) -> tuple[int, int]:
 
 	# Print errors
 	if error_count > 0:
-		print(f"\n❌ Found {error_count} errors in {file_path}:")
+		print(f"\n❌ Found {error_count} errors:")
 		for rule_name, error_list in lint_results.errors.items():
 			if error_list:
 				print(f"  📋 {rule_name} (error):")
@@ -239,6 +239,9 @@ def process_single_file(
 		print(f"⚠️  File {file_path} does not exist, skipping")
 		return 0, 0, None, None
 
+	# Print file header before any processing
+	print(f"\n📄 Evaluating file:\n    {file_path}")
+
 	# Initialize timers if profiling is enabled
 	file_timer = PerformanceTimer() if timer else None
 	file_read_ms = 0.0
@@ -258,7 +261,7 @@ def process_single_file(
 		file_read_ms = timer.stop()
 
 	if not json_data:
-		print(f"❌ Failed to read {file_path}, skipping")
+		print(f"❌ Failed to read file, skipping")
 		return 0, 0, None, None
 
 	# Time JSON flattening
@@ -269,7 +272,7 @@ def process_single_file(
 		flatten_ms = timer.stop()
 
 	if not flattened_json:
-		print(f"❌ Failed to parse {file_path}, skipping")
+		print(f"❌ Failed to parse file, skipping")
 		return 0, 0, None, None
 
 	# Time model building
@@ -304,7 +307,7 @@ def process_single_file(
 		file_warnings, file_errors = print_file_results(file_path, lint_results)
 
 		if file_errors == 0 and file_warnings == 0:
-			print(f"✅ No issues found in {file_path}")
+			print(f"✅ No issues found")
 
 		# Create timing record if profiling
 		if file_timer:
@@ -569,12 +572,11 @@ def main():
 			finalize_error_count = sum(len(e) for e in finalize_results.errors.values())
 
 			# If only one file was processed, show batch results in standard format
+			# (File path already shown in file header)
 			if len(file_paths) == 1:
-				file_path = file_paths[0]
-
 				# Print warnings
 				if finalize_warning_count > 0:
-					print(f"\n⚠️  Found {finalize_warning_count} warnings in {file_path}:")
+					print(f"\n⚠️  Found {finalize_warning_count} warnings:")
 					for rule_name, warning_list in finalize_results.warnings.items():
 						if warning_list:
 							print(f"  📋 {rule_name} (warning):")
@@ -584,7 +586,7 @@ def main():
 
 				# Print errors
 				if finalize_error_count > 0:
-					print(f"\n❌ Found {finalize_error_count} errors in {file_path}:")
+					print(f"\n❌ Found {finalize_error_count} errors:")
 					for rule_name, error_list in finalize_results.errors.items():
 						if error_list:
 							print(f"  📋 {rule_name} (error):")
