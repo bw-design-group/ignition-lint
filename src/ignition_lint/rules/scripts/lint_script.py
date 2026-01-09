@@ -41,13 +41,22 @@ class PylintScriptRule(ScriptRule):
 					return abs_path
 
 		# Fall back to standard location: .config/ignition.pylintrc
-		# Search from current directory up to find the project root
+		# First, search from current directory up to find the project root (user's custom config)
 		current_path = os.getcwd()
 		while current_path != os.path.dirname(current_path):  # Until we reach root
 			standard_pylintrc = os.path.join(current_path, ".config", "ignition.pylintrc")
 			if os.path.exists(standard_pylintrc):
 				return standard_pylintrc
 			current_path = os.path.dirname(current_path)
+
+		# If not found in user's repo, check the package installation directory
+		# This is where the bundled default config will be when installed via pip/poetry
+		# __file__ is: site-packages/ignition_lint/rules/scripts/lint_script.py
+		# We need to go up to: site-packages/.config/ignition.pylintrc
+		package_dir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
+		bundled_pylintrc = os.path.join(package_dir, ".config", "ignition.pylintrc")
+		if os.path.exists(bundled_pylintrc):
+			return bundled_pylintrc
 
 		# No pylintrc found - will use pylint defaults or inline config
 		return None

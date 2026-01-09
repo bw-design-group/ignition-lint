@@ -16,10 +16,6 @@
   "NamePatternRule": {
     "enabled": true,
     "kwargs": {
-      "target_node_types": [
-        "component",
-        "property"
-      ],
       "node_type_specific_rules": {
         "component": {
           "convention": "PascalCase",
