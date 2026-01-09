@@ -328,6 +328,9 @@ def write_results_file(
 	files_with_issues: int, finalize_results=None
 ):
 	"""Write linting results to an output file with detailed warnings and errors."""
+	# Ensure parent directory exists
+	output_path.parent.mkdir(parents=True, exist_ok=True)
+
 	with open(output_path, 'w', encoding='utf-8') as f:
 		f.write("=" * 80 + "\n")
 		f.write("IGNITION-LINT RESULTS\n")

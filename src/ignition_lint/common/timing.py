@@ -214,6 +214,9 @@ class TimingCollector:
 		"""Write a detailed timing report to a file."""
 		summary = self.get_summary()
 
+		# Ensure parent directory exists
+		output_path.parent.mkdir(parents=True, exist_ok=True)
+
 		with open(output_path, 'w', encoding='utf-8') as f:
 			f.write("=" * 80 + "\n")
 			f.write("IGNITION-LINT PERFORMANCE TIMING REPORT\n")
