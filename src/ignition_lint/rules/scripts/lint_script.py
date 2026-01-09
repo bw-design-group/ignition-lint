@@ -108,12 +108,18 @@ class PylintScriptRule(ScriptRule):
 			if self.collected_scripts:
 				self.process_scripts(self.collected_scripts)
 				self.collected_scripts = {}
+			# Note: Don't clear errors here - they'll be collected by LintEngine after process_nodes
 
 	def finalize(self):
 		"""Process all accumulated scripts across all files (batch mode only)."""
 		if self.batch_mode and self.collected_scripts:
 			self.process_scripts(self.collected_scripts)
 			self.collected_scripts = {}
+		elif not self.batch_mode:
+			# In non-batch mode, errors were already reported during post_process
+			# Clear them so they don't get collected again by finalize
+			self.errors = []
+			self.warnings = []
 
 	def process_scripts(self, scripts: Dict[str, ScriptNode]):
 		"""Process all collected scripts with pylint."""

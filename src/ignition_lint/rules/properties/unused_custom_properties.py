@@ -48,6 +48,7 @@ class UnusedCustomPropertiesRule(LintingRule):
 		self.defined_properties: Dict[str, str] = {}  # prop_path -> definition_location
 		self.used_properties: Set[str] = set()
 		self.flattened_json: Dict[str, Any] = {}  # Store flattened JSON for direct inspection
+		self._finalize_complete = False  # Track if finalize has been called to prevent duplicates
 
 	@property
 	def error_message(self) -> str:
@@ -65,11 +66,16 @@ class UnusedCustomPropertiesRule(LintingRule):
 
 	def process_nodes(self, nodes):
 		"""Process nodes to detect unused custom properties and view parameters."""
+		# Reset finalize flag for this file
+		self._finalize_complete = False
+
 		# Call parent process_nodes first to get standard property processing
 		super().process_nodes(nodes)
 
 		# After processing all nodes, check for unused properties
 		self.finalize()
+		# Mark finalize as complete to prevent duplication in finalize_batch_rules
+		self._finalize_complete = True
 
 	def post_process(self):
 		"""Called after all nodes are visited - but we handle this in process_nodes."""
@@ -186,6 +192,12 @@ class UnusedCustomPropertiesRule(LintingRule):
 
 	def finalize(self):
 		"""Called after all nodes are visited - check for unused properties."""
+		# Skip if already called during process_nodes (prevents duplicates)
+		if hasattr(self, '_finalize_complete') and self._finalize_complete:
+			self.errors = []
+			self.warnings = []
+			return
+
 		# Search entire flattened JSON for property references
 		self._search_flattened_json_for_references()
 
