@@ -298,7 +298,7 @@
         "name": "basePath",
         "node_type": "property",
         "path": "custom.filteredData.DifferentialPressure.basePath",
-        "value": "[MQTT Engine]Crusoe/ABI/BUILDING-2/WING-A/DataHall/Section-1/ROW/ROW-1A/RACK-1/Tx_and_Eq/TCV_102_A",
+        "value": "[MQTT Engine]BUILDING-2/WING-A/DataHall/Section-1/ROW/ROW-1A/RACK-1/Tx_and_Eq/TCV_102_A",
         "value_type": "str"
       },
       {
@@ -319,7 +319,7 @@
         "name": "basePath",
         "node_type": "property",
         "path": "custom.filteredData.EnergyValvePosition.basePath",
-        "value": "[MQTT Engine]Crusoe/ABI/BUILDING-2/WING-A/DataHall/Section-1/ROW/ROW-1A/RACK-1/Tx_and_Eq/TCV_102_A",
+        "value": "[MQTT Engine]BUILDING-2/WING-A/DataHall/Section-1/ROW/ROW-1A/RACK-1/Tx_and_Eq/TCV_102_A",
         "value_type": "str"
       },
       {
@@ -340,7 +340,7 @@
         "name": "basePath",
         "node_type": "property",
         "path": "custom.filteredData.LeakIsolationAlarm.basePath",
-        "value": "[MQTT Engine]Crusoe/ABI/BUILDING-2/WING-A/DataHall/Section-1/ROW/ROW-1A/RACK-1/LeakDetect",
+        "value": "[MQTT Engine]BUILDING-2/WING-A/DataHall/Section-1/ROW/ROW-1A/RACK-1/LeakDetect",
         "value_type": "str"
       },
       {
@@ -361,7 +361,7 @@
         "name": "basePath",
         "node_type": "property",
         "path": "custom.filteredData.Rack.basePath",
-        "value": "[MQTT Engine]Crusoe/ABI/BUILDING-2/WING-A/DataHall/Section-1/ROW/ROW-1A/RACK-1/BMS Alarm Priority/CustomTags/HighestActivePriority",
+        "value": "[MQTT Engine]BUILDING-2/WING-A/DataHall/Section-1/ROW/ROW-1A/RACK-1/BMS Alarm Priority/CustomTags/HighestActivePriority",
         "value_type": "str"
       },
       {
@@ -375,7 +375,7 @@
         "name": "basePath",
         "node_type": "property",
         "path": "custom.filteredData.ReturnTemperature.basePath",
-        "value": "[MQTT Engine]Crusoe/ABI/BUILDING-2/WING-A/DataHall/Section-1/ROW/ROW-1A/RACK-1/Tx_and_Eq/TCV_102_A",
+        "value": "[MQTT Engine]BUILDING-2/WING-A/DataHall/Section-1/ROW/ROW-1A/RACK-1/Tx_and_Eq/TCV_102_A",
         "value_type": "str"
       },
       {
@@ -410,7 +410,7 @@
         "name": "basePath",
         "node_type": "property",
         "path": "custom.filteredData.SupplyTemperature.basePath",
-        "value": "[MQTT Engine]Crusoe/ABI/BUILDING-2/WING-A/DataHall/Section-1/ROW/ROW-1A/RACK-1/Tx_and_Eq/TCV_102_A",
+        "value": "[MQTT Engine]BUILDING-2/WING-A/DataHall/Section-1/ROW/ROW-1A/RACK-1/Tx_and_Eq/TCV_102_A",
         "value_type": "str"
       },
       {
@@ -431,7 +431,7 @@
         "name": "basePath",
         "node_type": "property",
         "path": "custom.filteredData.VolumetricFlow.basePath",
-        "value": "[MQTT Engine]Crusoe/ABI/BUILDING-2/WING-A/DataHall/Section-1/ROW/ROW-1A/RACK-1/Tx_and_Eq/TCV_102_A",
+        "value": "[MQTT Engine]BUILDING-2/WING-A/DataHall/Section-1/ROW/ROW-1A/RACK-1/Tx_and_Eq/TCV_102_A",
         "value_type": "str"
       },
       {
@@ -459,14 +459,14 @@
         "name": "fullPath",
         "node_type": "property",
         "path": "custom.filteredData.fullPath",
-        "value": "[MQTT Engine]Crusoe/ABI/BUILDING-2/WING-A/DataHall/Section-1/ROW/ROW-1A/RACK-1",
+        "value": "[MQTT Engine]BUILDING-2/WING-A/DataHall/Section-1/ROW/ROW-1A/RACK-1",
         "value_type": "str"
       },
       {
         "name": "paths",
         "node_type": "property",
         "path": "custom.paths",
-        "value": "[MQTT Engine]Crusoe/ABI/BUILDING-2/WING-A/DataHall/Section-1/ROW/ROW-1A/RACK-1",
+        "value": "[MQTT Engine]BUILDING-2/WING-A/DataHall/Section-1/ROW/ROW-1A/RACK-1",
         "value_type": "str"
       },
       {
