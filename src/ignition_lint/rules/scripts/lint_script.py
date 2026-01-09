@@ -54,7 +54,9 @@ class PylintScriptRule(ScriptRule):
 		# This is where the bundled default config will be when installed via pip/poetry
 		# __file__ is: site-packages/ignition_lint/rules/scripts/lint_script.py
 		# We need to go up to: site-packages/.config/ignition.pylintrc
-		package_dir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
+		package_dir = os.path.dirname(
+			os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+		)
 		bundled_pylintrc = os.path.join(package_dir, ".config", "ignition.pylintrc")
 		if os.path.exists(bundled_pylintrc):
 			return bundled_pylintrc
@@ -162,6 +164,17 @@ class PylintScriptRule(ScriptRule):
 		# Use tests/debug if found, otherwise fall back to debug
 		debug_dir = tests_debug_dir if tests_debug_dir else os.path.join(cwd, "debug")
 		os.makedirs(debug_dir, exist_ok=True)
+
+		# Clean up old debug .py files to keep things fresh each run
+		try:
+			for filename in os.listdir(debug_dir):
+				if filename.endswith('.py'):
+					file_path = os.path.join(debug_dir, filename)
+					os.remove(file_path)
+		except OSError:
+			# Silently ignore cleanup errors - debug directory may not be writable
+			pass
+
 		return debug_dir
 
 	def _combine_scripts(self, scripts: Dict[str, ScriptNode]) -> Tuple[str, Dict[int, str]]:
@@ -321,7 +334,9 @@ class PylintScriptRule(ScriptRule):
 			should_save = has_issues or self.debug
 
 			if should_save and debug_dir:
-				debug_file_path = os.path.join(debug_dir, "pylint_input_temp.py")
+				# Preserve original temp filename (timestamp + random chars)
+				original_filename = os.path.basename(temp_file_path)
+				debug_file_path = os.path.join(debug_dir, original_filename)
 				shutil.copy(temp_file_path, debug_file_path)
 
 				if has_issues:
@@ -334,27 +349,7 @@ class PylintScriptRule(ScriptRule):
 
 
 def _save_debug_file(temp_file_path: str, debug_dir: str):
-	"""Helper function to save temporary file to debug directory."""
+	"""Helper function to save temporary file to debug directory with original filename."""
 	debug_file_path = os.path.join(debug_dir, os.path.basename(temp_file_path))
 	shutil.copy2(temp_file_path, debug_file_path)
-
-	# Keep only the 5 most recent debug files
-	try:
-		file_prefix = os.path.basename(temp_file_path).split('_')[0]
-		# Get all .py files in the debug directory
-		debug_files = [
-			f for f in os.listdir(debug_dir)
-			if f.endswith('.py') and os.path.basename(f).split('_')[0] != file_prefix
-		]
-
-		# Sort by modification time (newest first)
-		debug_files.sort(key=lambda f: os.path.getmtime(os.path.join(debug_dir, f)), reverse=True)
-
-		# Remove files beyond the 5 most recent
-		for file_to_remove in debug_files[5:]:
-			file_path = os.path.join(debug_dir, file_to_remove)
-			os.remove(file_path)
-
-	except OSError as e:
-		# Handle potential file system errors gracefully
-		print(f"Warning: Could not clean up old debug files: {e}")
+	# Note: Old .py files are cleaned up at the start of each run in _setup_debug_directory()
