@@ -36,7 +36,10 @@
     "enabled": true,
     "kwargs": {
       "max_array_size": 50,
-      "_comment": "Maximum allowed array size in custom properties. Arrays larger than this should use databases."
+      "max_sibling_properties": 50,
+      "max_nesting_depth": 5,
+      "max_data_points": 1000,
+      "_comment": "Detects excessive context data in custom properties using 4 methods: (1) max_array_size: arrays with too many items, (2) max_sibling_properties: too many properties at the same level, (3) max_nesting_depth: overly deep nesting, (4) max_data_points: total volume of data stored in custom properties."
     }
   },
   "_info": {

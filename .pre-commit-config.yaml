@@ -14,6 +14,7 @@ repos:
       - id: check-yaml
         stages: [pre-commit]
       - id: check-added-large-files
+        args: ['--maxkb=5000']  # Allow up to 5MB (for test case files like BadContextData)
         stages: [pre-commit]
 
   - repo: local
