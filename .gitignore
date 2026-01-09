@@ -19,6 +19,9 @@ debug/pylint_output.txt
 tests/debug/*.py
 tests/debug/pylint_output.txt
 
+# User repo debug directory (created by PylintScriptRule)
+.ignition-lint/
+
 # Local testing tools
 bin/
 .cache/
