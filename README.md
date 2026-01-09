@@ -755,12 +755,7 @@ repos:
     rev: v0.2.4
     hooks:
       - id: ignition-lint
-        args: [
-          '--config=rule_config.json',
-          '--files',
-          'services/**/view.json'  # Specify glob pattern here
-        ]
-        pass_filenames: false  # Use glob pattern instead of individual filenames
+        args: ['--config=rule_config.json', '--files']
 ```
 
 **With custom configuration (Option B - Lightweight):**
@@ -775,12 +770,8 @@ repos:
         language: python
         types: [json]
         files: view\.json$
-        args: [
-          '--config=rule_config.json',
-          '--files',
-          'services/**/view.json'  # Specify glob pattern here
-        ]
-        pass_filenames: false  # Use glob pattern instead of individual filenames
+        args: ['--config=rule_config.json', '--files']
+        pass_filenames: true
         additional_dependencies:
           - 'git+https://github.com/bw-design-group/ignition-lint@v0.2.4'
 ```
@@ -801,10 +792,24 @@ pre-commit run
 
 - Hook automatically runs only on `view.json` files
 - Default config uses warnings-only mode (won't block commits)
+- Pre-commit checks only **modified files** (incremental linting)
 - Config paths are resolved relative to your repository root
 - Customize pylintrc via the `pylintrc` parameter in your `rule_config.json`
 - **Recommended**: Use Option B (lightweight) to reduce initial download from ~64MB to ~1MB
-- **Important for large repositories**: Use `pass_filenames: false` with a glob pattern in args to avoid ARG_MAX limitations. Pre-commit's default behavior passes all matching filenames as command-line arguments, which can exceed system limits in repositories with hundreds of view.json files (e.g., 725 files × long paths can exceed ARG_MAX). Using a glob pattern lets ignition-lint discover files internally without hitting this limit.
+
+**For full repository scans**, use the CLI directly instead of `pre-commit run --all-files`:
+```bash
+# Scan all view.json files in the repository
+ignition-lint --files "services/**/view.json" --config rule_config.json
+
+# With timing and results output
+ignition-lint --files "services/**/view.json" \
+  --config rule_config.json \
+  --timing-output timing.txt \
+  --results-output results.txt
+```
+
+> **Why not use `pre-commit run --all-files`?** Pre-commit passes all matched filenames as command-line arguments, which can exceed system ARG_MAX limits in large repositories (e.g., 725 files with long paths). The CLI tool uses internal glob matching to avoid this limitation.
 
 ### 3. GitHub Actions Workflow
 
