@@ -590,7 +590,8 @@ def main():
 	if args.timing_output and timing_collector:
 		timing_path = Path(args.timing_output)
 		timing_collector.write_timing_report(timing_path)
-		print(f"📊 Timing report written to: {timing_path}")
+
+		print("\n" + f"📊 Timing report written to: {timing_path}")
 
 	# Write results file if requested
 	if args.results_output and results_buffer:
@@ -598,7 +599,7 @@ def main():
 			Path(args.results_output), results_buffer, total_warnings, total_errors, processed_files,
 			files_with_issues, finalize_results
 		)
-		print(f"📝 Results written to: {args.results_output}")
+		print("\n" + f"📝 Results written to: {args.results_output}")
 
 	# Print final summary
 	print_final_summary(
