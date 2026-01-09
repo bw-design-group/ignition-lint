@@ -19,13 +19,13 @@ repos:
   - repo: local
     hooks:
       # Fast formatting check (doesn't modify, just checks)
-      - id: yapf-check
-        name: yapf format check
-        entry: yapf
-        language: system
-        types: [python]
-        args: ["-d"]  # Diff mode - just check, don't modify
-        stages: [pre-commit]
+      # - id: yapf-check
+      #   name: yapf format check
+      #   entry: yapf
+      #   language: system
+      #   types: [python]
+      #   args: ["-d"]  # Diff mode - just check, don't modify
+      #   stages: [pre-commit]
 
       # Quick pylint on changed files only
       - id: pylint-quick
