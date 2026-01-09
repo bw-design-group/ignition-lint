@@ -32,12 +32,21 @@
     "enabled": true,
     "kwargs": {}
   },
+  "ExcessiveContextDataRule": {
+    "enabled": true,
+    "kwargs": {
+      "max_array_size": 50,
+      "_comment": "Maximum allowed array size in custom properties. Arrays larger than this should use databases."
+    }
+  },
   "_info": {
     "_description": "Rule severity levels are defined by rule developers:",
     "rule_severities": {
       "NamePatternRule": "warning - naming conventions are style preferences",
       "PollingIntervalRule": "error - performance issues that can cause system problems",
-      "PylintScriptRule": "error - syntax errors, undefined variables, etc."
+      "PylintScriptRule": "error - syntax errors, undefined variables, etc.",
+      "UnusedCustomPropertiesRule": "error - dead code that should be removed",
+      "ExcessiveContextDataRule": "error - architectural issue, data should be in databases"
     },
     "note": "Users cannot configure severity levels - they are determined by what each rule checks.",
     "PylintScriptRule_config": {
