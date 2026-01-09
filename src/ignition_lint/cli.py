@@ -232,11 +232,11 @@ def setup_linter(args) -> LintEngine:
 
 
 def process_single_file(file_path: Path, lint_engine: LintEngine, args,
-			timer: Optional[PerformanceTimer] = None) -> tuple[int, int, Optional[FileTimings]]:
-	"""Process a single view file and return the warning and error counts."""
+			timer: Optional[PerformanceTimer] = None) -> tuple[int, int, Optional[FileTimings], Optional[Any]]:
+	"""Process a single view file and return the warning and error counts plus lint results."""
 	if not file_path.exists():
 		print(f"⚠️  File {file_path} does not exist, skipping")
-		return 0, 0, None
+		return 0, 0, None, None
 
 	# Initialize timers if profiling is enabled
 	file_timer = PerformanceTimer() if timer else None
@@ -258,7 +258,7 @@ def process_single_file(file_path: Path, lint_engine: LintEngine, args,
 
 	if not json_data:
 		print(f"❌ Failed to read {file_path}, skipping")
-		return 0, 0, None
+		return 0, 0, None, None
 
 	# Time JSON flattening
 	if file_timer:
@@ -269,7 +269,7 @@ def process_single_file(file_path: Path, lint_engine: LintEngine, args,
 
 	if not flattened_json:
 		print(f"❌ Failed to parse {file_path}, skipping")
-		return 0, 0, None
+		return 0, 0, None, None
 
 	# Time model building
 	if file_timer:
@@ -316,16 +316,16 @@ def process_single_file(file_path: Path, lint_engine: LintEngine, args,
 				rule_execution_ms=rule_exec_ms, rule_timings=lint_results.rule_timings
 			)
 
-		return file_warnings, file_errors, file_timings
+		return file_warnings, file_errors, file_timings, lint_results
 
-	return 0, 0, None
+	return 0, 0, None, None
 
 
 def write_results_file(
 	output_path: Path, results: List[Dict], total_warnings: int, total_errors: int, processed_files: int,
-	files_with_issues: int
+	files_with_issues: int, finalize_results=None
 ):
-	"""Write linting results to an output file."""
+	"""Write linting results to an output file with detailed warnings and errors."""
 	with open(output_path, 'w', encoding='utf-8') as f:
 		f.write("=" * 80 + "\n")
 		f.write("IGNITION-LINT RESULTS\n")
@@ -347,11 +347,65 @@ def write_results_file(
 		for result in results:
 			status = "✅ CLEAN" if result['warnings'] == 0 and result['errors'] == 0 else "⚠️  ISSUES"
 			f.write(f"{status} - {result['file']}\n")
-			if result['warnings'] > 0:
-				f.write(f"  Warnings: {result['warnings']}\n")
-			if result['errors'] > 0:
-				f.write(f"  Errors:   {result['errors']}\n")
+			f.write("-" * 80 + "\n")
+
+			lint_results = result.get('lint_results')
+			if lint_results:
+				# Write warnings with details
+				if lint_results.warnings:
+					f.write(f"⚠️  WARNINGS ({result['warnings']} total):\n\n")
+					for rule_name, warning_list in lint_results.warnings.items():
+						if warning_list:
+							f.write(f"  📋 {rule_name}:\n")
+							for warning in warning_list:
+								f.write(f"    • {warning}\n")
+							f.write("\n")
+
+				# Write errors with details
+				if lint_results.errors:
+					f.write(f"❌ ERRORS ({result['errors']} total):\n\n")
+					for rule_name, error_list in lint_results.errors.items():
+						if error_list:
+							f.write(f"  📋 {rule_name}:\n")
+							for error in error_list:
+								f.write(f"    • {error}\n")
+							f.write("\n")
+			else:
+				# Fallback to just counts if lint_results not available
+				if result['warnings'] > 0:
+					f.write(f"  ⚠️  Warnings: {result['warnings']}\n")
+				if result['errors'] > 0:
+					f.write(f"  ❌ Errors:   {result['errors']}\n")
+
 			f.write("\n")
+
+		# Batch finalization results (if any)
+		if finalize_results and (finalize_results.warnings or finalize_results.errors):
+			f.write("=" * 80 + "\n")
+			f.write("📦 BATCH RULE FINALIZATION RESULTS\n")
+			f.write("=" * 80 + "\n\n")
+
+			# Write finalization warnings
+			if finalize_results.warnings:
+				warning_count = sum(len(w) for w in finalize_results.warnings.values())
+				f.write(f"⚠️  WARNINGS ({warning_count} total):\n\n")
+				for rule_name, warning_list in finalize_results.warnings.items():
+					if warning_list:
+						f.write(f"  📋 {rule_name}:\n")
+						for warning in warning_list:
+							f.write(f"    • {warning}\n")
+						f.write("\n")
+
+			# Write finalization errors
+			if finalize_results.errors:
+				error_count = sum(len(e) for e in finalize_results.errors.values())
+				f.write(f"❌ ERRORS ({error_count} total):\n\n")
+				for rule_name, error_list in finalize_results.errors.items():
+					if error_list:
+						f.write(f"  📋 {rule_name}:\n")
+						for error in error_list:
+							f.write(f"    • {error}\n")
+						f.write("\n")
 
 		f.write("=" * 80 + "\n")
 		f.write("END OF RESULTS\n")
@@ -478,7 +532,7 @@ def main():
 	results_buffer = []  # Collect results for file output
 
 	for file_path in file_paths:
-		file_warnings, file_errors, file_timings = process_single_file(
+		file_warnings, file_errors, file_timings, lint_results = process_single_file(
 			file_path, lint_engine, args, performance_timer
 		)
 
@@ -491,7 +545,8 @@ def main():
 			results_buffer.append({
 				'file': str(file_path),
 				'warnings': file_warnings,
-				'errors': file_errors
+				'errors': file_errors,
+				'lint_results': lint_results  # Include detailed messages
 			})
 
 		# All functions now return tuples, no need to check for -1
@@ -502,6 +557,7 @@ def main():
 			files_with_issues += 1
 
 	# Finalize batch rules (e.g., PylintScriptRule in batch mode)
+	finalize_results = None
 	if not args.stats_only:
 		finalize_results = lint_engine.finalize_batch_rules(enable_timing=bool(performance_timer))
 
@@ -540,7 +596,7 @@ def main():
 	if args.results_output and results_buffer:
 		write_results_file(
 			Path(args.results_output), results_buffer, total_warnings, total_errors, processed_files,
-			files_with_issues
+			files_with_issues, finalize_results
 		)
 		print(f"📝 Results written to: {args.results_output}")
 
