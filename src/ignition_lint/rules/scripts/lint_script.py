@@ -22,10 +22,10 @@ from ...model.node_types import ScriptNode
 class PylintScriptRule(ScriptRule):
 	"""Rule to run pylint on all script types using the simplified interface."""
 
-	def __init__(self, severity="error", pylintrc=None, debug=False, batch_mode=True, debug_dir=None):
+	def __init__(self, severity="error", pylintrc=None, debug=False, batch_mode=False, debug_dir=None):
 		super().__init__(severity=severity)  # Targets all script types by default
 		self.debug = debug  # Debug mode disabled by default for performance
-		self.batch_mode = batch_mode  # Batch mode enabled by default for performance
+		self.batch_mode = batch_mode  # Batch mode DISABLED by default for clarity (can be enabled for performance)
 		self.debug_dir_config = debug_dir  # User-configured debug directory
 		self.pylintrc = self._resolve_pylintrc_path(pylintrc)
 		if self.debug:

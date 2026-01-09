@@ -80,6 +80,10 @@ class LintEngine:
 			if hasattr(rule, 'set_flattened_json'):
 				rule.set_flattened_json(self.flattened_json)
 
+			# Give rules access to source file path if they need it (for batch mode grouping)
+			if hasattr(rule, 'set_source_file'):
+				rule.set_source_file(source_file_path)
+
 			# Let the rule process all nodes it's interested in
 			rule.process_nodes(all_nodes)
 

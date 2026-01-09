@@ -563,20 +563,47 @@ def main():
 
 		# Process finalization results
 		if finalize_results.warnings or finalize_results.errors:
-			print("\n" + "=" * 80)
-			print("📦 Batch Rule Finalization Results")
-			print("=" * 80)
+			# If only one file was processed, integrate results into that file's output
+			if len(file_paths) == 1:
+				file_path = file_paths[0]
+				finalize_warning_count = sum(len(w) for w in finalize_results.warnings.values())
+				finalize_error_count = sum(len(e) for e in finalize_results.errors.values())
 
-			# Print finalization warnings and errors
-			for rule_name, warning_list in finalize_results.warnings.items():
-				for warning in warning_list:
-					print(f"⚠️  {rule_name}: {warning}")
-					total_warnings += 1
+				# Print warnings in standard format
+				if finalize_warning_count > 0:
+					print(f"\n⚠️  Found {finalize_warning_count} additional warnings in {file_path}:")
+					for rule_name, warning_list in finalize_results.warnings.items():
+						if warning_list:
+							print(f"  📋 {rule_name} (warning):")
+							for warning in warning_list:
+								print(f"    • {warning}")
+								total_warnings += 1
 
-			for rule_name, error_list in finalize_results.errors.items():
-				for error in error_list:
-					print(f"❌ {rule_name}: {error}")
-					total_errors += 1
+				# Print errors in standard format
+				if finalize_error_count > 0:
+					print(f"\n❌ Found {finalize_error_count} additional errors in {file_path}:")
+					for rule_name, error_list in finalize_results.errors.items():
+						if error_list:
+							print(f"  📋 {rule_name} (error):")
+							for error in error_list:
+								print(f"    • {error}")
+								total_errors += 1
+			else:
+				# Multiple files: keep the separate section for batch results
+				print("\n" + "=" * 80)
+				print("📦 Batch Rule Finalization Results (All Files)")
+				print("=" * 80)
+
+				# Print finalization warnings and errors
+				for rule_name, warning_list in finalize_results.warnings.items():
+					for warning in warning_list:
+						print(f"⚠️  {rule_name}: {warning}")
+						total_warnings += 1
+
+				for rule_name, error_list in finalize_results.errors.items():
+					for error in error_list:
+						print(f"❌ {rule_name}: {error}")
+						total_errors += 1
 
 			# Update files_with_issues count if finalization found issues
 			if finalize_results.has_errors or finalize_results.warnings:
