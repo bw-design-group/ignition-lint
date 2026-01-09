@@ -6,6 +6,7 @@ import json
 import sys
 import argparse
 import glob
+import textwrap
 from pathlib import Path
 from typing import List, Dict, Any, Optional
 
@@ -110,6 +111,32 @@ def collect_files(args) -> List[Path]:
 	return files_to_process
 
 
+def wrap_message(message: str, width: int = 120, indent: str = "    • ") -> str:
+	"""
+	Wrap a long message to fit within terminal width.
+
+	Args:
+		message: The message to wrap
+		width: Maximum line width (default 120)
+		indent: Initial indentation (default "    • ")
+
+	Returns:
+		Wrapped message with proper indentation
+	"""
+	# Subsequent lines should align with the start of the message text
+	subsequent_indent = " " * len(indent)
+
+	wrapped = textwrap.fill(
+		message,
+		width=width,
+		initial_indent=indent,
+		subsequent_indent=subsequent_indent,
+		break_long_words=False,
+		break_on_hyphens=False
+	)
+	return wrapped
+
+
 def print_file_results(file_path: Path, lint_results) -> tuple[int, int]:
 	"""
 	Print warnings and errors for a file and return the counts.
@@ -131,7 +158,7 @@ def print_file_results(file_path: Path, lint_results) -> tuple[int, int]:
 			if warning_list:
 				print(f"\n  📋 {rule_name} (warning):")
 				for warning in warning_list:
-					print(f"    • {warning}")
+					print(wrap_message(warning))
 
 	# Print errors
 	if error_count > 0:
@@ -140,7 +167,7 @@ def print_file_results(file_path: Path, lint_results) -> tuple[int, int]:
 			if error_list:
 				print(f"\n  📋 {rule_name} (error):")
 				for error in error_list:
-					print(f"    • {error}")
+					print(wrap_message(error))
 
 	return warning_count, error_count
 
@@ -584,7 +611,7 @@ def main():
 						if warning_list:
 							print(f"  📋 {rule_name} (warning):")
 							for warning in warning_list:
-								print(f"    • {warning}")
+								print(wrap_message(warning))
 								total_warnings += 1
 
 				# Print errors
@@ -594,7 +621,7 @@ def main():
 						if error_list:
 							print(f"  📋 {rule_name} (error):")
 							for error in error_list:
-								print(f"    • {error}")
+								print(wrap_message(error))
 								total_errors += 1
 			else:
 				# Multiple files: show batch results in separate section
@@ -605,12 +632,16 @@ def main():
 				# Print warnings and errors
 				for rule_name, warning_list in finalize_results.warnings.items():
 					for warning in warning_list:
-						print(f"⚠️  {rule_name}: {warning}")
+						# For batch results, include rule name in message and wrap
+						message_with_rule = f"{rule_name}: {warning}"
+						print(wrap_message(message_with_rule, indent="⚠️  "))
 						total_warnings += 1
 
 				for rule_name, error_list in finalize_results.errors.items():
 					for error in error_list:
-						print(f"❌ {rule_name}: {error}")
+						# For batch results, include rule name in message and wrap
+						message_with_rule = f"{rule_name}: {error}"
+						print(wrap_message(message_with_rule, indent="❌ "))
 						total_errors += 1
 
 			# Update files_with_issues count if finalization found issues
