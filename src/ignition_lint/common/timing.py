@@ -3,6 +3,7 @@ Performance timing utilities for profiling ignition-lint operations.
 """
 
 import time
+from datetime import datetime
 from typing import Dict, List, Optional
 from dataclasses import dataclass, field
 from pathlib import Path
@@ -130,10 +131,12 @@ class TimingCollector:
 		self.file_timings: List[FileTimings] = []
 		self.total_start_time: Optional[float] = None
 		self.total_duration_ms: float = 0.0
+		self.start_timestamp: Optional[str] = None
 
 	def start_total_timing(self):
 		"""Start timing the entire operation."""
 		self.total_start_time = time.perf_counter()
+		self.start_timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
 	def stop_total_timing(self):
 		"""Stop timing the entire operation."""
@@ -214,7 +217,10 @@ class TimingCollector:
 		with open(output_path, 'w', encoding='utf-8') as f:
 			f.write("=" * 80 + "\n")
 			f.write("IGNITION-LINT PERFORMANCE TIMING REPORT\n")
-			f.write("=" * 80 + "\n\n")
+			f.write("=" * 80 + "\n")
+			if self.start_timestamp:
+				f.write(f"Report Generated: {self.start_timestamp}\n")
+			f.write("\n")
 
 			# Overall summary
 			f.write("OVERALL SUMMARY\n")
