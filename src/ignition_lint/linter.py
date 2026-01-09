@@ -5,6 +5,7 @@ It also includes methods for debugging nodes and analyzing rule impact on the vi
 """
 
 import json
+import time
 from pathlib import Path
 from typing import Dict, List, Any, NamedTuple, Optional
 from .rules.common import LintingRule
@@ -17,6 +18,7 @@ class LintResults(NamedTuple):
 	warnings: Dict[str, List[str]]
 	errors: Dict[str, List[str]]
 	has_errors: bool
+	rule_timings: Dict[str, float] = {}
 
 
 class LintEngine:
@@ -37,7 +39,10 @@ class LintEngine:
 		"""Return the structured view model."""
 		return self.model_builder.build_model(self.flattened_json)
 
-	def process(self, flattened_json: Dict[str, Any], source_file_path: Optional[str] = None) -> LintResults:
+	def process(
+		self, flattened_json: Dict[str, Any], source_file_path: Optional[str] = None,
+		enable_timing: bool = False
+	) -> LintResults:
 		"""Lint the given flattened JSON and return warnings and errors."""
 		# Build the object model
 		self.flattened_json = flattened_json
@@ -52,7 +57,8 @@ class LintEngine:
 		# that contain the same nodes as specific collections, causing duplicates
 		specific_collections = [
 			'components', 'message_handlers', 'custom_methods', 'expression_bindings',
-			'expression_struct_bindings', 'property_bindings', 'tag_bindings', 'query_bindings', 'script_transforms', 'event_handlers', 'properties'
+			'expression_struct_bindings', 'property_bindings', 'tag_bindings', 'query_bindings',
+			'script_transforms', 'event_handlers', 'properties'
 		]
 		all_nodes = []
 		for collection_name in specific_collections:
@@ -61,15 +67,25 @@ class LintEngine:
 
 		warnings = {}
 		errors = {}
+		rule_timings = {}
 
 		# Apply each rule to the nodes
 		for rule in self.rules:
+			# Time rule execution if timing is enabled
+			if enable_timing:
+				start_time = time.perf_counter()
+
 			# Give rules access to flattened JSON if they need it
 			if hasattr(rule, 'set_flattened_json'):
 				rule.set_flattened_json(self.flattened_json)
 
 			# Let the rule process all nodes it's interested in
 			rule.process_nodes(all_nodes)
+
+			# Record timing if enabled
+			if enable_timing:
+				duration_ms = (time.perf_counter() - start_time) * 1000.0
+				rule_timings[rule.__class__.__name__] = duration_ms
 
 			# Collect warnings from this rule
 			if rule.warnings:
@@ -79,7 +95,7 @@ class LintEngine:
 			if rule.errors:
 				errors[rule.error_key] = rule.errors
 
-		return LintResults(warnings=warnings, errors=errors, has_errors=bool(errors))
+		return LintResults(warnings=warnings, errors=errors, has_errors=bool(errors), rule_timings=rule_timings)
 
 	def get_model_statistics(self, flattened_json: Dict[str, Any]) -> Dict[str, Any]:
 		"""Get statistics about the parsed model for debugging/analysis."""
@@ -89,7 +105,8 @@ class LintEngine:
 		# Get all nodes for analysis, excluding generic collections to avoid duplicates
 		specific_collections = [
 			'components', 'message_handlers', 'custom_methods', 'expression_bindings',
-			'expression_struct_bindings', 'property_bindings', 'tag_bindings', 'query_bindings', 'script_transforms', 'event_handlers', 'properties'
+			'expression_struct_bindings', 'property_bindings', 'tag_bindings', 'query_bindings',
+			'script_transforms', 'event_handlers', 'properties'
 		]
 		all_nodes = []
 		for collection_name in specific_collections:

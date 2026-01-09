@@ -7,12 +7,13 @@ import sys
 import argparse
 import glob
 from pathlib import Path
-from typing import List, Dict, Any
+from typing import List, Dict, Any, Optional
 
 # Handle both relative and absolute imports
 try:
 	# Try relative imports first (when run as module)
 	from .common.flatten_json import read_json_file, flatten_json
+	from .common.timing import PerformanceTimer, TimingCollector, FileTimings
 	from .linter import LintEngine
 	from .rules import RULES_MAP
 except ImportError:
@@ -23,6 +24,7 @@ except ImportError:
 		sys.path.insert(0, str(src_dir))
 
 	from ignition_lint.common.flatten_json import read_json_file, flatten_json
+	from ignition_lint.common.timing import PerformanceTimer, TimingCollector, FileTimings
 	from ignition_lint.linter import LintEngine
 	from ignition_lint.rules import RULES_MAP
 
@@ -229,20 +231,53 @@ def setup_linter(args) -> LintEngine:
 	return lint_engine
 
 
-def process_single_file(file_path: Path, lint_engine: LintEngine, args) -> tuple[int, int]:
+def process_single_file(file_path: Path, lint_engine: LintEngine, args,
+			timer: Optional[PerformanceTimer] = None) -> tuple[int, int, Optional[FileTimings]]:
 	"""Process a single view file and return the warning and error counts."""
 	if not file_path.exists():
 		print(f"⚠️  File {file_path} does not exist, skipping")
-		return 0, 0
+		return 0, 0, None
 
-	# Read and flatten the JSON file
-	flattened_json = get_view_file(file_path)
+	# Initialize timers if profiling is enabled
+	file_timer = PerformanceTimer() if timer else None
+	file_read_ms = 0.0
+	flatten_ms = 0.0
+	model_build_ms = 0.0
+	rule_exec_ms = 0.0
+
+	# Start overall file timing
+	if file_timer:
+		file_timer.start()
+
+	# Time file reading
+	if file_timer:
+		timer.start()
+	json_data = read_json_file(file_path)
+	if file_timer:
+		file_read_ms = timer.stop()
+
+	if not json_data:
+		print(f"❌ Failed to read {file_path}, skipping")
+		return 0, 0, None
+
+	# Time JSON flattening
+	if file_timer:
+		timer.start()
+	flattened_json = flatten_json(json_data)
+	if file_timer:
+		flatten_ms = timer.stop()
+
 	if not flattened_json:
-		print(f"❌ Failed to read or parse {file_path}, skipping")
-		return 0, 0
+		print(f"❌ Failed to parse {file_path}, skipping")
+		return 0, 0, None
 
-	# Get statistics
+	# Time model building
+	if file_timer:
+		timer.start()
 	stats = lint_engine.get_model_statistics(flattened_json)
+	if file_timer:
+		model_build_ms = timer.stop()
+
 	print_statistics(file_path, stats, args.verbose or args.stats_only)
 
 	# Show rule analysis if requested
@@ -254,8 +289,17 @@ def process_single_file(file_path: Path, lint_engine: LintEngine, args) -> tuple
 		print_debug_nodes(lint_engine, flattened_json, args.debug_nodes)
 
 	# Run linting (unless stats-only mode)
+	file_timings = None
 	if not args.stats_only:
-		lint_results = lint_engine.process(flattened_json, source_file_path=str(file_path))
+		# Time rule execution
+		if file_timer:
+			timer.start()
+		lint_results = lint_engine.process(
+			flattened_json, source_file_path=str(file_path), enable_timing=bool(file_timer)
+		)
+		if file_timer:
+			rule_exec_ms = timer.stop()
+
 		file_warnings, file_errors = print_file_results(file_path, lint_results)
 
 		if file_errors == 0 and file_warnings == 0:
@@ -263,9 +307,55 @@ def process_single_file(file_path: Path, lint_engine: LintEngine, args) -> tuple
 		elif file_errors == 0 and file_warnings > 0:
 			print(f"✅ No errors found in {file_path} (warnings only)")
 
-		return file_warnings, file_errors
+		# Create timing record if profiling
+		if file_timer:
+			total_duration = file_timer.stop()
+			file_timings = FileTimings(
+				file_path=str(file_path), total_duration_ms=total_duration, file_read_ms=file_read_ms,
+				json_flatten_ms=flatten_ms, model_build_ms=model_build_ms,
+				rule_execution_ms=rule_exec_ms, rule_timings=lint_results.rule_timings
+			)
 
-	return 0, 0
+		return file_warnings, file_errors, file_timings
+
+	return 0, 0, None
+
+
+def write_results_file(
+	output_path: Path, results: List[Dict], total_warnings: int, total_errors: int, processed_files: int,
+	files_with_issues: int
+):
+	"""Write linting results to an output file."""
+	with open(output_path, 'w', encoding='utf-8') as f:
+		f.write("=" * 80 + "\n")
+		f.write("IGNITION-LINT RESULTS\n")
+		f.write("=" * 80 + "\n\n")
+
+		# Summary
+		f.write("SUMMARY\n")
+		f.write("-" * 80 + "\n")
+		f.write(f"Files processed: {processed_files}\n")
+		f.write(f"Total warnings:  {total_warnings}\n")
+		f.write(f"Total errors:    {total_errors}\n")
+		f.write(f"Files with issues: {files_with_issues}\n")
+		f.write(f"Clean files:     {processed_files - files_with_issues}\n\n")
+
+		# Per-file results
+		f.write("PER-FILE RESULTS\n")
+		f.write("=" * 80 + "\n\n")
+
+		for result in results:
+			status = "✅ CLEAN" if result['warnings'] == 0 and result['errors'] == 0 else "⚠️  ISSUES"
+			f.write(f"{status} - {result['file']}\n")
+			if result['warnings'] > 0:
+				f.write(f"  Warnings: {result['warnings']}\n")
+			if result['errors'] > 0:
+				f.write(f"  Errors:   {result['errors']}\n")
+			f.write("\n")
+
+		f.write("=" * 80 + "\n")
+		f.write("END OF RESULTS\n")
+		f.write("=" * 80 + "\n")
 
 
 def print_final_summary(
@@ -350,6 +440,14 @@ def main():
 		nargs="*",
 		help="Filenames to check (from pre-commit)",
 	)
+	parser.add_argument(
+		"--timing-output",
+		help="File path to write detailed timing/profiling report (e.g., timing.txt)",
+	)
+	parser.add_argument(
+		"--results-output",
+		help="File path to write linting results (e.g., results.txt)",
+	)
 	args = parser.parse_args()
 
 	# Set up the linting engine
@@ -364,14 +462,37 @@ def main():
 	if args.verbose:
 		print(f"📁 Processing {len(file_paths)} files")
 
+	# Initialize timing collector if timing output is requested
+	timing_collector = TimingCollector() if args.timing_output else None
+	performance_timer = PerformanceTimer() if args.timing_output else None
+
+	if timing_collector:
+		timing_collector.start_total_timing()
+		print(f"🔍 Performance profiling enabled (output: {args.timing_output})")
+
 	# Process each file
 	total_warnings = 0
 	total_errors = 0
 	files_with_issues = 0
 	processed_files = 0
+	results_buffer = []  # Collect results for file output
 
 	for file_path in file_paths:
-		file_warnings, file_errors = process_single_file(file_path, lint_engine, args)
+		file_warnings, file_errors, file_timings = process_single_file(
+			file_path, lint_engine, args, performance_timer
+		)
+
+		# Track timing if enabled
+		if timing_collector and file_timings:
+			timing_collector.add_file_timing(file_timings)
+
+		# Collect results for output file if specified
+		if args.results_output and not args.stats_only:
+			results_buffer.append({
+				'file': str(file_path),
+				'warnings': file_warnings,
+				'errors': file_errors
+			})
 
 		# All functions now return tuples, no need to check for -1
 		processed_files += 1
@@ -379,6 +500,24 @@ def main():
 		total_errors += file_errors
 		if file_warnings > 0 or file_errors > 0:
 			files_with_issues += 1
+
+	# Stop timing if enabled
+	if timing_collector:
+		timing_collector.stop_total_timing()
+
+	# Write timing report if requested
+	if args.timing_output and timing_collector:
+		timing_path = Path(args.timing_output)
+		timing_collector.write_timing_report(timing_path)
+		print(f"📊 Timing report written to: {timing_path}")
+
+	# Write results file if requested
+	if args.results_output and results_buffer:
+		write_results_file(
+			Path(args.results_output), results_buffer, total_warnings, total_errors, processed_files,
+			files_with_issues
+		)
+		print(f"📝 Results written to: {args.results_output}")
 
 	# Print final summary
 	print_final_summary(
