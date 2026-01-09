@@ -27,8 +27,11 @@ class PylintScriptRule(ScriptRule):
 		self.debug = debug  # Debug mode disabled by default for performance
 		self.batch_mode = batch_mode  # Batch mode enabled by default for performance
 		self.pylintrc = self._resolve_pylintrc_path(pylintrc)
-		if self.debug and self.pylintrc:
-			print(f"🔍 PylintScriptRule: Using pylintrc: {self.pylintrc}")
+		if self.debug:
+			if self.pylintrc:
+				print(f"🔍 PylintScriptRule: Using pylintrc: {self.pylintrc}")
+			else:
+				print("🔍 PylintScriptRule: No pylintrc found, using inline configuration")
 
 	def _resolve_pylintrc_path(self, pylintrc: Optional[str]) -> Optional[str]:
 		"""Resolve the pylintrc file path with fallback to standard location."""
@@ -236,6 +239,14 @@ class PylintScriptRule(ScriptRule):
 		if self.debug and debug_dir:
 			_save_debug_file(temp_file_path, debug_dir)
 
+		# Always write pylintrc info in debug mode to help diagnose config issues
+		if self.debug and debug_dir:
+			with open(os.path.join(debug_dir, "pylintrc_used.txt"), 'w', encoding='utf-8') as f:
+				if self.pylintrc:
+					f.write(f"Using pylintrc: {self.pylintrc}\n")
+				else:
+					f.write("No pylintrc found - using inline configuration\n")
+
 		pylint_output = StringIO()
 
 		# Build pylint arguments
@@ -244,18 +255,12 @@ class PylintScriptRule(ScriptRule):
 		# Use custom or standard pylintrc if available
 		if self.pylintrc:
 			args.extend(['--rcfile', self.pylintrc])
-			if self.debug and debug_dir:
-				with open(os.path.join(debug_dir, "pylintrc_used.txt"), 'w', encoding='utf-8') as f:
-					f.write(f"Using pylintrc: {self.pylintrc}\n")
 		else:
 			# Fallback to inline configuration if no pylintrc found
 			args.extend([
 				'--disable=all',
 				'--enable=unused-import,undefined-variable,syntax-error,invalid-name',
 			])
-			if self.debug and debug_dir:
-				with open(os.path.join(debug_dir, "pylintrc_used.txt"), 'w', encoding='utf-8') as f:
-					f.write("No pylintrc found - using inline configuration\n")
 
 		# Common arguments
 		args.extend([
