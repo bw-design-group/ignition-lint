@@ -22,10 +22,11 @@ from ...model.node_types import ScriptNode
 class PylintScriptRule(ScriptRule):
 	"""Rule to run pylint on all script types using the simplified interface."""
 
-	def __init__(self, severity="error", pylintrc=None, debug=False, batch_mode=True):
+	def __init__(self, severity="error", pylintrc=None, debug=False, batch_mode=True, debug_dir=None):
 		super().__init__(severity=severity)  # Targets all script types by default
 		self.debug = debug  # Debug mode disabled by default for performance
 		self.batch_mode = batch_mode  # Batch mode enabled by default for performance
+		self.debug_dir_config = debug_dir  # User-configured debug directory
 		self.pylintrc = self._resolve_pylintrc_path(pylintrc)
 		if self.debug:
 			if self.pylintrc:
@@ -157,26 +158,37 @@ class PylintScriptRule(ScriptRule):
 
 	def _setup_debug_directory(self) -> str:
 		"""Create and return debug directory path. Always creates directory for error reporting."""
-		# Try to detect if we're in a test environment and use tests/debug
 		cwd = os.getcwd()
-		tests_debug_dir = None
 
-		# Look for tests directory in current working directory or parent directories
-		current_path = cwd
-		while current_path != os.path.dirname(current_path):  # Until we reach root
-			if os.path.basename(current_path) == 'tests':
-				# We're in tests directory
-				tests_debug_dir = os.path.join(current_path, "debug")
-				break
-			elif os.path.exists(os.path.join(current_path, 'tests')):
-				# Tests directory exists in current path
-				tests_debug_dir = os.path.join(current_path, "tests", "debug")
-				break
-			current_path = os.path.dirname(current_path)
+		# Priority 1: User-configured debug directory
+		if self.debug_dir_config:
+			if os.path.isabs(self.debug_dir_config):
+				debug_dir = self.debug_dir_config
+			else:
+				debug_dir = os.path.join(cwd, self.debug_dir_config)
+		else:
+			# Priority 2: Try to detect if we're in a test environment and use tests/debug
+			tests_debug_dir = None
+			current_path = cwd
+			while current_path != os.path.dirname(current_path):  # Until we reach root
+				if os.path.basename(current_path) == 'tests':
+					# We're in tests directory
+					tests_debug_dir = os.path.join(current_path, "debug")
+					break
+				elif os.path.exists(os.path.join(current_path, 'tests')):
+					# Tests directory exists in current path
+					tests_debug_dir = os.path.join(current_path, "tests", "debug")
+					break
+				current_path = os.path.dirname(current_path)
 
-		# Use tests/debug if found, otherwise fall back to debug
-		debug_dir = tests_debug_dir if tests_debug_dir else os.path.join(cwd, "debug")
+			# Priority 3: Use .ignition-lint/debug as standard location for user repos
+			debug_dir = tests_debug_dir if tests_debug_dir else os.path.join(cwd, ".ignition-lint", "debug")
+
 		os.makedirs(debug_dir, exist_ok=True)
+
+		# Show debug directory location in debug mode
+		if self.debug:
+			print(f"🔍 PylintScriptRule: Debug directory: {debug_dir}")
 
 		# Clean up old debug .py files to keep things fresh each run
 		try:

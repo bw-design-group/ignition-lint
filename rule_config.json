@@ -6,7 +6,9 @@
       "_comment": "Optional: Specify a custom pylintrc file path. If not specified, uses .config/ignition.pylintrc",
       "pylintrc": null,
       "_debug_comment": "Optional: Set debug: true to save script files even when there are no errors. Debug files are ALWAYS saved automatically when pylint finds errors.",
-      "debug": false
+      "debug": false,
+      "_debug_dir_comment": "Optional: Specify custom debug directory. Defaults to .ignition-lint/debug/ (or tests/debug/ in ignition-lint repo). Can be absolute or relative path.",
+      "debug_dir": null
     }
   },
   "PollingIntervalRule": {
