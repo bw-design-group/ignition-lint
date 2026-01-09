@@ -530,6 +530,7 @@ The following rules are currently implemented and available for use:
 | `PylintScriptRule` | Error | Runs Pylint analysis on all scripts to detect syntax errors, undefined variables, and code quality issues | `pylintrc` (path to custom pylintrc file, defaults to `.config/ignition.pylintrc`) | ✅ |
 | `UnusedCustomPropertiesRule` | Warning | Detects custom properties and view parameters that are defined but never referenced | None | ✅ |
 | `BadComponentReferenceRule` | Error | Identifies brittle component object traversal patterns (getSibling, getParent, etc.) | `forbidden_patterns`, `case_sensitive` | ✅ |
+| `ExcessiveContextDataRule` | Error | Detects excessive data stored in custom properties using 4 detection methods | `max_array_size`, `max_sibling_properties`, `max_nesting_depth`, `max_data_points` | ✅ |
 
 ### Rule Details
 
@@ -637,6 +638,48 @@ Prevents brittle view dependencies by detecting object traversal patterns.
 - Implement message handling for component communication
 - Design views with explicit data flow patterns
 
+#### ExcessiveContextDataRule
+Detects excessive data stored in custom properties that should be in databases instead. Large datasets in view JSON cause performance issues, memory bloat, and violate separation of concerns.
+
+**Detection Methods:**
+
+1. **Array Size** - Detects arrays with too many items
+   - Parameter: `max_array_size` (default: 50)
+   - Example: `custom.filteredData[784]` exceeds threshold
+
+2. **Property Breadth** - Detects too many sibling properties at the same level
+   - Parameter: `max_sibling_properties` (default: 50)
+   - Example: `custom.device1`, `custom.device2`, ..., `custom.device100`
+
+3. **Nesting Depth** - Detects overly deep nesting structures
+   - Parameter: `max_nesting_depth` (default: 5 levels)
+   - Example: `custom.a.b.c.d.e.f` (6 levels deep)
+
+4. **Data Points** - Detects total volume of data in custom properties
+   - Parameter: `max_data_points` (default: 1000)
+   - Counts all flattened paths under `custom.*`
+
+**Configuration Example:**
+```json
+{
+  "ExcessiveContextDataRule": {
+    "enabled": true,
+    "kwargs": {
+      "max_array_size": 50,
+      "max_sibling_properties": 50,
+      "max_nesting_depth": 5,
+      "max_data_points": 1000
+    }
+  }
+}
+```
+
+**Best Practices:**
+- Custom properties should contain configuration, not data
+- Use databases, named queries, or tag historian for large datasets
+- Views should fetch data at runtime, not store it statically
+- Large arrays (>50 items) indicate data that belongs in a database
+
 ## Usage Methods
 
 This package can be utilized in several ways to fit different development workflows:
@@ -712,7 +755,12 @@ repos:
     rev: v0.2.4
     hooks:
       - id: ignition-lint
-        args: ['--config=rule_config.json', '--files']
+        args: [
+          '--config=rule_config.json',
+          '--files',
+          'services/**/view.json'  # Specify glob pattern here
+        ]
+        pass_filenames: false  # Use glob pattern instead of individual filenames
 ```
 
 **With custom configuration (Option B - Lightweight):**
@@ -727,8 +775,12 @@ repos:
         language: python
         types: [json]
         files: view\.json$
-        args: ['--config=rule_config.json', '--files']
-        pass_filenames: true
+        args: [
+          '--config=rule_config.json',
+          '--files',
+          'services/**/view.json'  # Specify glob pattern here
+        ]
+        pass_filenames: false  # Use glob pattern instead of individual filenames
         additional_dependencies:
           - 'git+https://github.com/bw-design-group/ignition-lint@v0.2.4'
 ```
@@ -749,10 +801,10 @@ pre-commit run
 
 - Hook automatically runs only on `view.json` files
 - Default config uses warnings-only mode (won't block commits)
-- Pre-commit automatically passes matched filenames to the tool
 - Config paths are resolved relative to your repository root
 - Customize pylintrc via the `pylintrc` parameter in your `rule_config.json`
 - **Recommended**: Use Option B (lightweight) to reduce initial download from ~64MB to ~1MB
+- **Important for large repositories**: Use `pass_filenames: false` with a glob pattern in args to avoid ARG_MAX limitations. Pre-commit's default behavior passes all matching filenames as command-line arguments, which can exceed system limits in repositories with hundreds of view.json files (e.g., 725 files × long paths can exceed ARG_MAX). Using a glob pattern lets ignition-lint discover files internally without hitting this limit.
 
 ### 3. GitHub Actions Workflow
 
