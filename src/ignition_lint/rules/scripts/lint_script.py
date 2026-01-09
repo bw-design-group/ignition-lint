@@ -27,6 +27,8 @@ class PylintScriptRule(ScriptRule):
 		self.debug = debug  # Debug mode disabled by default for performance
 		self.batch_mode = batch_mode  # Batch mode enabled by default for performance
 		self.pylintrc = self._resolve_pylintrc_path(pylintrc)
+		if self.debug and self.pylintrc:
+			print(f"🔍 PylintScriptRule: Using pylintrc: {self.pylintrc}")
 
 	def _resolve_pylintrc_path(self, pylintrc: Optional[str]) -> Optional[str]:
 		"""Resolve the pylintrc file path with fallback to standard location."""
@@ -35,11 +37,19 @@ class PylintScriptRule(ScriptRule):
 			if os.path.isabs(pylintrc):
 				if os.path.exists(pylintrc):
 					return pylintrc
+				else:
+					print(f"⚠️  Warning: Specified pylintrc not found: {pylintrc}")
+					print(f"   Falling back to standard location search...")
 			else:
 				# Try relative to current working directory
 				abs_path = os.path.join(os.getcwd(), pylintrc)
 				if os.path.exists(abs_path):
 					return abs_path
+				else:
+					print(f"⚠️  Warning: Specified pylintrc not found: {pylintrc}")
+					print(f"   Tried: {abs_path}")
+					print(f"   Current directory: {os.getcwd()}")
+					print(f"   Falling back to standard location search...")
 
 		# Fall back to standard location: .config/ignition.pylintrc
 		# First, search from current directory up to find the project root (user's custom config)
