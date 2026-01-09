@@ -1,0 +1,82 @@
+# Changelog
+
+All notable changes to this project will be documented in this file.
+
+The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
+and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+
+## [Unreleased]
+
+## [0.2.5] - 2026-01-09
+
+### Added
+- Pre-push hooks for comprehensive validation (full pylint + full test suite)
+- yapf format check to pre-commit stage
+- Clear section comments distinguishing pre-commit vs pre-push hook stages
+- Changelog skills for automated changelog management
+- .lfsconfig to skip LFS downloads during pre-commit installation
+
+### Changed
+- Reorganized pre-commit hooks into fast pre-commit stage (5-10s) and comprehensive pre-push stage (1-2min)
+- Pre-commit pylint now only runs on changed files for faster feedback
+- Migrated deprecated stage names (`commit` → `pre-commit`, `push` → `pre-push`)
+- Updated PR template with breaking change section and type of change checklist
+- Bundle .config/ directory with package for default pylintrc access
+- Pylintrc resolution order now: rule_config.json → repo .config → package .config → pylint defaults
+- Use Pythonic any() approach for CSS property detection
+
+### Fixed
+- Pre-commit installation failing due to LFS 404 errors
+- CSS property detection now includes all style containers (.textStyle., .elementStyle., .instanceStyle.)
+- CSS properties (kebab-case) no longer incorrectly flagged as naming violations
+- Deprecated stage name warnings in pre-commit configuration
+
+### Removed
+- Redundant .ignition-lint-precommit.json file
+- --pylintrc CLI argument (all configuration now via rule_config.json)
+- Unnecessary target_node_types from rule_config.json (auto-derived)
+
+## [0.2.4] - 2024-12-XX
+
+### Added
+- Configurable pylintrc parameter for PylintScriptRule
+- Improved output capture for pylint script linting
+- Makefile for convenience commands
+- Support for CSS properties in style and elementStyle properties
+
+### Fixed
+- Model builder now properly handles arrays
+- Event handler domain and event type extraction
+- Transform script key now correctly uses "code"
+- CSS property detection includes all style containers
+- Pre-commit compatibility and configuration simplification
+- View script linting issues
+
+### Changed
+- Debug files regenerated with corrected event handler extraction
+- Rule coverage target types now sorted alphabetically
+
+### Removed
+- .DS_Store files from repository
+
+## [0.2.3] - 2024-XX-XX
+
+### Changed
+- Reworked name rule to not require node_types list in arguments
+- Updated pre-commit configuration
+
+## [0.2.2] - 2024-XX-XX
+
+### Fixed
+- Severity levels on name patterns for different node types
+
+## [0.2.1] - 2024-XX-XX
+
+### Initial tracked release
+
+[Unreleased]: https://github.com/bw-design-group/ignition-lint/compare/v0.2.5...HEAD
+[0.2.5]: https://github.com/bw-design-group/ignition-lint/compare/v0.2.4...v0.2.5
+[0.2.4]: https://github.com/bw-design-group/ignition-lint/compare/v0.2.3...v0.2.4
+[0.2.3]: https://github.com/bw-design-group/ignition-lint/compare/v0.2.2...v0.2.3
+[0.2.2]: https://github.com/bw-design-group/ignition-lint/compare/v0.2.1...v0.2.2
+[0.2.1]: https://github.com/bw-design-group/ignition-lint/releases/tag/v0.2.1
