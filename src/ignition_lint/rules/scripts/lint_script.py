@@ -120,8 +120,8 @@ class PylintScriptRule(ScriptRule):
 
 	def _run_pylint_batch(self, scripts: Dict[str, ScriptNode]) -> Dict[str, List[str]]:
 		"""Run pylint on multiple scripts at once."""
-		# Only create debug directory if debug mode is enabled
-		debug_dir = self._setup_debug_directory() if self.debug else None
+		# Always create debug directory (for automatic error reporting)
+		debug_dir = self._setup_debug_directory()
 		combined_content, line_map = self._combine_scripts(scripts)
 		path_to_issues = {path: [] for path in scripts.keys()}
 		temp_file_path = None
@@ -140,11 +140,8 @@ class PylintScriptRule(ScriptRule):
 
 		return path_to_issues
 
-	def _setup_debug_directory(self) -> Optional[str]:
-		"""Create and return debug directory path. Returns None if debug mode is disabled."""
-		if not self.debug:
-			return None
-
+	def _setup_debug_directory(self) -> str:
+		"""Create and return debug directory path. Always creates directory for error reporting."""
 		# Try to detect if we're in a test environment and use tests/debug
 		cwd = os.getcwd()
 		tests_debug_dir = None
@@ -210,7 +207,7 @@ class PylintScriptRule(ScriptRule):
 			temp_file.write(content.encode('utf-8'))
 			return temp_file.name
 
-	def _run_pylint_on_file(self, temp_file_path: str, debug_dir: Optional[str]) -> str:
+	def _run_pylint_on_file(self, temp_file_path: str, debug_dir: str) -> str:
 		"""Execute pylint on the temporary file and return output."""
 		# Only save debug files if debug mode is enabled
 		if self.debug and debug_dir:
@@ -265,7 +262,7 @@ class PylintScriptRule(ScriptRule):
 		return output
 
 	def _parse_pylint_output(
-		self, output: str, line_map: Dict[int, str], path_to_issues: Dict[str, List[str]], debug_dir: Optional[str]
+		self, output: str, line_map: Dict[int, str], path_to_issues: Dict[str, List[str]], debug_dir: str
 	) -> None:
 		"""Parse pylint output and map issues back to original scripts."""
 		pattern = r'.*:(\d+):\d+: .+: (.+)'
@@ -304,7 +301,7 @@ class PylintScriptRule(ScriptRule):
 		with open(os.path.join(debug_dir, "pylint_error.txt"), 'a', encoding='utf-8') as f:
 			f.write(f"Error parsing line: {line}\nException: {str(error)}\n\n")
 
-	def _handle_pylint_error(self, error_msg: str, debug_dir: Optional[str], path_to_issues: Dict[str, List[str]]) -> None:
+	def _handle_pylint_error(self, error_msg: str, debug_dir: str, path_to_issues: Dict[str, List[str]]) -> None:
 		"""Handle and log pylint execution errors."""
 		# Only write debug files if debug mode is enabled
 		if self.debug and debug_dir:
@@ -313,14 +310,25 @@ class PylintScriptRule(ScriptRule):
 		for path in path_to_issues:
 			path_to_issues[path].append(error_msg)
 
-	def _cleanup_temp_file(self, temp_file_path: str, debug_dir: Optional[str], path_to_issues: Dict[str, List[str]]) -> None:
-		"""Clean up temporary file, keeping it for debug if there were issues."""
+	def _cleanup_temp_file(self, temp_file_path: str, debug_dir: str, path_to_issues: Dict[str, List[str]]) -> None:
+		"""Clean up temporary file, keeping it for debug if there were issues or debug mode is enabled."""
 		if temp_file_path and os.path.exists(temp_file_path):
-			# Only save debug files if debug mode is enabled OR there are issues
 			has_issues = any(issues for issues in path_to_issues.values())
-			if has_issues and self.debug and debug_dir:
-				shutil.copy(temp_file_path, os.path.join(debug_dir, "pylint_input_temp.py"))
-				print(f"Pylint encountered issues. Debug files saved to: {debug_dir}")
+
+			# Save debug files if:
+			# 1. There are issues (automatic error reporting), OR
+			# 2. Debug mode is explicitly enabled (opt-in for development)
+			should_save = has_issues or self.debug
+
+			if should_save and debug_dir:
+				debug_file_path = os.path.join(debug_dir, "pylint_input_temp.py")
+				shutil.copy(temp_file_path, debug_file_path)
+
+				if has_issues:
+					print(f"🐛 Pylint found issues. Debug file saved to: {debug_file_path}")
+				elif self.debug:
+					print(f"🔍 Debug mode: Script saved to: {debug_file_path}")
+
 			# Always clean up the temp file (was already copied to debug if needed)
 			os.remove(temp_file_path)
 

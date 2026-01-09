@@ -6,7 +6,7 @@ SUMMARY
 --------------------------------------------------------------------------------
 Files processed: 14
 Total warnings:  58
-Total errors:    436
+Total errors:    437
 Files with issues: 13
 Clean files:     1
 
@@ -61,7 +61,7 @@ PER-FILE RESULTS
     • custom.filteredData.Section: Name 'Section' doesn't follow camelCase for property (suggestion: 'section')
     • custom.filteredData.Wing: Name 'Wing' doesn't follow camelCase for property (suggestion: 'wing')
 
-❌ ERRORS (3 total):
+❌ ERRORS (4 total):
 
   📋 UnusedCustomPropertiesRule:
     • root.root.custom.key: custom property 'key' is defined but never referenced
@@ -69,6 +69,7 @@ PER-FILE RESULTS
   📋 ExcessiveContextDataRule:
     • custom.filteredData: Custom property 'filteredData' contains 784 items. Large datasets should be stored in databases, not view JSON. Maximum recommended: 50 items.
     • custom.paths: Custom property 'paths' contains 784 items. Large datasets should be stored in databases, not view JSON. Maximum recommended: 50 items.
+    • custom: Contains 20456 total data points across all custom properties. Large volumes of data should be stored in databases, not view JSON. Maximum recommended: 1000 data points.
 
 
 ⚠️  ISSUES - tests/cases/inconsistentCase/view.json
@@ -599,7 +600,7 @@ PER-FILE RESULTS
 ❌ ERRORS (93 total):
 
   📋 PylintScriptRule:
-    • root.root.children[4].MessageHandlerComponent.scripts.messageHandlers[0]: Line 4: 'expected an indented block after function definition on line 9 (111316_mpfv1rsx, line 12)' (syntax-error)
+    • root.root.children[4].MessageHandlerComponent.scripts.messageHandlers[0]: Line 4: 'expected an indented block after function definition on line 9 (125024_h171d5qk, line 12)' (syntax-error)
 
   📋 UnusedCustomPropertiesRule:
     • root.root.custom.key: custom property 'key' is defined but never referenced

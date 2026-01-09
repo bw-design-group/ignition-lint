@@ -610,11 +610,26 @@ Comprehensive Python code analysis using Pylint for all script types:
   "PylintScriptRule": {
     "enabled": true,
     "kwargs": {
-      "pylintrc": "config/my-custom-pylintrc"
+      "pylintrc": "config/my-custom-pylintrc",
+      "debug": false
     }
   }
 }
 ```
+
+**Debug Files (Automatic Error Reporting):**
+When PylintScriptRule detects errors (syntax errors, undefined variables, etc.), it **automatically** saves the combined Python script to a debug file for inspection:
+
+- **Location**: `debug/pylint_input_temp.py` (or `tests/debug/` if running from tests directory)
+- **Automatic**: Debug files are saved whenever pylint finds issues (no configuration needed)
+- **Manual**: Set `"debug": true` to save script files even when there are no errors (useful for development)
+
+**Example output when errors are found:**
+```
+🐛 Pylint found issues. Debug file saved to: /path/to/debug/pylint_input_temp.py
+```
+
+This makes it easy to inspect the actual script content when debugging syntax errors or other pylint issues.
 
 #### UnusedCustomPropertiesRule
 Identifies unused custom properties and view parameters to reduce view complexity.
