@@ -1,0 +1,213 @@
+================================================================================
+IGNITION-LINT RESULTS
+================================================================================
+
+SUMMARY
+--------------------------------------------------------------------------------
+Files processed: 51
+Total warnings:  1213
+Total errors:    461
+Files with issues: 51
+Clean files:     0
+
+PER-FILE RESULTS
+================================================================================
+
+⚠️  ISSUES - services/shared/.deps/crusoe.shared.library/projects/datacenter-utilities/com.inductiveautomation.perspective/views/Building/Wings/Embedded Views/MSB ATS C/view.json
+  Warnings: 5
+
+⚠️  ISSUES - services/building/frontend/ignition-data/projects/llano-building/com.inductiveautomation.perspective/views/Building/Wings/Equipment Rooms/Embedded Views/E190/view.json
+  Warnings: 5
+
+⚠️  ISSUES - services/building/frontend/ignition-data/projects/llano-building/com.inductiveautomation.perspective/views/Building/Wings/Equipment Rooms/Embedded Views/A202/view.json
+  Warnings: 1
+  Errors:   1
+
+⚠️  ISSUES - services/shared/.deps/crusoe.shared.library/projects/datacenter-utilities/com.inductiveautomation.perspective/views/Components/Table/Embedded Views/KPI Label/view.json
+  Warnings: 5
+  Errors:   1
+
+⚠️  ISSUES - services/building/frontend/ignition-data/projects/llano-building/com.inductiveautomation.perspective/views/Building/Wings/Equipment Rooms/Embedded Views/A221/view.json
+  Warnings: 1
+  Errors:   1
+
+⚠️  ISSUES - services/shared/.deps/crusoe.shared.library/projects/datacenter-utilities/com.inductiveautomation.perspective/views/BMS/Hardware Diagnostics/DLR/CRAH DLR E153/view.json
+  Warnings: 26
+  Errors:   3
+
+⚠️  ISSUES - services/shared/.deps/crusoe.shared.library/projects/datacenter-utilities/com.inductiveautomation.perspective/views/EPMS/One Lines/PDC/PDC/view.json
+  Errors:   3
+
+⚠️  ISSUES - services/shared/.deps/crusoe.shared.library/projects/datacenter-utilities/com.inductiveautomation.perspective/views/Building/Wings/Equipment Rooms/Embedded Views/E132/view.json
+  Warnings: 2
+  Errors:   3
+
+⚠️  ISSUES - services/shared/.deps/crusoe.shared.library/projects/datacenter-utilities/com.inductiveautomation.perspective/views/EPMS/Points Lists/Layouts/CAT_EMCP_Controller/view.json
+  Warnings: 3
+  Errors:   3
+
+⚠️  ISSUES - services/shared/.deps/crusoe.shared.library/projects/datacenter-utilities/com.inductiveautomation.perspective/views/Components/Equipment Sublevels/FCU Damper/view.json
+  Warnings: 3
+  Errors:   3
+
+⚠️  ISSUES - services/shared/.deps/crusoe.shared.library/projects/datacenter-utilities/com.inductiveautomation.perspective/views/EPMS/One Lines/Building/Embedded Views/Building 8ATS 4PDC/view.json
+  Warnings: 253
+  Errors:   3
+
+⚠️  ISSUES - services/shared/.deps/crusoe.shared.library/projects/crusoe-utilities/com.inductiveautomation.perspective/views/BMS/Data Hall/Embedded Views/Tray Popup/view.json
+  Warnings: 1
+  Errors:   3
+
+⚠️  ISSUES - services/building/frontend/ignition-data/projects/llano-building/com.inductiveautomation.perspective/views/Building/Wings/Equipment Rooms/Embedded Views/E122/view.json
+  Warnings: 5
+  Errors:   3
+
+⚠️  ISSUES - services/shared/.deps/crusoe.shared.library/projects/datacenter-utilities/com.inductiveautomation.perspective/views/Utilities/Popups/ChilledWaterValve/Embedded Views/Device Settings/view.json
+  Errors:   5
+
+⚠️  ISSUES - services/shared/.deps/crusoe.shared.library/projects/datacenter-utilities/com.inductiveautomation.perspective/views/Components/Equipment Sublevels/MUA Damper/view.json
+  Warnings: 3
+  Errors:   5
+
+⚠️  ISSUES - services/building/frontend/ignition-data/projects/llano-building/com.inductiveautomation.perspective/views/Building/Wings/Equipment Rooms/Embedded Views/E127/view.json
+  Warnings: 5
+  Errors:   5
+
+⚠️  ISSUES - services/shared/.deps/crusoe.shared.library/projects/datacenter-utilities/com.inductiveautomation.perspective/views/Components/Table/MMA Table/view.json
+  Warnings: 2
+  Errors:   5
+
+⚠️  ISSUES - services/shared/.deps/crusoe.shared.library/projects/datacenter-utilities/com.inductiveautomation.perspective/views/Building/Datahall/Embedded Views/Datahall Design_Loop/view.json
+  Warnings: 277
+  Errors:   7
+
+⚠️  ISSUES - services/building/frontend/ignition-data/projects/llano-building/com.inductiveautomation.perspective/views/Building/Wings/Equipment Rooms/Embedded Views/B310/view.json
+  Warnings: 1
+  Errors:   7
+
+⚠️  ISSUES - services/shared/.deps/crusoe.shared.library/projects/datacenter-utilities/com.inductiveautomation.perspective/views/Utilities/Popups/Pump/Pump/view.json
+  Warnings: 2
+  Errors:   7
+
+⚠️  ISSUES - services/shared/.deps/crusoe.shared.library/projects/datacenter-utilities/com.inductiveautomation.perspective/views/Components/Door/view.json
+  Warnings: 3
+  Errors:   7
+
+⚠️  ISSUES - services/shared/.deps/crusoe.shared.library/projects/datacenter-utilities/com.inductiveautomation.perspective/views/Navigation/Menus/EPMS/IT Distribution/view.json
+  Warnings: 4
+  Errors:   7
+
+⚠️  ISSUES - services/building/frontend/ignition-data/projects/llano-building/com.inductiveautomation.perspective/views/Building/Wings/Equipment Rooms/Embedded Views/C400W/view.json
+  Warnings: 130
+  Errors:   7
+
+⚠️  ISSUES - services/building/frontend/ignition-data/projects/llano-building/com.inductiveautomation.perspective/views/Building/Wings/Equipment Rooms/Embedded Views/B302/view.json
+  Warnings: 1
+  Errors:   7
+
+⚠️  ISSUES - services/shared/.deps/crusoe.shared.library/projects/datacenter-utilities/com.inductiveautomation.perspective/views/Building/Wings/Wing Overview/view.json
+  Warnings: 4
+  Errors:   7
+
+⚠️  ISSUES - services/shared/.deps/crusoe.shared.library/projects/datacenter-utilities/com.inductiveautomation.perspective/views/Components/MUA_CompressorFans/3-Stages Var1/view.json
+  Warnings: 31
+  Errors:   13
+
+⚠️  ISSUES - services/building/frontend/ignition-data/projects/llano-building/com.inductiveautomation.perspective/views/Building/Wings/Equipment Rooms/Embedded Views/E123/view.json
+  Warnings: 5
+  Errors:   13
+
+⚠️  ISSUES - services/shared/.deps/crusoe.shared.library/projects/datacenter-utilities/com.inductiveautomation.perspective/views/EPMS/Elevations/PDC/PDC 7 Section/view.json
+  Warnings: 62
+  Errors:   12
+
+⚠️  ISSUES - services/building/frontend/ignition-data/projects/llano-building/com.inductiveautomation.perspective/views/Building/Wings/Equipment Rooms/Embedded Views/A206/view.json
+  Warnings: 1
+  Errors:   12
+
+⚠️  ISSUES - services/building/frontend/ignition-data/projects/llano-building/com.inductiveautomation.perspective/views/Building/Wings/Equipment Rooms/Embedded Views/E171/view.json
+  Warnings: 5
+  Errors:   12
+
+⚠️  ISSUES - services/shared/.deps/crusoe.shared.library/projects/datacenter-utilities/com.inductiveautomation.perspective/views/EPMS/Elevations/MSB/Embedded Views/MSB IT Core Elevation Right/view.json
+  Warnings: 153
+  Errors:   12
+
+⚠️  ISSUES - services/shared/.deps/crusoe.shared.library/projects/datacenter-utilities/com.inductiveautomation.perspective/views/Building/Wings/Equipment Rooms/Embedded Views/D128/view.json
+  Warnings: 1
+  Errors:   12
+
+⚠️  ISSUES - services/shared/.deps/crusoe.shared.library/projects/datacenter-utilities/com.inductiveautomation.perspective/views/Utilities/Popups/Equip_1AO/Embedded Views/Manual Settings/view.json
+  Warnings: 2
+  Errors:   11
+
+⚠️  ISSUES - services/building/frontend/ignition-data/projects/llano-building/com.inductiveautomation.perspective/views/Building/Wings/Equipment Rooms/Embedded Views/E150/view.json
+  Warnings: 5
+  Errors:   11
+
+⚠️  ISSUES - services/building/frontend/ignition-data/projects/llano-building/com.inductiveautomation.perspective/views/Building/Wings/Equipment Rooms/Embedded Views/E189/view.json
+  Warnings: 5
+  Errors:   11
+
+⚠️  ISSUES - services/shared/.deps/crusoe.shared.library/projects/datacenter-utilities/com.inductiveautomation.perspective/views/Building/Wings/Equipment Rooms/Embedded Views/TTK/view.json
+  Warnings: 6
+  Errors:   11
+
+⚠️  ISSUES - services/shared/.deps/crusoe.shared.library/projects/datacenter-utilities/com.inductiveautomation.perspective/views/Utilities/Trending/Popups/Template/Get Trend/view.json
+  Warnings: 3
+  Errors:   12
+
+⚠️  ISSUES - services/shared/.deps/crusoe.shared.library/projects/datacenter-utilities/com.inductiveautomation.perspective/views/Building/Wings/Equipment Rooms/Embedded Views/E102/view.json
+  Warnings: 3
+  Errors:   12
+
+⚠️  ISSUES - services/building/frontend/ignition-data/projects/llano-building/com.inductiveautomation.perspective/views/Building/Wings/Equipment Rooms/Embedded Views/A200N/view.json
+  Warnings: 130
+  Errors:   12
+
+⚠️  ISSUES - services/shared/.deps/crusoe.shared.library/projects/datacenter-utilities/com.inductiveautomation.perspective/views/BMS/Data Hall/Embedded Views/DAT devices/view.json
+  Errors:   12
+
+⚠️  ISSUES - services/shared/.deps/crusoe.shared.library/projects/datacenter-utilities/com.inductiveautomation.perspective/views/Building/Datahall/Embedded Views/DAT devices/view.json
+  Errors:   12
+
+⚠️  ISSUES - services/shared/.deps/crusoe.shared.library/projects/datacenter-utilities/com.inductiveautomation.perspective/views/Utilities/Popups/Equip_RTU/Embedded Views/Overview/view.json
+  Errors:   12
+
+⚠️  ISSUES - services/shared/.deps/crusoe.shared.library/projects/datacenter-utilities/com.inductiveautomation.perspective/views/EPMS/Points Lists/Layouts/Embedded Views/PowerScout/Circuit_Table/view.json
+  Errors:   12
+
+⚠️  ISSUES - services/shared/.deps/crusoe.shared.library/projects/datacenter-utilities/com.inductiveautomation.perspective/views/Building/Wings/Equipment Rooms/Embedded Views/E115/view.json
+  Warnings: 1
+  Errors:   12
+
+⚠️  ISSUES - services/shared/.deps/crusoe.shared.library/projects/datacenter-utilities/com.inductiveautomation.perspective/views/Components/Fan Wall Display Object/Subcomponents/Row/view.json
+  Warnings: 1
+  Errors:   14
+
+⚠️  ISSUES - services/building/frontend/ignition-data/projects/llano-building/com.inductiveautomation.perspective/views/Building/Wings/Equipment Rooms/Embedded Views/E186/view.json
+  Warnings: 5
+  Errors:   14
+
+⚠️  ISSUES - services/shared/.deps/crusoe.shared.library/projects/datacenter-utilities/com.inductiveautomation.perspective/views/Building/Wings/Equipment Rooms/Embedded Views/E160/view.json
+  Errors:   14
+
+⚠️  ISSUES - services/shared/.deps/crusoe.shared.library/projects/datacenter-utilities/com.inductiveautomation.perspective/views/Building/Wings/Embedded Views/D Wing/view.json
+  Warnings: 40
+  Errors:   14
+
+⚠️  ISSUES - services/shared/.deps/crusoe.shared.library/projects/datacenter-utilities/com.inductiveautomation.perspective/views/Components/DAT Transmitter/Badge/view.json
+  Warnings: 1
+  Errors:   15
+
+⚠️  ISSUES - services/shared/.deps/crusoe.shared.library/projects/datacenter-utilities/com.inductiveautomation.perspective/views/Navigation/Top Nav/view.json
+  Warnings: 7
+  Errors:   15
+
+⚠️  ISSUES - services/shared/.deps/crusoe.shared.library/projects/datacenter-utilities/com.inductiveautomation.perspective/views/Components/Filter Dropdowns/Filter Dropdowns Vert/view.json
+  Warnings: 4
+  Errors:   15
+
+================================================================================
+END OF RESULTS
+================================================================================

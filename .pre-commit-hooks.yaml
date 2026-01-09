@@ -6,7 +6,7 @@
   language_version: python3.12
   types: [json]
   files: view\.json$
-  args: ['--config=.ignition-lint-precommit.json', '--files', '--warnings-only']
+  args: ['--config=.ignition-lint-precommit.json', '--files']
   pass_filenames: true
   minimum_pre_commit_version: '2.9.0'
   additional_dependencies: []

@@ -1,0 +1,652 @@
+================================================================================
+IGNITION-LINT PERFORMANCE TIMING REPORT
+================================================================================
+Report Generated: 2026-01-09 09:45:05
+
+OVERALL SUMMARY
+--------------------------------------------------------------------------------
+Total Duration: 77339.22 ms (77.34s)
+Files Processed: 51
+Average Per File: 1516.46 ms
+
+PHASE BREAKDOWN (Totals)
+--------------------------------------------------------------------------------
+File Reading:         48.31 ms
+JSON Flattening:      18.51 ms
+Model Building:    30601.71 ms
+Rule Execution:    46562.16 ms
+
+PHASE BREAKDOWN (Averages per file)
+--------------------------------------------------------------------------------
+File Reading:          0.95 ms
+JSON Flattening:       0.36 ms
+Model Building:      600.03 ms
+Rule Execution:      912.98 ms
+
+RULE EXECUTION SUMMARY
+--------------------------------------------------------------------------------
+Rule Name                                  Total (ms)     Avg (ms)   Executions
+--------------------------------------------------------------------------------
+PylintScriptRule                             16154.37       316.75           51
+UnusedCustomPropertiesRule                     226.92         4.45           51
+NamePatternRule                                 59.75         1.17           51
+PollingIntervalRule                              6.77         0.13           51
+
+PER-FILE TIMING DETAILS
+================================================================================
+
+File: services/shared/.deps/crusoe.shared.library/projects/datacenter-utilities/com.inductiveautomation.perspective/views/EPMS/Elevations/MSB/Embedded Views/MSB Control & Pump Elevation Left/view.json
+Total: 662.48 ms
+  - File Read:            1.02 ms
+  - JSON Flatten:         0.64 ms
+  - Model Build:         29.49 ms
+  - Rule Execution:     629.96 ms
+  Rule breakdown:
+    - PylintScriptRule: 595.24 ms
+    - NamePatternRule: 4.61 ms
+    - UnusedCustomPropertiesRule: 1.77 ms
+    - PollingIntervalRule: 0.17 ms
+
+File: services/shared/.deps/crusoe.shared.library/projects/datacenter-utilities/com.inductiveautomation.perspective/views/Building/Wings/Equipment Rooms/Embedded Views/E140/view.json
+Total: 463.81 ms
+  - File Read:            0.39 ms
+  - JSON Flatten:         0.04 ms
+  - Model Build:          0.31 ms
+  - Rule Execution:     463.02 ms
+  Rule breakdown:
+    - PylintScriptRule: 462.37 ms
+    - NamePatternRule: 0.22 ms
+    - UnusedCustomPropertiesRule: 0.21 ms
+    - PollingIntervalRule: 0.04 ms
+
+File: services/shared/.deps/crusoe.shared.library/projects/datacenter-utilities/com.inductiveautomation.perspective/views/BMS/Hardware Diagnostics/DLR/TCS DLR 5/view.json
+Total: 513.56 ms
+  - File Read:            0.61 ms
+  - JSON Flatten:         0.22 ms
+  - Model Build:         12.95 ms
+  - Rule Execution:     499.60 ms
+  Rule breakdown:
+    - PylintScriptRule: 488.73 ms
+    - UnusedCustomPropertiesRule: 1.46 ms
+    - NamePatternRule: 1.08 ms
+    - PollingIntervalRule: 0.14 ms
+
+File: services/shared/.deps/crusoe.shared.library/projects/datacenter-utilities/com.inductiveautomation.perspective/views/Utilities/Popups/Actuator/Actuator/view.json
+Total: 465.05 ms
+  - File Read:            0.71 ms
+  - JSON Flatten:         0.11 ms
+  - Model Build:          1.22 ms
+  - Rule Execution:     462.83 ms
+  Rule breakdown:
+    - PylintScriptRule: 459.81 ms
+    - NamePatternRule: 0.95 ms
+    - UnusedCustomPropertiesRule: 0.93 ms
+    - PollingIntervalRule: 0.11 ms
+
+File: services/building/frontend/ignition-data/projects/llano-building/com.inductiveautomation.perspective/views/Building/Wings/Equipment Rooms/Embedded Views/D506/view.json
+Total: 527.90 ms
+  - File Read:            0.91 ms
+  - JSON Flatten:         0.31 ms
+  - Model Build:          7.74 ms
+  - Rule Execution:     518.12 ms
+  Rule breakdown:
+    - PylintScriptRule: 503.54 ms
+    - UnusedCustomPropertiesRule: 2.83 ms
+    - NamePatternRule: 1.71 ms
+    - PollingIntervalRule: 0.11 ms
+
+File: services/shared/.deps/crusoe.shared.library/projects/datacenter-utilities/com.inductiveautomation.perspective/views/Navigation/Menus/BMS/Hardware Diagnostics/view.json
+Total: 417.27 ms
+  - File Read:            0.35 ms
+  - JSON Flatten:         0.02 ms
+  - Model Build:          0.14 ms
+  - Rule Execution:     416.72 ms
+  Rule breakdown:
+    - PylintScriptRule: 416.41 ms
+    - UnusedCustomPropertiesRule: 0.15 ms
+    - NamePatternRule: 0.07 ms
+    - PollingIntervalRule: 0.03 ms
+
+File: services/shared/.deps/crusoe.shared.library/projects/datacenter-utilities/com.inductiveautomation.perspective/views/BMS/Hardware Diagnostics/DLR/FWS DLR 5/view.json
+Total: 424.46 ms
+  - File Read:            0.53 ms
+  - JSON Flatten:         0.21 ms
+  - Model Build:          8.60 ms
+  - Rule Execution:     414.90 ms
+  Rule breakdown:
+    - PylintScriptRule: 404.11 ms
+    - UnusedCustomPropertiesRule: 1.66 ms
+    - NamePatternRule: 0.70 ms
+    - PollingIntervalRule: 0.06 ms
+
+File: services/shared/.deps/crusoe.shared.library/projects/datacenter-utilities/com.inductiveautomation.perspective/views/BMS/Chilled Water/Chiller/Modbus Data View/view.json
+Total: 383.11 ms
+  - File Read:            0.33 ms
+  - JSON Flatten:         0.04 ms
+  - Model Build:          0.32 ms
+  - Rule Execution:     382.39 ms
+  Rule breakdown:
+    - PylintScriptRule: 381.73 ms
+    - UnusedCustomPropertiesRule: 0.22 ms
+    - NamePatternRule: 0.19 ms
+    - PollingIntervalRule: 0.03 ms
+
+File: services/shared/.deps/crusoe.shared.library/projects/datacenter-utilities/com.inductiveautomation.perspective/views/BMS/HVAC/Variable Air/Embedded Views/Variable Air/view.json
+Total: 9.61 ms
+  - File Read:            0.51 ms
+  - JSON Flatten:         0.17 ms
+  - Model Build:          3.96 ms
+  - Rule Execution:       4.70 ms
+  Rule breakdown:
+    - NamePatternRule: 0.86 ms
+    - UnusedCustomPropertiesRule: 0.84 ms
+    - PollingIntervalRule: 0.04 ms
+    - PylintScriptRule: 0.02 ms
+
+File: services/building/frontend/ignition-data/projects/llano-building/com.inductiveautomation.perspective/views/Building/Wings/Equipment Rooms/Embedded Views/E128/view.json
+Total: 491.47 ms
+  - File Read:            0.72 ms
+  - JSON Flatten:         0.10 ms
+  - Model Build:          1.40 ms
+  - Rule Execution:     487.57 ms
+  Rule breakdown:
+    - PylintScriptRule: 485.33 ms
+    - UnusedCustomPropertiesRule: 0.49 ms
+    - NamePatternRule: 0.39 ms
+    - PollingIntervalRule: 0.05 ms
+
+File: services/shared/.deps/crusoe.shared.library/projects/datacenter-utilities/com.inductiveautomation.perspective/views/EPMS/Elevations/PDC/PDC 13 Section/view.json
+Total: 472.72 ms
+  - File Read:            1.02 ms
+  - JSON Flatten:         0.41 ms
+  - Model Build:         11.54 ms
+  - Rule Execution:     459.33 ms
+  Rule breakdown:
+    - PylintScriptRule: 429.82 ms
+    - NamePatternRule: 7.10 ms
+    - UnusedCustomPropertiesRule: 1.84 ms
+    - PollingIntervalRule: 0.37 ms
+
+File: services/shared/.deps/crusoe.shared.library/projects/datacenter-utilities/com.inductiveautomation.perspective/views/Building/Wings/Embedded Views/MSB UPS/view.json
+Total: 681.20 ms
+  - File Read:            0.79 ms
+  - JSON Flatten:         0.14 ms
+  - Model Build:          1.65 ms
+  - Rule Execution:     678.23 ms
+  Rule breakdown:
+    - PylintScriptRule: 675.41 ms
+    - UnusedCustomPropertiesRule: 0.86 ms
+    - NamePatternRule: 0.47 ms
+    - PollingIntervalRule: 0.07 ms
+
+File: services/shared/.deps/crusoe.shared.library/projects/crusoe-utilities/com.inductiveautomation.perspective/views/BMS/Data Hall/Embedded Views/Universal Secondary Setpoints/view.json
+Total: 532.10 ms
+  - File Read:            1.47 ms
+  - JSON Flatten:         0.44 ms
+  - Model Build:         18.16 ms
+  - Rule Execution:     487.26 ms
+  Rule breakdown:
+    - PylintScriptRule: 470.14 ms
+    - NamePatternRule: 3.01 ms
+    - UnusedCustomPropertiesRule: 2.00 ms
+    - PollingIntervalRule: 0.10 ms
+
+File: services/shared/.deps/crusoe.shared.library/projects/datacenter-utilities/com.inductiveautomation.perspective/views/EPMS/One Lines/MSB/Embedded Views/Chiller ATS/view.json
+Total: 463.13 ms
+  - File Read:            0.51 ms
+  - JSON Flatten:         0.14 ms
+  - Model Build:          2.27 ms
+  - Rule Execution:     454.84 ms
+  Rule breakdown:
+    - PylintScriptRule: 447.62 ms
+    - UnusedCustomPropertiesRule: 3.58 ms
+    - NamePatternRule: 1.49 ms
+    - PollingIntervalRule: 0.14 ms
+
+File: services/shared/.deps/crusoe.shared.library/projects/datacenter-utilities/com.inductiveautomation.perspective/views/Utilities/Popups/energy valve/energy_valve/view.json
+Total: 444.66 ms
+  - File Read:            0.83 ms
+  - JSON Flatten:         0.13 ms
+  - Model Build:          1.35 ms
+  - Rule Execution:     441.29 ms
+  Rule breakdown:
+    - PylintScriptRule: 438.66 ms
+    - UnusedCustomPropertiesRule: 0.79 ms
+    - NamePatternRule: 0.63 ms
+    - PollingIntervalRule: 0.06 ms
+
+File: services/building/frontend/ignition-data/projects/llano-building/com.inductiveautomation.perspective/views/Building/Wings/Equipment Rooms/Embedded Views/B316/view.json
+Total: 500.05 ms
+  - File Read:            0.59 ms
+  - JSON Flatten:         1.68 ms
+  - Model Build:          7.84 ms
+  - Rule Execution:     489.65 ms
+  Rule breakdown:
+    - PylintScriptRule: 471.88 ms
+    - UnusedCustomPropertiesRule: 1.79 ms
+    - NamePatternRule: 0.69 ms
+    - PollingIntervalRule: 0.10 ms
+
+File: services/shared/.deps/crusoe.shared.library/projects/datacenter-utilities/com.inductiveautomation.perspective/views/EPMS/Elevations/MSB/MSB Control & Pump Elevation/view.json
+Total: 1.04 ms
+  - File Read:            0.44 ms
+  - JSON Flatten:         0.03 ms
+  - Model Build:          0.18 ms
+  - Rule Execution:       0.36 ms
+  Rule breakdown:
+    - UnusedCustomPropertiesRule: 0.20 ms
+    - NamePatternRule: 0.07 ms
+    - PollingIntervalRule: 0.01 ms
+    - PylintScriptRule: 0.00 ms
+
+File: services/shared/.deps/crusoe.shared.library/projects/datacenter-utilities/com.inductiveautomation.perspective/views/Building/Wings/Gridlines/Embedded Views/Map Icons/view.json
+Total: 506.08 ms
+  - File Read:            0.39 ms
+  - JSON Flatten:         0.06 ms
+  - Model Build:          0.42 ms
+  - Rule Execution:     505.10 ms
+  Rule breakdown:
+    - PylintScriptRule: 503.04 ms
+    - UnusedCustomPropertiesRule: 1.05 ms
+    - NamePatternRule: 0.52 ms
+    - PollingIntervalRule: 0.13 ms
+
+File: services/shared/.deps/crusoe.shared.library/projects/datacenter-utilities/com.inductiveautomation.perspective/views/EPMS/One Lines/Building/Embedded Views/PQM/view.json
+Total: 1.29 ms
+  - File Read:            0.64 ms
+  - JSON Flatten:         0.03 ms
+  - Model Build:          0.20 ms
+  - Rule Execution:       0.39 ms
+  Rule breakdown:
+    - UnusedCustomPropertiesRule: 0.20 ms
+    - NamePatternRule: 0.06 ms
+    - PollingIntervalRule: 0.01 ms
+    - PylintScriptRule: 0.00 ms
+
+File: services/shared/.deps/crusoe.shared.library/projects/datacenter-utilities/com.inductiveautomation.perspective/views/Utilities/Popups/Fan/Embedded Views/Fan Wall Status/view.json
+Total: 10.01 ms
+  - File Read:            0.46 ms
+  - JSON Flatten:         0.17 ms
+  - Model Build:          4.02 ms
+  - Rule Execution:       5.20 ms
+  Rule breakdown:
+    - UnusedCustomPropertiesRule: 0.91 ms
+    - NamePatternRule: 0.42 ms
+    - PollingIntervalRule: 0.04 ms
+    - PylintScriptRule: 0.01 ms
+
+File: services/shared/.deps/crusoe.shared.library/projects/datacenter-utilities/com.inductiveautomation.perspective/views/EPMS/One Lines/MSB/MSB IT/view.json
+Total: 667.38 ms
+  - File Read:            1.31 ms
+  - JSON Flatten:         0.69 ms
+  - Model Build:         46.03 ms
+  - Rule Execution:     588.09 ms
+  Rule breakdown:
+    - PylintScriptRule: 530.55 ms
+    - UnusedCustomPropertiesRule: 5.05 ms
+    - NamePatternRule: 3.85 ms
+    - PollingIntervalRule: 0.25 ms
+
+File: services/shared/.deps/crusoe.shared.library/projects/datacenter-utilities/com.inductiveautomation.perspective/views/Utilities/Popups/Heater/Embedded Views/Overview/view.json
+Total: 3.23 ms
+  - File Read:            0.59 ms
+  - JSON Flatten:         0.04 ms
+  - Model Build:          1.04 ms
+  - Rule Execution:       1.51 ms
+  Rule breakdown:
+    - UnusedCustomPropertiesRule: 0.76 ms
+    - NamePatternRule: 0.33 ms
+    - PollingIntervalRule: 0.02 ms
+    - PylintScriptRule: 0.02 ms
+
+File: services/shared/.deps/crusoe.shared.library/projects/datacenter-utilities/com.inductiveautomation.perspective/views/Utilities/Popups/Actuator/Embedded Views/Alarm Settings/view.json
+Total: 459.61 ms
+  - File Read:            0.61 ms
+  - JSON Flatten:         0.04 ms
+  - Model Build:          0.34 ms
+  - Rule Execution:     457.43 ms
+  Rule breakdown:
+    - PylintScriptRule: 455.68 ms
+    - UnusedCustomPropertiesRule: 0.90 ms
+    - NamePatternRule: 0.44 ms
+    - PollingIntervalRule: 0.12 ms
+
+File: services/shared/.deps/crusoe.shared.library/projects/datacenter-utilities/com.inductiveautomation.perspective/views/Utilities/Popups/Heater/Heater/view.json
+Total: 477.71 ms
+  - File Read:            0.80 ms
+  - JSON Flatten:         0.11 ms
+  - Model Build:          0.94 ms
+  - Rule Execution:     469.83 ms
+  Rule breakdown:
+    - PylintScriptRule: 467.72 ms
+    - UnusedCustomPropertiesRule: 0.81 ms
+    - NamePatternRule: 0.43 ms
+    - PollingIntervalRule: 0.10 ms
+
+File: services/shared/.deps/crusoe.shared.library/projects/datacenter-utilities/com.inductiveautomation.perspective/views/EPMS/Critical Details/Critical Details Trends/view.json
+Total: 3.49 ms
+  - File Read:            0.72 ms
+  - JSON Flatten:         0.06 ms
+  - Model Build:          0.52 ms
+  - Rule Execution:       1.09 ms
+  Rule breakdown:
+    - UnusedCustomPropertiesRule: 0.38 ms
+    - NamePatternRule: 0.35 ms
+    - PollingIntervalRule: 0.01 ms
+    - PylintScriptRule: 0.01 ms
+
+File: services/shared/.deps/crusoe.shared.library/projects/datacenter-utilities/com.inductiveautomation.perspective/views/Components/Equipment Sublevels/Valve/view.json
+Total: 495.09 ms
+  - File Read:            0.78 ms
+  - JSON Flatten:         0.17 ms
+  - Model Build:          3.30 ms
+  - Rule Execution:     490.50 ms
+  Rule breakdown:
+    - PylintScriptRule: 485.17 ms
+    - UnusedCustomPropertiesRule: 1.62 ms
+    - NamePatternRule: 0.51 ms
+    - PollingIntervalRule: 0.11 ms
+
+File: services/shared/.deps/crusoe.shared.library/projects/datacenter-utilities/com.inductiveautomation.perspective/views/Utilities/Popups/Analog/Embedded Views/Alarm Table Views/Alarm Table Body Content/view.json
+Total: 406.83 ms
+  - File Read:            0.74 ms
+  - JSON Flatten:         0.06 ms
+  - Model Build:          0.50 ms
+  - Rule Execution:     405.37 ms
+  Rule breakdown:
+    - PylintScriptRule: 403.20 ms
+    - UnusedCustomPropertiesRule: 1.07 ms
+    - NamePatternRule: 0.62 ms
+    - PollingIntervalRule: 0.10 ms
+
+File: services/shared/.deps/crusoe.shared.library/projects/datacenter-utilities/com.inductiveautomation.perspective/views/EPMS/Elevations/PDC/PDC 10 Section/view.json
+Total: 497.68 ms
+  - File Read:            1.04 ms
+  - JSON Flatten:         0.34 ms
+  - Model Build:          8.64 ms
+  - Rule Execution:     486.43 ms
+  Rule breakdown:
+    - PylintScriptRule: 466.89 ms
+    - UnusedCustomPropertiesRule: 5.84 ms
+    - NamePatternRule: 3.70 ms
+    - PollingIntervalRule: 0.11 ms
+
+File: services/building/frontend/ignition-data/projects/llano-building/com.inductiveautomation.perspective/views/Building/Wings/Equipment Rooms/Embedded Views/E178/view.json
+Total: 484.83 ms
+  - File Read:            1.01 ms
+  - JSON Flatten:         0.11 ms
+  - Model Build:          1.50 ms
+  - Rule Execution:     481.96 ms
+  Rule breakdown:
+    - PylintScriptRule: 477.53 ms
+    - UnusedCustomPropertiesRule: 2.31 ms
+    - NamePatternRule: 0.74 ms
+    - PollingIntervalRule: 0.10 ms
+
+File: services/building/frontend/ignition-data/projects/llano-building/com.inductiveautomation.perspective/views/Building/Wings/Equipment Rooms/Embedded Views/E135/view.json
+Total: 453.17 ms
+  - File Read:            0.71 ms
+  - JSON Flatten:         0.11 ms
+  - Model Build:          1.60 ms
+  - Rule Execution:     449.48 ms
+  Rule breakdown:
+    - PylintScriptRule: 444.41 ms
+    - UnusedCustomPropertiesRule: 2.65 ms
+    - NamePatternRule: 1.01 ms
+    - PollingIntervalRule: 0.11 ms
+
+File: services/shared/.deps/crusoe.shared.library/projects/datacenter-utilities/com.inductiveautomation.perspective/views/BMS/HVAC/Rooftop Unit/RTU Screen/view.json
+Total: 456.16 ms
+  - File Read:            0.57 ms
+  - JSON Flatten:         0.19 ms
+  - Model Build:          4.11 ms
+  - Rule Execution:     451.14 ms
+  Rule breakdown:
+    - PylintScriptRule: 441.94 ms
+    - UnusedCustomPropertiesRule: 3.10 ms
+    - NamePatternRule: 2.32 ms
+    - PollingIntervalRule: 0.15 ms
+
+File: services/shared/.deps/crusoe.shared.library/projects/crusoe-utilities/com.inductiveautomation.perspective/views/BMS/Data Hall/Heat Trace/Heat Trace/view.json
+Total: 2.02 ms
+  - File Read:            0.46 ms
+  - JSON Flatten:         0.02 ms
+  - Model Build:          0.15 ms
+  - Rule Execution:       0.28 ms
+  Rule breakdown:
+    - UnusedCustomPropertiesRule: 0.15 ms
+    - NamePatternRule: 0.07 ms
+    - PollingIntervalRule: 0.01 ms
+    - PylintScriptRule: 0.00 ms
+
+File: services/shared/.deps/crusoe.shared.library/projects/datacenter-utilities/com.inductiveautomation.perspective/views/Building/Wings/Gridlines/Embedded Views/A Wing/view.json
+Total: 950.39 ms
+  - File Read:            1.55 ms
+  - JSON Flatten:         0.94 ms
+  - Model Build:        200.47 ms
+  - Rule Execution:     746.11 ms
+  Rule breakdown:
+    - PylintScriptRule: 544.01 ms
+    - NamePatternRule: 10.68 ms
+    - UnusedCustomPropertiesRule: 9.05 ms
+    - PollingIntervalRule: 0.23 ms
+
+File: services/building/frontend/ignition-data/projects/llano-building/com.inductiveautomation.perspective/views/Building/Wings/Equipment Rooms/Embedded Views/E187/view.json
+Total: 439.28 ms
+  - File Read:            0.84 ms
+  - JSON Flatten:         0.11 ms
+  - Model Build:          2.12 ms
+  - Rule Execution:     435.30 ms
+  Rule breakdown:
+    - PylintScriptRule: 426.98 ms
+    - UnusedCustomPropertiesRule: 3.76 ms
+    - NamePatternRule: 1.17 ms
+    - PollingIntervalRule: 0.13 ms
+
+File: services/building/frontend/ignition-data/projects/llano-building/com.inductiveautomation.perspective/views/Building/Wings/Equipment Rooms/Embedded Views/E137/view.json
+Total: 452.71 ms
+  - File Read:            0.94 ms
+  - JSON Flatten:         0.11 ms
+  - Model Build:          1.54 ms
+  - Rule Execution:     446.81 ms
+  Rule breakdown:
+    - PylintScriptRule: 442.53 ms
+    - UnusedCustomPropertiesRule: 0.99 ms
+    - NamePatternRule: 0.39 ms
+    - PollingIntervalRule: 0.07 ms
+
+File: services/shared/.deps/crusoe.shared.library/projects/datacenter-utilities/com.inductiveautomation.perspective/views/BMS/Hardware Diagnostics/PLC/Module/view.json
+Total: 450.15 ms
+  - File Read:            0.80 ms
+  - JSON Flatten:         0.07 ms
+  - Model Build:          0.57 ms
+  - Rule Execution:     448.48 ms
+  Rule breakdown:
+    - PylintScriptRule: 446.25 ms
+    - UnusedCustomPropertiesRule: 0.64 ms
+    - NamePatternRule: 0.19 ms
+    - PollingIntervalRule: 0.06 ms
+
+File: services/building/frontend/ignition-data/projects/llano-building/com.inductiveautomation.perspective/views/Building/Wings/Equipment Rooms/Embedded Views/E129/view.json
+Total: 455.54 ms
+  - File Read:            0.55 ms
+  - JSON Flatten:         0.11 ms
+  - Model Build:          1.82 ms
+  - Rule Execution:     452.47 ms
+  Rule breakdown:
+    - PylintScriptRule: 444.14 ms
+    - UnusedCustomPropertiesRule: 6.00 ms
+    - NamePatternRule: 0.92 ms
+    - PollingIntervalRule: 0.16 ms
+
+File: services/shared/.deps/crusoe.shared.library/projects/crusoe-utilities/com.inductiveautomation.perspective/views/BMS/Data Hall/Embedded Views/Spacer/view.json
+Total: 9.00 ms
+  - File Read:            0.49 ms
+  - JSON Flatten:         0.15 ms
+  - Model Build:          2.88 ms
+  - Rule Execution:       5.40 ms
+  Rule breakdown:
+    - NamePatternRule: 1.48 ms
+    - UnusedCustomPropertiesRule: 0.95 ms
+    - PollingIntervalRule: 0.03 ms
+    - PylintScriptRule: 0.02 ms
+
+File: services/building/frontend/ignition-data/projects/llano-building/com.inductiveautomation.perspective/views/Building/Wings/Equipment Rooms/Embedded Views/C416/view.json
+Total: 493.50 ms
+  - File Read:            0.58 ms
+  - JSON Flatten:         0.30 ms
+  - Model Build:         12.32 ms
+  - Rule Execution:     477.75 ms
+  Rule breakdown:
+    - PylintScriptRule: 458.40 ms
+    - UnusedCustomPropertiesRule: 2.92 ms
+    - PollingIntervalRule: 2.72 ms
+    - NamePatternRule: 1.21 ms
+
+File: services/shared/.deps/crusoe.shared.library/projects/datacenter-utilities/com.inductiveautomation.perspective/views/BMS/HVAC/Air Handling Unit/AHU Screen/view.json
+Total: 467.97 ms
+  - File Read:            0.71 ms
+  - JSON Flatten:         0.15 ms
+  - Model Build:          1.90 ms
+  - Rule Execution:     460.55 ms
+  Rule breakdown:
+    - PylintScriptRule: 453.14 ms
+    - UnusedCustomPropertiesRule: 2.91 ms
+    - NamePatternRule: 0.81 ms
+    - PollingIntervalRule: 0.06 ms
+
+File: services/shared/.deps/crusoe.shared.library/projects/datacenter-utilities/com.inductiveautomation.perspective/views/Building/Wings/Equipment Rooms/Embedded Views/ER1xxVav/view.json
+Total: 459.04 ms
+  - File Read:            0.58 ms
+  - JSON Flatten:         0.15 ms
+  - Model Build:          5.95 ms
+  - Rule Execution:     452.21 ms
+  Rule breakdown:
+    - PylintScriptRule: 447.16 ms
+    - UnusedCustomPropertiesRule: 1.44 ms
+    - NamePatternRule: 0.24 ms
+    - PollingIntervalRule: 0.07 ms
+
+File: services/shared/.deps/crusoe.shared.library/projects/datacenter-utilities/com.inductiveautomation.perspective/views/BMS/Data Hall/Embedded Views/CDU Views/Status/view.json
+Total: 12.11 ms
+  - File Read:            0.73 ms
+  - JSON Flatten:         0.30 ms
+  - Model Build:          6.20 ms
+  - Rule Execution:       2.82 ms
+  Rule breakdown:
+    - UnusedCustomPropertiesRule: 1.05 ms
+    - NamePatternRule: 0.22 ms
+    - PollingIntervalRule: 0.03 ms
+    - PylintScriptRule: 0.01 ms
+
+File: services/shared/.deps/crusoe.shared.library/projects/datacenter-utilities/com.inductiveautomation.perspective/views/EPMS/Critical Details/Embedded Views/KPI Label Historical/view.json
+Total: 10.72 ms
+  - File Read:            4.99 ms
+  - JSON Flatten:         0.10 ms
+  - Model Build:          1.76 ms
+  - Rule Execution:       2.16 ms
+  Rule breakdown:
+    - UnusedCustomPropertiesRule: 1.27 ms
+    - NamePatternRule: 0.30 ms
+    - PollingIntervalRule: 0.02 ms
+    - PylintScriptRule: 0.01 ms
+
+File: services/shared/.deps/crusoe.shared.library/projects/datacenter-utilities/com.inductiveautomation.perspective/views/Components/PID Table/PID Table/view.json
+Total: 10.10 ms
+  - File Read:            0.42 ms
+  - JSON Flatten:         0.13 ms
+  - Model Build:          2.50 ms
+  - Rule Execution:       4.51 ms
+  Rule breakdown:
+    - UnusedCustomPropertiesRule: 1.26 ms
+    - NamePatternRule: 0.61 ms
+    - PollingIntervalRule: 0.04 ms
+    - PylintScriptRule: 0.02 ms
+
+File: services/shared/.deps/crusoe.shared.library/projects/datacenter-utilities/com.inductiveautomation.perspective/views/Building/Datahall/Embedded Views/KPI Table/view.json
+Total: 60301.67 ms
+  - File Read:            9.87 ms
+  - JSON Flatten:         8.66 ms
+  - Model Build:      30177.68 ms
+  - Rule Execution:   30105.33 ms
+  Rule breakdown:
+    - PylintScriptRule: 251.75 ms
+    - UnusedCustomPropertiesRule: 143.65 ms
+    - NamePatternRule: 1.05 ms
+    - PollingIntervalRule: 0.05 ms
+
+File: services/shared/.deps/crusoe.shared.library/projects/datacenter-utilities/com.inductiveautomation.perspective/views/Utilities/Popups/PID/Embedded Views/Manual Settings/view.json
+Total: 1.91 ms
+  - File Read:            0.41 ms
+  - JSON Flatten:         0.03 ms
+  - Model Build:          0.30 ms
+  - Rule Execution:       1.14 ms
+  Rule breakdown:
+    - UnusedCustomPropertiesRule: 0.79 ms
+    - NamePatternRule: 0.15 ms
+    - PollingIntervalRule: 0.01 ms
+    - PylintScriptRule: 0.01 ms
+
+File: services/shared/.deps/crusoe.shared.library/projects/datacenter-utilities/com.inductiveautomation.perspective/views/Utilities/Embedded Views/Availability Indicator/view.json
+Total: 0.65 ms
+  - File Read:            0.28 ms
+  - JSON Flatten:         0.02 ms
+  - Model Build:          0.08 ms
+  - Rule Execution:       0.25 ms
+  Rule breakdown:
+    - UnusedCustomPropertiesRule: 0.14 ms
+    - NamePatternRule: 0.06 ms
+    - PollingIntervalRule: 0.00 ms
+    - PylintScriptRule: 0.00 ms
+
+File: services/shared/.deps/crusoe.shared.library/projects/datacenter-utilities/com.inductiveautomation.perspective/views/Building/Wings/Equipment Rooms/Embedded Views/D100/view.json
+Total: 212.88 ms
+  - File Read:            0.31 ms
+  - JSON Flatten:         0.07 ms
+  - Model Build:          0.73 ms
+  - Rule Execution:     211.70 ms
+  Rule breakdown:
+    - PylintScriptRule: 209.83 ms
+    - UnusedCustomPropertiesRule: 0.86 ms
+    - NamePatternRule: 0.33 ms
+    - PollingIntervalRule: 0.05 ms
+
+File: services/shared/.deps/crusoe.shared.library/projects/datacenter-utilities/com.inductiveautomation.perspective/views/Utilities/test/view.json
+Total: 0.77 ms
+  - File Read:            0.39 ms
+  - JSON Flatten:         0.01 ms
+  - Model Build:          0.09 ms
+  - Rule Execution:       0.25 ms
+  Rule breakdown:
+    - UnusedCustomPropertiesRule: 0.14 ms
+    - NamePatternRule: 0.08 ms
+    - PylintScriptRule: 0.00 ms
+    - PollingIntervalRule: 0.00 ms
+
+File: services/shared/.deps/crusoe.shared.library/projects/datacenter-utilities/com.inductiveautomation.perspective/views/BMS/Points Lists/Embedded Views/Fire Alarm/view.json
+Total: 224.82 ms
+  - File Read:            0.33 ms
+  - JSON Flatten:         0.03 ms
+  - Model Build:          0.26 ms
+  - Rule Execution:     224.12 ms
+  Rule breakdown:
+    - PylintScriptRule: 223.12 ms
+    - UnusedCustomPropertiesRule: 0.54 ms
+    - NamePatternRule: 0.22 ms
+    - PollingIntervalRule: 0.03 ms
+
+File: services/shared/.deps/crusoe.shared.library/projects/crusoe-utilities/com.inductiveautomation.perspective/views/BMS/Data Hall/TCS Loop/TCS Loop/view.json
+Total: 1.33 ms
+  - File Read:            0.99 ms
+  - JSON Flatten:         0.02 ms
+  - Model Build:          0.11 ms
+  - Rule Execution:       0.20 ms
+  Rule breakdown:
+    - UnusedCustomPropertiesRule: 0.13 ms
+    - NamePatternRule: 0.03 ms
+    - PollingIntervalRule: 0.00 ms
+    - PylintScriptRule: 0.00 ms
+
+================================================================================
+END OF REPORT
+================================================================================

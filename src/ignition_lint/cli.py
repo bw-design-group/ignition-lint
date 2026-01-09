@@ -305,7 +305,7 @@ def process_single_file(file_path: Path, lint_engine: LintEngine, args,
 		if file_errors == 0 and file_warnings == 0:
 			print(f"✅ No issues found in {file_path}")
 		elif file_errors == 0 and file_warnings > 0:
-			print(f"✅ No errors found in {file_path} (warnings only)")
+			print(f"⚠️  Warnings found in {file_path} (no errors)")
 
 		# Create timing record if profiling
 		if file_timer:
@@ -414,7 +414,7 @@ def write_results_file(
 
 def print_final_summary(
 	processed_files: int, total_warnings: int, total_errors: int, files_with_issues: int, stats_only: bool,
-	warnings_only_mode: bool = False
+	ignore_warnings: bool = False
 ):
 	"""Print the final summary of the linting process."""
 	print("\n📈 Summary:")
@@ -433,14 +433,15 @@ def print_final_summary(
 			print(f"  📁 Files with issues: {files_with_issues}")
 			print(f"  📁 Clean files: {processed_files - files_with_issues}")
 
-			# Exit with appropriate code based on warnings-only mode
-			if warnings_only_mode and total_errors == 0:
-				print("  ✅ No errors found (warnings only - allowing commit)")
+			# Exit with appropriate code based on ignore-warnings mode
+			if ignore_warnings and total_errors == 0:
+				print("  ✅ No errors found (ignoring warnings)")
 				sys.exit(0)
 			elif total_errors > 0:
 				sys.exit(1)
 			else:
-				sys.exit(0)
+				# Has warnings but no errors, and not ignoring warnings
+				sys.exit(1)
 	else:
 		print("  📊 Statistics analysis complete")
 		sys.exit(0)
@@ -485,9 +486,9 @@ def main():
 		help="Directory to save debug files (flattened JSON, model state, statistics)",
 	)
 	parser.add_argument(
-		"--warnings-only",
+		"--ignore-warnings",
 		action="store_true",
-		help="Exit with code 0 when only warnings are found (useful for pre-commit hooks)",
+		help="Don't fail on warnings, only on errors (warnings are still displayed)",
 	)
 	parser.add_argument(
 		"filenames",
@@ -602,7 +603,7 @@ def main():
 
 	# Print final summary
 	print_final_summary(
-		processed_files, total_warnings, total_errors, files_with_issues, args.stats_only, args.warnings_only
+		processed_files, total_warnings, total_errors, files_with_issues, args.stats_only, args.ignore_warnings
 	)
 
 

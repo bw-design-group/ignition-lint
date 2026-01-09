@@ -1,0 +1,700 @@
+================================================================================
+IGNITION-LINT RESULTS
+================================================================================
+
+SUMMARY
+--------------------------------------------------------------------------------
+Files processed: 14
+Total warnings:  58
+Total errors:    436
+Files with issues: 13
+Clean files:     1
+
+PER-FILE RESULTS
+================================================================================
+
+⚠️  ISSUES - tests/cases/Title Case/view.json
+--------------------------------------------------------------------------------
+⚠️  WARNINGS (1 total):
+
+  📋 NamePatternRule:
+    • root.root.children[0].Icon Title Case: Name 'Icon Title Case' doesn't follow PascalCase for component (suggestion: 'IconTitleCase')
+
+
+✅ CLEAN - tests/cases/BadComponentReferences/view.json
+--------------------------------------------------------------------------------
+
+⚠️  ISSUES - tests/cases/LineDashboard/view.json
+--------------------------------------------------------------------------------
+⚠️  WARNINGS (12 total):
+
+  📋 NamePatternRule:
+    • root.root.children[0].Header.children[0].FlexContainer.children[0].Line Image: Name 'Line Image' doesn't follow PascalCase for component (suggestion: 'LineImage')
+    • root.root.children[0].Header.children[0].FlexContainer.children[1].Left Labels.children[0].Name.children[0].Line Name: Name 'Line Name' doesn't follow PascalCase for component (suggestion: 'LineName')
+    • root.root.children[0].Header.children[0].FlexContainer.children[1].Left Labels.children[0].Name.children[1].Custom Dashboard Button: Name 'Custom Dashboard Button' doesn't follow PascalCase for component (suggestion: 'CustomDashboardButton')
+    • root.root.children[0].Header.children[0].FlexContainer.children[1].Left Labels: Name 'Left Labels' doesn't follow PascalCase for component (suggestion: 'LeftLabels')
+    • root.root.children[0].Header.children[0].FlexContainer.children[2].KPI Repeater Static: Name 'KPI Repeater Static' doesn't follow PascalCase for component (suggestion: 'KpiRepeaterStatic')
+    • root.root.children[0].Header.children[1].Production Picker: Name 'Production Picker' doesn't follow PascalCase for component (suggestion: 'ProductionPicker')
+    • root.root.children[1].Data.children[0].Left Container.children[0].Production Orders: Name 'Production Orders' doesn't follow PascalCase for component (suggestion: 'ProductionOrders')
+    • root.root.children[1].Data.children[0].Left Container.children[1].Equipment States: Name 'Equipment States' doesn't follow PascalCase for component (suggestion: 'EquipmentStates')
+    • root.root.children[1].Data.children[0].Left Container.children[2].KPI Charts: Name 'KPI Charts' doesn't follow PascalCase for component (suggestion: 'KpiCharts')
+    • root.root.children[1].Data.children[0].Left Container: Name 'Left Container' doesn't follow PascalCase for component (suggestion: 'LeftContainer')
+    • root.root.children[1].Data.children[1].SplitContainer.children[1].Top Drivers: Name 'Top Drivers' doesn't follow PascalCase for component (suggestion: 'TopDrivers')
+    • params.eq_path_url: Name 'eq_path_url' doesn't follow camelCase for property (suggestion: 'eqPathURL')
+
+❌ ERRORS (1 total):
+
+  📋 UnusedCustomPropertiesRule:
+    • root.root.custom.key: custom property 'key' is defined but never referenced
+
+
+⚠️  ISSUES - tests/cases/BadContextData/view.json
+--------------------------------------------------------------------------------
+⚠️  WARNINGS (7 total):
+
+  📋 NamePatternRule:
+    • root.root.children[0].Filters.children[0].Wing.children[1].Wing Dropdown: Name 'Wing Dropdown' doesn't follow PascalCase for component (suggestion: 'WingDropdown')
+    • root.root.children[0].Filters.children[1].Section.children[1].Section Dropdown: Name 'Section Dropdown' doesn't follow PascalCase for component (suggestion: 'SectionDropdown')
+    • root.root.children[0].Filters.children[2].Device.children[1].Device Dropdown: Name 'Device Dropdown' doesn't follow PascalCase for component (suggestion: 'DeviceDropdown')
+    • custom.filteredData.DeviceName: Name 'DeviceName' doesn't follow camelCase for property (suggestion: 'deviceName')
+    • custom.filteredData.Row: Name 'Row' doesn't follow camelCase for property (suggestion: 'row')
+    • custom.filteredData.Section: Name 'Section' doesn't follow camelCase for property (suggestion: 'section')
+    • custom.filteredData.Wing: Name 'Wing' doesn't follow camelCase for property (suggestion: 'wing')
+
+❌ ERRORS (3 total):
+
+  📋 UnusedCustomPropertiesRule:
+    • root.root.custom.key: custom property 'key' is defined but never referenced
+
+  📋 ExcessiveContextDataRule:
+    • custom.filteredData: Custom property 'filteredData' contains 784 items. Large datasets should be stored in databases, not view JSON. Maximum recommended: 50 items.
+    • custom.paths: Custom property 'paths' contains 784 items. Large datasets should be stored in databases, not view JSON. Maximum recommended: 50 items.
+
+
+⚠️  ISSUES - tests/cases/inconsistentCase/view.json
+--------------------------------------------------------------------------------
+⚠️  WARNINGS (18 total):
+
+  📋 NamePatternRule:
+    • root.root.children[1].FlexContainer.children[1].badEmbeddedPotato_0: Name 'badEmbeddedPotato_0' doesn't follow PascalCase for component (suggestion: 'Badembeddedpotato0')
+    • root.root.children[2].bad potato: Name 'bad potato' doesn't follow PascalCase for component (suggestion: 'BadPotato')
+    • root.root.children[3].anotherBadPotato: Name 'anotherBadPotato' doesn't follow PascalCase for component (suggestion: 'AnotherBadPotato')
+    • custom.PrettyBigIssue: Name 'PrettyBigIssue' doesn't follow camelCase for property (suggestion: 'prettyBigIssue')
+    • custom.THISIsQuestionable: Name 'THISIsQuestionable' doesn't follow camelCase for property (suggestion: 'tHISIsQuestionable')
+    • custom.TRYAGAIN: Name 'TRYAGAIN' doesn't follow camelCase for property (suggestion: 'tRYAGAIN')
+    • custom.goodKey.EmbeddedNope: Name 'EmbeddedNope' doesn't follow camelCase for property (suggestion: 'embeddedNope')
+    • custom.this_is_illegal: Name 'this_is_illegal' doesn't follow camelCase for property (suggestion: 'thisIsIllegal')
+    • params.VeryBadPractice: Name 'VeryBadPractice' doesn't follow camelCase for property (suggestion: 'veryBadPractice')
+    • root.root.children.GoodLabelName.custom.BadLabelCustomProp: Name 'BadLabelCustomProp' doesn't follow camelCase for property (suggestion: 'badLabelCustomProp')
+    • root.root.children.GoodLabelName.custom.sneakyBad.HaHaHaHaHa: Name 'HaHaHaHaHa' doesn't follow camelCase for property (suggestion: 'haHaHaHaHa')
+    • root.root.children.FlexContainer.children.EmbeddedPotato.props.params.BadStillDontCheck: Name 'BadStillDontCheck' doesn't follow camelCase for property (suggestion: 'badStillDontCheck')
+    • root.root.children.FlexContainer.children.badEmbeddedPotato_0.custom.VeryVeryBadProperty: Name 'VeryVeryBadProperty' doesn't follow camelCase for property (suggestion: 'veryVeryBadProperty')
+    • root.root.children.FlexContainer.children.badEmbeddedPotato_0.props.params.BadStillDontCheck: Name 'BadStillDontCheck' doesn't follow camelCase for property (suggestion: 'badStillDontCheck')
+    • root.root.children.bad potato.custom.VeryVeryBadProperty: Name 'VeryVeryBadProperty' doesn't follow camelCase for property (suggestion: 'veryVeryBadProperty')
+    • root.root.children.bad potato.props.params.BadStillDontCheck: Name 'BadStillDontCheck' doesn't follow camelCase for property (suggestion: 'badStillDontCheck')
+    • root.root.children.anotherBadPotato.custom.VeryVeryBadProperty: Name 'VeryVeryBadProperty' doesn't follow camelCase for property (suggestion: 'veryVeryBadProperty')
+    • root.root.children.anotherBadPotato.props.params.BadStillDontCheck: Name 'BadStillDontCheck' doesn't follow camelCase for property (suggestion: 'badStillDontCheck')
+
+❌ ERRORS (14 total):
+
+  📋 UnusedCustomPropertiesRule:
+    • root.root.custom.key: custom property 'key' is defined but never referenced
+    • custom.PrettyBigIssue: custom property 'PrettyBigIssue' is defined but never referenced
+    • custom.THISIsQuestionable: custom property 'THISIsQuestionable' is defined but never referenced
+    • custom.TRYAGAIN: custom property 'TRYAGAIN' is defined but never referenced
+    • custom.this_is_illegal: custom property 'this_is_illegal' is defined but never referenced
+    • params.VeryBadPractice: view parameter 'VeryBadPractice' is defined but never referenced
+    • root.root.children.GoodLabelName.custom.BadLabelCustomProp: custom property 'BadLabelCustomProp' is defined but never referenced
+    • root.root.children.GoodLabelName.custom.key: custom property 'key' is defined but never referenced
+    • root.root.children.GoodLabelName.custom.labelCustomProperty: custom property 'labelCustomProperty' is defined but never referenced
+    • root.root.children.FlexContainer.children.EmbeddedPotato.custom.key: custom property 'key' is defined but never referenced
+    • root.root.children.FlexContainer.children.EmbeddedPotato.custom.notSoBad: custom property 'notSoBad' is defined but never referenced
+    • root.root.children.FlexContainer.children.badEmbeddedPotato_0.custom.VeryVeryBadProperty: custom property 'VeryVeryBadProperty' is defined but never referenced
+    • root.root.children.bad potato.custom.VeryVeryBadProperty: custom property 'VeryVeryBadProperty' is defined but never referenced
+    • root.root.children.anotherBadPotato.custom.VeryVeryBadProperty: custom property 'VeryVeryBadProperty' is defined but never referenced
+
+
+⚠️  ISSUES - tests/cases/AllNodeTypes/view.json
+--------------------------------------------------------------------------------
+❌ ERRORS (25 total):
+
+  📋 PollingIntervalRule:
+    • propConfig.custom.transformExpression: 'now(5000)'
+
+  📋 UnusedCustomPropertiesRule:
+    • root.root.custom.key: custom property 'key' is defined but never referenced
+    • custom.PrettyBigIssue: custom property 'PrettyBigIssue' is defined but never referenced
+    • custom.THISIsQuestionable: custom property 'THISIsQuestionable' is defined but never referenced
+    • custom.TRYAGAIN: custom property 'TRYAGAIN' is defined but never referenced
+    • custom.this_is_illegal: custom property 'this_is_illegal' is defined but never referenced
+    • params.VeryBadPractice: view parameter 'VeryBadPractice' is defined but never referenced
+    • root.root.children.GoodLabelName.custom.BadLabelCustomProp: custom property 'BadLabelCustomProp' is defined but never referenced
+    • root.root.children.GoodLabelName.custom.key: custom property 'key' is defined but never referenced
+    • root.root.children.GoodLabelName.custom.labelCustomProperty: custom property 'labelCustomProperty' is defined but never referenced
+    • root.root.children.FlexContainer.children.EmbeddedPotato.custom.key: custom property 'key' is defined but never referenced
+    • root.root.children.FlexContainer.children.EmbeddedPotato.custom.notSoBad: custom property 'notSoBad' is defined but never referenced
+    • root.root.children.FlexContainer.children.badEmbeddedPotato_0.custom.VeryVeryBadProperty: custom property 'VeryVeryBadProperty' is defined but never referenced
+    • root.root.children.bad potato.custom.VeryVeryBadProperty: custom property 'VeryVeryBadProperty' is defined but never referenced
+    • root.root.children.anotherBadPotato.custom.VeryVeryBadProperty: custom property 'VeryVeryBadProperty' is defined but never referenced
+    • custom.expr: custom property 'expr' is defined but never referenced
+    • custom.property: custom property 'property' is defined but never referenced
+    • custom.query: custom property 'query' is defined but never referenced
+    • custom.tagExpression: custom property 'tagExpression' is defined but never referenced
+    • custom.tagIndirect: custom property 'tagIndirect' is defined but never referenced
+    • custom.transformExpression: custom property 'transformExpression' is defined but never referenced
+    • custom.transformMap: custom property 'transformMap' is defined but never referenced
+    • custom.transformScript: custom property 'transformScript' is defined but never referenced
+    • custom.transofrmExpression: custom property 'transofrmExpression' is defined but never referenced
+    • params.valList: view parameter 'valList' is defined but never referenced
+
+
+⚠️  ISSUES - tests/cases/UPPER_CASE/view.json
+--------------------------------------------------------------------------------
+⚠️  WARNINGS (5 total):
+
+  📋 NamePatternRule:
+    • root.root.children[0].ICON_UPPER_CASE: Name 'ICON_UPPER_CASE' doesn't follow PascalCase for component (suggestion: 'IconUpperCase')
+    • custom.CUSTOM_VIEW_PARAM: Name 'CUSTOM_VIEW_PARAM' doesn't follow camelCase for property (suggestion: 'customViewParam')
+    • params.VIEW_PARAM: Name 'VIEW_PARAM' doesn't follow camelCase for property (suggestion: 'viewParam')
+    • root.root.children.ICON_UPPER_CASE.custom.COMPONENT_CUSTOM_PARAM: Name 'COMPONENT_CUSTOM_PARAM' doesn't follow camelCase for property (suggestion: 'componentCustomParam')
+    • root.root.custom.ROOT_CUSTOM_PARAM: Name 'ROOT_CUSTOM_PARAM' doesn't follow camelCase for property (suggestion: 'rootCustomParam')
+
+❌ ERRORS (28 total):
+
+  📋 UnusedCustomPropertiesRule:
+    • root.root.custom.key: custom property 'key' is defined but never referenced
+    • custom.PrettyBigIssue: custom property 'PrettyBigIssue' is defined but never referenced
+    • custom.THISIsQuestionable: custom property 'THISIsQuestionable' is defined but never referenced
+    • custom.TRYAGAIN: custom property 'TRYAGAIN' is defined but never referenced
+    • custom.this_is_illegal: custom property 'this_is_illegal' is defined but never referenced
+    • params.VeryBadPractice: view parameter 'VeryBadPractice' is defined but never referenced
+    • root.root.children.GoodLabelName.custom.BadLabelCustomProp: custom property 'BadLabelCustomProp' is defined but never referenced
+    • root.root.children.GoodLabelName.custom.key: custom property 'key' is defined but never referenced
+    • root.root.children.GoodLabelName.custom.labelCustomProperty: custom property 'labelCustomProperty' is defined but never referenced
+    • root.root.children.FlexContainer.children.EmbeddedPotato.custom.key: custom property 'key' is defined but never referenced
+    • root.root.children.FlexContainer.children.EmbeddedPotato.custom.notSoBad: custom property 'notSoBad' is defined but never referenced
+    • root.root.children.FlexContainer.children.badEmbeddedPotato_0.custom.VeryVeryBadProperty: custom property 'VeryVeryBadProperty' is defined but never referenced
+    • root.root.children.bad potato.custom.VeryVeryBadProperty: custom property 'VeryVeryBadProperty' is defined but never referenced
+    • root.root.children.anotherBadPotato.custom.VeryVeryBadProperty: custom property 'VeryVeryBadProperty' is defined but never referenced
+    • custom.expr: custom property 'expr' is defined but never referenced
+    • custom.property: custom property 'property' is defined but never referenced
+    • custom.query: custom property 'query' is defined but never referenced
+    • custom.tagExpression: custom property 'tagExpression' is defined but never referenced
+    • custom.tagIndirect: custom property 'tagIndirect' is defined but never referenced
+    • custom.transformExpression: custom property 'transformExpression' is defined but never referenced
+    • custom.transformMap: custom property 'transformMap' is defined but never referenced
+    • custom.transformScript: custom property 'transformScript' is defined but never referenced
+    • custom.transofrmExpression: custom property 'transofrmExpression' is defined but never referenced
+    • params.valList: view parameter 'valList' is defined but never referenced
+    • custom.CUSTOM_VIEW_PARAM: custom property 'CUSTOM_VIEW_PARAM' is defined but never referenced
+    • params.VIEW_PARAM: view parameter 'VIEW_PARAM' is defined but never referenced
+    • root.root.children.ICON_UPPER_CASE.custom.COMPONENT_CUSTOM_PARAM: custom property 'COMPONENT_CUSTOM_PARAM' is defined but never referenced
+    • root.root.custom.ROOT_CUSTOM_PARAM: custom property 'ROOT_CUSTOM_PARAM' is defined but never referenced
+
+
+⚠️  ISSUES - tests/cases/snake_case/view.json
+--------------------------------------------------------------------------------
+⚠️  WARNINGS (5 total):
+
+  📋 NamePatternRule:
+    • root.root.children[0].icon_snake_case: Name 'icon_snake_case' doesn't follow PascalCase for component (suggestion: 'IconSnakeCase')
+    • custom.custom_view_param: Name 'custom_view_param' doesn't follow camelCase for property (suggestion: 'customViewParam')
+    • params.view_param: Name 'view_param' doesn't follow camelCase for property (suggestion: 'viewParam')
+    • root.root.children.icon_snake_case.custom.component_custom_param: Name 'component_custom_param' doesn't follow camelCase for property (suggestion: 'componentCustomParam')
+    • root.root.custom.root_custom_param: Name 'root_custom_param' doesn't follow camelCase for property (suggestion: 'rootCustomParam')
+
+❌ ERRORS (32 total):
+
+  📋 UnusedCustomPropertiesRule:
+    • root.root.custom.key: custom property 'key' is defined but never referenced
+    • custom.PrettyBigIssue: custom property 'PrettyBigIssue' is defined but never referenced
+    • custom.THISIsQuestionable: custom property 'THISIsQuestionable' is defined but never referenced
+    • custom.TRYAGAIN: custom property 'TRYAGAIN' is defined but never referenced
+    • custom.this_is_illegal: custom property 'this_is_illegal' is defined but never referenced
+    • params.VeryBadPractice: view parameter 'VeryBadPractice' is defined but never referenced
+    • root.root.children.GoodLabelName.custom.BadLabelCustomProp: custom property 'BadLabelCustomProp' is defined but never referenced
+    • root.root.children.GoodLabelName.custom.key: custom property 'key' is defined but never referenced
+    • root.root.children.GoodLabelName.custom.labelCustomProperty: custom property 'labelCustomProperty' is defined but never referenced
+    • root.root.children.FlexContainer.children.EmbeddedPotato.custom.key: custom property 'key' is defined but never referenced
+    • root.root.children.FlexContainer.children.EmbeddedPotato.custom.notSoBad: custom property 'notSoBad' is defined but never referenced
+    • root.root.children.FlexContainer.children.badEmbeddedPotato_0.custom.VeryVeryBadProperty: custom property 'VeryVeryBadProperty' is defined but never referenced
+    • root.root.children.bad potato.custom.VeryVeryBadProperty: custom property 'VeryVeryBadProperty' is defined but never referenced
+    • root.root.children.anotherBadPotato.custom.VeryVeryBadProperty: custom property 'VeryVeryBadProperty' is defined but never referenced
+    • custom.expr: custom property 'expr' is defined but never referenced
+    • custom.property: custom property 'property' is defined but never referenced
+    • custom.query: custom property 'query' is defined but never referenced
+    • custom.tagExpression: custom property 'tagExpression' is defined but never referenced
+    • custom.tagIndirect: custom property 'tagIndirect' is defined but never referenced
+    • custom.transformExpression: custom property 'transformExpression' is defined but never referenced
+    • custom.transformMap: custom property 'transformMap' is defined but never referenced
+    • custom.transformScript: custom property 'transformScript' is defined but never referenced
+    • custom.transofrmExpression: custom property 'transofrmExpression' is defined but never referenced
+    • params.valList: view parameter 'valList' is defined but never referenced
+    • custom.CUSTOM_VIEW_PARAM: custom property 'CUSTOM_VIEW_PARAM' is defined but never referenced
+    • params.VIEW_PARAM: view parameter 'VIEW_PARAM' is defined but never referenced
+    • root.root.children.ICON_UPPER_CASE.custom.COMPONENT_CUSTOM_PARAM: custom property 'COMPONENT_CUSTOM_PARAM' is defined but never referenced
+    • root.root.custom.ROOT_CUSTOM_PARAM: custom property 'ROOT_CUSTOM_PARAM' is defined but never referenced
+    • custom.custom_view_param: custom property 'custom_view_param' is defined but never referenced
+    • params.view_param: view parameter 'view_param' is defined but never referenced
+    • root.root.children.icon_snake_case.custom.component_custom_param: custom property 'component_custom_param' is defined but never referenced
+    • root.root.custom.root_custom_param: custom property 'root_custom_param' is defined but never referenced
+
+
+⚠️  ISSUES - tests/cases/ExpressionBindings/view.json
+--------------------------------------------------------------------------------
+❌ ERRORS (38 total):
+
+  📋 PollingIntervalRule:
+    • propConfig.custom.expressionPolling: 'now()'
+    • propConfig.custom.transformPolling.binding.transforms[0]: 'now()'
+    • propConfig.custom.transformPolling.binding.transforms[1]: 'now(5000)'
+    • root.root.children[0].BadPollingDateTimeInput.propConfig.props.value: 'now()'
+    • propConfig.custom.expressionStructurePolling.badPolling: 'now()'
+
+  📋 UnusedCustomPropertiesRule:
+    • root.root.custom.key: custom property 'key' is defined but never referenced
+    • custom.PrettyBigIssue: custom property 'PrettyBigIssue' is defined but never referenced
+    • custom.THISIsQuestionable: custom property 'THISIsQuestionable' is defined but never referenced
+    • custom.TRYAGAIN: custom property 'TRYAGAIN' is defined but never referenced
+    • custom.this_is_illegal: custom property 'this_is_illegal' is defined but never referenced
+    • params.VeryBadPractice: view parameter 'VeryBadPractice' is defined but never referenced
+    • root.root.children.GoodLabelName.custom.BadLabelCustomProp: custom property 'BadLabelCustomProp' is defined but never referenced
+    • root.root.children.GoodLabelName.custom.key: custom property 'key' is defined but never referenced
+    • root.root.children.GoodLabelName.custom.labelCustomProperty: custom property 'labelCustomProperty' is defined but never referenced
+    • root.root.children.FlexContainer.children.EmbeddedPotato.custom.key: custom property 'key' is defined but never referenced
+    • root.root.children.FlexContainer.children.EmbeddedPotato.custom.notSoBad: custom property 'notSoBad' is defined but never referenced
+    • root.root.children.FlexContainer.children.badEmbeddedPotato_0.custom.VeryVeryBadProperty: custom property 'VeryVeryBadProperty' is defined but never referenced
+    • root.root.children.bad potato.custom.VeryVeryBadProperty: custom property 'VeryVeryBadProperty' is defined but never referenced
+    • root.root.children.anotherBadPotato.custom.VeryVeryBadProperty: custom property 'VeryVeryBadProperty' is defined but never referenced
+    • custom.expr: custom property 'expr' is defined but never referenced
+    • custom.property: custom property 'property' is defined but never referenced
+    • custom.query: custom property 'query' is defined but never referenced
+    • custom.tagExpression: custom property 'tagExpression' is defined but never referenced
+    • custom.tagIndirect: custom property 'tagIndirect' is defined but never referenced
+    • custom.transformExpression: custom property 'transformExpression' is defined but never referenced
+    • custom.transformMap: custom property 'transformMap' is defined but never referenced
+    • custom.transformScript: custom property 'transformScript' is defined but never referenced
+    • custom.transofrmExpression: custom property 'transofrmExpression' is defined but never referenced
+    • params.valList: view parameter 'valList' is defined but never referenced
+    • custom.CUSTOM_VIEW_PARAM: custom property 'CUSTOM_VIEW_PARAM' is defined but never referenced
+    • params.VIEW_PARAM: view parameter 'VIEW_PARAM' is defined but never referenced
+    • root.root.children.ICON_UPPER_CASE.custom.COMPONENT_CUSTOM_PARAM: custom property 'COMPONENT_CUSTOM_PARAM' is defined but never referenced
+    • root.root.custom.ROOT_CUSTOM_PARAM: custom property 'ROOT_CUSTOM_PARAM' is defined but never referenced
+    • custom.custom_view_param: custom property 'custom_view_param' is defined but never referenced
+    • params.view_param: view parameter 'view_param' is defined but never referenced
+    • root.root.children.icon_snake_case.custom.component_custom_param: custom property 'component_custom_param' is defined but never referenced
+    • root.root.custom.root_custom_param: custom property 'root_custom_param' is defined but never referenced
+    • custom.test: custom property 'test' is defined but never referenced
+
+
+⚠️  ISSUES - tests/cases/AllScriptTypes/view.json
+--------------------------------------------------------------------------------
+❌ ERRORS (33 total):
+
+  📋 UnusedCustomPropertiesRule:
+    • root.root.custom.key: custom property 'key' is defined but never referenced
+    • custom.PrettyBigIssue: custom property 'PrettyBigIssue' is defined but never referenced
+    • custom.THISIsQuestionable: custom property 'THISIsQuestionable' is defined but never referenced
+    • custom.TRYAGAIN: custom property 'TRYAGAIN' is defined but never referenced
+    • custom.this_is_illegal: custom property 'this_is_illegal' is defined but never referenced
+    • params.VeryBadPractice: view parameter 'VeryBadPractice' is defined but never referenced
+    • root.root.children.GoodLabelName.custom.BadLabelCustomProp: custom property 'BadLabelCustomProp' is defined but never referenced
+    • root.root.children.GoodLabelName.custom.key: custom property 'key' is defined but never referenced
+    • root.root.children.GoodLabelName.custom.labelCustomProperty: custom property 'labelCustomProperty' is defined but never referenced
+    • root.root.children.FlexContainer.children.EmbeddedPotato.custom.key: custom property 'key' is defined but never referenced
+    • root.root.children.FlexContainer.children.EmbeddedPotato.custom.notSoBad: custom property 'notSoBad' is defined but never referenced
+    • root.root.children.FlexContainer.children.badEmbeddedPotato_0.custom.VeryVeryBadProperty: custom property 'VeryVeryBadProperty' is defined but never referenced
+    • root.root.children.bad potato.custom.VeryVeryBadProperty: custom property 'VeryVeryBadProperty' is defined but never referenced
+    • root.root.children.anotherBadPotato.custom.VeryVeryBadProperty: custom property 'VeryVeryBadProperty' is defined but never referenced
+    • custom.expr: custom property 'expr' is defined but never referenced
+    • custom.property: custom property 'property' is defined but never referenced
+    • custom.query: custom property 'query' is defined but never referenced
+    • custom.tagExpression: custom property 'tagExpression' is defined but never referenced
+    • custom.tagIndirect: custom property 'tagIndirect' is defined but never referenced
+    • custom.transformExpression: custom property 'transformExpression' is defined but never referenced
+    • custom.transformMap: custom property 'transformMap' is defined but never referenced
+    • custom.transformScript: custom property 'transformScript' is defined but never referenced
+    • custom.transofrmExpression: custom property 'transofrmExpression' is defined but never referenced
+    • params.valList: view parameter 'valList' is defined but never referenced
+    • custom.CUSTOM_VIEW_PARAM: custom property 'CUSTOM_VIEW_PARAM' is defined but never referenced
+    • params.VIEW_PARAM: view parameter 'VIEW_PARAM' is defined but never referenced
+    • root.root.children.ICON_UPPER_CASE.custom.COMPONENT_CUSTOM_PARAM: custom property 'COMPONENT_CUSTOM_PARAM' is defined but never referenced
+    • root.root.custom.ROOT_CUSTOM_PARAM: custom property 'ROOT_CUSTOM_PARAM' is defined but never referenced
+    • custom.custom_view_param: custom property 'custom_view_param' is defined but never referenced
+    • params.view_param: view parameter 'view_param' is defined but never referenced
+    • root.root.children.icon_snake_case.custom.component_custom_param: custom property 'component_custom_param' is defined but never referenced
+    • root.root.custom.root_custom_param: custom property 'root_custom_param' is defined but never referenced
+    • custom.test: custom property 'test' is defined but never referenced
+
+
+⚠️  ISSUES - tests/cases/kebab-case/view.json
+--------------------------------------------------------------------------------
+⚠️  WARNINGS (5 total):
+
+  📋 NamePatternRule:
+    • root.root.children[0].icon-kebab-case: Name 'icon-kebab-case' doesn't follow PascalCase for component (suggestion: 'IconKebabCase')
+    • custom.custom-view-param: Name 'custom-view-param' doesn't follow camelCase for property (suggestion: 'customViewParam')
+    • params.view-param: Name 'view-param' doesn't follow camelCase for property (suggestion: 'viewParam')
+    • root.root.children.icon-kebab-case.custom.component-custom-param: Name 'component-custom-param' doesn't follow camelCase for property (suggestion: 'componentCustomParam')
+    • root.root.custom.root-custom-param: Name 'root-custom-param' doesn't follow camelCase for property (suggestion: 'rootCustomParam')
+
+❌ ERRORS (37 total):
+
+  📋 UnusedCustomPropertiesRule:
+    • root.root.custom.key: custom property 'key' is defined but never referenced
+    • custom.PrettyBigIssue: custom property 'PrettyBigIssue' is defined but never referenced
+    • custom.THISIsQuestionable: custom property 'THISIsQuestionable' is defined but never referenced
+    • custom.TRYAGAIN: custom property 'TRYAGAIN' is defined but never referenced
+    • custom.this_is_illegal: custom property 'this_is_illegal' is defined but never referenced
+    • params.VeryBadPractice: view parameter 'VeryBadPractice' is defined but never referenced
+    • root.root.children.GoodLabelName.custom.BadLabelCustomProp: custom property 'BadLabelCustomProp' is defined but never referenced
+    • root.root.children.GoodLabelName.custom.key: custom property 'key' is defined but never referenced
+    • root.root.children.GoodLabelName.custom.labelCustomProperty: custom property 'labelCustomProperty' is defined but never referenced
+    • root.root.children.FlexContainer.children.EmbeddedPotato.custom.key: custom property 'key' is defined but never referenced
+    • root.root.children.FlexContainer.children.EmbeddedPotato.custom.notSoBad: custom property 'notSoBad' is defined but never referenced
+    • root.root.children.FlexContainer.children.badEmbeddedPotato_0.custom.VeryVeryBadProperty: custom property 'VeryVeryBadProperty' is defined but never referenced
+    • root.root.children.bad potato.custom.VeryVeryBadProperty: custom property 'VeryVeryBadProperty' is defined but never referenced
+    • root.root.children.anotherBadPotato.custom.VeryVeryBadProperty: custom property 'VeryVeryBadProperty' is defined but never referenced
+    • custom.expr: custom property 'expr' is defined but never referenced
+    • custom.property: custom property 'property' is defined but never referenced
+    • custom.query: custom property 'query' is defined but never referenced
+    • custom.tagExpression: custom property 'tagExpression' is defined but never referenced
+    • custom.tagIndirect: custom property 'tagIndirect' is defined but never referenced
+    • custom.transformExpression: custom property 'transformExpression' is defined but never referenced
+    • custom.transformMap: custom property 'transformMap' is defined but never referenced
+    • custom.transformScript: custom property 'transformScript' is defined but never referenced
+    • custom.transofrmExpression: custom property 'transofrmExpression' is defined but never referenced
+    • params.valList: view parameter 'valList' is defined but never referenced
+    • custom.CUSTOM_VIEW_PARAM: custom property 'CUSTOM_VIEW_PARAM' is defined but never referenced
+    • params.VIEW_PARAM: view parameter 'VIEW_PARAM' is defined but never referenced
+    • root.root.children.ICON_UPPER_CASE.custom.COMPONENT_CUSTOM_PARAM: custom property 'COMPONENT_CUSTOM_PARAM' is defined but never referenced
+    • root.root.custom.ROOT_CUSTOM_PARAM: custom property 'ROOT_CUSTOM_PARAM' is defined but never referenced
+    • custom.custom_view_param: custom property 'custom_view_param' is defined but never referenced
+    • params.view_param: view parameter 'view_param' is defined but never referenced
+    • root.root.children.icon_snake_case.custom.component_custom_param: custom property 'component_custom_param' is defined but never referenced
+    • root.root.custom.root_custom_param: custom property 'root_custom_param' is defined but never referenced
+    • custom.test: custom property 'test' is defined but never referenced
+    • custom.custom-view-param: custom property 'custom-view-param' is defined but never referenced
+    • params.view-param: view parameter 'view-param' is defined but never referenced
+    • root.root.children.icon-kebab-case.custom.component-custom-param: custom property 'component-custom-param' is defined but never referenced
+    • root.root.custom.root-custom-param: custom property 'root-custom-param' is defined but never referenced
+
+
+⚠️  ISSUES - tests/cases/camelCase/view.json
+--------------------------------------------------------------------------------
+⚠️  WARNINGS (1 total):
+
+  📋 NamePatternRule:
+    • root.root.children[0].iconCamelCase: Name 'iconCamelCase' doesn't follow PascalCase for component (suggestion: 'IconCamelCase')
+
+❌ ERRORS (41 total):
+
+  📋 UnusedCustomPropertiesRule:
+    • root.root.custom.key: custom property 'key' is defined but never referenced
+    • custom.PrettyBigIssue: custom property 'PrettyBigIssue' is defined but never referenced
+    • custom.THISIsQuestionable: custom property 'THISIsQuestionable' is defined but never referenced
+    • custom.TRYAGAIN: custom property 'TRYAGAIN' is defined but never referenced
+    • custom.this_is_illegal: custom property 'this_is_illegal' is defined but never referenced
+    • params.VeryBadPractice: view parameter 'VeryBadPractice' is defined but never referenced
+    • root.root.children.GoodLabelName.custom.BadLabelCustomProp: custom property 'BadLabelCustomProp' is defined but never referenced
+    • root.root.children.GoodLabelName.custom.key: custom property 'key' is defined but never referenced
+    • root.root.children.GoodLabelName.custom.labelCustomProperty: custom property 'labelCustomProperty' is defined but never referenced
+    • root.root.children.FlexContainer.children.EmbeddedPotato.custom.key: custom property 'key' is defined but never referenced
+    • root.root.children.FlexContainer.children.EmbeddedPotato.custom.notSoBad: custom property 'notSoBad' is defined but never referenced
+    • root.root.children.FlexContainer.children.badEmbeddedPotato_0.custom.VeryVeryBadProperty: custom property 'VeryVeryBadProperty' is defined but never referenced
+    • root.root.children.bad potato.custom.VeryVeryBadProperty: custom property 'VeryVeryBadProperty' is defined but never referenced
+    • root.root.children.anotherBadPotato.custom.VeryVeryBadProperty: custom property 'VeryVeryBadProperty' is defined but never referenced
+    • custom.expr: custom property 'expr' is defined but never referenced
+    • custom.property: custom property 'property' is defined but never referenced
+    • custom.query: custom property 'query' is defined but never referenced
+    • custom.tagExpression: custom property 'tagExpression' is defined but never referenced
+    • custom.tagIndirect: custom property 'tagIndirect' is defined but never referenced
+    • custom.transformExpression: custom property 'transformExpression' is defined but never referenced
+    • custom.transformMap: custom property 'transformMap' is defined but never referenced
+    • custom.transformScript: custom property 'transformScript' is defined but never referenced
+    • custom.transofrmExpression: custom property 'transofrmExpression' is defined but never referenced
+    • params.valList: view parameter 'valList' is defined but never referenced
+    • custom.CUSTOM_VIEW_PARAM: custom property 'CUSTOM_VIEW_PARAM' is defined but never referenced
+    • params.VIEW_PARAM: view parameter 'VIEW_PARAM' is defined but never referenced
+    • root.root.children.ICON_UPPER_CASE.custom.COMPONENT_CUSTOM_PARAM: custom property 'COMPONENT_CUSTOM_PARAM' is defined but never referenced
+    • root.root.custom.ROOT_CUSTOM_PARAM: custom property 'ROOT_CUSTOM_PARAM' is defined but never referenced
+    • custom.custom_view_param: custom property 'custom_view_param' is defined but never referenced
+    • params.view_param: view parameter 'view_param' is defined but never referenced
+    • root.root.children.icon_snake_case.custom.component_custom_param: custom property 'component_custom_param' is defined but never referenced
+    • root.root.custom.root_custom_param: custom property 'root_custom_param' is defined but never referenced
+    • custom.test: custom property 'test' is defined but never referenced
+    • custom.custom-view-param: custom property 'custom-view-param' is defined but never referenced
+    • params.view-param: view parameter 'view-param' is defined but never referenced
+    • root.root.children.icon-kebab-case.custom.component-custom-param: custom property 'component-custom-param' is defined but never referenced
+    • root.root.custom.root-custom-param: custom property 'root-custom-param' is defined but never referenced
+    • custom.customViewParam: custom property 'customViewParam' is defined but never referenced
+    • params.viewParam: view parameter 'viewParam' is defined but never referenced
+    • root.root.children.iconCamelCase.custom.componentCustomParam: custom property 'componentCustomParam' is defined but never referenced
+    • root.root.custom.rootCustomParam: custom property 'rootCustomParam' is defined but never referenced
+
+
+⚠️  ISSUES - tests/cases/PascalCase/view.json
+--------------------------------------------------------------------------------
+⚠️  WARNINGS (4 total):
+
+  📋 NamePatternRule:
+    • custom.CustomViewParam: Name 'CustomViewParam' doesn't follow camelCase for property (suggestion: 'customViewParam')
+    • params.ViewParam: Name 'ViewParam' doesn't follow camelCase for property (suggestion: 'viewParam')
+    • root.root.children.IconPascalCase.custom.ComponentCustomParam: Name 'ComponentCustomParam' doesn't follow camelCase for property (suggestion: 'componentCustomParam')
+    • root.root.custom.RootCustomParam: Name 'RootCustomParam' doesn't follow camelCase for property (suggestion: 'rootCustomParam')
+
+❌ ERRORS (45 total):
+
+  📋 UnusedCustomPropertiesRule:
+    • root.root.custom.key: custom property 'key' is defined but never referenced
+    • custom.PrettyBigIssue: custom property 'PrettyBigIssue' is defined but never referenced
+    • custom.THISIsQuestionable: custom property 'THISIsQuestionable' is defined but never referenced
+    • custom.TRYAGAIN: custom property 'TRYAGAIN' is defined but never referenced
+    • custom.this_is_illegal: custom property 'this_is_illegal' is defined but never referenced
+    • params.VeryBadPractice: view parameter 'VeryBadPractice' is defined but never referenced
+    • root.root.children.GoodLabelName.custom.BadLabelCustomProp: custom property 'BadLabelCustomProp' is defined but never referenced
+    • root.root.children.GoodLabelName.custom.key: custom property 'key' is defined but never referenced
+    • root.root.children.GoodLabelName.custom.labelCustomProperty: custom property 'labelCustomProperty' is defined but never referenced
+    • root.root.children.FlexContainer.children.EmbeddedPotato.custom.key: custom property 'key' is defined but never referenced
+    • root.root.children.FlexContainer.children.EmbeddedPotato.custom.notSoBad: custom property 'notSoBad' is defined but never referenced
+    • root.root.children.FlexContainer.children.badEmbeddedPotato_0.custom.VeryVeryBadProperty: custom property 'VeryVeryBadProperty' is defined but never referenced
+    • root.root.children.bad potato.custom.VeryVeryBadProperty: custom property 'VeryVeryBadProperty' is defined but never referenced
+    • root.root.children.anotherBadPotato.custom.VeryVeryBadProperty: custom property 'VeryVeryBadProperty' is defined but never referenced
+    • custom.expr: custom property 'expr' is defined but never referenced
+    • custom.property: custom property 'property' is defined but never referenced
+    • custom.query: custom property 'query' is defined but never referenced
+    • custom.tagExpression: custom property 'tagExpression' is defined but never referenced
+    • custom.tagIndirect: custom property 'tagIndirect' is defined but never referenced
+    • custom.transformExpression: custom property 'transformExpression' is defined but never referenced
+    • custom.transformMap: custom property 'transformMap' is defined but never referenced
+    • custom.transformScript: custom property 'transformScript' is defined but never referenced
+    • custom.transofrmExpression: custom property 'transofrmExpression' is defined but never referenced
+    • params.valList: view parameter 'valList' is defined but never referenced
+    • custom.CUSTOM_VIEW_PARAM: custom property 'CUSTOM_VIEW_PARAM' is defined but never referenced
+    • params.VIEW_PARAM: view parameter 'VIEW_PARAM' is defined but never referenced
+    • root.root.children.ICON_UPPER_CASE.custom.COMPONENT_CUSTOM_PARAM: custom property 'COMPONENT_CUSTOM_PARAM' is defined but never referenced
+    • root.root.custom.ROOT_CUSTOM_PARAM: custom property 'ROOT_CUSTOM_PARAM' is defined but never referenced
+    • custom.custom_view_param: custom property 'custom_view_param' is defined but never referenced
+    • params.view_param: view parameter 'view_param' is defined but never referenced
+    • root.root.children.icon_snake_case.custom.component_custom_param: custom property 'component_custom_param' is defined but never referenced
+    • root.root.custom.root_custom_param: custom property 'root_custom_param' is defined but never referenced
+    • custom.test: custom property 'test' is defined but never referenced
+    • custom.custom-view-param: custom property 'custom-view-param' is defined but never referenced
+    • params.view-param: view parameter 'view-param' is defined but never referenced
+    • root.root.children.icon-kebab-case.custom.component-custom-param: custom property 'component-custom-param' is defined but never referenced
+    • root.root.custom.root-custom-param: custom property 'root-custom-param' is defined but never referenced
+    • custom.customViewParam: custom property 'customViewParam' is defined but never referenced
+    • params.viewParam: view parameter 'viewParam' is defined but never referenced
+    • root.root.children.iconCamelCase.custom.componentCustomParam: custom property 'componentCustomParam' is defined but never referenced
+    • root.root.custom.rootCustomParam: custom property 'rootCustomParam' is defined but never referenced
+    • custom.CustomViewParam: custom property 'CustomViewParam' is defined but never referenced
+    • params.ViewParam: view parameter 'ViewParam' is defined but never referenced
+    • root.root.children.IconPascalCase.custom.ComponentCustomParam: custom property 'ComponentCustomParam' is defined but never referenced
+    • root.root.custom.RootCustomParam: custom property 'RootCustomParam' is defined but never referenced
+
+
+⚠️  ISSUES - tests/cases/PreferredStyle/view.json
+--------------------------------------------------------------------------------
+❌ ERRORS (46 total):
+
+  📋 UnusedCustomPropertiesRule:
+    • root.root.custom.key: custom property 'key' is defined but never referenced
+    • custom.PrettyBigIssue: custom property 'PrettyBigIssue' is defined but never referenced
+    • custom.THISIsQuestionable: custom property 'THISIsQuestionable' is defined but never referenced
+    • custom.TRYAGAIN: custom property 'TRYAGAIN' is defined but never referenced
+    • custom.this_is_illegal: custom property 'this_is_illegal' is defined but never referenced
+    • params.VeryBadPractice: view parameter 'VeryBadPractice' is defined but never referenced
+    • root.root.children.GoodLabelName.custom.BadLabelCustomProp: custom property 'BadLabelCustomProp' is defined but never referenced
+    • root.root.children.GoodLabelName.custom.key: custom property 'key' is defined but never referenced
+    • root.root.children.GoodLabelName.custom.labelCustomProperty: custom property 'labelCustomProperty' is defined but never referenced
+    • root.root.children.FlexContainer.children.EmbeddedPotato.custom.key: custom property 'key' is defined but never referenced
+    • root.root.children.FlexContainer.children.EmbeddedPotato.custom.notSoBad: custom property 'notSoBad' is defined but never referenced
+    • root.root.children.FlexContainer.children.badEmbeddedPotato_0.custom.VeryVeryBadProperty: custom property 'VeryVeryBadProperty' is defined but never referenced
+    • root.root.children.bad potato.custom.VeryVeryBadProperty: custom property 'VeryVeryBadProperty' is defined but never referenced
+    • root.root.children.anotherBadPotato.custom.VeryVeryBadProperty: custom property 'VeryVeryBadProperty' is defined but never referenced
+    • custom.expr: custom property 'expr' is defined but never referenced
+    • custom.property: custom property 'property' is defined but never referenced
+    • custom.query: custom property 'query' is defined but never referenced
+    • custom.tagExpression: custom property 'tagExpression' is defined but never referenced
+    • custom.tagIndirect: custom property 'tagIndirect' is defined but never referenced
+    • custom.transformExpression: custom property 'transformExpression' is defined but never referenced
+    • custom.transformMap: custom property 'transformMap' is defined but never referenced
+    • custom.transformScript: custom property 'transformScript' is defined but never referenced
+    • custom.transofrmExpression: custom property 'transofrmExpression' is defined but never referenced
+    • params.valList: view parameter 'valList' is defined but never referenced
+    • custom.CUSTOM_VIEW_PARAM: custom property 'CUSTOM_VIEW_PARAM' is defined but never referenced
+    • params.VIEW_PARAM: view parameter 'VIEW_PARAM' is defined but never referenced
+    • root.root.children.ICON_UPPER_CASE.custom.COMPONENT_CUSTOM_PARAM: custom property 'COMPONENT_CUSTOM_PARAM' is defined but never referenced
+    • root.root.custom.ROOT_CUSTOM_PARAM: custom property 'ROOT_CUSTOM_PARAM' is defined but never referenced
+    • custom.custom_view_param: custom property 'custom_view_param' is defined but never referenced
+    • params.view_param: view parameter 'view_param' is defined but never referenced
+    • root.root.children.icon_snake_case.custom.component_custom_param: custom property 'component_custom_param' is defined but never referenced
+    • root.root.custom.root_custom_param: custom property 'root_custom_param' is defined but never referenced
+    • custom.test: custom property 'test' is defined but never referenced
+    • custom.custom-view-param: custom property 'custom-view-param' is defined but never referenced
+    • params.view-param: view parameter 'view-param' is defined but never referenced
+    • root.root.children.icon-kebab-case.custom.component-custom-param: custom property 'component-custom-param' is defined but never referenced
+    • root.root.custom.root-custom-param: custom property 'root-custom-param' is defined but never referenced
+    • custom.customViewParam: custom property 'customViewParam' is defined but never referenced
+    • params.viewParam: view parameter 'viewParam' is defined but never referenced
+    • root.root.children.iconCamelCase.custom.componentCustomParam: custom property 'componentCustomParam' is defined but never referenced
+    • root.root.custom.rootCustomParam: custom property 'rootCustomParam' is defined but never referenced
+    • custom.CustomViewParam: custom property 'CustomViewParam' is defined but never referenced
+    • params.ViewParam: view parameter 'ViewParam' is defined but never referenced
+    • root.root.children.IconPascalCase.custom.ComponentCustomParam: custom property 'ComponentCustomParam' is defined but never referenced
+    • root.root.custom.RootCustomParam: custom property 'RootCustomParam' is defined but never referenced
+    • root.root.children.IconPascalCase.custom.componentCustomParam: custom property 'componentCustomParam' is defined but never referenced
+    • root.root.custom.key: custom property 'key' is defined but never referenced
+    • custom.PrettyBigIssue: custom property 'PrettyBigIssue' is defined but never referenced
+    • custom.THISIsQuestionable: custom property 'THISIsQuestionable' is defined but never referenced
+    • custom.TRYAGAIN: custom property 'TRYAGAIN' is defined but never referenced
+    • custom.this_is_illegal: custom property 'this_is_illegal' is defined but never referenced
+    • params.VeryBadPractice: view parameter 'VeryBadPractice' is defined but never referenced
+    • root.root.children.GoodLabelName.custom.BadLabelCustomProp: custom property 'BadLabelCustomProp' is defined but never referenced
+    • root.root.children.GoodLabelName.custom.key: custom property 'key' is defined but never referenced
+    • root.root.children.GoodLabelName.custom.labelCustomProperty: custom property 'labelCustomProperty' is defined but never referenced
+    • root.root.children.FlexContainer.children.EmbeddedPotato.custom.key: custom property 'key' is defined but never referenced
+    • root.root.children.FlexContainer.children.EmbeddedPotato.custom.notSoBad: custom property 'notSoBad' is defined but never referenced
+    • root.root.children.FlexContainer.children.badEmbeddedPotato_0.custom.VeryVeryBadProperty: custom property 'VeryVeryBadProperty' is defined but never referenced
+    • root.root.children.bad potato.custom.VeryVeryBadProperty: custom property 'VeryVeryBadProperty' is defined but never referenced
+    • root.root.children.anotherBadPotato.custom.VeryVeryBadProperty: custom property 'VeryVeryBadProperty' is defined but never referenced
+    • custom.expr: custom property 'expr' is defined but never referenced
+    • custom.property: custom property 'property' is defined but never referenced
+    • custom.query: custom property 'query' is defined but never referenced
+    • custom.tagExpression: custom property 'tagExpression' is defined but never referenced
+    • custom.tagIndirect: custom property 'tagIndirect' is defined but never referenced
+    • custom.transformExpression: custom property 'transformExpression' is defined but never referenced
+    • custom.transformMap: custom property 'transformMap' is defined but never referenced
+    • custom.transformScript: custom property 'transformScript' is defined but never referenced
+    • custom.transofrmExpression: custom property 'transofrmExpression' is defined but never referenced
+    • params.valList: view parameter 'valList' is defined but never referenced
+    • custom.CUSTOM_VIEW_PARAM: custom property 'CUSTOM_VIEW_PARAM' is defined but never referenced
+    • params.VIEW_PARAM: view parameter 'VIEW_PARAM' is defined but never referenced
+    • root.root.children.ICON_UPPER_CASE.custom.COMPONENT_CUSTOM_PARAM: custom property 'COMPONENT_CUSTOM_PARAM' is defined but never referenced
+    • root.root.custom.ROOT_CUSTOM_PARAM: custom property 'ROOT_CUSTOM_PARAM' is defined but never referenced
+    • custom.custom_view_param: custom property 'custom_view_param' is defined but never referenced
+    • params.view_param: view parameter 'view_param' is defined but never referenced
+    • root.root.children.icon_snake_case.custom.component_custom_param: custom property 'component_custom_param' is defined but never referenced
+    • root.root.custom.root_custom_param: custom property 'root_custom_param' is defined but never referenced
+    • custom.test: custom property 'test' is defined but never referenced
+    • custom.custom-view-param: custom property 'custom-view-param' is defined but never referenced
+    • params.view-param: view parameter 'view-param' is defined but never referenced
+    • root.root.children.icon-kebab-case.custom.component-custom-param: custom property 'component-custom-param' is defined but never referenced
+    • root.root.custom.root-custom-param: custom property 'root-custom-param' is defined but never referenced
+    • custom.customViewParam: custom property 'customViewParam' is defined but never referenced
+    • params.viewParam: view parameter 'viewParam' is defined but never referenced
+    • root.root.children.iconCamelCase.custom.componentCustomParam: custom property 'componentCustomParam' is defined but never referenced
+    • root.root.custom.rootCustomParam: custom property 'rootCustomParam' is defined but never referenced
+    • custom.CustomViewParam: custom property 'CustomViewParam' is defined but never referenced
+    • params.ViewParam: view parameter 'ViewParam' is defined but never referenced
+    • root.root.children.IconPascalCase.custom.ComponentCustomParam: custom property 'ComponentCustomParam' is defined but never referenced
+    • root.root.custom.RootCustomParam: custom property 'RootCustomParam' is defined but never referenced
+    • root.root.children.IconPascalCase.custom.componentCustomParam: custom property 'componentCustomParam' is defined but never referenced
+
+
+================================================================================
+📦 BATCH RULE FINALIZATION RESULTS
+================================================================================
+
+❌ ERRORS (93 total):
+
+  📋 PylintScriptRule:
+    • root.root.children[4].MessageHandlerComponent.scripts.messageHandlers[0]: Line 4: 'expected an indented block after function definition on line 9 (111316_mpfv1rsx, line 12)' (syntax-error)
+
+  📋 UnusedCustomPropertiesRule:
+    • root.root.custom.key: custom property 'key' is defined but never referenced
+    • custom.PrettyBigIssue: custom property 'PrettyBigIssue' is defined but never referenced
+    • custom.THISIsQuestionable: custom property 'THISIsQuestionable' is defined but never referenced
+    • custom.TRYAGAIN: custom property 'TRYAGAIN' is defined but never referenced
+    • custom.this_is_illegal: custom property 'this_is_illegal' is defined but never referenced
+    • params.VeryBadPractice: view parameter 'VeryBadPractice' is defined but never referenced
+    • root.root.children.GoodLabelName.custom.BadLabelCustomProp: custom property 'BadLabelCustomProp' is defined but never referenced
+    • root.root.children.GoodLabelName.custom.key: custom property 'key' is defined but never referenced
+    • root.root.children.GoodLabelName.custom.labelCustomProperty: custom property 'labelCustomProperty' is defined but never referenced
+    • root.root.children.FlexContainer.children.EmbeddedPotato.custom.key: custom property 'key' is defined but never referenced
+    • root.root.children.FlexContainer.children.EmbeddedPotato.custom.notSoBad: custom property 'notSoBad' is defined but never referenced
+    • root.root.children.FlexContainer.children.badEmbeddedPotato_0.custom.VeryVeryBadProperty: custom property 'VeryVeryBadProperty' is defined but never referenced
+    • root.root.children.bad potato.custom.VeryVeryBadProperty: custom property 'VeryVeryBadProperty' is defined but never referenced
+    • root.root.children.anotherBadPotato.custom.VeryVeryBadProperty: custom property 'VeryVeryBadProperty' is defined but never referenced
+    • custom.expr: custom property 'expr' is defined but never referenced
+    • custom.property: custom property 'property' is defined but never referenced
+    • custom.query: custom property 'query' is defined but never referenced
+    • custom.tagExpression: custom property 'tagExpression' is defined but never referenced
+    • custom.tagIndirect: custom property 'tagIndirect' is defined but never referenced
+    • custom.transformExpression: custom property 'transformExpression' is defined but never referenced
+    • custom.transformMap: custom property 'transformMap' is defined but never referenced
+    • custom.transformScript: custom property 'transformScript' is defined but never referenced
+    • custom.transofrmExpression: custom property 'transofrmExpression' is defined but never referenced
+    • params.valList: view parameter 'valList' is defined but never referenced
+    • custom.CUSTOM_VIEW_PARAM: custom property 'CUSTOM_VIEW_PARAM' is defined but never referenced
+    • params.VIEW_PARAM: view parameter 'VIEW_PARAM' is defined but never referenced
+    • root.root.children.ICON_UPPER_CASE.custom.COMPONENT_CUSTOM_PARAM: custom property 'COMPONENT_CUSTOM_PARAM' is defined but never referenced
+    • root.root.custom.ROOT_CUSTOM_PARAM: custom property 'ROOT_CUSTOM_PARAM' is defined but never referenced
+    • custom.custom_view_param: custom property 'custom_view_param' is defined but never referenced
+    • params.view_param: view parameter 'view_param' is defined but never referenced
+    • root.root.children.icon_snake_case.custom.component_custom_param: custom property 'component_custom_param' is defined but never referenced
+    • root.root.custom.root_custom_param: custom property 'root_custom_param' is defined but never referenced
+    • custom.test: custom property 'test' is defined but never referenced
+    • custom.custom-view-param: custom property 'custom-view-param' is defined but never referenced
+    • params.view-param: view parameter 'view-param' is defined but never referenced
+    • root.root.children.icon-kebab-case.custom.component-custom-param: custom property 'component-custom-param' is defined but never referenced
+    • root.root.custom.root-custom-param: custom property 'root-custom-param' is defined but never referenced
+    • custom.customViewParam: custom property 'customViewParam' is defined but never referenced
+    • params.viewParam: view parameter 'viewParam' is defined but never referenced
+    • root.root.children.iconCamelCase.custom.componentCustomParam: custom property 'componentCustomParam' is defined but never referenced
+    • root.root.custom.rootCustomParam: custom property 'rootCustomParam' is defined but never referenced
+    • custom.CustomViewParam: custom property 'CustomViewParam' is defined but never referenced
+    • params.ViewParam: view parameter 'ViewParam' is defined but never referenced
+    • root.root.children.IconPascalCase.custom.ComponentCustomParam: custom property 'ComponentCustomParam' is defined but never referenced
+    • root.root.custom.RootCustomParam: custom property 'RootCustomParam' is defined but never referenced
+    • root.root.children.IconPascalCase.custom.componentCustomParam: custom property 'componentCustomParam' is defined but never referenced
+    • root.root.custom.key: custom property 'key' is defined but never referenced
+    • custom.PrettyBigIssue: custom property 'PrettyBigIssue' is defined but never referenced
+    • custom.THISIsQuestionable: custom property 'THISIsQuestionable' is defined but never referenced
+    • custom.TRYAGAIN: custom property 'TRYAGAIN' is defined but never referenced
+    • custom.this_is_illegal: custom property 'this_is_illegal' is defined but never referenced
+    • params.VeryBadPractice: view parameter 'VeryBadPractice' is defined but never referenced
+    • root.root.children.GoodLabelName.custom.BadLabelCustomProp: custom property 'BadLabelCustomProp' is defined but never referenced
+    • root.root.children.GoodLabelName.custom.key: custom property 'key' is defined but never referenced
+    • root.root.children.GoodLabelName.custom.labelCustomProperty: custom property 'labelCustomProperty' is defined but never referenced
+    • root.root.children.FlexContainer.children.EmbeddedPotato.custom.key: custom property 'key' is defined but never referenced
+    • root.root.children.FlexContainer.children.EmbeddedPotato.custom.notSoBad: custom property 'notSoBad' is defined but never referenced
+    • root.root.children.FlexContainer.children.badEmbeddedPotato_0.custom.VeryVeryBadProperty: custom property 'VeryVeryBadProperty' is defined but never referenced
+    • root.root.children.bad potato.custom.VeryVeryBadProperty: custom property 'VeryVeryBadProperty' is defined but never referenced
+    • root.root.children.anotherBadPotato.custom.VeryVeryBadProperty: custom property 'VeryVeryBadProperty' is defined but never referenced
+    • custom.expr: custom property 'expr' is defined but never referenced
+    • custom.property: custom property 'property' is defined but never referenced
+    • custom.query: custom property 'query' is defined but never referenced
+    • custom.tagExpression: custom property 'tagExpression' is defined but never referenced
+    • custom.tagIndirect: custom property 'tagIndirect' is defined but never referenced
+    • custom.transformExpression: custom property 'transformExpression' is defined but never referenced
+    • custom.transformMap: custom property 'transformMap' is defined but never referenced
+    • custom.transformScript: custom property 'transformScript' is defined but never referenced
+    • custom.transofrmExpression: custom property 'transofrmExpression' is defined but never referenced
+    • params.valList: view parameter 'valList' is defined but never referenced
+    • custom.CUSTOM_VIEW_PARAM: custom property 'CUSTOM_VIEW_PARAM' is defined but never referenced
+    • params.VIEW_PARAM: view parameter 'VIEW_PARAM' is defined but never referenced
+    • root.root.children.ICON_UPPER_CASE.custom.COMPONENT_CUSTOM_PARAM: custom property 'COMPONENT_CUSTOM_PARAM' is defined but never referenced
+    • root.root.custom.ROOT_CUSTOM_PARAM: custom property 'ROOT_CUSTOM_PARAM' is defined but never referenced
+    • custom.custom_view_param: custom property 'custom_view_param' is defined but never referenced
+    • params.view_param: view parameter 'view_param' is defined but never referenced
+    • root.root.children.icon_snake_case.custom.component_custom_param: custom property 'component_custom_param' is defined but never referenced
+    • root.root.custom.root_custom_param: custom property 'root_custom_param' is defined but never referenced
+    • custom.test: custom property 'test' is defined but never referenced
+    • custom.custom-view-param: custom property 'custom-view-param' is defined but never referenced
+    • params.view-param: view parameter 'view-param' is defined but never referenced
+    • root.root.children.icon-kebab-case.custom.component-custom-param: custom property 'component-custom-param' is defined but never referenced
+    • root.root.custom.root-custom-param: custom property 'root-custom-param' is defined but never referenced
+    • custom.customViewParam: custom property 'customViewParam' is defined but never referenced
+    • params.viewParam: view parameter 'viewParam' is defined but never referenced
+    • root.root.children.iconCamelCase.custom.componentCustomParam: custom property 'componentCustomParam' is defined but never referenced
+    • root.root.custom.rootCustomParam: custom property 'rootCustomParam' is defined but never referenced
+    • custom.CustomViewParam: custom property 'CustomViewParam' is defined but never referenced
+    • params.ViewParam: view parameter 'ViewParam' is defined but never referenced
+    • root.root.children.IconPascalCase.custom.ComponentCustomParam: custom property 'ComponentCustomParam' is defined but never referenced
+    • root.root.custom.RootCustomParam: custom property 'RootCustomParam' is defined but never referenced
+    • root.root.children.IconPascalCase.custom.componentCustomParam: custom property 'componentCustomParam' is defined but never referenced
+
+================================================================================
+END OF RESULTS
+================================================================================

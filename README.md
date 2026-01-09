@@ -791,11 +791,28 @@ pre-commit run
 **Notes:**
 
 - Hook automatically runs only on `view.json` files
-- Default config uses warnings-only mode (won't block commits)
+- **Default behavior**: Both warnings and errors block commits
 - Pre-commit checks only **modified files** (incremental linting)
 - Config paths are resolved relative to your repository root
 - Customize pylintrc via the `pylintrc` parameter in your `rule_config.json`
 - **Recommended**: Use Option B (lightweight) to reduce initial download from ~64MB to ~1MB
+
+**Warnings vs Errors:**
+By default, both warnings and errors will block commits:
+- **Warnings** (e.g., naming conventions): Style issues that should be fixed
+- **Errors** (e.g., undefined variables, excessive context data): Critical issues that must be fixed
+
+To allow commits with warnings (only block on errors), add `--ignore-warnings`:
+```yaml
+repos:
+  - repo: https://github.com/bw-design-group/ignition-lint
+    rev: v0.2.4
+    hooks:
+      - id: ignition-lint
+        args: ['--config=rule_config.json', '--files', '--ignore-warnings']
+```
+
+This is useful for teams that want to gradually address warnings without blocking development.
 
 **For full repository scans**, use the CLI directly instead of `pre-commit run --all-files`:
 ```bash
