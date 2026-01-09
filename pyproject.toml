@@ -6,7 +6,12 @@ authors = ["Eric Knorr", "Alex Spyksma"]
 license = "MIT"
 readme = "README.md"
 homepage = "https://github.com/design-group/ignition-lint"
-packages = [{ include = "ignition_lint", from = "src" }]
+packages = [
+    { include = "ignition_lint", from = "src" }
+]
+include = [
+    ".config/**/*"
+]
 
 [tool.poetry.dependencies]
 python = ">=3.9,<3.13"

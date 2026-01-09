@@ -1,8 +1,35 @@
 repos:
+  # ============================================================================
+  # PRE-COMMIT HOOKS (Fast checks on every commit - should complete in seconds)
+  # ============================================================================
+
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.5.0
+    hooks:
+      - id: trailing-whitespace
+        stages: [pre-commit]
+      - id: end-of-file-fixer
+        types: [python]
+        stages: [pre-commit]
+      - id: check-yaml
+        stages: [pre-commit]
+      - id: check-added-large-files
+        stages: [pre-commit]
+
   - repo: local
     hooks:
-      - id: pylint
-        name: pylint
+      # Fast formatting check (doesn't modify, just checks)
+      - id: yapf-check
+        name: yapf format check
+        entry: yapf
+        language: system
+        types: [python]
+        args: ["-d"]  # Diff mode - just check, don't modify
+        stages: [pre-commit]
+
+      # Quick pylint on changed files only
+      - id: pylint-quick
+        name: pylint (changed files only)
         entry: pylint
         language: system
         types: [python]
@@ -10,6 +37,7 @@ repos:
           "--rcfile=.config/.pylintrc",
           "--msg-template=\"{path}({line}): [{obj}] {msg} ({symbol})\"",
         ]
+        stages: [pre-commit]
 
       # - id: markdownlint
       #   name: markdownlint
@@ -20,12 +48,28 @@ repos:
       #     "--config=.config/.markdownlint.json",
       #     "--ignore-path=.config/.markdownlintignore"
       #   ]
+      #   stages: [commit]
 
-  - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v4.5.0
+  # ============================================================================
+  # PRE-PUSH HOOKS (Comprehensive checks before push - can take minutes)
+  # ============================================================================
+
+  - repo: local
     hooks:
-      - id: trailing-whitespace
-      - id: end-of-file-fixer
-        types: [python]
-      - id: check-yaml
-      - id: check-added-large-files
+      # Full pylint on entire codebase
+      - id: pylint-full
+        name: pylint (full codebase)
+        entry: bash -c 'pylint src/ tests/ scripts/ --rcfile=.config/.pylintrc'
+        language: system
+        pass_filenames: false
+        always_run: true
+        stages: [pre-push]
+
+      # Full test suite
+      - id: run-all-tests
+        name: Run full test suite
+        entry: bash -c 'cd tests && python test_runner.py --run-all'
+        language: system
+        pass_filenames: false
+        always_run: true
+        stages: [pre-push]

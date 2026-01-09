@@ -38,7 +38,12 @@ def load_config(config_path: str) -> dict:
 
 
 def create_rules_from_config(config: dict) -> list:
-	"""Create rule instances from config dictionary using self-processing rules."""
+	"""
+	Create rule instances from config dictionary using self-processing rules.
+
+	Args:
+		config: Configuration dictionary from config file
+	"""
 	rules = []
 	for rule_name, rule_config in config.items():
 		# Skip private keys or invalid configurations
@@ -263,7 +268,10 @@ def process_single_file(file_path: Path, lint_engine: LintEngine, args) -> tuple
 	return 0, 0
 
 
-def print_final_summary(processed_files: int, total_warnings: int, total_errors: int, files_with_issues: int, stats_only: bool, warnings_only_mode: bool = False):
+def print_final_summary(
+	processed_files: int, total_warnings: int, total_errors: int, files_with_issues: int, stats_only: bool,
+	warnings_only_mode: bool = False
+):
 	"""Print the final summary of the linting process."""
 	print("\n📈 Summary:")
 	print(f"  Files processed: {processed_files}")
@@ -373,7 +381,9 @@ def main():
 			files_with_issues += 1
 
 	# Print final summary
-	print_final_summary(processed_files, total_warnings, total_errors, files_with_issues, args.stats_only, args.warnings_only)
+	print_final_summary(
+		processed_files, total_warnings, total_errors, files_with_issues, args.stats_only, args.warnings_only
+	)
 
 
 if __name__ == "__main__":

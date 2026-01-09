@@ -673,19 +673,64 @@ ignition-lint path/to/view.json
 
 ### 2. Pre-commit Hook Integration
 
-Add to your `.pre-commit-config.yaml`:
+**Option A: Standard (clones entire repository ~64MB):**
 
 ```yaml
 repos:
-  - repo: https://github.com/design-group/ignition-lint
-    rev: v0.1.0
+  - repo: https://github.com/bw-design-group/ignition-lint
+    rev: v0.2.4  # Use the latest release tag
     hooks:
       - id: ignition-lint
-        args: [
-          "--config", "rule_config.json",
-          "--files", "**/*.json"
-        ]
+        # Hook runs on view.json files by default with warnings-only mode
+```
+
+**Option B: Lightweight (installs only Python package ~1MB, recommended):**
+
+```yaml
+repos:
+  - repo: local
+    hooks:
+      - id: ignition-lint
+        name: Ignition Lint
+        entry: ignition-lint
+        language: python
+        types: [json]
         files: view\.json$
+        args: ['--config=rule_config.json', '--files', '--warnings-only']
+        pass_filenames: true
+        additional_dependencies:
+          - 'git+https://github.com/bw-design-group/ignition-lint@v0.2.4'
+```
+
+> **Note**: Option B installs only the Python package without cloning tests, docker files, and documentation, reducing download size from ~64MB to ~1MB.
+
+**With custom configuration (Option A - Standard):**
+
+```yaml
+repos:
+  - repo: https://github.com/bw-design-group/ignition-lint
+    rev: v0.2.4
+    hooks:
+      - id: ignition-lint
+        args: ['--config=rule_config.json', '--files']
+```
+
+**With custom configuration (Option B - Lightweight):**
+
+```yaml
+repos:
+  - repo: local
+    hooks:
+      - id: ignition-lint
+        name: Ignition Lint
+        entry: ignition-lint
+        language: python
+        types: [json]
+        files: view\.json$
+        args: ['--config=rule_config.json', '--files']
+        pass_filenames: true
+        additional_dependencies:
+          - 'git+https://github.com/bw-design-group/ignition-lint@v0.2.4'
 ```
 
 Install and run:
@@ -699,6 +744,15 @@ pre-commit run --all-files
 # Run on staged files only
 pre-commit run
 ```
+
+**Notes:**
+
+- Hook automatically runs only on `view.json` files
+- Default config uses warnings-only mode (won't block commits)
+- Pre-commit automatically passes matched filenames to the tool
+- Config paths are resolved relative to your repository root
+- Customize pylintrc via the `pylintrc` parameter in your `rule_config.json`
+- **Recommended**: Use Option B (lightweight) to reduce initial download from ~64MB to ~1MB
 
 ### 3. GitHub Actions Workflow
 
