@@ -97,6 +97,48 @@ class LintEngine:
 
 		return LintResults(warnings=warnings, errors=errors, has_errors=bool(errors), rule_timings=rule_timings)
 
+	def finalize_batch_rules(self, enable_timing: bool = False) -> LintResults:
+		"""
+		Finalize batch rules after all files have been processed.
+
+		This method should be called after processing all files to allow batch rules
+		(like PylintScriptRule in batch mode) to process accumulated data.
+
+		Args:
+			enable_timing: Whether to time rule finalization
+
+		Returns:
+			LintResults containing any warnings/errors from finalization
+		"""
+		warnings = {}
+		errors = {}
+		rule_timings = {}
+
+		# Finalize each rule that supports batching
+		for rule in self.rules:
+			if hasattr(rule, 'finalize'):
+				# Time finalization if timing is enabled
+				if enable_timing:
+					start_time = time.perf_counter()
+
+				# Call finalize method
+				rule.finalize()
+
+				# Record timing if enabled
+				if enable_timing:
+					duration_ms = (time.perf_counter() - start_time) * 1000.0
+					rule_timings[f"{rule.__class__.__name__}_finalize"] = duration_ms
+
+				# Collect warnings from finalization
+				if rule.warnings:
+					warnings[rule.error_key] = rule.warnings
+
+				# Collect errors from finalization
+				if rule.errors:
+					errors[rule.error_key] = rule.errors
+
+		return LintResults(warnings=warnings, errors=errors, has_errors=bool(errors), rule_timings=rule_timings)
+
 	def get_model_statistics(self, flattened_json: Dict[str, Any]) -> Dict[str, Any]:
 		"""Get statistics about the parsed model for debugging/analysis."""
 		self.flattened_json = flattened_json

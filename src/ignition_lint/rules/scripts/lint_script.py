@@ -22,9 +22,10 @@ from ...model.node_types import ScriptNode
 class PylintScriptRule(ScriptRule):
 	"""Rule to run pylint on all script types using the simplified interface."""
 
-	def __init__(self, severity="error", pylintrc=None, debug=False):
+	def __init__(self, severity="error", pylintrc=None, debug=False, batch_mode=True):
 		super().__init__(severity=severity)  # Targets all script types by default
 		self.debug = debug  # Debug mode disabled by default for performance
+		self.batch_mode = batch_mode  # Batch mode enabled by default for performance
 		self.pylintrc = self._resolve_pylintrc_path(pylintrc)
 
 	def _resolve_pylintrc_path(self, pylintrc: Optional[str]) -> Optional[str]:
@@ -64,6 +65,39 @@ class PylintScriptRule(ScriptRule):
 	@property
 	def error_message(self) -> str:
 		return "Pylint detected issues in script"
+
+	def process_nodes(self, nodes):
+		"""Override to handle batch mode - don't reset scripts when batching across files."""
+		if not self.batch_mode:
+			# Non-batch mode: reset everything per file and process immediately
+			self.errors = []
+			self.warnings = []
+			self.collected_scripts = {}
+		# In batch mode: don't reset anything - accumulate across all files
+
+		# Filter nodes that this rule applies to
+		applicable_nodes = [node for node in nodes if self.applies_to(node)]
+
+		# Visit each applicable node (collect scripts)
+		for node in applicable_nodes:
+			node.accept(self)
+
+		# Call post_process (in batch mode this does nothing)
+		self.post_process()
+
+	def post_process(self):
+		"""Override to skip processing in batch mode - wait for finalize() instead."""
+		if not self.batch_mode:
+			# Non-batch mode: process immediately
+			if self.collected_scripts:
+				self.process_scripts(self.collected_scripts)
+				self.collected_scripts = {}
+
+	def finalize(self):
+		"""Process all accumulated scripts across all files (batch mode only)."""
+		if self.batch_mode and self.collected_scripts:
+			self.process_scripts(self.collected_scripts)
+			self.collected_scripts = {}
 
 	def process_scripts(self, scripts: Dict[str, ScriptNode]):
 		"""Process all collected scripts with pylint."""

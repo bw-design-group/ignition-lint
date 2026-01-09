@@ -501,6 +501,31 @@ def main():
 		if file_warnings > 0 or file_errors > 0:
 			files_with_issues += 1
 
+	# Finalize batch rules (e.g., PylintScriptRule in batch mode)
+	if not args.stats_only:
+		finalize_results = lint_engine.finalize_batch_rules(enable_timing=bool(performance_timer))
+
+		# Process finalization results
+		if finalize_results.warnings or finalize_results.errors:
+			print("\n" + "=" * 80)
+			print("📦 Batch Rule Finalization Results")
+			print("=" * 80)
+
+			# Print finalization warnings and errors
+			for rule_name, warning_list in finalize_results.warnings.items():
+				for warning in warning_list:
+					print(f"⚠️  {rule_name}: {warning}")
+					total_warnings += 1
+
+			for rule_name, error_list in finalize_results.errors.items():
+				for error in error_list:
+					print(f"❌ {rule_name}: {error}")
+					total_errors += 1
+
+			# Update files_with_issues count if finalization found issues
+			if finalize_results.has_errors or finalize_results.warnings:
+				files_with_issues = max(files_with_issues, 1)  # At least one file had issues
+
 	# Stop timing if enabled
 	if timing_collector:
 		timing_collector.stop_total_timing()
