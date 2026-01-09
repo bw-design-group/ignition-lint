@@ -1,0 +1,5 @@
+[lfs]
+	# Skip LFS file downloads during clone/checkout
+	# This allows pre-commit and CI to work without requiring LFS files
+	# Developers can manually fetch LFS files with: git lfs pull
+	fetchexclude = *
