@@ -557,21 +557,24 @@ def main():
 			files_with_issues += 1
 
 	# Finalize batch rules (e.g., PylintScriptRule in batch mode)
+	# NOTE: In non-batch mode (default), rules process per-file and finalize() returns empty results
+	# This section only produces output for rules running in batch mode (processing all files together)
 	finalize_results = None
 	if not args.stats_only:
 		finalize_results = lint_engine.finalize_batch_rules(enable_timing=bool(performance_timer))
 
-		# Process finalization results
+		# Process finalization results (only non-empty when rules run in batch mode)
 		if finalize_results.warnings or finalize_results.errors:
-			# If only one file was processed, integrate results into that file's output
+			finalize_warning_count = sum(len(w) for w in finalize_results.warnings.values())
+			finalize_error_count = sum(len(e) for e in finalize_results.errors.values())
+
+			# If only one file was processed, show batch results in standard format
 			if len(file_paths) == 1:
 				file_path = file_paths[0]
-				finalize_warning_count = sum(len(w) for w in finalize_results.warnings.values())
-				finalize_error_count = sum(len(e) for e in finalize_results.errors.values())
 
-				# Print warnings in standard format
+				# Print warnings
 				if finalize_warning_count > 0:
-					print(f"\n⚠️  Found {finalize_warning_count} additional warnings in {file_path}:")
+					print(f"\n⚠️  Found {finalize_warning_count} warnings in {file_path}:")
 					for rule_name, warning_list in finalize_results.warnings.items():
 						if warning_list:
 							print(f"  📋 {rule_name} (warning):")
@@ -579,9 +582,9 @@ def main():
 								print(f"    • {warning}")
 								total_warnings += 1
 
-				# Print errors in standard format
+				# Print errors
 				if finalize_error_count > 0:
-					print(f"\n❌ Found {finalize_error_count} additional errors in {file_path}:")
+					print(f"\n❌ Found {finalize_error_count} errors in {file_path}:")
 					for rule_name, error_list in finalize_results.errors.items():
 						if error_list:
 							print(f"  📋 {rule_name} (error):")
@@ -589,12 +592,12 @@ def main():
 								print(f"    • {error}")
 								total_errors += 1
 			else:
-				# Multiple files: keep the separate section for batch results
+				# Multiple files: show batch results in separate section
 				print("\n" + "=" * 80)
-				print("📦 Batch Rule Finalization Results (All Files)")
+				print("📦 Batch Rule Results (All Files)")
 				print("=" * 80)
 
-				# Print finalization warnings and errors
+				# Print warnings and errors
 				for rule_name, warning_list in finalize_results.warnings.items():
 					for warning in warning_list:
 						print(f"⚠️  {rule_name}: {warning}")
