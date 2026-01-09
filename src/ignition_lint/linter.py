@@ -44,9 +44,10 @@ class LintEngine:
 		enable_timing: bool = False
 	) -> LintResults:
 		"""Lint the given flattened JSON and return warnings and errors."""
-		# Build the object model
-		self.flattened_json = flattened_json
-		self.view_model = self.get_view_model()
+		# Build the object model (only if flattened_json changed)
+		if self.flattened_json is not flattened_json:
+			self.flattened_json = flattened_json
+			self.view_model = self.get_view_model()
 
 		# Save debug information if debug output directory is configured
 		if self.debug_output_dir and source_file_path:
