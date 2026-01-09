@@ -7,6 +7,48 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.2.6] - 2026-01-09
+
+### Added
+- Performance profiling with `--timing-output` and `--results-output` flags [b66e88b]
+- Batch processing mode for PylintScriptRule to process all files together [95b81fa]
+- ExcessiveContextDataRule to detect large arrays and excessive nesting in custom properties [9d76661]
+- Four detection methods for excessive context data: array size, sibling properties, nesting depth, total data points [41e3c95]
+- Detailed warnings and errors in results report output [3da2a29]
+- Timestamp to timing reports for tracking report generation time [cc3eb3b]
+- Auto-save debug files when PylintScriptRule finds errors [0ce3555]
+- Configurable debug directory for PylintScriptRule via `debug_dir` parameter [43fa11f]
+- File path header display at top of output before violations [ee1cb1f]
+
+### Changed
+- Disabled batch mode by default for clearer per-file output [28ac26e]
+- `--warnings-only` flag replaced with `--ignore-warnings` for clearer intent [e81c1c1]
+- Removed confusing "additional" wording from batch results output [20a8956]
+- File path now shown once at top instead of repeated in each violation header [ee1cb1f]
+
+### Fixed
+- Pre-commit compatibility and configuration simplification [942cc7f]
+- CSS property detection now includes all style containers [8c2d21f]
+- Deprecated stage names in pre-commit configuration [cdc1bc0]
+- Duplicate model building in LintEngine [7f0c84b]
+- Duplicate violation output in non-batch mode [52295bb]
+- Duplicate warning statements in output [d667c78]
+- Report styling improvements [f83ea8a]
+- Strip array indices from script function names for valid Python [33271a6]
+- Warn when specified pylintrc file is not found [c1b904f]
+- Always show pylintrc resolution in debug mode [5936f59]
+- Create parent directories for timing and results output files [bf1a9bd]
+- Suppress pylint module name errors for temporary files with timestamps [cf7ba13]
+- Rule name spacing in output [8ac97c1]
+
+### Performance
+- Optimized `_is_property_persistent` with propConfig caching (30s → <1s for large files) [a618dda]
+- PylintScriptRule quick optimization wins [dbb00e5]
+
+### Documentation
+- Added ExcessiveContextDataRule documentation [5ffa23d]
+- Corrected pre-commit workflow documentation (incremental checks vs full scans) [795d9a1]
+
 ## [0.2.5] - 2026-01-09
 
 ### Added
