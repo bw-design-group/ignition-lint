@@ -22,9 +22,9 @@ from ...model.node_types import ScriptNode
 class PylintScriptRule(ScriptRule):
 	"""Rule to run pylint on all script types using the simplified interface."""
 
-	def __init__(self, severity="error", pylintrc=None):
+	def __init__(self, severity="error", pylintrc=None, debug=False):
 		super().__init__(severity=severity)  # Targets all script types by default
-		self.debug = True
+		self.debug = debug  # Debug mode disabled by default for performance
 		self.pylintrc = self._resolve_pylintrc_path(pylintrc)
 
 	def _resolve_pylintrc_path(self, pylintrc: Optional[str]) -> Optional[str]:
@@ -67,7 +67,12 @@ class PylintScriptRule(ScriptRule):
 
 	def process_scripts(self, scripts: Dict[str, ScriptNode]):
 		"""Process all collected scripts with pylint."""
+		# Quick exit: Skip processing if there are no scripts
 		if not scripts:
+			return
+
+		# Quick exit: Skip if all scripts are empty
+		if all(not script.script.strip() for script in scripts.values()):
 			return
 
 		# Run pylint on all scripts at once
@@ -81,7 +86,8 @@ class PylintScriptRule(ScriptRule):
 
 	def _run_pylint_batch(self, scripts: Dict[str, ScriptNode]) -> Dict[str, List[str]]:
 		"""Run pylint on multiple scripts at once."""
-		debug_dir = self._setup_debug_directory()
+		# Only create debug directory if debug mode is enabled
+		debug_dir = self._setup_debug_directory() if self.debug else None
 		combined_content, line_map = self._combine_scripts(scripts)
 		path_to_issues = {path: [] for path in scripts.keys()}
 		temp_file_path = None
@@ -100,8 +106,11 @@ class PylintScriptRule(ScriptRule):
 
 		return path_to_issues
 
-	def _setup_debug_directory(self) -> str:
-		"""Create and return debug directory path."""
+	def _setup_debug_directory(self) -> Optional[str]:
+		"""Create and return debug directory path. Returns None if debug mode is disabled."""
+		if not self.debug:
+			return None
+
 		# Try to detect if we're in a test environment and use tests/debug
 		cwd = os.getcwd()
 		tests_debug_dir = None
@@ -167,9 +176,10 @@ class PylintScriptRule(ScriptRule):
 			temp_file.write(content.encode('utf-8'))
 			return temp_file.name
 
-	def _run_pylint_on_file(self, temp_file_path: str, debug_dir: str) -> str:
+	def _run_pylint_on_file(self, temp_file_path: str, debug_dir: Optional[str]) -> str:
 		"""Execute pylint on the temporary file and return output."""
-		if self.debug:
+		# Only save debug files if debug mode is enabled
+		if self.debug and debug_dir:
 			_save_debug_file(temp_file_path, debug_dir)
 
 		pylint_output = StringIO()
@@ -180,7 +190,7 @@ class PylintScriptRule(ScriptRule):
 		# Use custom or standard pylintrc if available
 		if self.pylintrc:
 			args.extend(['--rcfile', self.pylintrc])
-			if self.debug:
+			if self.debug and debug_dir:
 				with open(os.path.join(debug_dir, "pylintrc_used.txt"), 'w', encoding='utf-8') as f:
 					f.write(f"Using pylintrc: {self.pylintrc}\n")
 		else:
@@ -189,7 +199,7 @@ class PylintScriptRule(ScriptRule):
 				'--disable=all',
 				'--enable=unused-import,undefined-variable,syntax-error,invalid-name',
 			])
-			if self.debug:
+			if self.debug and debug_dir:
 				with open(os.path.join(debug_dir, "pylintrc_used.txt"), 'w', encoding='utf-8') as f:
 					f.write("No pylintrc found - using inline configuration\n")
 
@@ -213,14 +223,15 @@ class PylintScriptRule(ScriptRule):
 
 		output = pylint_output.getvalue()
 
-		if self.debug:
+		# Only write debug output if debug mode is enabled
+		if self.debug and debug_dir:
 			with open(os.path.join(debug_dir, "pylint_output.txt"), 'w', encoding='utf-8') as f:
 				f.write(output)
 
 		return output
 
 	def _parse_pylint_output(
-		self, output: str, line_map: Dict[int, str], path_to_issues: Dict[str, List[str]], debug_dir: str
+		self, output: str, line_map: Dict[int, str], path_to_issues: Dict[str, List[str]], debug_dir: Optional[str]
 	) -> None:
 		"""Parse pylint output and map issues back to original scripts."""
 		pattern = r'.*:(\d+):\d+: .+: (.+)'
@@ -239,7 +250,8 @@ class PylintScriptRule(ScriptRule):
 					path_to_issues[script_path].append(f"Line {relative_line}: {message}")
 
 			except (ValueError, IndexError) as e:
-				self._log_parse_error(line, e, debug_dir)
+				if self.debug and debug_dir:
+					self._log_parse_error(line, e, debug_dir)
 
 	def _find_script_for_line(self, line_num: int, line_map: Dict[int, str]) -> Optional[str]:
 		"""Find which script a line number belongs to."""
@@ -258,21 +270,25 @@ class PylintScriptRule(ScriptRule):
 		with open(os.path.join(debug_dir, "pylint_error.txt"), 'a', encoding='utf-8') as f:
 			f.write(f"Error parsing line: {line}\nException: {str(error)}\n\n")
 
-	def _handle_pylint_error(self, error_msg: str, debug_dir: str, path_to_issues: Dict[str, List[str]]) -> None:
+	def _handle_pylint_error(self, error_msg: str, debug_dir: Optional[str], path_to_issues: Dict[str, List[str]]) -> None:
 		"""Handle and log pylint execution errors."""
-		with open(os.path.join(debug_dir, "pylint_error.txt"), 'w', encoding='utf-8') as f:
-			f.write(error_msg)
+		# Only write debug files if debug mode is enabled
+		if self.debug and debug_dir:
+			with open(os.path.join(debug_dir, "pylint_error.txt"), 'w', encoding='utf-8') as f:
+				f.write(error_msg)
 		for path in path_to_issues:
 			path_to_issues[path].append(error_msg)
 
-	def _cleanup_temp_file(self, temp_file_path: str, debug_dir: str, path_to_issues: Dict[str, List[str]]) -> None:
+	def _cleanup_temp_file(self, temp_file_path: str, debug_dir: Optional[str], path_to_issues: Dict[str, List[str]]) -> None:
 		"""Clean up temporary file, keeping it for debug if there were issues."""
 		if temp_file_path and os.path.exists(temp_file_path):
-			if any(issues for issues in path_to_issues.values()):
+			# Only save debug files if debug mode is enabled OR there are issues
+			has_issues = any(issues for issues in path_to_issues.values())
+			if has_issues and self.debug and debug_dir:
 				shutil.copy(temp_file_path, os.path.join(debug_dir, "pylint_input_temp.py"))
 				print(f"Pylint encountered issues. Debug files saved to: {debug_dir}")
-			else:
-				os.remove(temp_file_path)
+			# Always clean up the temp file (was already copied to debug if needed)
+			os.remove(temp_file_path)
 
 
 def _save_debug_file(temp_file_path: str, debug_dir: str):
