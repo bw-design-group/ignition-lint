@@ -129,7 +129,7 @@ def print_file_results(file_path: Path, lint_results) -> tuple[int, int]:
 		print(f"\n⚠️  Found {warning_count} warnings:")
 		for rule_name, warning_list in lint_results.warnings.items():
 			if warning_list:
-				print(f"  📋 {rule_name} (warning):")
+				print(f"\n  📋 {rule_name} (warning):")
 				for warning in warning_list:
 					print(f"    • {warning}")
 
@@ -138,7 +138,7 @@ def print_file_results(file_path: Path, lint_results) -> tuple[int, int]:
 		print(f"\n❌ Found {error_count} errors:")
 		for rule_name, error_list in lint_results.errors.items():
 			if error_list:
-				print(f"  📋 {rule_name} (error):")
+				print(f"\n  📋 {rule_name} (error):")
 				for error in error_list:
 					print(f"    • {error}")
 
