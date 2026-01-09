@@ -231,8 +231,9 @@ def setup_linter(args) -> LintEngine:
 	return lint_engine
 
 
-def process_single_file(file_path: Path, lint_engine: LintEngine, args,
-			timer: Optional[PerformanceTimer] = None) -> tuple[int, int, Optional[FileTimings], Optional[Any]]:
+def process_single_file(
+	file_path: Path, lint_engine: LintEngine, args, timer: Optional[PerformanceTimer] = None
+) -> tuple[int, int, Optional[FileTimings], Optional[Any]]:
 	"""Process a single view file and return the warning and error counts plus lint results."""
 	if not file_path.exists():
 		print(f"⚠️  File {file_path} does not exist, skipping")
@@ -304,8 +305,6 @@ def process_single_file(file_path: Path, lint_engine: LintEngine, args,
 
 		if file_errors == 0 and file_warnings == 0:
 			print(f"✅ No issues found in {file_path}")
-		elif file_errors == 0 and file_warnings > 0:
-			print(f"⚠️  Warnings found in {file_path} (no errors)")
 
 		# Create timing record if profiling
 		if file_timer:
