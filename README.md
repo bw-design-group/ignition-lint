@@ -530,6 +530,7 @@ The following rules are currently implemented and available for use:
 | `PylintScriptRule` | Error | Runs Pylint analysis on all scripts to detect syntax errors, undefined variables, and code quality issues | `pylintrc` (path to custom pylintrc file, defaults to `.config/ignition.pylintrc`) | ✅ |
 | `UnusedCustomPropertiesRule` | Warning | Detects custom properties and view parameters that are defined but never referenced | None | ✅ |
 | `BadComponentReferenceRule` | Error | Identifies brittle component object traversal patterns (getSibling, getParent, etc.) | `forbidden_patterns`, `case_sensitive` | ✅ |
+| `ExcessiveContextDataRule` | Error | Detects excessive data stored in custom properties using 4 detection methods | `max_array_size`, `max_sibling_properties`, `max_nesting_depth`, `max_data_points` | ✅ |
 
 ### Rule Details
 
@@ -609,11 +610,26 @@ Comprehensive Python code analysis using Pylint for all script types:
   "PylintScriptRule": {
     "enabled": true,
     "kwargs": {
-      "pylintrc": "config/my-custom-pylintrc"
+      "pylintrc": "config/my-custom-pylintrc",
+      "debug": false
     }
   }
 }
 ```
+
+**Debug Files (Automatic Error Reporting):**
+When PylintScriptRule detects errors (syntax errors, undefined variables, etc.), it **automatically** saves the combined Python script to a debug file for inspection:
+
+- **Location**: `debug/pylint_input_temp.py` (or `tests/debug/` if running from tests directory)
+- **Automatic**: Debug files are saved whenever pylint finds issues (no configuration needed)
+- **Manual**: Set `"debug": true` to save script files even when there are no errors (useful for development)
+
+**Example output when errors are found:**
+```
+🐛 Pylint found issues. Debug file saved to: /path/to/debug/pylint_input_temp.py
+```
+
+This makes it easy to inspect the actual script content when debugging syntax errors or other pylint issues.
 
 #### UnusedCustomPropertiesRule
 Identifies unused custom properties and view parameters to reduce view complexity.
@@ -636,6 +652,48 @@ Prevents brittle view dependencies by detecting object traversal patterns.
 - Use `view.custom` properties for data sharing
 - Implement message handling for component communication
 - Design views with explicit data flow patterns
+
+#### ExcessiveContextDataRule
+Detects excessive data stored in custom properties that should be in databases instead. Large datasets in view JSON cause performance issues, memory bloat, and violate separation of concerns.
+
+**Detection Methods:**
+
+1. **Array Size** - Detects arrays with too many items
+   - Parameter: `max_array_size` (default: 50)
+   - Example: `custom.filteredData[784]` exceeds threshold
+
+2. **Property Breadth** - Detects too many sibling properties at the same level
+   - Parameter: `max_sibling_properties` (default: 50)
+   - Example: `custom.device1`, `custom.device2`, ..., `custom.device100`
+
+3. **Nesting Depth** - Detects overly deep nesting structures
+   - Parameter: `max_nesting_depth` (default: 5 levels)
+   - Example: `custom.a.b.c.d.e.f` (6 levels deep)
+
+4. **Data Points** - Detects total volume of data in custom properties
+   - Parameter: `max_data_points` (default: 1000)
+   - Counts all flattened paths under `custom.*`
+
+**Configuration Example:**
+```json
+{
+  "ExcessiveContextDataRule": {
+    "enabled": true,
+    "kwargs": {
+      "max_array_size": 50,
+      "max_sibling_properties": 50,
+      "max_nesting_depth": 5,
+      "max_data_points": 1000
+    }
+  }
+}
+```
+
+**Best Practices:**
+- Custom properties should contain configuration, not data
+- Use databases, named queries, or tag historian for large datasets
+- Views should fetch data at runtime, not store it statically
+- Large arrays (>50 items) indicate data that belongs in a database
 
 ## Usage Methods
 
@@ -748,11 +806,42 @@ pre-commit run
 **Notes:**
 
 - Hook automatically runs only on `view.json` files
-- Default config uses warnings-only mode (won't block commits)
-- Pre-commit automatically passes matched filenames to the tool
+- **Default behavior**: Both warnings and errors block commits
+- Pre-commit checks only **modified files** (incremental linting)
 - Config paths are resolved relative to your repository root
 - Customize pylintrc via the `pylintrc` parameter in your `rule_config.json`
 - **Recommended**: Use Option B (lightweight) to reduce initial download from ~64MB to ~1MB
+
+**Warnings vs Errors:**
+By default, both warnings and errors will block commits:
+- **Warnings** (e.g., naming conventions): Style issues that should be fixed
+- **Errors** (e.g., undefined variables, excessive context data): Critical issues that must be fixed
+
+To allow commits with warnings (only block on errors), add `--ignore-warnings`:
+```yaml
+repos:
+  - repo: https://github.com/bw-design-group/ignition-lint
+    rev: v0.2.4
+    hooks:
+      - id: ignition-lint
+        args: ['--config=rule_config.json', '--files', '--ignore-warnings']
+```
+
+This is useful for teams that want to gradually address warnings without blocking development.
+
+**For full repository scans**, use the CLI directly instead of `pre-commit run --all-files`:
+```bash
+# Scan all view.json files in the repository
+ignition-lint --files "services/**/view.json" --config rule_config.json
+
+# With timing and results output
+ignition-lint --files "services/**/view.json" \
+  --config rule_config.json \
+  --timing-output timing.txt \
+  --results-output results.txt
+```
+
+> **Why not use `pre-commit run --all-files`?** Pre-commit passes all matched filenames as command-line arguments, which can exceed system ARG_MAX limits in large repositories (e.g., 725 files with long paths). The CLI tool uses internal glob matching to avoid this limitation.
 
 ### 3. GitHub Actions Workflow
 

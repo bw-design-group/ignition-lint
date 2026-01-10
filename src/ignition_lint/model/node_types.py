@@ -4,6 +4,7 @@ It includes base classes for nodes, specific node types, and an enum for node ty
 It also provides visitor support for processing nodes in a structured way.
 """
 
+import re
 from enum import Enum
 from abc import ABC
 from typing import Dict, List, Any, Set
@@ -125,7 +126,10 @@ class PropertyBinding(ViewNode):
 class TagBinding(ViewNode):
 	"""Represents a tag binding with support for direct, indirect, and expression modes."""
 
-	def __init__(self, path: str, tag_path: str, *, mode: str = "direct", references: Dict[str, str] = None, config: Dict = None):
+	def __init__(
+		self, path: str, tag_path: str, *, mode: str = "direct", references: Dict[str, str] = None,
+		config: Dict = None
+	):
 		super().__init__(path, NodeType.TAG_BINDING)
 		self.tag_path = tag_path
 		self.mode = mode  # 'direct', 'indirect', or 'expression'
@@ -235,7 +239,9 @@ class CustomMethodScript(ScriptNode):
 		super().__init__(path, NodeType.CUSTOM_METHOD, script)
 		self.name = name
 		self.params = params or []
-		self.function_def = f"def {self.name}({', '.join(['self'] + self.params)}):"
+		# Strip array indices from method name for valid Python function name
+		method_name = re.sub(r'\[\d+\]', '', self.name)
+		self.function_def = f"def {method_name}({', '.join(['self'] + self.params)}):"
 
 	def _get_serializable_attrs(self) -> Dict[str, Any]:
 		base_attrs = super()._get_serializable_attrs()
@@ -265,7 +271,9 @@ class EventHandlerScript(ScriptNode):
 		self.event_domain = event_domain
 		self.event_type = event_type
 		self.scope = scope
-		self.function_def = f"def {self.event_type}(self, event):"
+		# Strip array indices from event type for valid Python function name
+		event_name = re.sub(r'\[\d+\]', '', self.event_type)
+		self.function_def = f"def {event_name}(self, event):"
 
 	def _get_serializable_attrs(self) -> Dict[str, Any]:
 		base_attrs = super()._get_serializable_attrs()

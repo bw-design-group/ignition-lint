@@ -69,6 +69,12 @@
         "component"
       ]
     },
+    "ExcessiveContextDataRule": {
+      "applicable_node_count": 200,
+      "target_types": [
+        "all"
+      ]
+    },
     "NamePatternRule": {
       "applicable_node_count": 19,
       "target_types": [

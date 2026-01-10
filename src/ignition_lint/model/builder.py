@@ -42,6 +42,7 @@ class ViewModelBuilder:
 			'script_transforms': [],
 			'properties': []
 		}
+		self._propconfig_cache = None  # Cache for propConfig paths (performance optimization)
 
 	def _search_for_path_value(self, path: str, suffix: str = None, fallback: Any = None) -> Any:
 		"""Search for a value in the flattened JSON by path, optionally with a suffix."""
@@ -205,6 +206,24 @@ class ViewModelBuilder:
 				config[key] = value
 		return config
 
+	def _build_propconfig_cache(self):
+		"""
+		Build cache of propConfig property paths for fast lookup.
+
+		Extracts all property paths that have propConfig entries to avoid O(n) iteration
+		for every property check. Converts O(n²) behavior to O(n) with O(1) lookups.
+		"""
+		self._propconfig_cache = set()
+		prefix = "propConfig."
+		for path in self.flattened_json.keys():
+			if path.startswith(prefix):
+				# Extract property path: propConfig.custom.foo.persistent → custom.foo
+				prop_path = path[len(prefix):]
+				# Strip the configuration key (persistent, type, etc.)
+				if '.' in prop_path:
+					prop_path = prop_path.rsplit('.', 1)[0]
+					self._propconfig_cache.add(prop_path)
+
 	def _is_property_persistent(self, property_path: str) -> bool:
 		"""
 		Check if a property is persistent (exists at startup) or non-persistent (created by bindings).
@@ -219,6 +238,10 @@ class ViewModelBuilder:
 		Returns:
 			True if the property should be persistent, False if it's created by bindings at runtime
 		"""
+		# Build cache on first use
+		if self._propconfig_cache is None:
+			self._build_propconfig_cache()
+
 		# Check for explicit persistence configuration
 		config_path = f"propConfig.{property_path}.persistent"
 		persistent_value = self.flattened_json.get(config_path)
@@ -228,8 +251,8 @@ class ViewModelBuilder:
 			return persistent_value
 
 		# No explicit configuration - check if there's any propConfig for this property
-		config_prefix = f"propConfig.{property_path}."
-		has_any_config = any(path.startswith(config_prefix) for path in self.flattened_json.keys())
+		# Use O(1) cache lookup instead of O(n) iteration
+		has_any_config = property_path in self._propconfig_cache
 
 		if has_any_config:
 			# Property has configuration but no explicit persistent setting
@@ -557,6 +580,7 @@ class ViewModelBuilder:
 			Dict mapping node types to lists of those nodes
 		"""
 		self.flattened_json = flattened_json
+		self._propconfig_cache = None  # Reset cache for new flattened_json
 
 		# Reset model to avoid accumulation from multiple calls
 		self.model = {

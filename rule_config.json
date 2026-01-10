@@ -4,7 +4,13 @@
     "enabled": true,
     "kwargs": {
       "_comment": "Optional: Specify a custom pylintrc file path. If not specified, uses .config/ignition.pylintrc",
-      "pylintrc": null
+      "pylintrc": null,
+      "_debug_comment": "Optional: Set debug: true to save script files even when there are no errors. Debug files are ALWAYS saved automatically when pylint finds errors.",
+      "debug": false,
+      "_debug_dir_comment": "Optional: Specify custom debug directory. Defaults to .ignition-lint/debug/ (or tests/debug/ in ignition-lint repo). Can be absolute or relative path.",
+      "debug_dir": null,
+      "_batch_mode_comment": "Optional: Set batch_mode: true to process all files together (faster but harder to read). Default: false (process each file separately for clearer output).",
+      "batch_mode": false
     }
   },
   "PollingIntervalRule": {
@@ -32,12 +38,24 @@
     "enabled": true,
     "kwargs": {}
   },
+  "ExcessiveContextDataRule": {
+    "enabled": true,
+    "kwargs": {
+      "max_array_size": 50,
+      "max_sibling_properties": 50,
+      "max_nesting_depth": 5,
+      "max_data_points": 1000,
+      "_comment": "Detects excessive context data in custom properties using 4 methods: (1) max_array_size: arrays with too many items, (2) max_sibling_properties: too many properties at the same level, (3) max_nesting_depth: overly deep nesting, (4) max_data_points: total volume of data stored in custom properties."
+    }
+  },
   "_info": {
     "_description": "Rule severity levels are defined by rule developers:",
     "rule_severities": {
       "NamePatternRule": "warning - naming conventions are style preferences",
       "PollingIntervalRule": "error - performance issues that can cause system problems",
-      "PylintScriptRule": "error - syntax errors, undefined variables, etc."
+      "PylintScriptRule": "error - syntax errors, undefined variables, etc.",
+      "UnusedCustomPropertiesRule": "error - dead code that should be removed",
+      "ExcessiveContextDataRule": "error - architectural issue, data should be in databases"
     },
     "note": "Users cannot configure severity levels - they are determined by what each rule checks.",
     "PylintScriptRule_config": {

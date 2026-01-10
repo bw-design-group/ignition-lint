@@ -1,0 +1,1402 @@
+{
+  "bindings": {
+    "count": 13,
+    "nodes": [
+      {
+        "config": {
+          "waitOnAll": true
+        },
+        "node_type": "expression_struct_binding",
+        "path": "propConfig.custom.filteredData",
+        "struct": {
+          "rackPaths": "{view.custom.paths}",
+          "row": "{/root/Filters/Device/Device Dropdown.props.value}",
+          "section": "{/root/Filters/Section/Section Dropdown.props.value}",
+          "wing": "{/root/Filters/Wing/Wing Dropdown.props.value}"
+        }
+      },
+      {
+        "config": {},
+        "expression": "RUNSCRIPT('Perspective.TableData.rack_list_finder', 0, {session.custom.building})",
+        "node_type": "expression_binding",
+        "path": "propConfig.custom.paths"
+      },
+      {
+        "config": {},
+        "node_type": "property_binding",
+        "path": "root.root.children[0].Filters.children[0].Wing.children[1].Wing Dropdown.propConfig.props.options",
+        "target_path": "view.custom.dropdownData.wings"
+      },
+      {
+        "config": {},
+        "node_type": "property_binding",
+        "path": "root.root.children[0].Filters.children[0].Wing.children[1].Wing Dropdown.propConfig.props.value",
+        "target_path": "view.params.wing"
+      },
+      {
+        "config": {},
+        "node_type": "property_binding",
+        "path": "root.root.children[0].Filters.children[1].Section.children[1].Section Dropdown.propConfig.props.options",
+        "target_path": "view.custom.dropdownData.sections"
+      },
+      {
+        "config": {},
+        "node_type": "property_binding",
+        "path": "root.root.children[0].Filters.children[1].Section.children[1].Section Dropdown.propConfig.props.value",
+        "target_path": "view.params.section"
+      },
+      {
+        "config": {},
+        "node_type": "property_binding",
+        "path": "root.root.children[0].Filters.children[2].Device.children[1].Device Dropdown.propConfig.props.options",
+        "target_path": "view.custom.dropdownData.rows"
+      },
+      {
+        "config": {},
+        "node_type": "property_binding",
+        "path": "root.root.children[0].Filters.children[2].Device.children[1].Device Dropdown.propConfig.props.value",
+        "target_path": "view.params.row"
+      },
+      {
+        "config": {},
+        "node_type": "property_binding",
+        "path": "root.root.children[1].Table.propConfig.props.columns[2].filter.string.value",
+        "target_path": "../Filters/Wing/Wing Dropdown.props.value"
+      },
+      {
+        "config": {},
+        "node_type": "property_binding",
+        "path": "root.root.children[1].Table.propConfig.props.columns[3].filter.string.value",
+        "target_path": "../Filters/Equipment/Equipment Dropdown.props.value"
+      },
+      {
+        "config": {},
+        "node_type": "property_binding",
+        "path": "root.root.children[1].Table.propConfig.props.columns[4].filter.string.value",
+        "target_path": "../Filters/Device/Device Dropdown.props.value"
+      },
+      {
+        "config": {},
+        "node_type": "property_binding",
+        "path": "root.root.children[1].Table.propConfig.props.data",
+        "target_path": "view.custom.filteredData"
+      },
+      {
+        "config": {},
+        "expression": "\"BUILDING-\" + {session.custom.building} + \"/\" + {view.params.wing} + \"/\" + \"Datahall/Energy Valve Overview\" ",
+        "node_type": "expression_binding",
+        "path": "root.root.children[2].Header.propConfig.props.params.path"
+      }
+    ]
+  },
+  "components": {
+    "count": 13,
+    "nodes": [
+      {
+        "name": "Label",
+        "node_type": "component",
+        "path": "root.root.children[0].Filters.children[0].Wing.children[0].Label",
+        "properties_count": 0,
+        "type": "ia.display.label"
+      },
+      {
+        "name": "Wing Dropdown",
+        "node_type": "component",
+        "path": "root.root.children[0].Filters.children[0].Wing.children[1].Wing Dropdown",
+        "properties_count": 0,
+        "type": "ia.input.dropdown"
+      },
+      {
+        "name": "Wing",
+        "node_type": "component",
+        "path": "root.root.children[0].Filters.children[0].Wing",
+        "properties_count": 0,
+        "type": "ia.container.flex"
+      },
+      {
+        "name": "Label",
+        "node_type": "component",
+        "path": "root.root.children[0].Filters.children[1].Section.children[0].Label",
+        "properties_count": 0,
+        "type": "ia.display.label"
+      },
+      {
+        "name": "Section Dropdown",
+        "node_type": "component",
+        "path": "root.root.children[0].Filters.children[1].Section.children[1].Section Dropdown",
+        "properties_count": 0,
+        "type": "ia.input.dropdown"
+      },
+      {
+        "name": "Section",
+        "node_type": "component",
+        "path": "root.root.children[0].Filters.children[1].Section",
+        "properties_count": 0,
+        "type": "ia.container.flex"
+      },
+      {
+        "name": "Label",
+        "node_type": "component",
+        "path": "root.root.children[0].Filters.children[2].Device.children[0].Label",
+        "properties_count": 0,
+        "type": "ia.display.label"
+      },
+      {
+        "name": "Device Dropdown",
+        "node_type": "component",
+        "path": "root.root.children[0].Filters.children[2].Device.children[1].Device Dropdown",
+        "properties_count": 0,
+        "type": "ia.input.dropdown"
+      },
+      {
+        "name": "Device",
+        "node_type": "component",
+        "path": "root.root.children[0].Filters.children[2].Device",
+        "properties_count": 0,
+        "type": "ia.container.flex"
+      },
+      {
+        "name": "Filters",
+        "node_type": "component",
+        "path": "root.root.children[0].Filters",
+        "properties_count": 0,
+        "type": "ia.container.flex"
+      },
+      {
+        "name": "Table",
+        "node_type": "component",
+        "path": "root.root.children[1].Table",
+        "properties_count": 0,
+        "type": "ia.display.table"
+      },
+      {
+        "name": "Header",
+        "node_type": "component",
+        "path": "root.root.children[2].Header",
+        "properties_count": 0,
+        "type": "ia.display.view"
+      },
+      {
+        "name": "root",
+        "node_type": "component",
+        "path": "root.root",
+        "properties_count": 0,
+        "type": "ia.container.flex"
+      }
+    ]
+  },
+  "custom_methods": {
+    "count": 0,
+    "nodes": []
+  },
+  "event_handlers": {
+    "count": 1,
+    "nodes": [
+      {
+        "event_domain": "component",
+        "event_type": "onRowClick",
+        "node_type": "event_handler",
+        "path": "root.root.children[1].Table.events.component.onRowClick",
+        "scope": "G",
+        "script_length": 157,
+        "script_preview": "\n    rack = self.props.data[event.row].Rack.label\n    path =  '/' + self.view.params.wing + '/Dataha..."
+      }
+    ]
+  },
+  "expression_bindings": {
+    "count": 2,
+    "nodes": [
+      {
+        "config": {},
+        "expression": "RUNSCRIPT('Perspective.TableData.rack_list_finder', 0, {session.custom.building})",
+        "node_type": "expression_binding",
+        "path": "propConfig.custom.paths"
+      },
+      {
+        "config": {},
+        "expression": "\"BUILDING-\" + {session.custom.building} + \"/\" + {view.params.wing} + \"/\" + \"Datahall/Energy Valve Overview\" ",
+        "node_type": "expression_binding",
+        "path": "root.root.children[2].Header.propConfig.props.params.path"
+      }
+    ]
+  },
+  "expression_struct_bindings": {
+    "count": 1,
+    "nodes": [
+      {
+        "config": {
+          "waitOnAll": true
+        },
+        "node_type": "expression_struct_binding",
+        "path": "propConfig.custom.filteredData",
+        "struct": {
+          "rackPaths": "{view.custom.paths}",
+          "row": "{/root/Filters/Device/Device Dropdown.props.value}",
+          "section": "{/root/Filters/Section/Section Dropdown.props.value}",
+          "wing": "{/root/Filters/Wing/Wing Dropdown.props.value}"
+        }
+      }
+    ]
+  },
+  "message_handlers": {
+    "count": 0,
+    "nodes": []
+  },
+  "properties": {
+    "count": 147,
+    "nodes": [
+      {
+        "name": "label",
+        "node_type": "property",
+        "path": "custom.dropdownData.rows.label",
+        "value": "ROW-1A",
+        "value_type": "str"
+      },
+      {
+        "name": "value",
+        "node_type": "property",
+        "path": "custom.dropdownData.rows.value",
+        "value": "ROW-1A",
+        "value_type": "str"
+      },
+      {
+        "name": "label",
+        "node_type": "property",
+        "path": "custom.dropdownData.sections.label",
+        "value": "Section-1",
+        "value_type": "str"
+      },
+      {
+        "name": "value",
+        "node_type": "property",
+        "path": "custom.dropdownData.sections.value",
+        "value": "Section-1",
+        "value_type": "str"
+      },
+      {
+        "name": "label",
+        "node_type": "property",
+        "path": "custom.dropdownData.wings.label",
+        "value": "WING-A",
+        "value_type": "str"
+      },
+      {
+        "name": "value",
+        "node_type": "property",
+        "path": "custom.dropdownData.wings.value",
+        "value": "WING-A",
+        "value_type": "str"
+      },
+      {
+        "name": "DeviceName",
+        "node_type": "property",
+        "path": "custom.filteredData.DeviceName",
+        "value": "1A1",
+        "value_type": "str"
+      },
+      {
+        "name": "basePath",
+        "node_type": "property",
+        "path": "custom.filteredData.DifferentialPressure.basePath",
+        "value": "[MQTT Engine]BUILDING-2/WING-A/DataHall/Section-1/ROW/ROW-1A/RACK-1/Tx_and_Eq/TCV_102_A",
+        "value_type": "str"
+      },
+      {
+        "name": "descriptionVisible",
+        "node_type": "property",
+        "path": "custom.filteredData.DifferentialPressure.descriptionVisible",
+        "value": false,
+        "value_type": "bool"
+      },
+      {
+        "name": "tagName",
+        "node_type": "property",
+        "path": "custom.filteredData.DifferentialPressure.tagName",
+        "value": "Absolute_Differential_Water_Pressure",
+        "value_type": "str"
+      },
+      {
+        "name": "basePath",
+        "node_type": "property",
+        "path": "custom.filteredData.EnergyValvePosition.basePath",
+        "value": "[MQTT Engine]BUILDING-2/WING-A/DataHall/Section-1/ROW/ROW-1A/RACK-1/Tx_and_Eq/TCV_102_A",
+        "value_type": "str"
+      },
+      {
+        "name": "descriptionVisible",
+        "node_type": "property",
+        "path": "custom.filteredData.EnergyValvePosition.descriptionVisible",
+        "value": false,
+        "value_type": "bool"
+      },
+      {
+        "name": "tagName",
+        "node_type": "property",
+        "path": "custom.filteredData.EnergyValvePosition.tagName",
+        "value": "Analog_Open_Feedback",
+        "value_type": "str"
+      },
+      {
+        "name": "basePath",
+        "node_type": "property",
+        "path": "custom.filteredData.LeakIsolationAlarm.basePath",
+        "value": "[MQTT Engine]BUILDING-2/WING-A/DataHall/Section-1/ROW/ROW-1A/RACK-1/LeakDetect",
+        "value_type": "str"
+      },
+      {
+        "name": "descriptionVisible",
+        "node_type": "property",
+        "path": "custom.filteredData.LeakIsolationAlarm.descriptionVisible",
+        "value": false,
+        "value_type": "bool"
+      },
+      {
+        "name": "tagName",
+        "node_type": "property",
+        "path": "custom.filteredData.LeakIsolationAlarm.tagName",
+        "value": "LeakShutdown",
+        "value_type": "str"
+      },
+      {
+        "name": "basePath",
+        "node_type": "property",
+        "path": "custom.filteredData.Rack.basePath",
+        "value": "[MQTT Engine]BUILDING-2/WING-A/DataHall/Section-1/ROW/ROW-1A/RACK-1/BMS Alarm Priority/CustomTags/HighestActivePriority",
+        "value_type": "str"
+      },
+      {
+        "name": "label",
+        "node_type": "property",
+        "path": "custom.filteredData.Rack.label",
+        "value": "1A1",
+        "value_type": "str"
+      },
+      {
+        "name": "basePath",
+        "node_type": "property",
+        "path": "custom.filteredData.ReturnTemperature.basePath",
+        "value": "[MQTT Engine]BUILDING-2/WING-A/DataHall/Section-1/ROW/ROW-1A/RACK-1/Tx_and_Eq/TCV_102_A",
+        "value_type": "str"
+      },
+      {
+        "name": "descriptionVisible",
+        "node_type": "property",
+        "path": "custom.filteredData.ReturnTemperature.descriptionVisible",
+        "value": false,
+        "value_type": "bool"
+      },
+      {
+        "name": "tagName",
+        "node_type": "property",
+        "path": "custom.filteredData.ReturnTemperature.tagName",
+        "value": "Temperature_Flow_Body_T2",
+        "value_type": "str"
+      },
+      {
+        "name": "Row",
+        "node_type": "property",
+        "path": "custom.filteredData.Row",
+        "value": "ROW-1A",
+        "value_type": "str"
+      },
+      {
+        "name": "Section",
+        "node_type": "property",
+        "path": "custom.filteredData.Section",
+        "value": "Section-1",
+        "value_type": "str"
+      },
+      {
+        "name": "basePath",
+        "node_type": "property",
+        "path": "custom.filteredData.SupplyTemperature.basePath",
+        "value": "[MQTT Engine]BUILDING-2/WING-A/DataHall/Section-1/ROW/ROW-1A/RACK-1/Tx_and_Eq/TCV_102_A",
+        "value_type": "str"
+      },
+      {
+        "name": "descriptionVisible",
+        "node_type": "property",
+        "path": "custom.filteredData.SupplyTemperature.descriptionVisible",
+        "value": false,
+        "value_type": "bool"
+      },
+      {
+        "name": "tagName",
+        "node_type": "property",
+        "path": "custom.filteredData.SupplyTemperature.tagName",
+        "value": "Temperature_Remote_T1",
+        "value_type": "str"
+      },
+      {
+        "name": "basePath",
+        "node_type": "property",
+        "path": "custom.filteredData.VolumetricFlow.basePath",
+        "value": "[MQTT Engine]BUILDING-2/WING-A/DataHall/Section-1/ROW/ROW-1A/RACK-1/Tx_and_Eq/TCV_102_A",
+        "value_type": "str"
+      },
+      {
+        "name": "descriptionVisible",
+        "node_type": "property",
+        "path": "custom.filteredData.VolumetricFlow.descriptionVisible",
+        "value": false,
+        "value_type": "bool"
+      },
+      {
+        "name": "tagName",
+        "node_type": "property",
+        "path": "custom.filteredData.VolumetricFlow.tagName",
+        "value": "Absolute_Volumetric_Flow",
+        "value_type": "str"
+      },
+      {
+        "name": "Wing",
+        "node_type": "property",
+        "path": "custom.filteredData.Wing",
+        "value": "WING-A",
+        "value_type": "str"
+      },
+      {
+        "name": "fullPath",
+        "node_type": "property",
+        "path": "custom.filteredData.fullPath",
+        "value": "[MQTT Engine]BUILDING-2/WING-A/DataHall/Section-1/ROW/ROW-1A/RACK-1",
+        "value_type": "str"
+      },
+      {
+        "name": "paths",
+        "node_type": "property",
+        "path": "custom.paths",
+        "value": "[MQTT Engine]BUILDING-2/WING-A/DataHall/Section-1/ROW/ROW-1A/RACK-1",
+        "value_type": "str"
+      },
+      {
+        "name": "row",
+        "node_type": "property",
+        "path": "params.row",
+        "persistent": true,
+        "value": "",
+        "value_type": "str"
+      },
+      {
+        "name": "section",
+        "node_type": "property",
+        "path": "params.section",
+        "persistent": true,
+        "value": "",
+        "value_type": "str"
+      },
+      {
+        "name": "wing",
+        "node_type": "property",
+        "path": "params.wing",
+        "persistent": true,
+        "value": "",
+        "value_type": "str"
+      },
+      {
+        "name": "text",
+        "node_type": "property",
+        "path": "root.root.children.Filters.children.Wing.children.Label.props.text",
+        "value": "Wing",
+        "value_type": "str"
+      },
+      {
+        "name": "classes",
+        "node_type": "property",
+        "path": "root.root.children.Filters.children.Wing.children.Label.props.textStyle.classes",
+        "value": "text-xs",
+        "value_type": "str"
+      },
+      {
+        "name": "color",
+        "node_type": "property",
+        "path": "root.root.children.Filters.children.Wing.children.Label.props.textStyle.color",
+        "value": "--labelNested",
+        "value_type": "str"
+      },
+      {
+        "name": "grow",
+        "node_type": "property",
+        "path": "root.root.children.Filters.children.Wing.children.Wing Dropdown.position.grow",
+        "value": 1,
+        "value_type": "int"
+      },
+      {
+        "name": "multiSelect",
+        "node_type": "property",
+        "path": "root.root.children.Filters.children.Wing.children.Wing Dropdown.props.multiSelect",
+        "value": true,
+        "value_type": "bool"
+      },
+      {
+        "name": "showClearIcon",
+        "node_type": "property",
+        "path": "root.root.children.Filters.children.Wing.children.Wing Dropdown.props.showClearIcon",
+        "value": true,
+        "value_type": "bool"
+      },
+      {
+        "name": "classes",
+        "node_type": "property",
+        "path": "root.root.children.Filters.children.Wing.children.Wing Dropdown.props.style.classes",
+        "value": "w-64",
+        "value_type": "str"
+      },
+      {
+        "name": "grow",
+        "node_type": "property",
+        "path": "root.root.children.Filters.children.Wing.position.grow",
+        "value": 1,
+        "value_type": "int"
+      },
+      {
+        "name": "direction",
+        "node_type": "property",
+        "path": "root.root.children.Filters.children.Wing.props.direction",
+        "value": "column",
+        "value_type": "str"
+      },
+      {
+        "name": "classes",
+        "node_type": "property",
+        "path": "root.root.children.Filters.children.Wing.props.style.classes",
+        "value": "gap-1 w-full",
+        "value_type": "str"
+      },
+      {
+        "name": "text",
+        "node_type": "property",
+        "path": "root.root.children.Filters.children.Section.children.Label.props.text",
+        "value": "Section",
+        "value_type": "str"
+      },
+      {
+        "name": "classes",
+        "node_type": "property",
+        "path": "root.root.children.Filters.children.Section.children.Label.props.textStyle.classes",
+        "value": "text-xs",
+        "value_type": "str"
+      },
+      {
+        "name": "color",
+        "node_type": "property",
+        "path": "root.root.children.Filters.children.Section.children.Label.props.textStyle.color",
+        "value": "--labelNested",
+        "value_type": "str"
+      },
+      {
+        "name": "grow",
+        "node_type": "property",
+        "path": "root.root.children.Filters.children.Section.children.Section Dropdown.position.grow",
+        "value": 1,
+        "value_type": "int"
+      },
+      {
+        "name": "multiSelect",
+        "node_type": "property",
+        "path": "root.root.children.Filters.children.Section.children.Section Dropdown.props.multiSelect",
+        "value": true,
+        "value_type": "bool"
+      },
+      {
+        "name": "showClearIcon",
+        "node_type": "property",
+        "path": "root.root.children.Filters.children.Section.children.Section Dropdown.props.showClearIcon",
+        "value": true,
+        "value_type": "bool"
+      },
+      {
+        "name": "classes",
+        "node_type": "property",
+        "path": "root.root.children.Filters.children.Section.children.Section Dropdown.props.style.classes",
+        "value": "w-64",
+        "value_type": "str"
+      },
+      {
+        "name": "grow",
+        "node_type": "property",
+        "path": "root.root.children.Filters.children.Section.position.grow",
+        "value": 1,
+        "value_type": "int"
+      },
+      {
+        "name": "direction",
+        "node_type": "property",
+        "path": "root.root.children.Filters.children.Section.props.direction",
+        "value": "column",
+        "value_type": "str"
+      },
+      {
+        "name": "classes",
+        "node_type": "property",
+        "path": "root.root.children.Filters.children.Section.props.style.classes",
+        "value": "gap-1 w-full",
+        "value_type": "str"
+      },
+      {
+        "name": "text",
+        "node_type": "property",
+        "path": "root.root.children.Filters.children.Device.children.Label.props.text",
+        "value": "Row",
+        "value_type": "str"
+      },
+      {
+        "name": "classes",
+        "node_type": "property",
+        "path": "root.root.children.Filters.children.Device.children.Label.props.textStyle.classes",
+        "value": "text-xs",
+        "value_type": "str"
+      },
+      {
+        "name": "color",
+        "node_type": "property",
+        "path": "root.root.children.Filters.children.Device.children.Label.props.textStyle.color",
+        "value": "--labelNested",
+        "value_type": "str"
+      },
+      {
+        "name": "grow",
+        "node_type": "property",
+        "path": "root.root.children.Filters.children.Device.children.Device Dropdown.position.grow",
+        "value": 1,
+        "value_type": "int"
+      },
+      {
+        "name": "multiSelect",
+        "node_type": "property",
+        "path": "root.root.children.Filters.children.Device.children.Device Dropdown.props.multiSelect",
+        "value": true,
+        "value_type": "bool"
+      },
+      {
+        "name": "showClearIcon",
+        "node_type": "property",
+        "path": "root.root.children.Filters.children.Device.children.Device Dropdown.props.showClearIcon",
+        "value": true,
+        "value_type": "bool"
+      },
+      {
+        "name": "classes",
+        "node_type": "property",
+        "path": "root.root.children.Filters.children.Device.children.Device Dropdown.props.style.classes",
+        "value": "w-64",
+        "value_type": "str"
+      },
+      {
+        "name": "grow",
+        "node_type": "property",
+        "path": "root.root.children.Filters.children.Device.position.grow",
+        "value": 1,
+        "value_type": "int"
+      },
+      {
+        "name": "direction",
+        "node_type": "property",
+        "path": "root.root.children.Filters.children.Device.props.direction",
+        "value": "column",
+        "value_type": "str"
+      },
+      {
+        "name": "classes",
+        "node_type": "property",
+        "path": "root.root.children.Filters.children.Device.props.style.classes",
+        "value": "gap-1 w-full",
+        "value_type": "str"
+      },
+      {
+        "name": "alignItems",
+        "node_type": "property",
+        "path": "root.root.children.Filters.props.alignItems",
+        "value": "flex-start",
+        "value_type": "str"
+      },
+      {
+        "name": "justify",
+        "node_type": "property",
+        "path": "root.root.children.Filters.props.justify",
+        "value": "space-evenly",
+        "value_type": "str"
+      },
+      {
+        "name": "classes",
+        "node_type": "property",
+        "path": "root.root.children.Filters.props.style.classes",
+        "value": "gap-2 p-2",
+        "value_type": "str"
+      },
+      {
+        "name": "left",
+        "node_type": "property",
+        "path": "root.root.children.Filters.props.style.left",
+        "value": "50%",
+        "value_type": "str"
+      },
+      {
+        "name": "position",
+        "node_type": "property",
+        "path": "root.root.children.Filters.props.style.position",
+        "value": "absolute",
+        "value_type": "str"
+      },
+      {
+        "name": "transform",
+        "node_type": "property",
+        "path": "root.root.children.Filters.props.style.transform",
+        "value": "translateX(-50%) translateY(0%)",
+        "value_type": "str"
+      },
+      {
+        "name": "width",
+        "node_type": "property",
+        "path": "root.root.children.Filters.props.style.width",
+        "value": "",
+        "value_type": "str"
+      },
+      {
+        "name": "zIndex",
+        "node_type": "property",
+        "path": "root.root.children.Filters.props.style.zIndex",
+        "value": "10",
+        "value_type": "str"
+      },
+      {
+        "name": "grow",
+        "node_type": "property",
+        "path": "root.root.children.Table.position.grow",
+        "value": 1,
+        "value_type": "int"
+      },
+      {
+        "name": "align",
+        "node_type": "property",
+        "path": "root.root.children.Table.props.columns.align",
+        "value": "center",
+        "value_type": "str"
+      },
+      {
+        "name": "boolean",
+        "node_type": "property",
+        "path": "root.root.children.Table.props.columns.boolean",
+        "value": "checkbox",
+        "value_type": "str"
+      },
+      {
+        "name": "dateFormat",
+        "node_type": "property",
+        "path": "root.root.children.Table.props.columns.dateFormat",
+        "value": "MM/DD/YYYY",
+        "value_type": "str"
+      },
+      {
+        "name": "editable",
+        "node_type": "property",
+        "path": "root.root.children.Table.props.columns.editable",
+        "value": false,
+        "value_type": "bool"
+      },
+      {
+        "name": "field",
+        "node_type": "property",
+        "path": "root.root.children.Table.props.columns.field",
+        "value": "Rack",
+        "value_type": "str"
+      },
+      {
+        "name": "condition",
+        "node_type": "property",
+        "path": "root.root.children.Table.props.columns.filter.boolean.condition",
+        "value": "",
+        "value_type": "str"
+      },
+      {
+        "name": "condition",
+        "node_type": "property",
+        "path": "root.root.children.Table.props.columns.filter.date.condition",
+        "value": "",
+        "value_type": "str"
+      },
+      {
+        "name": "value",
+        "node_type": "property",
+        "path": "root.root.children.Table.props.columns.filter.date.value",
+        "value": "",
+        "value_type": "str"
+      },
+      {
+        "name": "enabled",
+        "node_type": "property",
+        "path": "root.root.children.Table.props.columns.filter.enabled",
+        "value": false,
+        "value_type": "bool"
+      },
+      {
+        "name": "condition",
+        "node_type": "property",
+        "path": "root.root.children.Table.props.columns.filter.number.condition",
+        "value": "",
+        "value_type": "str"
+      },
+      {
+        "name": "value",
+        "node_type": "property",
+        "path": "root.root.children.Table.props.columns.filter.number.value",
+        "value": "",
+        "value_type": "str"
+      },
+      {
+        "name": "condition",
+        "node_type": "property",
+        "path": "root.root.children.Table.props.columns.filter.string.condition",
+        "value": "",
+        "value_type": "str"
+      },
+      {
+        "name": "value",
+        "node_type": "property",
+        "path": "root.root.children.Table.props.columns.filter.string.value",
+        "value": "",
+        "value_type": "str"
+      },
+      {
+        "name": "visible",
+        "node_type": "property",
+        "path": "root.root.children.Table.props.columns.filter.visible",
+        "value": "on-hover",
+        "value_type": "str"
+      },
+      {
+        "name": "align",
+        "node_type": "property",
+        "path": "root.root.children.Table.props.columns.footer.align",
+        "value": "center",
+        "value_type": "str"
+      },
+      {
+        "name": "justify",
+        "node_type": "property",
+        "path": "root.root.children.Table.props.columns.footer.justify",
+        "value": "left",
+        "value_type": "str"
+      },
+      {
+        "name": "classes",
+        "node_type": "property",
+        "path": "root.root.children.Table.props.columns.footer.style.classes",
+        "value": "",
+        "value_type": "str"
+      },
+      {
+        "name": "title",
+        "node_type": "property",
+        "path": "root.root.children.Table.props.columns.footer.title",
+        "value": "",
+        "value_type": "str"
+      },
+      {
+        "name": "align",
+        "node_type": "property",
+        "path": "root.root.children.Table.props.columns.header.align",
+        "value": "center",
+        "value_type": "str"
+      },
+      {
+        "name": "justify",
+        "node_type": "property",
+        "path": "root.root.children.Table.props.columns.header.justify",
+        "value": "left",
+        "value_type": "str"
+      },
+      {
+        "name": "classes",
+        "node_type": "property",
+        "path": "root.root.children.Table.props.columns.header.style.classes",
+        "value": "",
+        "value_type": "str"
+      },
+      {
+        "name": "title",
+        "node_type": "property",
+        "path": "root.root.children.Table.props.columns.header.title",
+        "value": "Rack",
+        "value_type": "str"
+      },
+      {
+        "name": "justify",
+        "node_type": "property",
+        "path": "root.root.children.Table.props.columns.justify",
+        "value": "auto",
+        "value_type": "str"
+      },
+      {
+        "name": "includeNullStrings",
+        "node_type": "property",
+        "path": "root.root.children.Table.props.columns.nullFormat.includeNullStrings",
+        "value": false,
+        "value_type": "bool"
+      },
+      {
+        "name": "nullFormatValue",
+        "node_type": "property",
+        "path": "root.root.children.Table.props.columns.nullFormat.nullFormatValue",
+        "value": "",
+        "value_type": "str"
+      },
+      {
+        "name": "strict",
+        "node_type": "property",
+        "path": "root.root.children.Table.props.columns.nullFormat.strict",
+        "value": false,
+        "value_type": "bool"
+      },
+      {
+        "name": "number",
+        "node_type": "property",
+        "path": "root.root.children.Table.props.columns.number",
+        "value": "value",
+        "value_type": "str"
+      },
+      {
+        "name": "numberFormat",
+        "node_type": "property",
+        "path": "root.root.children.Table.props.columns.numberFormat",
+        "value": "0,0.##",
+        "value_type": "str"
+      },
+      {
+        "name": "color",
+        "node_type": "property",
+        "path": "root.root.children.Table.props.columns.progressBar.bar.color",
+        "value": "",
+        "value_type": "str"
+      },
+      {
+        "name": "classes",
+        "node_type": "property",
+        "path": "root.root.children.Table.props.columns.progressBar.bar.style.classes",
+        "value": "",
+        "value_type": "str"
+      },
+      {
+        "name": "max",
+        "node_type": "property",
+        "path": "root.root.children.Table.props.columns.progressBar.max",
+        "value": 100,
+        "value_type": "int"
+      },
+      {
+        "name": "min",
+        "node_type": "property",
+        "path": "root.root.children.Table.props.columns.progressBar.min",
+        "value": 0,
+        "value_type": "int"
+      },
+      {
+        "name": "color",
+        "node_type": "property",
+        "path": "root.root.children.Table.props.columns.progressBar.track.color",
+        "value": "",
+        "value_type": "str"
+      },
+      {
+        "name": "classes",
+        "node_type": "property",
+        "path": "root.root.children.Table.props.columns.progressBar.track.style.classes",
+        "value": "",
+        "value_type": "str"
+      },
+      {
+        "name": "enabled",
+        "node_type": "property",
+        "path": "root.root.children.Table.props.columns.progressBar.value.enabled",
+        "value": true,
+        "value_type": "bool"
+      },
+      {
+        "name": "format",
+        "node_type": "property",
+        "path": "root.root.children.Table.props.columns.progressBar.value.format",
+        "value": "0,0.##",
+        "value_type": "str"
+      },
+      {
+        "name": "justify",
+        "node_type": "property",
+        "path": "root.root.children.Table.props.columns.progressBar.value.justify",
+        "value": "center",
+        "value_type": "str"
+      },
+      {
+        "name": "classes",
+        "node_type": "property",
+        "path": "root.root.children.Table.props.columns.progressBar.value.style.classes",
+        "value": "",
+        "value_type": "str"
+      },
+      {
+        "name": "render",
+        "node_type": "property",
+        "path": "root.root.children.Table.props.columns.render",
+        "value": "auto",
+        "value_type": "str"
+      },
+      {
+        "name": "resizable",
+        "node_type": "property",
+        "path": "root.root.children.Table.props.columns.resizable",
+        "value": true,
+        "value_type": "bool"
+      },
+      {
+        "name": "sort",
+        "node_type": "property",
+        "path": "root.root.children.Table.props.columns.sort",
+        "value": "none",
+        "value_type": "str"
+      },
+      {
+        "name": "sortable",
+        "node_type": "property",
+        "path": "root.root.children.Table.props.columns.sortable",
+        "value": true,
+        "value_type": "bool"
+      },
+      {
+        "name": "strictWidth",
+        "node_type": "property",
+        "path": "root.root.children.Table.props.columns.strictWidth",
+        "value": true,
+        "value_type": "bool"
+      },
+      {
+        "name": "classes",
+        "node_type": "property",
+        "path": "root.root.children.Table.props.columns.style.classes",
+        "value": "",
+        "value_type": "str"
+      },
+      {
+        "name": "selected",
+        "node_type": "property",
+        "path": "root.root.children.Table.props.columns.toggleSwitch.color.selected",
+        "value": "",
+        "value_type": "str"
+      },
+      {
+        "name": "unselected",
+        "node_type": "property",
+        "path": "root.root.children.Table.props.columns.toggleSwitch.color.unselected",
+        "value": "",
+        "value_type": "str"
+      },
+      {
+        "name": "viewPath",
+        "node_type": "property",
+        "path": "root.root.children.Table.props.columns.viewPath",
+        "value": "Building/Datahall/Embedded Views/Elements/RackName",
+        "value_type": "str"
+      },
+      {
+        "name": "visible",
+        "node_type": "property",
+        "path": "root.root.children.Table.props.columns.visible",
+        "value": true,
+        "value_type": "bool"
+      },
+      {
+        "name": "width",
+        "node_type": "property",
+        "path": "root.root.children.Table.props.columns.width",
+        "value": "70px",
+        "value_type": "str"
+      },
+      {
+        "name": "paddingTop",
+        "node_type": "property",
+        "path": "root.root.children.Table.props.filter.style.paddingTop",
+        "value": "15px",
+        "value_type": "str"
+      },
+      {
+        "name": "activeOption",
+        "node_type": "property",
+        "path": "root.root.children.Table.props.pager.activeOption",
+        "value": 196,
+        "value_type": "int"
+      },
+      {
+        "name": "bottom",
+        "node_type": "property",
+        "path": "root.root.children.Table.props.pager.bottom",
+        "value": false,
+        "value_type": "bool"
+      },
+      {
+        "name": "initialOption",
+        "node_type": "property",
+        "path": "root.root.children.Table.props.pager.initialOption",
+        "value": 196,
+        "value_type": "int"
+      },
+      {
+        "name": "options",
+        "node_type": "property",
+        "path": "root.root.children.Table.props.pager.options",
+        "value": 5,
+        "value_type": "int"
+      },
+      {
+        "name": "enabled",
+        "node_type": "property",
+        "path": "root.root.children.Table.props.rows.highlight.enabled",
+        "value": false,
+        "value_type": "bool"
+      },
+      {
+        "name": "even",
+        "node_type": "property",
+        "path": "root.root.children.Table.props.rows.striped.color.even",
+        "value": "var(--container)",
+        "value_type": "str"
+      },
+      {
+        "name": "odd",
+        "node_type": "property",
+        "path": "root.root.children.Table.props.rows.striped.color.odd",
+        "value": "var(--containerNested)",
+        "value_type": "str"
+      },
+      {
+        "name": "subviewExpansionMode",
+        "node_type": "property",
+        "path": "root.root.children.Table.props.rows.subviewExpansionMode",
+        "value": "single",
+        "value_type": "str"
+      },
+      {
+        "name": "classes",
+        "node_type": "property",
+        "path": "root.root.children.Table.props.style.classes",
+        "value": "transition-all rounded",
+        "value_type": "str"
+      },
+      {
+        "name": "margin",
+        "node_type": "property",
+        "path": "root.root.children.Table.props.style.margin",
+        "value": "100px auto 50px auto",
+        "value_type": "str"
+      },
+      {
+        "name": "min-width",
+        "node_type": "property",
+        "path": "root.root.children.Table.props.style.min-width",
+        "value": "900px",
+        "value_type": "str"
+      },
+      {
+        "name": "overflow",
+        "node_type": "property",
+        "path": "root.root.children.Table.props.style.overflow",
+        "value": "visible",
+        "value_type": "str"
+      },
+      {
+        "name": "transform",
+        "node_type": "property",
+        "path": "root.root.children.Table.props.style.transform",
+        "value": "scale(1.0)",
+        "value_type": "str"
+      },
+      {
+        "name": "width",
+        "node_type": "property",
+        "path": "root.root.children.Table.props.style.width",
+        "value": "1400px",
+        "value_type": "str"
+      },
+      {
+        "name": "virtualized",
+        "node_type": "property",
+        "path": "root.root.children.Table.props.virtualized",
+        "value": false,
+        "value_type": "bool"
+      },
+      {
+        "name": "shrink",
+        "node_type": "property",
+        "path": "root.root.children.Header.position.shrink",
+        "value": 0,
+        "value_type": "int"
+      },
+      {
+        "name": "overview",
+        "node_type": "property",
+        "path": "root.root.children.Header.props.params.overview",
+        "value": false,
+        "value_type": "bool"
+      },
+      {
+        "name": "path",
+        "node_type": "property",
+        "path": "root.root.children.Header.props.path",
+        "value": "Components/Header/Page Header",
+        "value_type": "str"
+      },
+      {
+        "name": "classes",
+        "node_type": "property",
+        "path": "root.root.children.Header.props.style.classes",
+        "value": "pt-6 pl-6 z-10 absolute",
+        "value_type": "str"
+      },
+      {
+        "name": "width",
+        "node_type": "property",
+        "path": "root.root.children.Header.props.style.width",
+        "value": "300px",
+        "value_type": "str"
+      },
+      {
+        "name": "direction",
+        "node_type": "property",
+        "path": "root.root.props.direction",
+        "value": "column",
+        "value_type": "str"
+      },
+      {
+        "name": "backgroundColor",
+        "node_type": "property",
+        "path": "root.root.props.style.backgroundColor",
+        "value": "var(--container-map)",
+        "value_type": "str"
+      },
+      {
+        "name": "classes",
+        "node_type": "property",
+        "path": "root.root.props.style.classes",
+        "value": "gap-6 rounded-tl-lg border-t border-l border-(--border-subtle)",
+        "value_type": "str"
+      }
+    ]
+  },
+  "property_bindings": {
+    "count": 10,
+    "nodes": [
+      {
+        "config": {},
+        "node_type": "property_binding",
+        "path": "root.root.children[0].Filters.children[0].Wing.children[1].Wing Dropdown.propConfig.props.options",
+        "target_path": "view.custom.dropdownData.wings"
+      },
+      {
+        "config": {},
+        "node_type": "property_binding",
+        "path": "root.root.children[0].Filters.children[0].Wing.children[1].Wing Dropdown.propConfig.props.value",
+        "target_path": "view.params.wing"
+      },
+      {
+        "config": {},
+        "node_type": "property_binding",
+        "path": "root.root.children[0].Filters.children[1].Section.children[1].Section Dropdown.propConfig.props.options",
+        "target_path": "view.custom.dropdownData.sections"
+      },
+      {
+        "config": {},
+        "node_type": "property_binding",
+        "path": "root.root.children[0].Filters.children[1].Section.children[1].Section Dropdown.propConfig.props.value",
+        "target_path": "view.params.section"
+      },
+      {
+        "config": {},
+        "node_type": "property_binding",
+        "path": "root.root.children[0].Filters.children[2].Device.children[1].Device Dropdown.propConfig.props.options",
+        "target_path": "view.custom.dropdownData.rows"
+      },
+      {
+        "config": {},
+        "node_type": "property_binding",
+        "path": "root.root.children[0].Filters.children[2].Device.children[1].Device Dropdown.propConfig.props.value",
+        "target_path": "view.params.row"
+      },
+      {
+        "config": {},
+        "node_type": "property_binding",
+        "path": "root.root.children[1].Table.propConfig.props.columns[2].filter.string.value",
+        "target_path": "../Filters/Wing/Wing Dropdown.props.value"
+      },
+      {
+        "config": {},
+        "node_type": "property_binding",
+        "path": "root.root.children[1].Table.propConfig.props.columns[3].filter.string.value",
+        "target_path": "../Filters/Equipment/Equipment Dropdown.props.value"
+      },
+      {
+        "config": {},
+        "node_type": "property_binding",
+        "path": "root.root.children[1].Table.propConfig.props.columns[4].filter.string.value",
+        "target_path": "../Filters/Device/Device Dropdown.props.value"
+      },
+      {
+        "config": {},
+        "node_type": "property_binding",
+        "path": "root.root.children[1].Table.propConfig.props.data",
+        "target_path": "view.custom.filteredData"
+      }
+    ]
+  },
+  "query_bindings": {
+    "count": 0,
+    "nodes": []
+  },
+  "script_transforms": {
+    "count": 2,
+    "nodes": [
+      {
+        "binding_path": "propConfig.custom.filteredData",
+        "node_type": "transform",
+        "path": "propConfig.custom.filteredData.binding.transforms[0]",
+        "script_length": 110,
+        "script_preview": "\treturn Perspective.TableData.process_datahall_kpi_data(value.rackPaths, value.wing, value.section, ..."
+      },
+      {
+        "binding_path": "root.root.children[1].Table.propConfig.props.columns[2].filter.string.value",
+        "node_type": "transform",
+        "path": "root.root.children[1].Table.propConfig.props.columns[2].filter.string.value.binding.transforms[0]",
+        "script_length": 23,
+        "script_preview": "\treturn ' '.join(value)"
+      }
+    ]
+  },
+  "scripts": {
+    "count": 3,
+    "nodes": [
+      {
+        "binding_path": "propConfig.custom.filteredData",
+        "node_type": "transform",
+        "path": "propConfig.custom.filteredData.binding.transforms[0]",
+        "script_length": 110,
+        "script_preview": "\treturn Perspective.TableData.process_datahall_kpi_data(value.rackPaths, value.wing, value.section, ..."
+      },
+      {
+        "binding_path": "root.root.children[1].Table.propConfig.props.columns[2].filter.string.value",
+        "node_type": "transform",
+        "path": "root.root.children[1].Table.propConfig.props.columns[2].filter.string.value.binding.transforms[0]",
+        "script_length": 23,
+        "script_preview": "\treturn ' '.join(value)"
+      },
+      {
+        "event_domain": "component",
+        "event_type": "onRowClick",
+        "node_type": "event_handler",
+        "path": "root.root.children[1].Table.events.component.onRowClick",
+        "scope": "G",
+        "script_length": 157,
+        "script_preview": "\n    rack = self.props.data[event.row].Rack.label\n    path =  '/' + self.view.params.wing + '/Dataha..."
+      }
+    ]
+  },
+  "tag_bindings": {
+    "count": 0,
+    "nodes": []
+  }
+}
