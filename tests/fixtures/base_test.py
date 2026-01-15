@@ -20,10 +20,13 @@ from ignition_lint.common.flatten_json import flatten_file
 
 class BaseRuleTest(unittest.TestCase):
 	"""Base class for testing individual linting rules."""
+	test_cases_dir: Path
+	configs_dir: Path
+	rule_config: Dict[str, Dict[str, Any]] | None
+	last_results: Any | None
+
 	def __init__(self, methodName='runTest'):
 		super().__init__(methodName)
-		self.test_cases_dir = None
-		self.configs_dir = None
 		self.rule_config = None
 		self.last_results = None  # Store results from last run_lint call
 
@@ -305,6 +308,8 @@ class BaseRuleTest(unittest.TestCase):
 
 class BaseIntegrationTest(unittest.TestCase):
 	"""Base class for integration tests involving multiple components."""
+	test_cases_dir: Path
+	configs_dir: Path
 
 	def setUp(self):
 		"""Set up test fixtures."""

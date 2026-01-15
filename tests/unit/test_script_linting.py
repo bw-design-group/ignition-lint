@@ -5,6 +5,7 @@ Tests script linting functionality.
 """
 
 import unittest
+from typing import Dict, Any
 
 from fixtures.base_test import BaseRuleTest
 from fixtures.test_helpers import get_test_config, load_test_view
@@ -12,6 +13,7 @@ from fixtures.test_helpers import get_test_config, load_test_view
 
 class TestPylintScriptRule(BaseRuleTest):
 	"""Test script linting with pylint."""
+	rule_config: Dict[str, Dict[str, Any]]  # Override base class to make non-optional
 
 	def setUp(self):  # pylint: disable=invalid-name
 		super().setUp()
