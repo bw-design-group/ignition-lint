@@ -5,6 +5,7 @@ Tests detection of bad component reference patterns.
 """
 
 import unittest
+from typing import Dict, Any
 
 from fixtures.base_test import BaseRuleTest
 from fixtures.test_helpers import get_test_config, create_mock_script, load_test_view
@@ -12,6 +13,7 @@ from fixtures.test_helpers import get_test_config, create_mock_script, load_test
 
 class TestBadComponentReferenceRule(BaseRuleTest):
 	"""Test bad component reference detection."""
+	rule_config: Dict[str, Dict[str, Any]]  # Override base class to make non-optional
 
 	def setUp(self):  # pylint: disable=invalid-name
 		super().setUp()

@@ -14,7 +14,7 @@ include = [
 ]
 
 [tool.poetry.dependencies]
-python = ">=3.9,<3.13"
+python = ">=3.10,<3.13"
 pylint = "*"
 ignition-api-stubs = "^8.1.48.post1"
 pre-commit = "^4.2.0"

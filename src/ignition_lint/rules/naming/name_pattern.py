@@ -180,9 +180,10 @@ class NamePatternRule(LintingRule):
 		else:
 			# Create config from individual parameters (backward compatibility)
 			self.config = NamePatternConfig(
-				allow_numbers=kwargs.get('allow_numbers', True), min_length=kwargs.get('min_length', 1),
-				max_length=kwargs.get('max_length',
-							None), forbidden_names=kwargs.get('forbidden_names', None),
+				allow_numbers=kwargs.get('allow_numbers', True),
+				min_length=kwargs.get('min_length', 1),
+				max_length=kwargs.get('max_length', None),
+				forbidden_names=kwargs.get('forbidden_names', None),
 				skip_names=kwargs.get('skip_names', None),
 				allowed_abbreviations=kwargs.get('allowed_abbreviations', None),
 				auto_detect_abbreviations=kwargs.get('auto_detect_abbreviations', True),
@@ -244,7 +245,6 @@ class NamePatternRule(LintingRule):
 	@property
 	def auto_detect_abbreviations(self) -> bool:
 		return self.config.auto_detect_abbreviations
-
 
 	def _get_default_name_extractors(self) -> Dict[NodeType, Callable[[ViewNode], str]]:
 		"""Get default name extractors for different node types."""
@@ -313,30 +313,58 @@ class NamePatternRule(LintingRule):
 				return None
 		return None
 
-	def _is_css_property(self, node: ViewNode) -> bool:
+	def _should_skip_property(self, node: ViewNode) -> bool:
 		"""
-		Check if a property is a CSS property (in style, elementStyle, textStyle, or instanceStyle).
-		CSS properties should always be in kebab-case and should not be validated.
+		Check if a property should be skipped from naming validation.
+
+		This includes:
+		- CSS properties (in style, elementStyle, textStyle, instanceStyle)
+		- Position properties (x, y coordinates in .position.)
+		- SVG path data (properties named 'd' inside props.elements)
+		- Other default/system properties that have fixed naming conventions
 
 		Args:
 			node: The property node to check
 
 		Returns:
-			True if the property is a CSS property, False otherwise
+			True if the property should be skipped, False otherwise
 		"""
 		if node.node_type != NodeType.PROPERTY:
 			return False
 
-		# Check if the path contains style-related property containers
+		path = node.path
+
+		# Define property containers that should be skipped
 		# Examples:
 		#   root.root.props.style.touch-action -> CSS property
 		#   root.FlexRepeater.props.elementStyle.flex-direction -> CSS property
 		#   root.Label.props.textStyle.font-family -> CSS property
 		#   root.FlexRepeater.props.instanceStyle[0].flex-direction -> CSS property
-		#   custom.myProperty -> NOT a CSS property
-		path = node.path
-		css_containers = ('.style.', '.elementStyle.', '.textStyle.', '.instanceStyle.')
-		return any(container in path for container in css_containers)
+		#   root.Container.position.x -> Position property
+		#   root.Container.position.y -> Position property
+		#   root.SvgIcon.props.elements.d -> SVG path data (direct)
+		#   root.Line1.props.elements[0].d -> SVG path data (in array)
+		#   custom.myProperty -> NOT skipped
+		skip_containers = (
+			'.style.',
+			'.elementStyle.',
+			'.textStyle.',
+			'.instanceStyle.',
+			'.position.',
+		)
+
+		# Check standard skip containers
+		if any(container in path for container in skip_containers):
+			return True
+
+		# Special case for SVG path data: check if path contains .props.elements and ends with .d
+		# This handles both direct properties and array elements:
+		#   root.SvgIcon.props.elements.d
+		#   root.Line1.props.elements[0].d
+		if '.props.elements' in path and path.endswith('.d'):
+			return True
+
+		return False
 
 	def _validate_name(self, node: ViewNode, name: str) -> list:
 		"""
@@ -406,7 +434,9 @@ class NamePatternRule(LintingRule):
 			validation_errors = self._validate_name(node, name)
 			for error in validation_errors:
 				# Use node-specific severity if available, otherwise fall back to global severity
-				node_severity = self._get_node_specific_config(node.node_type, 'severity', self.severity)
+				node_severity = self._get_node_specific_config(
+					node.node_type, 'severity', self.severity
+				)
 				self.add_violation(f"{node.path}: {error}", node_severity)
 
 	# Specific visit methods that delegate to the generic method
@@ -420,8 +450,8 @@ class NamePatternRule(LintingRule):
 		self.visit_generic(node)
 
 	def visit_property(self, node: ViewNode):
-		# Skip validation for CSS properties (in style or elementStyle)
-		if self._is_css_property(node):
+		# Skip validation for default/system properties (CSS, position, etc.)
+		if self._should_skip_property(node):
 			return
 		self.visit_generic(node)
 

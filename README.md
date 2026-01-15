@@ -7,7 +7,7 @@ Ignition Lint is a Python framework designed to analyze and lint Ignition Perspe
 ## Getting Started with Poetry
 
 ### Prerequisites
-- Python 3.9 or higher
+- Python 3.10 or higher
 - Poetry >= 2.0 (install from [python-poetry.org](https://python-poetry.org/docs/#installation))
 
 ### Installation Methods

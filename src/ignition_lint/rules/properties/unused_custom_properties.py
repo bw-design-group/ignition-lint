@@ -59,6 +59,7 @@ class UnusedCustomPropertiesRule(LintingRule):
 		self.defined_properties = {}
 		self.used_properties = set()
 		self.flattened_json = {}
+		self._finalize_complete = False
 
 	def set_flattened_json(self, flattened_json: Dict[str, Any]):
 		"""Set the flattened JSON for comprehensive property reference searching."""
@@ -66,7 +67,10 @@ class UnusedCustomPropertiesRule(LintingRule):
 
 	def process_nodes(self, nodes):
 		"""Process nodes to detect unused custom properties and view parameters."""
-		# Reset finalize flag for this file
+		# Reset tracking state before processing this file
+		# Note: flattened_json is set via set_flattened_json() before this is called
+		self.defined_properties = {}
+		self.used_properties = set()
 		self._finalize_complete = False
 
 		# Call parent process_nodes first to get standard property processing
@@ -232,7 +236,7 @@ class UnusedCustomPropertiesRule(LintingRule):
 		# Get all property paths we're looking for
 		search_patterns = []
 
-		for prop_path in self.defined_properties.keys(): # pylint: disable=consider-iterating-dictionary
+		for prop_path in self.defined_properties.keys():  # pylint: disable=consider-iterating-dictionary
 			if prop_path.startswith('view.custom.'):
 				# For view custom properties: view.custom.propName
 				prop_name = prop_path[12:]  # Remove 'view.custom.'

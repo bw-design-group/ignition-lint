@@ -5,6 +5,7 @@ Tests polling interval validation in expression bindings.
 """
 
 import unittest
+from typing import Dict, Any
 
 from fixtures.base_test import BaseRuleTest
 from fixtures.test_helpers import get_test_config, load_test_view
@@ -12,6 +13,8 @@ from fixtures.test_helpers import get_test_config, load_test_view
 
 class TestPollingIntervalRule(BaseRuleTest):
 	"""Test polling interval validation."""
+	rule_config: Dict[str, Dict[str, Any]]  # Override base class to make non-optional
+
 	def setUp(self):  # pylint: disable=invalid-name
 		super().setUp()
 		self.rule_config = get_test_config("PollingIntervalRule", minimum_interval=10000)
