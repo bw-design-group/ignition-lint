@@ -5,6 +5,7 @@ Tests various naming conventions and edge cases for different node types.
 """
 
 import unittest
+from typing import Dict, Any
 
 from fixtures.base_test import BaseRuleTest
 from fixtures.test_helpers import get_test_config, load_test_view
@@ -12,8 +13,9 @@ from fixtures.test_helpers import get_test_config, load_test_view
 
 class TestNamePatternPascalCase(BaseRuleTest):
 	"""Test PascalCase naming convention for components."""
+	rule_config: Dict[str, Dict[str, Any]]  # Override base class to make non-optional
 
-	def setUp(self): # pylint: disable=invalid-name
+	def setUp(self):  # pylint: disable=invalid-name
 		super().setUp()
 		self.rule_config = get_test_config(
 			"NamePatternRule", target_node_types=["component"], convention="PascalCase", allow_numbers=True,
@@ -43,7 +45,9 @@ class TestNamePatternPascalCase(BaseRuleTest):
 
 class TestNamePatternCamelCase(BaseRuleTest):
 	"""Test camelCase naming convention for components."""
-	def setUp(self): # pylint: disable=invalid-name
+	rule_config: Dict[str, Dict[str, Any]]  # Override base class to make non-optional
+
+	def setUp(self):  # pylint: disable=invalid-name
 		super().setUp()
 		self.rule_config = get_test_config(
 			"NamePatternRule", target_node_types=["component"], convention="camelCase", allow_numbers=True,
@@ -68,8 +72,9 @@ class TestNamePatternCamelCase(BaseRuleTest):
 
 class TestNamePatternSnakeCase(BaseRuleTest):
 	"""Test snake_case naming convention for components."""
+	rule_config: Dict[str, Dict[str, Any]]  # Override base class to make non-optional
 
-	def setUp(self): # pylint: disable=invalid-name
+	def setUp(self):  # pylint: disable=invalid-name
 		super().setUp()
 		self.rule_config = get_test_config(
 			"NamePatternRule", target_node_types=["component"], convention="snake_case", allow_numbers=True,
@@ -94,8 +99,9 @@ class TestNamePatternSnakeCase(BaseRuleTest):
 
 class TestNamePatternKebabCase(BaseRuleTest):
 	"""Test kebab-case naming convention for components."""
+	rule_config: Dict[str, Dict[str, Any]]  # Override base class to make non-optional
 
-	def setUp(self): # pylint: disable=invalid-name
+	def setUp(self):  # pylint: disable=invalid-name
 		super().setUp()
 		self.rule_config = get_test_config(
 			"NamePatternRule", target_node_types=["component"], convention="kebab-case", allow_numbers=True,
@@ -402,9 +408,7 @@ class TestStandardNamingConventions(BaseRuleTest):
 	def test_pascal_case_components_camel_case_properties(self):
 		"""Test that components follow PascalCase and properties follow camelCase."""
 		rule_config = get_test_config(
-			"NamePatternRule",
-			target_node_types=["component", "property"],
-			node_type_specific_rules={
+			"NamePatternRule", target_node_types=["component", "property"], node_type_specific_rules={
 				"component": {
 					"convention": "PascalCase",
 					"severity": "error"
@@ -421,23 +425,20 @@ class TestStandardNamingConventions(BaseRuleTest):
 
 		# Should have warnings for properties not following camelCase
 		self.assert_rule_warnings(
-			view_file, rule_config, "NamePatternRule",
+			view_file,
+			rule_config,
+			"NamePatternRule",
 			expected_warning_count=4,  # All custom properties are PascalCase
 			warning_patterns=["doesn't follow camelCase", "property"]
 		)
 
 		# Should have no errors for components (they follow PascalCase)
-		self.assert_rule_errors(
-			view_file, rule_config, "NamePatternRule",
-			expected_error_count=0
-		)
+		self.assert_rule_errors(view_file, rule_config, "NamePatternRule", expected_error_count=0)
 
 	def test_camel_case_components_pascal_case_properties_fails(self):
 		"""Test camelCase components with PascalCase properties - should produce errors and warnings."""
 		rule_config = get_test_config(
-			"NamePatternRule",
-			target_node_types=["component", "property"],
-			node_type_specific_rules={
+			"NamePatternRule", target_node_types=["component", "property"], node_type_specific_rules={
 				"component": {
 					"convention": "PascalCase",
 					"severity": "error"
@@ -454,7 +455,9 @@ class TestStandardNamingConventions(BaseRuleTest):
 
 		# Should have errors for components not following PascalCase
 		self.assert_rule_errors(
-			view_file, rule_config, "NamePatternRule",
+			view_file,
+			rule_config,
+			"NamePatternRule",
 			expected_error_count=1,  # The iconCamelCase component
 			error_patterns=["doesn't follow PascalCase", "component"]
 		)
@@ -487,16 +490,15 @@ class TestStandardNamingConventions(BaseRuleTest):
 
 		# Should have warnings for properties (they don't follow camelCase)
 		self.assert_rule_warnings(
-			view_file, rule_config, "NamePatternRule",
+			view_file,
+			rule_config,
+			"NamePatternRule",
 			expected_warning_count=4,  # All properties are PascalCase instead of camelCase
 			warning_patterns=["doesn't follow camelCase", "property"]
 		)
 
 		# Should have no errors since severity is set to warning
-		self.assert_rule_errors(
-			view_file, rule_config, "NamePatternRule",
-			expected_error_count=0
-		)
+		self.assert_rule_errors(view_file, rule_config, "NamePatternRule", expected_error_count=0)
 
 
 class TestNamePatternArrayProperties(BaseRuleTest):
@@ -505,10 +507,7 @@ class TestNamePatternArrayProperties(BaseRuleTest):
 	def test_array_property_validated_once(self):
 		"""Array property should be validated once for the base name, not once per element."""
 		rule_config = get_test_config(
-			"NamePatternRule",
-			target_node_types=["property"],
-			convention="camelCase",
-			severity="error"
+			"NamePatternRule", target_node_types=["property"], convention="camelCase", severity="error"
 		)
 
 		# Create a view with an array property that violates camelCase
@@ -540,8 +539,9 @@ class TestNamePatternArrayProperties(BaseRuleTest):
 			errors = self.get_errors_for_rule("NamePatternRule")
 
 			# Should have exactly 1 error for MyArrayProperty, not 3 (one per element)
-			self.assertEqual(len(errors), 1,
-				f"Expected 1 error for array property, got {len(errors)}: {errors}")
+			self.assertEqual(
+				len(errors), 1, f"Expected 1 error for array property, got {len(errors)}: {errors}"
+			)
 
 			# Error should reference the base property name, not an indexed element
 			self.assertIn("MyArrayProperty", errors[0])
@@ -554,10 +554,7 @@ class TestNamePatternArrayProperties(BaseRuleTest):
 	def test_array_property_with_valid_name(self):
 		"""Array property with valid name should pass validation."""
 		rule_config = get_test_config(
-			"NamePatternRule",
-			target_node_types=["property"],
-			convention="camelCase",
-			severity="error"
+			"NamePatternRule", target_node_types=["property"], convention="camelCase", severity="error"
 		)
 
 		# Create a view with an array property that follows camelCase
@@ -596,10 +593,7 @@ class TestNamePatternCSSProperties(BaseRuleTest):
 	def test_css_properties_in_style_should_pass(self):
 		"""CSS properties in style objects should not be flagged by property naming rules."""
 		rule_config = get_test_config(
-			"NamePatternRule",
-			target_node_types=["property"],
-			convention="camelCase",
-			severity="error"
+			"NamePatternRule", target_node_types=["property"], convention="camelCase", severity="error"
 		)
 
 		# Create a view with CSS properties in style
@@ -640,10 +634,7 @@ class TestNamePatternCSSProperties(BaseRuleTest):
 	def test_css_properties_in_element_style_should_pass(self):
 		"""CSS properties in elementStyle (flex repeater) should not be flagged."""
 		rule_config = get_test_config(
-			"NamePatternRule",
-			target_node_types=["property"],
-			convention="camelCase",
-			severity="error"
+			"NamePatternRule", target_node_types=["property"], convention="camelCase", severity="error"
 		)
 
 		# Create a view with CSS properties in elementStyle
@@ -652,21 +643,19 @@ class TestNamePatternCSSProperties(BaseRuleTest):
 			"params": {},
 			"props": {},
 			"root": {
-				"children": [
-					{
-						"meta": {
-							"name": "FlexRepeater"
-						},
-						"props": {
-							"elementStyle": {
-								"display": "flex",
-								"flex-direction": "row",
-								"align-items": "center"
-							}
-						},
-						"type": "ia.container.flex"
-					}
-				],
+				"children": [{
+					"meta": {
+						"name": "FlexRepeater"
+					},
+					"props": {
+						"elementStyle": {
+							"display": "flex",
+							"flex-direction": "row",
+							"align-items": "center"
+						}
+					},
+					"type": "ia.container.flex"
+				}],
 				"meta": {
 					"name": "root"
 				},
@@ -691,10 +680,7 @@ class TestNamePatternCSSProperties(BaseRuleTest):
 	def test_regular_properties_still_validated(self):
 		"""Regular properties (not in style) should still be validated."""
 		rule_config = get_test_config(
-			"NamePatternRule",
-			target_node_types=["property"],
-			convention="camelCase",
-			severity="error"
+			"NamePatternRule", target_node_types=["property"], convention="camelCase", severity="error"
 		)
 
 		# Create a view with regular properties that violate camelCase
@@ -724,6 +710,225 @@ class TestNamePatternCSSProperties(BaseRuleTest):
 		try:
 			# Regular properties SHOULD be flagged as violations
 			self.assert_rule_fails(view_file, rule_config, "NamePatternRule")
+		finally:
+			view_file.unlink()
+
+
+class TestNamePatternSVGProperties(BaseRuleTest):
+	"""Test that SVG path properties (props.elements.d) are not flagged as violations."""
+
+	def test_svg_path_properties_should_pass(self):
+		"""SVG path data properties should not be flagged by property naming rules."""
+		rule_config = get_test_config(
+			"NamePatternRule", target_node_types=["property"], convention="camelCase", severity="error"
+		)
+
+		# Create a view with SVG path data in props.elements array (real-world structure)
+		view_data = {
+			"custom": {},
+			"params": {},
+			"props": {},
+			"root": {
+				"children": [{
+					"meta": {
+						"name": "Line1"
+					},
+					"position": {
+						"height": 0.125,
+						"width": 0.0222,
+						"x": 0.25,
+						"y": 0.088
+					},
+					"props": {
+						"elements": [{
+							"d": "M5 15 c5 -5, 10 -5, 15 0 c5 5, 10 5, 15 0 m-15 0 v110",  # SVG path in array
+							"type": "path"
+						}],
+						"fill": {
+							"paint": "transparent"
+						}
+					},
+					"type": "ia.shapes.svg"
+				}],
+				"meta": {
+					"name": "root"
+				},
+				"type": "ia.container.coord"
+			}
+		}
+
+		# Write test view file
+		import json
+		import tempfile
+		from pathlib import Path
+		with tempfile.NamedTemporaryFile(mode='w', suffix='.json', delete=False) as f:
+			json.dump(view_data, f)
+			view_file = Path(f.name)
+
+		try:
+			# SVG path properties should NOT be flagged as violations
+			self.assert_rule_passes(view_file, rule_config, "NamePatternRule")
+		finally:
+			view_file.unlink()
+
+	def test_svg_paths_skipped_but_other_props_validated(self):
+		"""SVG path properties should be skipped while other properties are still validated."""
+		rule_config = get_test_config(
+			"NamePatternRule", target_node_types=["property"], convention="camelCase", severity="error"
+		)
+
+		# Create a view with SVG paths and custom properties
+		view_data = {
+			"custom": {
+				"BadPropertyName": "value"  # PascalCase - should fail camelCase rule
+			},
+			"params": {},
+			"props": {
+				"elements": {
+					"d": "M10 10 L20 20"  # SVG path - should be skipped
+				}
+			},
+			"root": {
+				"meta": {
+					"name": "root"
+				},
+				"type": "ia.container.coord"
+			}
+		}
+
+		# Write test view file
+		import json
+		import tempfile
+		from pathlib import Path
+		with tempfile.NamedTemporaryFile(mode='w', suffix='.json', delete=False) as f:
+			json.dump(view_data, f)
+			view_file = Path(f.name)
+
+		try:
+			# Should fail because of BadPropertyName, but not because of SVG path
+			self.run_lint_on_file(view_file, rule_config)
+			errors = self.get_errors_for_rule("NamePatternRule")
+
+			# Should have exactly 1 error for BadPropertyName
+			self.assertEqual(
+				len(errors), 1, f"Expected 1 error for BadPropertyName, got {len(errors)}: {errors}"
+			)
+
+			# Error should be about BadPropertyName, not SVG path
+			self.assertIn("BadPropertyName", errors[0])
+			self.assertNotIn("props.elements.d", errors[0])
+		finally:
+			view_file.unlink()
+
+
+class TestNamePatternPositionProperties(BaseRuleTest):
+	"""Test that position properties (.position.x, .position.y) are not flagged as violations."""
+
+	def test_position_properties_should_pass(self):
+		"""Position properties (x, y coordinates) should not be flagged by property naming rules."""
+		rule_config = get_test_config(
+			"NamePatternRule", target_node_types=["property"], convention="camelCase", severity="error"
+		)
+
+		# Create a view with position properties
+		view_data = {
+			"custom": {},
+			"params": {},
+			"props": {},
+			"root": {
+				"children": [{
+					"meta": {
+						"name": "Button"
+					},
+					"position": {
+						"x": 100,
+						"y": 200,
+						"width": 150,
+						"height": 50
+					},
+					"type": "ia.display.button"
+				}, {
+					"meta": {
+						"name": "Label"
+					},
+					"position": {
+						"x": 300,
+						"y": 400
+					},
+					"type": "ia.display.label"
+				}],
+				"meta": {
+					"name": "root"
+				},
+				"position": {
+					"x": 0,
+					"y": 0
+				},
+				"type": "ia.container.coord"
+			}
+		}
+
+		# Write test view file
+		import json
+		import tempfile
+		from pathlib import Path
+		with tempfile.NamedTemporaryFile(mode='w', suffix='.json', delete=False) as f:
+			json.dump(view_data, f)
+			view_file = Path(f.name)
+
+		try:
+			# Position properties should NOT be flagged as violations
+			self.assert_rule_passes(view_file, rule_config, "NamePatternRule")
+		finally:
+			view_file.unlink()
+
+	def test_position_properties_with_custom_properties(self):
+		"""Position properties should be skipped while custom properties are still validated."""
+		rule_config = get_test_config(
+			"NamePatternRule", target_node_types=["property"], convention="camelCase", severity="error"
+		)
+
+		# Create a view with both position and custom properties
+		view_data = {
+			"custom": {
+				"BadPropertyName": "value"  # PascalCase - should fail camelCase rule
+			},
+			"params": {},
+			"props": {},
+			"root": {
+				"meta": {
+					"name": "root"
+				},
+				"position": {
+					"x": 0,  # Should be skipped
+					"y": 0  # Should be skipped
+				},
+				"type": "ia.container.coord"
+			}
+		}
+
+		# Write test view file
+		import json
+		import tempfile
+		from pathlib import Path
+		with tempfile.NamedTemporaryFile(mode='w', suffix='.json', delete=False) as f:
+			json.dump(view_data, f)
+			view_file = Path(f.name)
+
+		try:
+			# Should fail because of BadPropertyName, but not because of x/y
+			self.run_lint_on_file(view_file, rule_config)
+			errors = self.get_errors_for_rule("NamePatternRule")
+
+			# Should have exactly 1 error for BadPropertyName
+			self.assertEqual(
+				len(errors), 1, f"Expected 1 error for BadPropertyName, got {len(errors)}: {errors}"
+			)
+
+			# Error should be about BadPropertyName, not x or y
+			self.assertIn("BadPropertyName", errors[0])
+			self.assertNotIn("position.x", errors[0])
+			self.assertNotIn("position.y", errors[0])
 		finally:
 			view_file.unlink()
 
