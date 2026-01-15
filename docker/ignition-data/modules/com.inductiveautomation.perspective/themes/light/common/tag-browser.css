@@ -1,9 +1,0 @@
-.ia_tagBrowser__noResultsDisplay,
-.ia_tagBrowser__loadingDisplay {
-    background: var(--neutral-10);
-    border: 1px solid var(--border);
-}
-
-.ia_tagBrowser__noResultsDisplay__message {
-    color: var(--input--disabled);
-}

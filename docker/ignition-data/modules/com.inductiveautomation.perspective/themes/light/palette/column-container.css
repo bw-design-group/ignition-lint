@@ -1,7 +1,0 @@
-.ia_columnContainerComponent--designing__columnGuide {
-    background-color: var(--containerNested);
-}
-
-.ia_columnContainerComponent--designing__row {
-    outline: dashed var(--border) 1px;
-}
