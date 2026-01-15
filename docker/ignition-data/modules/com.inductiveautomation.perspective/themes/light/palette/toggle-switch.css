@@ -1,7 +1,0 @@
-.ia_toggleSwitchComponent {
-    color: var(--label);
-}
-
-.ia_toggleSwitchComponent--disabled {
-    color: var(--label--disabled);
-}
