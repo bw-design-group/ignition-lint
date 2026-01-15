@@ -714,6 +714,113 @@ class TestNamePatternCSSProperties(BaseRuleTest):
 			view_file.unlink()
 
 
+class TestNamePatternSVGProperties(BaseRuleTest):
+	"""Test that SVG path properties (props.elements.d) are not flagged as violations."""
+
+	def test_svg_path_properties_should_pass(self):
+		"""SVG path data properties should not be flagged by property naming rules."""
+		rule_config = get_test_config(
+			"NamePatternRule", target_node_types=["property"], convention="camelCase", severity="error"
+		)
+
+		# Create a view with SVG path data in props.elements array (real-world structure)
+		view_data = {
+			"custom": {},
+			"params": {},
+			"props": {},
+			"root": {
+				"children": [{
+					"meta": {
+						"name": "Line1"
+					},
+					"position": {
+						"height": 0.125,
+						"width": 0.0222,
+						"x": 0.25,
+						"y": 0.088
+					},
+					"props": {
+						"elements": [{
+							"d": "M5 15 c5 -5, 10 -5, 15 0 c5 5, 10 5, 15 0 m-15 0 v110",  # SVG path in array
+							"type": "path"
+						}],
+						"fill": {
+							"paint": "transparent"
+						}
+					},
+					"type": "ia.shapes.svg"
+				}],
+				"meta": {
+					"name": "root"
+				},
+				"type": "ia.container.coord"
+			}
+		}
+
+		# Write test view file
+		import json
+		import tempfile
+		from pathlib import Path
+		with tempfile.NamedTemporaryFile(mode='w', suffix='.json', delete=False) as f:
+			json.dump(view_data, f)
+			view_file = Path(f.name)
+
+		try:
+			# SVG path properties should NOT be flagged as violations
+			self.assert_rule_passes(view_file, rule_config, "NamePatternRule")
+		finally:
+			view_file.unlink()
+
+	def test_svg_paths_skipped_but_other_props_validated(self):
+		"""SVG path properties should be skipped while other properties are still validated."""
+		rule_config = get_test_config(
+			"NamePatternRule", target_node_types=["property"], convention="camelCase", severity="error"
+		)
+
+		# Create a view with SVG paths and custom properties
+		view_data = {
+			"custom": {
+				"BadPropertyName": "value"  # PascalCase - should fail camelCase rule
+			},
+			"params": {},
+			"props": {
+				"elements": {
+					"d": "M10 10 L20 20"  # SVG path - should be skipped
+				}
+			},
+			"root": {
+				"meta": {
+					"name": "root"
+				},
+				"type": "ia.container.coord"
+			}
+		}
+
+		# Write test view file
+		import json
+		import tempfile
+		from pathlib import Path
+		with tempfile.NamedTemporaryFile(mode='w', suffix='.json', delete=False) as f:
+			json.dump(view_data, f)
+			view_file = Path(f.name)
+
+		try:
+			# Should fail because of BadPropertyName, but not because of SVG path
+			self.run_lint_on_file(view_file, rule_config)
+			errors = self.get_errors_for_rule("NamePatternRule")
+
+			# Should have exactly 1 error for BadPropertyName
+			self.assertEqual(
+				len(errors), 1, f"Expected 1 error for BadPropertyName, got {len(errors)}: {errors}"
+			)
+
+			# Error should be about BadPropertyName, not SVG path
+			self.assertIn("BadPropertyName", errors[0])
+			self.assertNotIn("props.elements.d", errors[0])
+		finally:
+			view_file.unlink()
+
+
 class TestNamePatternPositionProperties(BaseRuleTest):
 	"""Test that position properties (.position.x, .position.y) are not flagged as violations."""
 

@@ -320,6 +320,7 @@ class NamePatternRule(LintingRule):
 		This includes:
 		- CSS properties (in style, elementStyle, textStyle, instanceStyle)
 		- Position properties (x, y coordinates in .position.)
+		- SVG path data (properties named 'd' inside props.elements)
 		- Other default/system properties that have fixed naming conventions
 
 		Args:
@@ -341,6 +342,8 @@ class NamePatternRule(LintingRule):
 		#   root.FlexRepeater.props.instanceStyle[0].flex-direction -> CSS property
 		#   root.Container.position.x -> Position property
 		#   root.Container.position.y -> Position property
+		#   root.SvgIcon.props.elements.d -> SVG path data (direct)
+		#   root.Line1.props.elements[0].d -> SVG path data (in array)
 		#   custom.myProperty -> NOT skipped
 		skip_containers = (
 			'.style.',
@@ -350,7 +353,18 @@ class NamePatternRule(LintingRule):
 			'.position.',
 		)
 
-		return any(container in path for container in skip_containers)
+		# Check standard skip containers
+		if any(container in path for container in skip_containers):
+			return True
+
+		# Special case for SVG path data: check if path contains .props.elements and ends with .d
+		# This handles both direct properties and array elements:
+		#   root.SvgIcon.props.elements.d
+		#   root.Line1.props.elements[0].d
+		if '.props.elements' in path and path.endswith('.d'):
+			return True
+
+		return False
 
 	def _validate_name(self, node: ViewNode, name: str) -> list:
 		"""
