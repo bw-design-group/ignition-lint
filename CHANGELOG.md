@@ -13,8 +13,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Updated virtualenv from 20.31.2 to 20.36.1 to fix CVE-2026-22702 (TOCTOU vulnerabilities in directory creation)
 - Added explicit `permissions: contents: read` to all GitHub Actions workflows following principle of least privilege
 
+### Changed
+- NamePatternRule now skips position properties (x, y coordinates) to prevent false positives on coordinate container properties [5e1b209]
+- NamePatternRule now skips SVG path properties (d property in props.elements) to prevent false positives on SVG shape components [70b6329]
+
 ### Fixed
 - UnusedCustomPropertiesRule now properly resets state between files to prevent false positives [30a440b]
+- Resolved Pylance type errors in unit test base classes and test files [64afcf9]
 
 ## [0.2.6] - 2026-01-09
 
