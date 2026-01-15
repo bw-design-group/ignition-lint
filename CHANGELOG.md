@@ -5,7 +5,10 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [0.2.7] - 2026-01-15
+
+### Fixed
+- UnusedCustomPropertiesRule now properly resets state between files to prevent false positives [30a440b]
 
 ## [0.2.6] - 2026-01-09
 
@@ -116,7 +119,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Initial tracked release
 
-[Unreleased]: https://github.com/bw-design-group/ignition-lint/compare/v0.2.5...HEAD
+[Unreleased]: https://github.com/bw-design-group/ignition-lint/compare/v0.2.7...HEAD
+[0.2.7]: https://github.com/bw-design-group/ignition-lint/compare/v0.2.6...v0.2.7
+[0.2.6]: https://github.com/bw-design-group/ignition-lint/compare/v0.2.5...v0.2.6
 [0.2.5]: https://github.com/bw-design-group/ignition-lint/compare/v0.2.4...v0.2.5
 [0.2.4]: https://github.com/bw-design-group/ignition-lint/compare/v0.2.3...v0.2.4
 [0.2.3]: https://github.com/bw-design-group/ignition-lint/compare/v0.2.2...v0.2.3

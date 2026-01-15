@@ -18,6 +18,7 @@ REMAINING LIMITATIONS:
 import json
 from fixtures.base_test import BaseRuleTest
 from fixtures.test_helpers import get_test_config, create_temp_view_file
+from ignition_lint.common.flatten_json import flatten_file
 
 
 class TestUnusedCustomPropertiesRule(BaseRuleTest):
@@ -207,4 +208,58 @@ class TestUnusedCustomPropertiesRule(BaseRuleTest):
 		self.assert_rule_errors(
 			mock_view, rule_config, "UnusedCustomPropertiesRule", expected_error_count=1,
 			error_patterns=["unusedViewParam", "never referenced"]
+		)
+
+	def test_state_reset_between_files(self):
+		"""Test that rule state is properly reset when processing multiple files."""
+		# Create first view with unused property "fileOneProp"
+		view_data_1 = {
+			"custom": {
+				"fileOneProp": "value from file 1"
+			},
+			"root": {
+				"children": [],
+				"meta": {
+					"name": "root"
+				}
+			}
+		}
+		mock_view_1 = create_temp_view_file(json.dumps(view_data_1, indent=2))
+
+		# Create second view with a completely different unused property "fileTwoProp"
+		view_data_2 = {
+			"custom": {
+				"fileTwoProp": "value from file 2"
+			},
+			"root": {
+				"children": [],
+				"meta": {
+					"name": "root"
+				}
+			}
+		}
+		mock_view_2 = create_temp_view_file(json.dumps(view_data_2, indent=2))
+
+		# Create a SINGLE lint engine that will be reused for both files (mimics CLI behavior)
+		rule_config = get_test_config("UnusedCustomPropertiesRule")
+		lint_engine = self.create_lint_engine(rule_config)
+
+		# Process first file with the lint engine
+		flattened_1 = flatten_file(mock_view_1)
+		results_1 = lint_engine.process(flattened_1)
+		errors_1 = results_1.errors.get("UnusedCustomPropertiesRule", [])
+		self.assertEqual(len(errors_1), 1, "First file should have exactly 1 error")
+		self.assertIn("fileOneProp", errors_1[0], "First file error should mention fileOneProp")
+		self.assertNotIn("fileTwoProp", errors_1[0], "First file error should NOT mention fileTwoProp")
+
+		# Process second file with the SAME lint engine (this is where the bug manifests)
+		flattened_2 = flatten_file(mock_view_2)
+		results_2 = lint_engine.process(flattened_2)
+		errors_2 = results_2.errors.get("UnusedCustomPropertiesRule", [])
+		self.assertEqual(len(errors_2), 1, "Second file should have exactly 1 error")
+		self.assertIn("fileTwoProp", errors_2[0], "Second file error should mention fileTwoProp")
+		# This assertion will FAIL if state is not reset properly:
+		self.assertNotIn(
+			"fileOneProp", errors_2[0],
+			"Second file error should NOT mention fileOneProp from first file (state not reset!)"
 		)
