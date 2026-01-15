@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [0.2.7] - 2026-01-15
 
+### Security
+- Updated Python requirement from >=3.9 to >=3.10 (Python 3.9 reached EOL October 2025)
+- Updated filelock from 3.18.0 to 3.20.3 to fix CVE-2025-68146 (TOCTOU race condition vulnerabilities)
+- Updated virtualenv from 20.31.2 to 20.36.1 to fix CVE-2026-22702 (TOCTOU vulnerabilities in directory creation)
+- Added explicit `permissions: contents: read` to all GitHub Actions workflows following principle of least privilege
+
 ### Fixed
 - UnusedCustomPropertiesRule now properly resets state between files to prevent false positives [30a440b]
 
