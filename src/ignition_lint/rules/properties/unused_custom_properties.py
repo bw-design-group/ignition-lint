@@ -182,17 +182,21 @@ class UnusedCustomPropertiesRule(LintingRule):
 			r'self\.view\.custom\.([a-zA-Z_][a-zA-Z0-9_]*)',  # self.view.custom.propName
 			r'self\.view\.params\.([a-zA-Z_][a-zA-Z0-9_]*)',  # self.view.params.paramName
 			r'self\.custom\.([a-zA-Z_][a-zA-Z0-9_]*)',  # self.custom.propName (component)
+			r'self\.params\.([a-zA-Z_][a-zA-Z0-9_]*)',  # self.params.propName (component)
 		]
 
 		for pattern in patterns:
 			matches = re.findall(pattern, script)
 			for match in matches:
-				if '.view.custom.' in pattern:
+				# Check for escaped versions of the substrings since patterns have escaped dots
+				if r'\.view\.custom\.' in pattern:
 					self.used_properties.add(f"view.custom.{match}")
-				elif '.view.params.' in pattern:
+				elif r'\.view\.params\.' in pattern:
 					self.used_properties.add(f"view.params.{match}")
-				elif '.custom.' in pattern:
+				elif r'\.custom\.' in pattern:
 					self.used_properties.add(f"*.custom.{match}")
+				elif r'\.params\.' in pattern:
+					self.used_properties.add(f"*.params.{match}")
 
 	def finalize(self):
 		"""Called after all nodes are visited - check for unused properties."""
@@ -210,16 +214,23 @@ class UnusedCustomPropertiesRule(LintingRule):
 		for prop_path, definition_location in self.defined_properties.items():
 			# Check if this property is used
 			is_used = prop_path in self.used_properties
+			if is_used:
+				continue
 
 			# For component custom properties, also check wildcard usage
-			if not is_used and '.custom.' in prop_path and not prop_path.startswith('view.'):
+			if '.custom.' in prop_path and not prop_path.startswith('view.'):
 				# Extract just the property name for wildcard matching
 				prop_name = prop_path.split('.custom.')[-1]
-				wildcard_path = f"*.custom.{prop_name}"
-				is_used = wildcard_path in self.used_properties
+				if f"*.custom.{prop_name}" in self.used_properties:
+					continue
 
-			if not is_used:
-				unused_properties.append((prop_path, definition_location))
+			if prop_path.startswith('view.params.'):
+				prop_name = prop_path.split('view.params.')[-1]
+				if f"*.params.{prop_name}" in self.used_properties:
+					continue
+
+			# If we reach here, the property is unused
+			unused_properties.append((prop_path, definition_location))
 
 		# Report unused properties
 		for prop_path, definition_location in unused_properties:
