@@ -5,6 +5,16 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.2.9] - 2026-01-27
+
+### Added
+- UnusedCustomPropertiesRule now detects self.params references in script transforms [5cf928d]
+- Test coverage expanded for UnusedCustomPropertiesRule with 8 new test cases covering script transforms, tag bindings, message handlers, custom methods, property bindings, and expression patterns [5599aad]
+
+### Fixed
+- UnusedCustomPropertiesRule now correctly recognizes view parameters used as self.params in script transforms, preventing false positives [5cf928d]
+- Pattern matching in script reference detection now properly handles escaped regex patterns for .params. and .custom. patterns [5cf928d]
+
 ## [0.2.8] - 2026-01-26
 
 ### Added
@@ -146,7 +156,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Initial tracked release
 
-[Unreleased]: https://github.com/bw-design-group/ignition-lint/compare/v0.2.8...HEAD
+[Unreleased]: https://github.com/bw-design-group/ignition-lint/compare/v0.2.9...HEAD
+[0.2.9]: https://github.com/bw-design-group/ignition-lint/compare/v0.2.8...v0.2.9
 [0.2.8]: https://github.com/bw-design-group/ignition-lint/compare/v0.2.7...v0.2.8
 [0.2.7]: https://github.com/bw-design-group/ignition-lint/compare/v0.2.6...v0.2.7
 [0.2.6]: https://github.com/bw-design-group/ignition-lint/compare/v0.2.5...v0.2.6

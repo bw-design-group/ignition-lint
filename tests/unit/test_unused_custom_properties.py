@@ -263,3 +263,313 @@ class TestUnusedCustomPropertiesRule(BaseRuleTest):
 			"fileOneProp", errors_2[0],
 			"Second file error should NOT mention fileOneProp from first file (state not reset!)"
 		)
+
+	def test_view_param_used_in_script_transform_with_self_params(self):
+		"""Test that view params accessed via self.params in script transforms are recognized as used."""
+		# Create a view with a view parameter used in a script transform as self.params.scriptValue
+		view_data = {
+			"params": {
+				"scriptValue": "default value"
+			},
+			"root": {
+				"children": [{
+					"meta": {
+						"name": "TestLabel"
+					},
+					"type": "ia.display.label",
+					"props": {
+						"text": {
+							"binding": {
+								"config": {
+									"expression": "None"
+								},
+								"transforms": [{
+									"type": "script",
+									"code": "return str(self.params.scriptValue)"
+								}],
+								"type": "expr"
+							}
+						}
+					}
+				}],
+				"meta": {
+					"name": "root"
+				}
+			}
+		}
+		mock_view_content = json.dumps(view_data, indent=2)
+		mock_view = create_temp_view_file(mock_view_content)
+
+		rule_config = get_test_config("UnusedCustomPropertiesRule")
+
+		# Should NOT flag the view parameter as unused since it's referenced in the script transform
+		self.assert_rule_errors(mock_view, rule_config, "UnusedCustomPropertiesRule", expected_error_count=0)
+
+	def test_view_param_used_in_script_transform_on_root(self):
+		"""Test that view params accessed in script transforms on the root component are recognized."""
+		# Create a view where the root component has a script transform using self.params
+		view_data = {
+			"params": {
+				"rootParam": "root value"
+			},
+			"root": {
+				"meta": {
+					"name": "root"
+				},
+				"props": {
+					"custom.displayValue": {
+						"binding": {
+							"config": {
+								"expression": "None"
+							},
+							"transforms": [{
+								"type": "script",
+								"code": "# Access root param via self.params\nreturn self.params.rootParam"
+							}],
+							"type": "expr"
+						}
+					}
+				}
+			}
+		}
+		mock_view_content = json.dumps(view_data, indent=2)
+		mock_view = create_temp_view_file(mock_view_content)
+
+		rule_config = get_test_config("UnusedCustomPropertiesRule")
+
+		# Should NOT flag the root parameter as unused
+		self.assert_rule_errors(mock_view, rule_config, "UnusedCustomPropertiesRule", expected_error_count=0)
+
+	def test_multiple_view_params_mixed_usage_in_scripts(self):
+		"""Test detection of mixed used/unused view params in various script contexts."""
+		view_data = {
+			"params": {
+				"usedInTransform": "value1",
+				"usedInEventHandler": "value2",
+				"unusedParam": "value3"
+			},
+			"root": {
+				"children": [{
+					"meta": {
+						"name": "TestButton"
+					},
+					"type": "ia.input.button",
+					"props": {
+						"text": {
+							"binding": {
+								"config": {
+									"expression": "None"
+								},
+								"transforms": [{
+									"type": "script",
+									"code": "return self.params.usedInTransform"
+								}],
+								"type": "expr"
+							}
+						}
+					},
+					"events": {
+						"component": {
+							"onActionPerformed": {
+								"config": {
+									"script": "logger.info(self.params.usedInEventHandler)"
+								},
+								"scope": "G",
+								"type": "script"
+							}
+						}
+					}
+				}],
+				"meta": {
+					"name": "root"
+				}
+			}
+		}
+		mock_view_content = json.dumps(view_data, indent=2)
+		mock_view = create_temp_view_file(mock_view_content)
+
+		rule_config = get_test_config("UnusedCustomPropertiesRule")
+
+		# Should detect only the unused param
+		self.assert_rule_errors(
+			mock_view, rule_config, "UnusedCustomPropertiesRule", expected_error_count=1,
+			error_patterns=["unusedParam", "never referenced"]
+		)
+
+	def test_custom_property_used_in_tag_binding(self):
+		"""Test that custom properties used in tag bindings are not flagged."""
+		view_data = {
+			"custom": {
+				"tagPrefix": "[default]MyTag"
+			},
+			"root": {
+				"children": [{
+					"meta": {
+						"name": "TestLabel"
+					},
+					"type": "ia.display.label",
+					"props": {
+						"text": {
+							"binding": {
+								"config": {
+									"tagPath": "{view.custom.tagPrefix}/Value"
+								},
+								"type": "tag"
+							}
+						}
+					}
+				}],
+				"meta": {
+					"name": "root"
+				}
+			}
+		}
+		mock_view_content = json.dumps(view_data, indent=2)
+		mock_view = create_temp_view_file(mock_view_content)
+
+		rule_config = get_test_config("UnusedCustomPropertiesRule")
+
+		# Should NOT flag the custom property used in tag binding
+		self.assert_rule_errors(mock_view, rule_config, "UnusedCustomPropertiesRule", expected_error_count=0)
+
+	def test_custom_property_used_in_message_handler(self):
+		"""Test that custom properties used in message handler scripts are not flagged."""
+		view_data = {
+			"custom": {
+				"messageValue": "test"
+			},
+			"root": {
+				"children": [{
+					"meta": {
+						"name": "TestContainer"
+					},
+					"type": "ia.container.flex",
+					"scripts": {
+						"messageHandlers": [{
+							"messageType": "testMessage",
+							"script": "logger.info(self.view.custom.messageValue)"
+						}]
+					}
+				}],
+				"meta": {
+					"name": "root"
+				}
+			}
+		}
+		mock_view_content = json.dumps(view_data, indent=2)
+		mock_view = create_temp_view_file(mock_view_content)
+
+		rule_config = get_test_config("UnusedCustomPropertiesRule")
+
+		# Should NOT flag the custom property used in message handler
+		self.assert_rule_errors(mock_view, rule_config, "UnusedCustomPropertiesRule", expected_error_count=0)
+
+	def test_custom_property_used_in_custom_method(self):
+		"""Test that custom properties used in custom component methods are not flagged."""
+		view_data = {
+			"custom": {
+				"methodValue": "custom data"
+			},
+			"root": {
+				"children": [{
+					"meta": {
+						"name": "TestComponent"
+					},
+					"type": "ia.container.flex",
+					"custom": {
+						"myProp": "value"
+					},
+					"scripts": {
+						"customMethods": [{
+							"name": "myMethod",
+							"script": "return self.view.custom.methodValue + str(self.custom.myProp)"
+						}]
+					}
+				}],
+				"meta": {
+					"name": "root"
+				}
+			}
+		}
+		mock_view_content = json.dumps(view_data, indent=2)
+		mock_view = create_temp_view_file(mock_view_content)
+
+		rule_config = get_test_config("UnusedCustomPropertiesRule")
+
+		# Should NOT flag either custom property as they're both used in custom method
+		self.assert_rule_errors(mock_view, rule_config, "UnusedCustomPropertiesRule", expected_error_count=0)
+
+	def test_custom_property_used_in_property_binding(self):
+		"""Test that custom properties used in property binding source paths are not flagged."""
+		view_data = {
+			"custom": {
+				"sourceValue": "binding source"
+			},
+			"root": {
+				"children": [{
+					"meta": {
+						"name": "TestLabel"
+					},
+					"type": "ia.display.label",
+					"props": {
+						"text": {
+							"binding": {
+								"config": {
+									"path": "view.custom.sourceValue"
+								},
+								"type": "property"
+							}
+						}
+					}
+				}],
+				"meta": {
+					"name": "root"
+				}
+			}
+		}
+		mock_view_content = json.dumps(view_data, indent=2)
+		mock_view = create_temp_view_file(mock_view_content)
+
+		rule_config = get_test_config("UnusedCustomPropertiesRule")
+
+		# Should NOT flag the custom property used in property binding
+		self.assert_rule_errors(mock_view, rule_config, "UnusedCustomPropertiesRule", expected_error_count=0)
+
+	def test_custom_property_with_self_view_pattern_in_expression(self):
+		"""Test that custom properties with {self.view.custom.prop} pattern in expressions are recognized."""
+		view_data = {
+			"custom": {
+				"selfViewProp": "test value"
+			},
+			"params": {
+				"selfViewParam": "param value"
+			},
+			"root": {
+				"children": [{
+					"meta": {
+						"name": "TestLabel"
+					},
+					"type": "ia.display.label",
+					"props": {
+						"text": {
+							"binding": {
+								"type": "expression",
+								"config": {
+									"expression": "{self.view.custom.selfViewProp} + {self.view.params.selfViewParam}"
+								}
+							}
+						}
+					}
+				}],
+				"meta": {
+					"name": "root"
+				}
+			}
+		}
+		mock_view_content = json.dumps(view_data, indent=2)
+		mock_view = create_temp_view_file(mock_view_content)
+
+		rule_config = get_test_config("UnusedCustomPropertiesRule")
+
+		# Should NOT flag properties used with self.view pattern in expressions
+		self.assert_rule_errors(mock_view, rule_config, "UnusedCustomPropertiesRule", expected_error_count=0)
