@@ -1,8 +1,0 @@
-.ia_signaturePadComponent {
-    background-color: var(--input);
-    border: var(--containerBorder);
-}
-
-.ia_signaturePadComponent__actionBar {
-    background-color: var(--containerNested);
-}

@@ -1,9 +1,0 @@
-.ia_multiStateButton__button--primary--selected,
-.ia_multiStateButton__button--secondary--selected {
-    font-weight: 500;
-}
-
-.ia_multiStateButton__button--primary--unselected,
-.ia_multiStateButton__button--secondary--unselected {
-    font-weight: 400;
-}

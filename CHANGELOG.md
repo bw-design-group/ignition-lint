@@ -5,6 +5,22 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.2.8] - 2026-01-26
+
+### Added
+- BadComponentReferenceRule added to default rule_config.json to detect brittle component traversal patterns (.getSibling, .getParent, .getChild)
+- NamePatternRule now validates message_handler nodes (kebab-case convention)
+- NamePatternRule now validates custom_method nodes (snake_case convention)
+
+### Changed
+- NamePatternRule no longer validates event_handler nodes as event handler names (onActionPerformed, onClick, etc.) are framework-defined by Ignition components
+- rule_config.json updated with comprehensive naming conventions for all user-controllable node types:
+  - component: PascalCase (min 3 chars)
+  - property: camelCase (min 2 chars)
+  - message_handler: kebab-case (min 2 chars)
+  - custom_method: snake_case (min 2 chars)
+- Add docker/.gitignore and remove tracked files matching ignore patterns [9ce499a]
+
 ## [0.2.7] - 2026-01-15
 
 ### Security
@@ -130,7 +146,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Initial tracked release
 
-[Unreleased]: https://github.com/bw-design-group/ignition-lint/compare/v0.2.7...HEAD
+[Unreleased]: https://github.com/bw-design-group/ignition-lint/compare/v0.2.8...HEAD
+[0.2.8]: https://github.com/bw-design-group/ignition-lint/compare/v0.2.7...v0.2.8
 [0.2.7]: https://github.com/bw-design-group/ignition-lint/compare/v0.2.6...v0.2.7
 [0.2.6]: https://github.com/bw-design-group/ignition-lint/compare/v0.2.5...v0.2.6
 [0.2.5]: https://github.com/bw-design-group/ignition-lint/compare/v0.2.4...v0.2.5

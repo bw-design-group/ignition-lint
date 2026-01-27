@@ -1,7 +1,0 @@
-.ia_horizontalMenuComponent__item:not(.ia_horizontalMenuComponent__item--active):not(.ia_horizontalMenuComponent__item--disabled):hover {
-    filter: brightness(1.2);
-}
-
-.ia_horizontalMenuComponent__modal .ia_horizontalMenuComponent__item:not(.ia_horizontalMenuComponent__item--active):not(.ia_horizontalMenuComponent__item--disabled):hover {
-    filter: brightness(1.2);
-}

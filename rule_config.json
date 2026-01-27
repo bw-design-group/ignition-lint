@@ -30,6 +30,14 @@
         "property": {
           "convention": "camelCase",
           "min_length": 2
+        },
+        "message_handler": {
+          "convention": "kebab-case",
+          "min_length": 2
+        },
+        "custom_method": {
+          "convention": "snake_case",
+          "min_length": 2
         }
       }
     }
@@ -48,6 +56,12 @@
       "_comment": "Detects excessive context data in custom properties using 4 methods: (1) max_array_size: arrays with too many items, (2) max_sibling_properties: too many properties at the same level, (3) max_nesting_depth: overly deep nesting, (4) max_data_points: total volume of data stored in custom properties."
     }
   },
+  "BadComponentReferenceRule": {
+    "enabled": true,
+    "kwargs": {
+      "_comment": "Detects brittle component references like .getSibling(), .getParent(), .getChild(), .parent, .children that create tight coupling to view structure. Use view.custom properties or message handling instead."
+    }
+  },
   "_info": {
     "_description": "Rule severity levels are defined by rule developers:",
     "rule_severities": {
@@ -55,9 +69,16 @@
       "PollingIntervalRule": "error - performance issues that can cause system problems",
       "PylintScriptRule": "error - syntax errors, undefined variables, etc.",
       "UnusedCustomPropertiesRule": "error - dead code that should be removed",
-      "ExcessiveContextDataRule": "error - architectural issue, data should be in databases"
+      "ExcessiveContextDataRule": "error - architectural issue, data should be in databases",
+      "BadComponentReferenceRule": "error - brittle view structure dependencies that break during refactoring"
     },
     "note": "Users cannot configure severity levels - they are determined by what each rule checks.",
+    "NamePatternRule_node_types": {
+      "component": "User-defined component names (PascalCase)",
+      "property": "User-defined custom property names (camelCase)",
+      "message_handler": "User-defined message type names (kebab-case)",
+      "custom_method": "User-defined custom method names (snake_case)",
+    },
     "PylintScriptRule_config": {
       "pylintrc": "Path to custom pylintrc file. Defaults to .config/ignition.pylintrc if not specified.",
       "example": "\"pylintrc\": \"/path/to/custom.pylintrc\" or \"pylintrc\": \"relative/path/.pylintrc\""
