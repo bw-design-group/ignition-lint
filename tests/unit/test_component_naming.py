@@ -326,17 +326,8 @@ class TestNamePatternSpecificNodeTypes(BaseRuleTest):
 
 		self.assertIsInstance(self.get_errors_for_rule("NamePatternRule"), list)
 
-	def test_event_handler_naming(self):
-		"""Test naming validation for event handlers."""
-		rule_config = get_test_config(
-			"NamePatternRule", target_node_types=["event_handler"], convention="camelCase", min_length=4,
-			skip_names=["onClick", "onFocus", "onBlur", "onLoad"]
-		)
-
-		view_file = load_test_view(self.test_cases_dir, "PascalCase")
-		self.run_lint_on_file(view_file, rule_config)
-
-		self.assertIsInstance(self.get_errors_for_rule("NamePatternRule"), list)
+	# test_event_handler_naming intentionally removed - event handler names are framework-defined
+	# Event handlers like onActionPerformed, onClick, etc. are predefined by Ignition and cannot be renamed
 
 
 class TestStandardNamingConventions(BaseRuleTest):
@@ -378,7 +369,7 @@ class TestStandardNamingConventions(BaseRuleTest):
 		"""Test multiple node types with their appropriate conventions."""
 		rule_config = get_test_config(
 			"NamePatternRule",
-			target_node_types=["component", "property", "custom_method", "event_handler"],
+			target_node_types=["component", "property", "custom_method", "message_handler"],
 			convention="PascalCase",  # Default
 			node_type_specific_rules={
 				"component": {
@@ -393,10 +384,9 @@ class TestStandardNamingConventions(BaseRuleTest):
 					"convention": "camelCase",
 					"min_length": 3
 				},
-				"event_handler": {
+				"message_handler": {
 					"convention": "camelCase",
-					"min_length": 2,
-					"skip_names": ["onClick", "onLoad", "onFocus", "onBlur"]
+					"min_length": 2
 				}
 			}
 		)

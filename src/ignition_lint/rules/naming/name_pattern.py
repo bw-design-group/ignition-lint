@@ -156,7 +156,7 @@ class NamePatternRule(LintingRule):
 
 		Args:
 			target_node_types: Node types this rule should apply to. If not provided and
-			                  node_type_specific_rules is provided, will be auto-derived from the keys
+							  node_type_specific_rules is provided, will be auto-derived from the keys
 			convention: Naming convention (PascalCase, camelCase, etc.)
 			custom_pattern: Custom regex pattern (overrides convention)
 			config: Configuration for validation and abbreviation handling
@@ -253,7 +253,7 @@ class NamePatternRule(LintingRule):
 			NodeType.MESSAGE_HANDLER: lambda node: getattr(node, 'message_type', ''),
 			NodeType.CUSTOM_METHOD: lambda node: getattr(node, 'name', ''),
 			NodeType.PROPERTY: lambda node: getattr(node, 'name', ''),
-			NodeType.EVENT_HANDLER: lambda node: getattr(node, 'event_type', ''),
+			# EVENT_HANDLER is intentionally omitted - event names are framework-defined (e.g., onActionPerformed)
 		}
 
 	def _setup_pattern(self):
@@ -455,8 +455,7 @@ class NamePatternRule(LintingRule):
 			return
 		self.visit_generic(node)
 
-	def visit_event_handler(self, node: ViewNode):
-		self.visit_generic(node)
+	# visit_event_handler intentionally not implemented - event handler names are framework-defined
 
 	def _process_abbreviations(self, name: str, node_type: NodeType) -> str:
 		"""Process a name to handle abbreviations according to the naming convention."""
