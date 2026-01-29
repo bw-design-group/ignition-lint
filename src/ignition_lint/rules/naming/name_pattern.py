@@ -346,11 +346,8 @@ class NamePatternRule(LintingRule):
 		#   root.Line1.props.elements[0].d -> SVG path data (in array)
 		#   custom.myProperty -> NOT skipped
 		skip_containers = (
-			'.style.',
-			'.elementStyle.',
-			'.textStyle.',
-			'.instanceStyle.',
-			'.position.',
+			'.style.', '.elementStyle.', '.textStyle.', '.instanceStyle.', '.position.',
+			'.props.aspectRatio'
 		)
 
 		# Check standard skip containers

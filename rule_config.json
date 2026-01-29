@@ -77,7 +77,7 @@
       "component": "User-defined component names (PascalCase)",
       "property": "User-defined custom property names (camelCase)",
       "message_handler": "User-defined message type names (kebab-case)",
-      "custom_method": "User-defined custom method names (snake_case)",
+      "custom_method": "User-defined custom method names (snake_case)"
     },
     "PylintScriptRule_config": {
       "pylintrc": "Path to custom pylintrc file. Defaults to .config/ignition.pylintrc if not specified.",
