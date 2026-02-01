@@ -109,7 +109,7 @@
         "scripts": {
           "customMethods": [
             {
-              "name": "customBindingRefresh",
+              "name": "custom_binding_refresh",
               "params": [
                 "var10",
                 "var11"
