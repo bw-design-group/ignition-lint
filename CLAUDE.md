@@ -252,6 +252,34 @@ ignition-lint --files "**/view.json" --debug-nodes component expression_binding 
 ignition-lint --config rule_config.json --files "**/view.json" --verbose --debug-output ./analysis --analyze-rules
 ```
 
+## Release Process
+
+### Publishing to PyPI
+
+For detailed instructions on releasing new versions, see [RELEASING.md](RELEASING.md).
+
+**Quick Reference - Automated Release Workflow:**
+1. **Tag dev with RC**: `git tag v0.X.Y-RC1 && git push origin v0.X.Y-RC1`
+2. **Automation runs**: Updates version, generates changelog, creates PR (dev → main)
+3. **Review PR**: Check changes, edit CHANGELOG.md if needed, approve
+4. **Merge PR**: Merge to main
+5. **Tag main**: `git tag v0.X.Y && git push origin v0.X.Y`
+6. **PyPI publish**: Triggered automatically by tag push
+
+**Testing before production:**
+- Use workflow_dispatch with Test PyPI option to validate before real release
+- Go to Actions → Publish to PyPI → Run workflow → Check "test_pypi"
+
+**Manual changelog maintenance:**
+- Keep `## [Unreleased]` section updated as you work
+- Automation handles version numbers and dates
+- Can edit in PR if needed
+
+**Emergency rollback:**
+- Cannot delete from PyPI (versions are permanent)
+- Yank the release on PyPI (prevents new installs)
+- Release patch version with fixes
+
 ## Architecture Overview
 
 ### Core Framework
