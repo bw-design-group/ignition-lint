@@ -34,7 +34,7 @@
   "root.root.children[1].Button.events.component.onActionPerformed.type": "script",
   "root.root.children[1].Button.meta.name": "Button",
   "root.root.children[1].Button.position.basis": "34px",
-  "root.root.children[1].Button.scripts.customMethods[0].name": "customBindingRefresh",
+  "root.root.children[1].Button.scripts.customMethods[0].name": "custom_binding_refresh",
   "root.root.children[1].Button.scripts.customMethods[0].params[0]": "var10",
   "root.root.children[1].Button.scripts.customMethods[0].params[1]": "var11",
   "root.root.children[1].Button.scripts.customMethods[0].script": "\t# implement your method here\n\treturn var10 * var11",
