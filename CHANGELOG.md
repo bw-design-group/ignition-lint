@@ -7,8 +7,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-## [0.3.0] - 2026-02-01
-
 ### Added
 - Prep package to be available on PyPI - install with `pip install ignition-lint` [02ad134]
 - Python 3.13 support [02ad134]
@@ -193,7 +191,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Initial tracked release
 
-[Unreleased]: https://github.com/design-group/ignition-lint/compare/v0.3.0...HEAD
+[Unreleased]: https://github.com/design-group/ignition-lint/compare/v0.2.10...HEAD
 [0.2.10]: https://github.com/design-group/ignition-lint/compare/v0.2.9...v0.2.10
 [0.2.9]: https://github.com/bw-design-group/ignition-lint/compare/v0.2.8...v0.2.9
 [0.2.8]: https://github.com/bw-design-group/ignition-lint/compare/v0.2.7...v0.2.8
@@ -204,4 +202,3 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [0.2.3]: https://github.com/bw-design-group/ignition-lint/compare/v0.2.2...v0.2.3
 [0.2.2]: https://github.com/bw-design-group/ignition-lint/compare/v0.2.1...v0.2.2
 [0.2.1]: https://github.com/bw-design-group/ignition-lint/releases/tag/v0.2.1
-[0.3.0]: https://github.com/design-group/ignition-lint/compare/v0.2.10...v0.3.0
