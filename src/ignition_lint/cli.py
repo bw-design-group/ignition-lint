@@ -9,6 +9,12 @@ import glob
 from pathlib import Path
 from typing import List, Dict, Any, Optional
 
+try:
+	from importlib.metadata import version
+except ImportError:
+	# Python < 3.8
+	from importlib_metadata import version
+
 # Handle both relative and absolute imports
 try:
 	# Try relative imports first (when run as module)
@@ -455,6 +461,11 @@ def print_final_summary(
 def main():
 	"""Main function to lint Ignition view.json files for style inconsistencies."""
 	parser = argparse.ArgumentParser(description="Lint Ignition JSON files")
+	parser.add_argument(
+		"--version",
+		action="version",
+		version=f"%(prog)s {version('ignition-lint')}",
+	)
 	parser.add_argument(
 		"--config",
 		default="rule_config.json",

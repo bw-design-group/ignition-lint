@@ -9,9 +9,6 @@ homepage = "https://github.com/design-group/ignition-lint"
 packages = [
     { include = "ignition_lint", from = "src" }
 ]
-include = [
-    ".config/**/*"
-]
 
 keywords = [
     "ignition",
