@@ -80,9 +80,9 @@ jobs:
             # Update the date on existing version
             sed -i "s/## \[${VERSION}\] - .*/## [${VERSION}] - ${DATE}/" CHANGELOG.md
 
-            # Ensure [Unreleased] section exists at top
+            # Ensure [Unreleased] section exists after description
             if ! grep -q "## \[Unreleased\]" CHANGELOG.md; then
-              sed -i "/# Changelog/a\\\\n\\\\n## [Unreleased]" CHANGELOG.md
+              sed -i "/semver.org/a\\n## [Unreleased]" CHANGELOG.md
               echo "   Added missing [Unreleased] section"
             fi
           else
@@ -90,14 +90,14 @@ jobs:
 
             # Ensure [Unreleased] section exists (defensive)
             if ! grep -q "## \[Unreleased\]" CHANGELOG.md; then
-              sed -i "/# Changelog/a\\\\n\\\\n## [Unreleased]" CHANGELOG.md
+              sed -i "/semver.org/a\\n## [Unreleased]" CHANGELOG.md
             fi
 
             # Replace [Unreleased] with versioned heading
             sed -i "s/## \[Unreleased\]/## [${VERSION}] - ${DATE}/" CHANGELOG.md
 
-            # Add new [Unreleased] section at top
-            sed -i "/# Changelog/a\\\\n\\\\n## [Unreleased]" CHANGELOG.md
+            # Add new [Unreleased] section after description
+            sed -i "/semver.org/a\\n## [Unreleased]" CHANGELOG.md
           fi
 
           # Update comparison links (idempotent - remove old, add new)
