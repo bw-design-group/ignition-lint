@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "ignition-lint"
-version = "0.1.0"
+version = "0.3.0"
 description = "A linter for Ignition JSON files"
 authors = ["Eric Knorr", "Alex Spyksma"]
 license = "MIT"
@@ -13,15 +13,41 @@ include = [
     ".config/**/*"
 ]
 
+keywords = [
+    "ignition",
+    "perspective",
+    "linting",
+    "json",
+    "scada",
+    "quality-assurance",
+    "static-analysis"
+]
+
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Environment :: Console",
+    "Intended Audience :: Developers",
+    "Intended Audience :: Manufacturing",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Software Development :: Quality Assurance",
+    "Topic :: Software Development :: Testing",
+    "Typing :: Typed"
+]
+
 [tool.poetry.dependencies]
-python = ">=3.10,<3.13"
+python = ">=3.10,<3.14"
 pylint = "*"
-ignition-api-stubs = "^8.1.48.post1"
-pre-commit = "^4.2.0"
 
 [tool.poetry.group.dev.dependencies]
 # Development and testing dependencies
 yapf = "*"
+pre-commit = "^4.2.0"
 
 [tool.poetry.requires-plugins]
 poetry-plugin-export = ">=1.8"
