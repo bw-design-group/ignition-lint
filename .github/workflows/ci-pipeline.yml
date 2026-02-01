@@ -1,11 +1,9 @@
 name: CI Pipeline
 
 on:
-  push:
-    branches: [ main, dev ]
   pull_request:
-    branches: [ main ]
-  workflow_dispatch:
+    branches: [ main, dev ]  # Only run on PRs
+  workflow_dispatch:         # Allow manual trigger
 
 permissions:
   contents: read
@@ -15,7 +13,13 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python-version: ["3.12"]
+        # Smart matrix: all versions for main PRs, latest version for dev PRs
+        python-version: >-
+          ${{
+            github.base_ref == 'main' &&
+            fromJSON('["3.10", "3.11", "3.12", "3.13"]') ||
+            fromJSON('["3.13"]')
+          }}
 
     steps:
       - name: Checkout code
@@ -68,6 +72,8 @@ jobs:
   build:
     runs-on: ubuntu-latest
     needs: test
+    # Only build on PRs to main (release prep)
+    if: github.base_ref == 'main'
 
     steps:
       - name: Checkout code
@@ -76,7 +82,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: "3.11"
+          python-version: "3.13"  # Use latest supported version
 
       - name: Install Poetry
         run: |
