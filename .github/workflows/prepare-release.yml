@@ -191,8 +191,7 @@ jobs:
               --base main \
               --head dev \
               --title "Release v${VERSION}" \
-              --body-file /tmp/pr_body.md \
-              --label "release"
+              --body-file /tmp/pr_body.md
 
             echo "✅ Created new PR"
           fi
