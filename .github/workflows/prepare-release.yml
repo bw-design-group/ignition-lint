@@ -104,11 +104,12 @@ jobs:
           # Remove existing version link if present
           sed -i "/^\[${VERSION}\]:/d" CHANGELOG.md
 
-          # Add version comparison link
-          echo "[${VERSION}]: https://github.com/design-group/ignition-lint/compare/v${LAST_VERSION}...v${VERSION}" >> CHANGELOG.md
-
           # Update Unreleased link to compare from new version
           sed -i "s|\[Unreleased\]:.*|[Unreleased]: https://github.com/design-group/ignition-lint/compare/v${VERSION}...HEAD|" CHANGELOG.md
+
+          # Add version comparison link right after [Unreleased] link
+          # Using proper GNU sed syntax with literal newline for line continuation
+          sed -i "/^\[Unreleased\]:/a [${VERSION}]: https://github.com/design-group/ignition-lint/compare/v${LAST_VERSION}...v${VERSION}" CHANGELOG.md
 
           echo "✅ CHANGELOG.md updated successfully"
           echo "   Version: ${VERSION}"
