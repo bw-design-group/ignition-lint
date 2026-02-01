@@ -14,6 +14,13 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      - name: Generate token from GitHub App
+        id: generate_token
+        uses: tibdex/github-app-token@v2
+        with:
+          app_id: ${{ secrets.RELEASE_BOT_ID }}
+          private_key: ${{ secrets.RELEASE_BOT_PRIVATE_KEY }}
+
       - name: Extract version from tag
         id: version
         run: |
@@ -30,7 +37,7 @@ jobs:
         with:
           ref: dev
           fetch-depth: 0  # Full history for changelog generation
-          token: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ steps.generate_token.outputs.token }}
 
       - name: Setup Python
         uses: actions/setup-python@v5
@@ -124,7 +131,7 @@ jobs:
 
       - name: Create or Update Pull Request
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ steps.generate_token.outputs.token }}
         run: |
           VERSION="${{ steps.version.outputs.version }}"
           LAST_TAG="${{ steps.last_release.outputs.last_tag }}"
