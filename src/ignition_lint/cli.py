@@ -10,10 +10,40 @@ from pathlib import Path
 from typing import List, Dict, Any, Optional
 
 try:
-	from importlib.metadata import version
+	from importlib.metadata import version, PackageNotFoundError
 except ImportError:
 	# Python < 3.8
-	from importlib_metadata import version
+	from importlib_metadata import version, PackageNotFoundError
+
+
+def get_version() -> str:
+	"""Get package version, with fallback for development/testing."""
+	try:
+		return version('ignition-lint')
+	except PackageNotFoundError:
+		# Package not installed (development/testing mode)
+		# Try to read version from pyproject.toml
+		try:
+			# Python 3.11+ has tomllib built-in
+			try:
+				import tomllib
+			except ImportError:
+				# Python < 3.11, try tomli if available
+				try:
+					import tomli as tomllib
+				except ImportError:
+					# No TOML parser available, return dev
+					return 'dev'
+
+			pyproject_path = Path(__file__).parent.parent.parent / 'pyproject.toml'
+			if pyproject_path.exists():
+				with open(pyproject_path, 'rb') as f:
+					data = tomllib.load(f)
+					return data.get('tool', {}).get('poetry', {}).get('version', 'dev')
+		except Exception:
+			pass
+		return 'dev'
+
 
 # Handle both relative and absolute imports
 try:
@@ -464,7 +494,7 @@ def main():
 	parser.add_argument(
 		"--version",
 		action="version",
-		version=f"%(prog)s {version('ignition-lint')}",
+		version=f"%(prog)s {get_version()}",
 	)
 	parser.add_argument(
 		"--config",
