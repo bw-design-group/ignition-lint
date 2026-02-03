@@ -82,7 +82,7 @@ jobs:
 
             # Ensure [Unreleased] section exists after description
             if ! grep -q "## \[Unreleased\]" CHANGELOG.md; then
-              sed -i "/semver.org/a\\n## [Unreleased]" CHANGELOG.md
+              awk '/semver\.org/{print; print ""; print "## [Unreleased]"; next}1' CHANGELOG.md > /tmp/changelog.tmp && mv /tmp/changelog.tmp CHANGELOG.md
               echo "   Added missing [Unreleased] section"
             fi
           else
@@ -90,14 +90,14 @@ jobs:
 
             # Ensure [Unreleased] section exists (defensive)
             if ! grep -q "## \[Unreleased\]" CHANGELOG.md; then
-              sed -i "/semver.org/a\\n## [Unreleased]" CHANGELOG.md
+              awk '/semver\.org/{print; print ""; print "## [Unreleased]"; next}1' CHANGELOG.md > /tmp/changelog.tmp && mv /tmp/changelog.tmp CHANGELOG.md
             fi
 
             # Replace [Unreleased] with versioned heading
             sed -i "s/## \[Unreleased\]/## [${VERSION}] - ${DATE}/" CHANGELOG.md
 
             # Add new [Unreleased] section after description
-            sed -i "/semver.org/a\\n## [Unreleased]" CHANGELOG.md
+            awk '/semver\.org/{print; print ""; print "## [Unreleased]"; next}1' CHANGELOG.md > /tmp/changelog.tmp && mv /tmp/changelog.tmp CHANGELOG.md
           fi
 
           # Update comparison links (idempotent - remove old, add new)
