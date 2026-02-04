@@ -67,11 +67,11 @@ class PylintScriptRule(ScriptRule):
 		# If not found in user's repo, check the package installation directory
 		# This is where the bundled default config will be when installed via pip/poetry
 		# __file__ is: site-packages/ignition_lint/rules/scripts/lint_script.py
-		# We need to go up to: site-packages/.config/ignition.pylintrc
+		# We need to go up to: site-packages/ignition_lint/.config/.pylintrc
 		package_dir = os.path.dirname(
-			os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+			os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 		)
-		bundled_pylintrc = os.path.join(package_dir, ".config", "ignition.pylintrc")
+		bundled_pylintrc = os.path.join(package_dir, ".config", ".pylintrc")
 		if os.path.exists(bundled_pylintrc):
 			return bundled_pylintrc
 

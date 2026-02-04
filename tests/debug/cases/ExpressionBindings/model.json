@@ -80,7 +80,7 @@
     "count": 1,
     "nodes": [
       {
-        "name": "customBindingRefresh",
+        "name": "custom_binding_refresh",
         "node_type": "custom_method",
         "params": [
           "var10",
@@ -232,7 +232,7 @@
     "count": 2,
     "nodes": [
       {
-        "name": "customBindingRefresh",
+        "name": "custom_binding_refresh",
         "node_type": "custom_method",
         "params": [
           "var10",

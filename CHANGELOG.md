@@ -5,6 +5,38 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+## [0.3.0] - 2026-02-03
+
+### Added
+- Prep package to be available on PyPI - install with `pip install ignition-lint` [02ad134]
+- Python 3.13 support [02ad134]
+- PyPI metadata: keywords and classifiers for better package discoverability [02ad134]
+- Automated release preparation workflow triggered by RC tags [41d9491]
+- PyPI publishing workflow for automated package publishing [2430eb1]
+- Comprehensive release process documentation in RELEASING.md [d189aa1]
+- CLI `--version` flag to display package version [69310f9]
+- v0.3.0 implementation documentation [2ccb2b6]
+
+### Changed
+- Moved `pre-commit` from runtime dependencies to dev dependencies (cleaner installation) [02ad134]
+- Updated Python version constraint to `>=3.10,<3.14` (was `>=3.10,<3.13`) [02ad134]
+- Optimized CI pipeline to run only on PRs with smart Python version matrix [bde11a4]
+- Renamed ci.yml to ci-pipeline.yml for clarity [bde11a4]
+- Updated CLAUDE.md with release process section [5d990bc]
+- Moved bundled pylintrc from root to `src/ignition_lint/.config/.pylintrc` [69310f9]
+- Updated author order to reflect primary contributor [9e16825]
+
+### Fixed
+- NamePatternRule now correctly expects snake_case for custom methods (was incorrectly expecting camelCase) [56669ad]
+- Bundled pylintrc now properly included in wheel package for pip installations [69310f9]
+
+### Removed
+- `ignition-api-stubs` dependency (not used at runtime, was blocking Python 3.13 support) [02ad134]
+- Redundant unittest.yml and integration-test.yml workflows that are covered by the ci-pipeline.yaml [bde11a4]
+- Temporary v0.3.0 implementation guide (archived implementation notes kept) [436451d]
+
 ## [0.2.10] - 2026-01-29
 
 ### Added
@@ -161,8 +193,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Initial tracked release
 
-[Unreleased]: https://github.com/bw-design-group/ignition-lint/compare/v0.2.10...HEAD
-[0.2.10]: https://github.com/bw-design-group/ignition-lint/compare/v0.2.9...v0.2.10
+[Unreleased]: https://github.com/design-group/ignition-lint/compare/v0.3.0...HEAD
+[0.3.0]: https://github.com/design-group/ignition-lint/compare/v0.2.10...v0.3.0
+[0.2.10]: https://github.com/design-group/ignition-lint/compare/v0.2.9...v0.2.10
 [0.2.9]: https://github.com/bw-design-group/ignition-lint/compare/v0.2.8...v0.2.9
 [0.2.8]: https://github.com/bw-design-group/ignition-lint/compare/v0.2.7...v0.2.8
 [0.2.7]: https://github.com/bw-design-group/ignition-lint/compare/v0.2.6...v0.2.7

@@ -1,0 +1,211 @@
+name: Prepare Release from RC Tag
+
+on:
+  push:
+    tags:
+      - 'v*-RC*'  # Triggers on tags like v0.3.0-RC1, v1.2.3-RC2, etc.
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  prepare-release:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Generate token from GitHub App
+        id: generate_token
+        uses: actions/create-github-app-token@v1
+        with:
+          app-id: ${{ secrets.RELEASE_BOT_ID }}
+          private-key: ${{ secrets.RELEASE_BOT_PRIVATE_KEY }}
+
+      - name: Extract version from tag
+        id: version
+        run: |
+          # Extract version from tag (v0.3.0-RC1 → 0.3.0)
+          TAG="${GITHUB_REF#refs/tags/}"
+          VERSION="${TAG%%-RC*}"
+          VERSION="${VERSION#v}"
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "rc_tag=$TAG" >> $GITHUB_OUTPUT
+          echo "📦 Preparing release for version: $VERSION"
+
+      - name: Checkout dev branch
+        uses: actions/checkout@v4
+        with:
+          ref: dev
+          fetch-depth: 0  # Full history for changelog generation
+          token: ${{ steps.generate_token.outputs.token }}
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+
+      - name: Install Poetry
+        run: |
+          curl -sSL https://install.python-poetry.org | python3 -
+          echo "$HOME/.local/bin" >> $GITHUB_PATH
+
+      - name: Get last release tag
+        id: last_release
+        run: |
+          # Find the most recent non-RC tag
+          LAST_TAG=$(git tag --list 'v*' --sort=-version:refname | grep -v 'RC' | head -n1)
+          LAST_VERSION="${LAST_TAG#v}"
+          echo "last_tag=$LAST_TAG" >> $GITHUB_OUTPUT
+          echo "last_version=$LAST_VERSION" >> $GITHUB_OUTPUT
+          echo "📊 Last release: $LAST_TAG"
+
+      - name: Update pyproject.toml version
+        run: |
+          poetry version "${{ steps.version.outputs.version }}"
+          echo "✅ Updated pyproject.toml to version ${{ steps.version.outputs.version }}"
+
+      - name: Update CHANGELOG.md (idempotent)
+        run: |
+          VERSION="${{ steps.version.outputs.version }}"
+          LAST_VERSION="${{ steps.last_release.outputs.last_version }}"
+          DATE=$(date +%Y-%m-%d)
+
+          echo "🔄 Updating CHANGELOG.md for version ${VERSION}..."
+
+          # Check if this version already exists (e.g., from previous RC run)
+          if grep -q "## \[${VERSION}\]" CHANGELOG.md; then
+            echo "⚠️  Version ${VERSION} already exists in CHANGELOG"
+            echo "   Updating date and ensuring [Unreleased] section exists..."
+
+            # Update the date on existing version
+            sed -i "s/## \[${VERSION}\] - .*/## [${VERSION}] - ${DATE}/" CHANGELOG.md
+
+            # Ensure [Unreleased] section exists after description
+            if ! grep -q "## \[Unreleased\]" CHANGELOG.md; then
+              awk '/semver\.org/{print; print ""; print "## [Unreleased]"; next}1' CHANGELOG.md > /tmp/changelog.tmp && mv /tmp/changelog.tmp CHANGELOG.md
+              echo "   Added missing [Unreleased] section"
+            fi
+          else
+            echo "✨ First run for ${VERSION}, creating new section..."
+
+            # Ensure [Unreleased] section exists (defensive)
+            if ! grep -q "## \[Unreleased\]" CHANGELOG.md; then
+              awk '/semver\.org/{print; print ""; print "## [Unreleased]"; next}1' CHANGELOG.md > /tmp/changelog.tmp && mv /tmp/changelog.tmp CHANGELOG.md
+            fi
+
+            # Replace [Unreleased] with versioned heading
+            sed -i "s/## \[Unreleased\]/## [${VERSION}] - ${DATE}/" CHANGELOG.md
+
+            # Add new [Unreleased] section after description
+            awk '/semver\.org/{print; print ""; print "## [Unreleased]"; next}1' CHANGELOG.md > /tmp/changelog.tmp && mv /tmp/changelog.tmp CHANGELOG.md
+          fi
+
+          # Update comparison links (idempotent - remove old, add new)
+          # Remove existing version link if present
+          sed -i "/^\[${VERSION}\]:/d" CHANGELOG.md
+
+          # Update Unreleased link to compare from new version
+          sed -i "s|\[Unreleased\]:.*|[Unreleased]: https://github.com/design-group/ignition-lint/compare/v${VERSION}...HEAD|" CHANGELOG.md
+
+          # Add version comparison link right after [Unreleased] link
+          # Using proper GNU sed syntax with literal newline for line continuation
+          sed -i "/^\[Unreleased\]:/a [${VERSION}]: https://github.com/design-group/ignition-lint/compare/v${LAST_VERSION}...v${VERSION}" CHANGELOG.md
+
+          echo "✅ CHANGELOG.md updated successfully"
+          echo "   Version: ${VERSION}"
+          echo "   Date: ${DATE}"
+
+      - name: Commit changes to dev
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          git add pyproject.toml CHANGELOG.md
+          git commit -m "chore: Prepare release v${{ steps.version.outputs.version }}
+
+          Auto-generated from RC tag ${{ steps.version.outputs.rc_tag }}
+
+          - Updated version in pyproject.toml
+          - Generated changelog from commits since ${{ steps.last_release.outputs.last_tag }}"
+
+          git push origin dev
+
+      - name: Create or Update Pull Request
+        env:
+          GH_TOKEN: ${{ steps.generate_token.outputs.token }}
+        run: |
+          VERSION="${{ steps.version.outputs.version }}"
+          LAST_TAG="${{ steps.last_release.outputs.last_tag }}"
+
+          # Extract the changelog section for this version from CHANGELOG.md
+          CHANGELOG_SECTION=$(sed -n "/## \[${VERSION}\]/,/## \[/p" CHANGELOG.md | sed '$d')
+
+          # Get commit list for reference
+          COMMIT_LIST=$(git log ${LAST_TAG}..HEAD --pretty=format:"- %s (%h)" --no-merges | head -30)
+
+          # Create PR body
+          cat > /tmp/pr_body.md << EOF
+          ## Release v${VERSION}
+
+          This PR was automatically generated from RC tag \`${{ steps.version.outputs.rc_tag }}\`.
+
+          ### Changes in this release
+
+          ${CHANGELOG_SECTION}
+
+          ### Commits included (since ${LAST_TAG})
+
+          ${COMMIT_LIST}
+
+          ---
+
+          **Next steps:**
+          1. Review the changelog above
+          2. Edit CHANGELOG.md if needed (add missing entries, improve wording)
+          3. Approve and merge this PR
+          4. Tag main with production release:
+             \`\`\`bash
+             git checkout main && git pull
+             git tag v${VERSION}
+             git push origin v${VERSION}
+             \`\`\`
+          5. Create GitHub Release from v${VERSION} tag (optional)
+          6. PyPI publish will trigger automatically
+          EOF
+
+          # Check if PR already exists for this release
+          EXISTING_PR=$(gh pr list --base main --head dev --state open --json number --jq '.[0].number')
+
+          if [ -n "$EXISTING_PR" ]; then
+            echo "⚠️  PR #${EXISTING_PR} already exists (dev → main)"
+            echo "   Updating PR description with latest changes..."
+
+            gh pr edit "$EXISTING_PR" \
+              --title "Release v${VERSION}" \
+              --body-file /tmp/pr_body.md
+
+            echo "✅ Updated existing PR #${EXISTING_PR}"
+          else
+            echo "✨ Creating new PR (dev → main)..."
+
+            gh pr create \
+              --base main \
+              --head dev \
+              --title "Release v${VERSION}" \
+              --body-file /tmp/pr_body.md
+
+            echo "✅ Created new PR"
+          fi
+
+      - name: Summary
+        run: |
+          echo "✅ Release preparation complete!"
+          echo ""
+          echo "📋 Summary:"
+          echo "  - Version: ${{ steps.version.outputs.version }}"
+          echo "  - RC Tag: ${{ steps.version.outputs.rc_tag }}"
+          echo "  - Updated: pyproject.toml, CHANGELOG.md"
+          echo "  - Committed to: dev"
+          echo "  - PR created: dev → main"
+          echo ""
+          echo "👉 Next: Review and approve the PR, then tag main for production release"
