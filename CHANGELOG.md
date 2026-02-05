@@ -199,7 +199,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Initial tracked release
 
 [Unreleased]: https://github.com/design-group/ignition-lint/compare/v0.3.1...HEAD
-[0.3.1]: https://github.com/design-group/ignition-lint/compare/v0.2.10...v0.3.1
+[0.3.1]: https://github.com/design-group/ignition-lint/compare/v0.3.0...v0.3.1
 [0.3.0]: https://github.com/design-group/ignition-lint/compare/v0.2.10...v0.3.0
 [0.2.10]: https://github.com/design-group/ignition-lint/compare/v0.2.9...v0.2.10
 [0.2.9]: https://github.com/bw-design-group/ignition-lint/compare/v0.2.8...v0.2.9
