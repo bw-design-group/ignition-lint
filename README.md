@@ -546,7 +546,14 @@ Validates naming conventions across different node types with flexible configura
 - `Title Case`
 - `lower case`
 
-**Configuration Example:**
+**Configuration Options:**
+- `convention`: Use a predefined naming convention (e.g., "PascalCase", "camelCase")
+- `custom_pattern`: Define a custom regex pattern for validation
+- `suggestion_convention`: When using `custom_pattern`, specify which convention to use for generating helpful suggestions
+- `target_node_types`: Specify which node types this rule applies to
+- `node_type_specific_rules`: Override settings for specific node types
+
+**Configuration Example (Predefined Convention):**
 ```json
 {
   "NamePatternRule": {
@@ -563,6 +570,26 @@ Validates naming conventions across different node types with flexible configura
   }
 }
 ```
+
+**Configuration Example (Custom Pattern with Suggestions):**
+```json
+{
+  "NamePatternRule": {
+    "enabled": true,
+    "kwargs": {
+      "custom_pattern": "^[A-Z][a-z]+(_[A-Z][a-z]+)*$",
+      "suggestion_convention": "PascalCase",
+      "target_node_types": ["component"]
+    }
+  }
+}
+```
+
+**Note on Custom Patterns:**
+- When using `custom_pattern`, the rule validates names against your regex but cannot automatically generate suggestions
+- Add `suggestion_convention` to enable helpful naming suggestions in error messages
+- Without `suggestion_convention`, errors will include: "(define 'suggestion_convention' parameter for suggestions)"
+- The `suggestion_convention` should match the intent of your custom pattern (e.g., if your pattern enforces PascalCase-like formatting, use "PascalCase")
 
 #### PollingIntervalRule
 Prevents performance issues by enforcing minimum polling intervals in `now()` expressions.

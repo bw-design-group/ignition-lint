@@ -77,7 +77,7 @@ Analyze the remaining commit messages and categorize them into sections based on
 Create or update the `[Unreleased]` section with:
 
 ```markdown
-## [Unreleased] - YYYY-MM-DD
+## [Unreleased]
 
 ### Added
 - Summary of change [commit-hash]
@@ -90,7 +90,7 @@ Create or update the `[Unreleased]` section with:
 ```
 
 **Important:**
-- Use today's date for the entry
+- Do NOT add a date to the `[Unreleased]` section (dates are only added when the release is made)
 - Only include sections that have new commits
 - Clean up commit messages (remove prefixes, improve readability)
 - Include the short commit hash in square brackets
@@ -102,7 +102,7 @@ Create or update the `[Unreleased]` section with:
 - If an `[Unreleased]` section exists:
   - Merge new commits into the appropriate subsections (Added, Changed, Fixed, etc.)
   - Maintain chronological order within each subsection
-  - Update the date to today's date
+  - Do NOT add or update any date (the `[Unreleased]` section remains dateless)
 - If no `[Unreleased]` section exists:
   - Insert the new section after the header and before any existing version entries
 
@@ -117,7 +117,7 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased] - YYYY-MM-DD
+## [Unreleased]
 
 ### Added
 ...
