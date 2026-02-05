@@ -145,6 +145,7 @@ class NamePatternRule(LintingRule):
 		*,
 		target_node_types: Set[NodeType] = None,
 		custom_pattern: Optional[str] = None,
+		suggestion_convention: Optional[str] = None,
 		config: Optional[NamePatternConfig] = None,
 		name_extractors: Optional[Dict[NodeType, Callable[[ViewNode], str]]] = None,
 		node_type_specific_rules: Optional[Dict[NodeType, Dict]] = None,
@@ -159,6 +160,7 @@ class NamePatternRule(LintingRule):
 							  node_type_specific_rules is provided, will be auto-derived from the keys
 			convention: Naming convention (PascalCase, camelCase, etc.)
 			custom_pattern: Custom regex pattern (overrides convention)
+			suggestion_convention: Convention to use for suggestions when using custom_pattern
 			config: Configuration for validation and abbreviation handling
 			name_extractors: Custom name extraction functions for node types
 			node_type_specific_rules: Per-node-type rule overrides. Keys automatically become target_node_types
@@ -174,6 +176,7 @@ class NamePatternRule(LintingRule):
 
 		self.convention = convention
 		self.custom_pattern = custom_pattern
+		self.suggestion_convention = suggestion_convention
 		# Handle configuration - use provided config or create from kwargs/defaults
 		if config is not None:
 			self.config = config
@@ -408,12 +411,24 @@ class NamePatternRule(LintingRule):
 		if not re.match(pattern, processed_name):
 			error_msg = f"Name '{name}' doesn't follow {pattern_description} for {node_type.value}"
 
-			# Add helpful suggestions if using a predefined convention
+			# Add helpful suggestions if using a predefined convention OR custom pattern with suggestion_convention
 			node_convention = self._get_node_specific_config(node_type, 'convention', self.convention)
-			if node_convention and node_convention in self.NAMING_CONVENTIONS:
+			node_custom_pattern = self._get_node_specific_config(
+				node_type, 'custom_pattern', self.custom_pattern
+			)
+			node_suggestion_convention = self._get_node_specific_config(
+				node_type, 'suggestion_convention', self.suggestion_convention
+			)
+
+			# Show suggestions if: predefined convention exists, or custom pattern with suggestion_convention
+			if (node_convention and node_convention
+				in self.NAMING_CONVENTIONS) or (node_custom_pattern and node_suggestion_convention):
 				suggestion = self._suggest_name(name, node_type)
 				if suggestion:
 					error_msg += f" (suggestion: '{suggestion}')"
+			elif node_custom_pattern and not node_suggestion_convention:
+				# Custom pattern without suggestion_convention - guide the user
+				error_msg += " (define 'suggestion_convention' parameter for suggestions)"
 
 			errors.append(error_msg)
 
@@ -462,12 +477,18 @@ class NamePatternRule(LintingRule):
 		# Get node-specific custom pattern
 		custom_pattern = self._get_node_specific_config(node_type, 'custom_pattern', self.custom_pattern)
 		if custom_pattern:
-			return name
+			# For custom patterns, use suggestion_convention if available for abbreviation processing
+			suggestion_convention = self._get_node_specific_config(
+				node_type, 'suggestion_convention', self.suggestion_convention
+			)
+			if not suggestion_convention:
+				return name
+			convention = suggestion_convention
+		else:
+			# Get node-specific convention
+			convention = self._get_node_specific_config(node_type, 'convention', self.convention)
 
 		processed_name = name
-
-		# Get node-specific convention
-		convention = self._get_node_specific_config(node_type, 'convention', self.convention)
 
 		for abbrev in sorted(self.all_abbreviations, key=len, reverse=True):
 			if abbrev in name.upper():
@@ -492,24 +513,40 @@ class NamePatternRule(LintingRule):
 
 	def _suggest_name(self, name: str, node_type: NodeType) -> Optional[str]:
 		"""Suggest a corrected name based on the node-specific or default convention."""
-		convention = self._get_node_specific_config(node_type, 'convention', self.convention)
+		# Check if using custom pattern with suggestion_convention
+		custom_pattern = self._get_node_specific_config(node_type, 'custom_pattern', self.custom_pattern)
+		if custom_pattern:
+			# Use suggestion_convention if provided, otherwise no suggestions for custom patterns
+			suggestion_convention = self._get_node_specific_config(
+				node_type, 'suggestion_convention', self.suggestion_convention
+			)
+			if not suggestion_convention:
+				return None
 
-		if not convention or convention not in self.NAMING_CONVENTIONS:
-			return None
+		else:
+			# Use regular convention for non-custom patterns
+			convention = self._get_node_specific_config(node_type, 'convention', self.convention)
+			if not convention or convention not in self.NAMING_CONVENTIONS:
+				return None
 
-		if convention == 'PascalCase':
+			# Check if convention has a specific suggestion_convention override
+			conv_info = self.NAMING_CONVENTIONS[convention]
+			suggestion_convention = conv_info.get('suggestion_convention', convention)
+
+		# Generate suggestion based on suggestion_convention
+		if suggestion_convention == 'PascalCase':
 			suggested_name = self._to_pascal_case(name)
-		elif convention == 'camelCase':
+		elif suggestion_convention == 'camelCase':
 			suggested_name = self._to_camel_case(name)
-		elif convention == 'snake_case':
+		elif suggestion_convention == 'snake_case':
 			suggested_name = self._to_snake_case(name)
-		elif convention == 'kebab-case':
+		elif suggestion_convention == 'kebab-case':
 			suggested_name = self._to_kebab_case(name)
-		elif convention == 'SCREAMING_SNAKE_CASE':
+		elif suggestion_convention == 'SCREAMING_SNAKE_CASE':
 			suggested_name = self._to_snake_case(name).upper()
-		elif convention == 'Title Case':
+		elif suggestion_convention == 'Title Case':
 			suggested_name = self._to_title_case(name)
-		elif convention == 'lower case':
+		elif suggestion_convention == 'lower case':
 			suggested_name = self._to_lower_case(name)
 		else:
 			suggested_name = 'No suggestion available'
