@@ -4,7 +4,7 @@
     "nodes": []
   },
   "components": {
-    "count": 10,
+    "count": 19,
     "nodes": [
       {
         "name": "PascalCaseButton",
@@ -70,6 +70,69 @@
         "type": "ia.display.label"
       },
       {
+        "name": "APIClient",
+        "node_type": "component",
+        "path": "root.root.children[9].APIClient",
+        "properties_count": 0,
+        "type": "ia.display.label"
+      },
+      {
+        "name": "HTTPSConnection",
+        "node_type": "component",
+        "path": "root.root.children[10].HTTPSConnection",
+        "properties_count": 0,
+        "type": "ia.display.label"
+      },
+      {
+        "name": "MyAPIHandler",
+        "node_type": "component",
+        "path": "root.root.children[11].MyAPIHandler",
+        "properties_count": 0,
+        "type": "ia.display.label"
+      },
+      {
+        "name": "XMLHTTPRequest",
+        "node_type": "component",
+        "path": "root.root.children[12].XMLHTTPRequest",
+        "properties_count": 0,
+        "type": "ia.display.label"
+      },
+      {
+        "name": "API_CLIENT_HTTP",
+        "node_type": "component",
+        "path": "root.root.children[13].API_CLIENT_HTTP",
+        "properties_count": 0,
+        "type": "ia.display.label"
+      },
+      {
+        "name": "HTTP_API_URL",
+        "node_type": "component",
+        "path": "root.root.children[14].HTTP_API_URL",
+        "properties_count": 0,
+        "type": "ia.display.label"
+      },
+      {
+        "name": "TT_DAT_API_123",
+        "node_type": "component",
+        "path": "root.root.children[15].TT_DAT_API_123",
+        "properties_count": 0,
+        "type": "ia.display.label"
+      },
+      {
+        "name": "IOModuleController",
+        "node_type": "component",
+        "path": "root.root.children[16].IOModuleController",
+        "properties_count": 0,
+        "type": "ia.display.label"
+      },
+      {
+        "name": "CPU_GPU_MONITOR",
+        "node_type": "component",
+        "path": "root.root.children[17].CPU_GPU_MONITOR",
+        "properties_count": 0,
+        "type": "ia.display.label"
+      },
+      {
         "name": "root",
         "node_type": "component",
         "path": "root.root",
@@ -99,7 +162,7 @@
     "nodes": []
   },
   "properties": {
-    "count": 18,
+    "count": 36,
     "nodes": [
       {
         "name": "x",
@@ -225,6 +288,132 @@
         "node_type": "property",
         "path": "root.root.children.Mixed_PascalCase_Invalid.position.y",
         "value": 400,
+        "value_type": "int"
+      },
+      {
+        "name": "x",
+        "node_type": "property",
+        "path": "root.root.children.APIClient.position.x",
+        "value": 0,
+        "value_type": "int"
+      },
+      {
+        "name": "y",
+        "node_type": "property",
+        "path": "root.root.children.APIClient.position.y",
+        "value": 450,
+        "value_type": "int"
+      },
+      {
+        "name": "x",
+        "node_type": "property",
+        "path": "root.root.children.HTTPSConnection.position.x",
+        "value": 0,
+        "value_type": "int"
+      },
+      {
+        "name": "y",
+        "node_type": "property",
+        "path": "root.root.children.HTTPSConnection.position.y",
+        "value": 500,
+        "value_type": "int"
+      },
+      {
+        "name": "x",
+        "node_type": "property",
+        "path": "root.root.children.MyAPIHandler.position.x",
+        "value": 0,
+        "value_type": "int"
+      },
+      {
+        "name": "y",
+        "node_type": "property",
+        "path": "root.root.children.MyAPIHandler.position.y",
+        "value": 550,
+        "value_type": "int"
+      },
+      {
+        "name": "x",
+        "node_type": "property",
+        "path": "root.root.children.XMLHTTPRequest.position.x",
+        "value": 0,
+        "value_type": "int"
+      },
+      {
+        "name": "y",
+        "node_type": "property",
+        "path": "root.root.children.XMLHTTPRequest.position.y",
+        "value": 600,
+        "value_type": "int"
+      },
+      {
+        "name": "x",
+        "node_type": "property",
+        "path": "root.root.children.API_CLIENT_HTTP.position.x",
+        "value": 0,
+        "value_type": "int"
+      },
+      {
+        "name": "y",
+        "node_type": "property",
+        "path": "root.root.children.API_CLIENT_HTTP.position.y",
+        "value": 650,
+        "value_type": "int"
+      },
+      {
+        "name": "x",
+        "node_type": "property",
+        "path": "root.root.children.HTTP_API_URL.position.x",
+        "value": 0,
+        "value_type": "int"
+      },
+      {
+        "name": "y",
+        "node_type": "property",
+        "path": "root.root.children.HTTP_API_URL.position.y",
+        "value": 700,
+        "value_type": "int"
+      },
+      {
+        "name": "x",
+        "node_type": "property",
+        "path": "root.root.children.TT_DAT_API_123.position.x",
+        "value": 0,
+        "value_type": "int"
+      },
+      {
+        "name": "y",
+        "node_type": "property",
+        "path": "root.root.children.TT_DAT_API_123.position.y",
+        "value": 750,
+        "value_type": "int"
+      },
+      {
+        "name": "x",
+        "node_type": "property",
+        "path": "root.root.children.IOModuleController.position.x",
+        "value": 0,
+        "value_type": "int"
+      },
+      {
+        "name": "y",
+        "node_type": "property",
+        "path": "root.root.children.IOModuleController.position.y",
+        "value": 800,
+        "value_type": "int"
+      },
+      {
+        "name": "x",
+        "node_type": "property",
+        "path": "root.root.children.CPU_GPU_MONITOR.position.x",
+        "value": 0,
+        "value_type": "int"
+      },
+      {
+        "name": "y",
+        "node_type": "property",
+        "path": "root.root.children.CPU_GPU_MONITOR.position.y",
+        "value": 850,
         "value_type": "int"
       }
     ]

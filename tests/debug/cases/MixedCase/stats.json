@@ -2,7 +2,7 @@
   "components_by_type": {
     "ia.container.coord": 1,
     "ia.display.button": 1,
-    "ia.display.label": 8
+    "ia.display.label": 17
   },
   "model_keys": [
     "components",
@@ -20,8 +20,8 @@
     "properties"
   ],
   "node_type_counts": {
-    "component": 10,
-    "property": 18
+    "component": 19,
+    "property": 36
   },
   "rule_coverage": {
     "BadComponentReferenceRule": {
@@ -35,7 +35,7 @@
       ]
     },
     "ExampleBindingCountRule": {
-      "applicable_node_count": 10,
+      "applicable_node_count": 19,
       "target_types": [
         "component",
         "expression_binding",
@@ -46,25 +46,25 @@
       ]
     },
     "ExampleMixedSeverityRule": {
-      "applicable_node_count": 10,
+      "applicable_node_count": 19,
       "target_types": [
         "component"
       ]
     },
     "ExampleNameLengthRule": {
-      "applicable_node_count": 10,
+      "applicable_node_count": 19,
       "target_types": [
         "component"
       ]
     },
     "ExcessiveContextDataRule": {
-      "applicable_node_count": 28,
+      "applicable_node_count": 55,
       "target_types": [
         "all"
       ]
     },
     "NamePatternRule": {
-      "applicable_node_count": 10,
+      "applicable_node_count": 19,
       "target_types": [
         "component"
       ]
@@ -89,7 +89,7 @@
       ]
     },
     "UnusedCustomPropertiesRule": {
-      "applicable_node_count": 28,
+      "applicable_node_count": 55,
       "target_types": [
         "component",
         "custom_method",
@@ -103,5 +103,5 @@
       ]
     }
   },
-  "total_nodes": 28
+  "total_nodes": 55
 }
