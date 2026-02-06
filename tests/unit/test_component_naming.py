@@ -183,6 +183,161 @@ class TestNamePatternMultipleNodeTypes(BaseRuleTest):
 		self.assertIsInstance(self.get_errors_for_rule("NamePatternRule"), list)
 
 
+class TestNamePatternMixedCase(BaseRuleTest):
+	"""Test mixed PascalCase OR SCREAMING_SNAKE_CASE pattern."""
+	rule_config: Dict[str, Dict[str, Any]]  # Override base class to make non-optional
+
+	def setUp(self):  # pylint: disable=invalid-name
+		super().setUp()
+		self.rule_config = get_test_config(
+			"NamePatternRule",
+			target_node_types=["component"],
+			node_type_specific_rules={
+				"component": {
+					"pattern": "^([A-Z][a-zA-Z0-9]*|[A-Z][A-Z0-9_]*)$",
+					"pattern_description": "PascalCase or SCREAMING_SNAKE_CASE",
+					"suggestion_convention": "PascalCase",
+					"min_length": 3,
+					"severity": "error"
+				}
+			}
+		)
+
+	def test_pascal_case_passes(self):
+		"""PascalCase component names should pass the mixed pattern."""
+		view_file = load_test_view(self.test_cases_dir, "MixedCase")
+		self.run_lint_on_file(view_file, self.rule_config)
+		errors = self.get_errors_for_rule("NamePatternRule")
+
+		# PascalCaseButton should pass
+		pascal_case_errors = [e for e in errors if "PascalCaseButton" in e]
+		self.assertEqual(len(pascal_case_errors), 0, "PascalCaseButton should pass")
+
+	def test_screaming_snake_case_passes(self):
+		"""SCREAMING_SNAKE_CASE component names should pass the mixed pattern."""
+		view_file = load_test_view(self.test_cases_dir, "MixedCase")
+		self.run_lint_on_file(view_file, self.rule_config)
+		errors = self.get_errors_for_rule("NamePatternRule")
+
+		# SCREAMING_SNAKE_CASE_LABEL should pass
+		screaming_errors = [e for e in errors if "SCREAMING_SNAKE_CASE_LABEL" in e]
+		self.assertEqual(len(screaming_errors), 0, "SCREAMING_SNAKE_CASE_LABEL should pass")
+
+	def test_mixed_with_numbers_passes(self):
+		"""Components with numbers should pass in both formats."""
+		view_file = load_test_view(self.test_cases_dir, "MixedCase")
+		self.run_lint_on_file(view_file, self.rule_config)
+		errors = self.get_errors_for_rule("NamePatternRule")
+
+		# DAT_02_TT_123_A should pass (SCREAMING_SNAKE_CASE with numbers)
+		dat_errors = [e for e in errors if "DAT_02_TT_123_A" in e]
+		self.assertEqual(len(dat_errors), 0, "DAT_02_TT_123_A should pass")
+
+		# MyComponentWithNumbers123 should pass (PascalCase with numbers)
+		pascal_num_errors = [e for e in errors if "MyComponentWithNumbers123" in e]
+		self.assertEqual(len(pascal_num_errors), 0, "MyComponentWithNumbers123 should pass")
+
+		# UPPER_WITH_NUMBERS_456 should pass (SCREAMING_SNAKE_CASE with numbers)
+		upper_num_errors = [e for e in errors if "UPPER_WITH_NUMBERS_456" in e]
+		self.assertEqual(len(upper_num_errors), 0, "UPPER_WITH_NUMBERS_456 should pass")
+
+	def test_camel_case_fails(self):
+		"""camelCase should fail the mixed pattern."""
+		view_file = load_test_view(self.test_cases_dir, "MixedCase")
+		self.run_lint_on_file(view_file, self.rule_config)
+		errors = self.get_errors_for_rule("NamePatternRule")
+
+		# camelCaseInvalid should fail
+		camel_errors = [e for e in errors if "camelCaseInvalid" in e]
+		self.assertGreater(len(camel_errors), 0, "camelCaseInvalid should fail")
+		self.assertIn("doesn't follow PascalCase or SCREAMING_SNAKE_CASE", camel_errors[0])
+
+	def test_snake_case_fails(self):
+		"""snake_case should fail the mixed pattern."""
+		view_file = load_test_view(self.test_cases_dir, "MixedCase")
+		self.run_lint_on_file(view_file, self.rule_config)
+		errors = self.get_errors_for_rule("NamePatternRule")
+
+		# snake_case_invalid should fail
+		snake_errors = [e for e in errors if "snake_case_invalid" in e]
+		self.assertGreater(len(snake_errors), 0, "snake_case_invalid should fail")
+
+	def test_kebab_case_fails(self):
+		"""kebab-case should fail the mixed pattern."""
+		view_file = load_test_view(self.test_cases_dir, "MixedCase")
+		self.run_lint_on_file(view_file, self.rule_config)
+		errors = self.get_errors_for_rule("NamePatternRule")
+
+		# kebab-case-invalid should fail
+		kebab_errors = [e for e in errors if "kebab-case-invalid" in e]
+		self.assertGreater(len(kebab_errors), 0, "kebab-case-invalid should fail")
+
+	def test_mixed_pascal_snake_fails(self):
+		"""Mixed PascalCase and snake_case should fail."""
+		view_file = load_test_view(self.test_cases_dir, "MixedCase")
+		self.run_lint_on_file(view_file, self.rule_config)
+		errors = self.get_errors_for_rule("NamePatternRule")
+
+		# Mixed_PascalCase_Invalid should fail (lowercase with underscores)
+		mixed_errors = [e for e in errors if "Mixed_PascalCase_Invalid" in e]
+		self.assertGreater(len(mixed_errors), 0, "Mixed_PascalCase_Invalid should fail")
+
+	def test_suggestions_provided(self):
+		"""Verify that suggestions are provided for invalid names."""
+		view_file = load_test_view(self.test_cases_dir, "MixedCase")
+		self.run_lint_on_file(view_file, self.rule_config)
+		errors = self.get_errors_for_rule("NamePatternRule")
+
+		# Check that errors include suggestions
+		camel_errors = [e for e in errors if "camelCaseInvalid" in e]
+		self.assertGreater(len(camel_errors), 0)
+		self.assertIn("suggestion:", camel_errors[0], "Error should include suggestion")
+		self.assertIn("CamelCaseInvalid", camel_errors[0], "Suggestion should be PascalCase")
+
+	def test_abbreviations_in_pascal_case(self):
+		"""Test that abbreviations in PascalCase format pass validation."""
+		view_file = load_test_view(self.test_cases_dir, "MixedCase")
+		self.run_lint_on_file(view_file, self.rule_config)
+		errors = self.get_errors_for_rule("NamePatternRule")
+
+		# Test various abbreviation patterns in PascalCase
+		abbreviation_tests = [
+			("APIClient", "Abbreviation at start of PascalCase"),
+			("HTTPSConnection", "Multiple uppercase letters in PascalCase"),
+			("MyAPIHandler", "Abbreviation in middle of PascalCase"),
+			("XMLHTTPRequest", "Multiple abbreviations in PascalCase"),
+			("IOModuleController", "IO abbreviation in PascalCase"),
+		]
+
+		for name, description in abbreviation_tests:
+			with self.subTest(name=name, description=description):
+				name_errors = [e for e in errors if name in e]
+				self.assertEqual(
+					len(name_errors), 0, f"{name} should pass validation ({description})"
+				)
+
+	def test_abbreviations_in_screaming_snake_case(self):
+		"""Test that abbreviations in SCREAMING_SNAKE_CASE format pass validation."""
+		view_file = load_test_view(self.test_cases_dir, "MixedCase")
+		self.run_lint_on_file(view_file, self.rule_config)
+		errors = self.get_errors_for_rule("NamePatternRule")
+
+		# Test various abbreviation patterns in SCREAMING_SNAKE_CASE
+		abbreviation_tests = [
+			("API_CLIENT_HTTP", "Multiple abbreviations in SCREAMING_SNAKE_CASE"),
+			("HTTP_API_URL", "Abbreviations with underscores"),
+			("TT_DAT_API_123", "Abbreviations with numbers"),
+			("CPU_GPU_MONITOR", "Hardware abbreviations"),
+		]
+
+		for name, description in abbreviation_tests:
+			with self.subTest(name=name, description=description):
+				name_errors = [e for e in errors if name in e]
+				self.assertEqual(
+					len(name_errors), 0, f"{name} should pass validation ({description})"
+				)
+
+
 class TestNamePatternEdgeCases(BaseRuleTest):
 	"""Test edge cases for naming pattern rules."""
 
