@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- Comprehensive tests for mixed naming patterns (PascalCase/SCREAMING_SNAKE_CASE) [b19a336]
+
+### Changed
+- Simplify NamePatternRule pattern configuration from 'custom_pattern' to 'pattern' [27dc03f]
+
+### Fixed
+- Add common Ignition event handlers to default pylintrc exemptions [16d8c30]
+
 ## [0.3.1] - 2026-02-05
 
 ### Added
