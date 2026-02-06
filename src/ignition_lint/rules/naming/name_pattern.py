@@ -411,24 +411,18 @@ class NamePatternRule(LintingRule):
 		if not re.match(pattern, processed_name):
 			error_msg = f"Name '{name}' doesn't follow {pattern_description} for {node_type.value}"
 
-			# Add helpful suggestions if using a predefined convention OR custom pattern with suggestion_convention
-			node_convention = self._get_node_specific_config(node_type, 'convention', self.convention)
-			node_custom_pattern = self._get_node_specific_config(
-				node_type, 'custom_pattern', self.custom_pattern
-			)
+			# Check if we should show suggestions
+			# suggestion_convention is used for custom patterns, convention for predefined patterns
 			node_suggestion_convention = self._get_node_specific_config(
 				node_type, 'suggestion_convention', self.suggestion_convention
 			)
+			node_convention = self._get_node_specific_config(node_type, 'convention', self.convention)
 
-			# Show suggestions if: predefined convention exists, or custom pattern with suggestion_convention
-			if (node_convention and node_convention
-				in self.NAMING_CONVENTIONS) or (node_custom_pattern and node_suggestion_convention):
+			# Show suggestions if either suggestion_convention or convention is set
+			if node_suggestion_convention or (node_convention and node_convention in self.NAMING_CONVENTIONS):
 				suggestion = self._suggest_name(name, node_type)
 				if suggestion:
 					error_msg += f" (suggestion: '{suggestion}')"
-			elif node_custom_pattern and not node_suggestion_convention:
-				# Custom pattern without suggestion_convention - guide the user
-				error_msg += " (define 'suggestion_convention' parameter for suggestions)"
 
 			errors.append(error_msg)
 
@@ -474,19 +468,15 @@ class NamePatternRule(LintingRule):
 		if not self.all_abbreviations:
 			return name
 
-		# Get node-specific custom pattern
-		custom_pattern = self._get_node_specific_config(node_type, 'custom_pattern', self.custom_pattern)
-		if custom_pattern:
-			# For custom patterns, use suggestion_convention if available for abbreviation processing
-			suggestion_convention = self._get_node_specific_config(
-				node_type, 'suggestion_convention', self.suggestion_convention
-			)
-			if not suggestion_convention:
-				return name
-			convention = suggestion_convention
-		else:
-			# Get node-specific convention
+		# Priority: suggestion_convention (for custom patterns) > convention (for named patterns)
+		convention = self._get_node_specific_config(
+			node_type, 'suggestion_convention', self.suggestion_convention
+		)
+		if not convention:
 			convention = self._get_node_specific_config(node_type, 'convention', self.convention)
+
+		if not convention:
+			return name
 
 		processed_name = name
 
@@ -513,18 +503,13 @@ class NamePatternRule(LintingRule):
 
 	def _suggest_name(self, name: str, node_type: NodeType) -> Optional[str]:
 		"""Suggest a corrected name based on the node-specific or default convention."""
-		# Check if using custom pattern with suggestion_convention
-		custom_pattern = self._get_node_specific_config(node_type, 'custom_pattern', self.custom_pattern)
-		if custom_pattern:
-			# Use suggestion_convention if provided, otherwise no suggestions for custom patterns
-			suggestion_convention = self._get_node_specific_config(
-				node_type, 'suggestion_convention', self.suggestion_convention
-			)
-			if not suggestion_convention:
-				return None
+		# Priority: suggestion_convention (for custom patterns) > convention (for named patterns)
+		suggestion_convention = self._get_node_specific_config(
+			node_type, 'suggestion_convention', self.suggestion_convention
+		)
 
-		else:
-			# Use regular convention for non-custom patterns
+		if not suggestion_convention:
+			# Fall back to convention if no suggestion_convention
 			convention = self._get_node_specific_config(node_type, 'convention', self.convention)
 			if not convention or convention not in self.NAMING_CONVENTIONS:
 				return None

@@ -22,7 +22,7 @@
   "NamePatternRule": {
     "enabled": true,
     "kwargs": {
-      "_comment": "Use 'convention' for predefined patterns, or 'custom_pattern' with optional 'suggestion_convention' for custom regex patterns",
+      "_comment": "Use 'convention' for predefined patterns, or 'pattern' with 'suggestion_convention' for custom regex patterns. 'pattern' takes priority over 'convention'.",
       "node_type_specific_rules": {
         "component": {
           "convention": "PascalCase",
@@ -41,11 +41,12 @@
           "min_length": 2
         }
       },
-      "_custom_pattern_example_comment": "Example using custom_pattern with suggestion_convention:",
+      "_pattern_example_comment": "Example using custom pattern with suggestion_convention:",
       "_example": {
-        "custom_pattern": "^[A-Z][a-z]+(_[A-Z][a-z]+)*$",
+        "pattern": "^([A-Z][a-zA-Z0-9]*|[A-Z][A-Z0-9_]*)$",
+        "pattern_description": "PascalCase or SCREAMING_SNAKE_CASE",
         "suggestion_convention": "PascalCase",
-        "_note": "When using custom_pattern, add suggestion_convention to provide helpful naming suggestions in error messages"
+        "_note": "When using 'pattern', add 'suggestion_convention' to provide helpful naming suggestions and 'pattern_description' for clearer error messages"
       }
     }
   },
