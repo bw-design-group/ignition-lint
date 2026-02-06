@@ -204,7 +204,7 @@ property-classes=abc.abstractproperty,cached_property.cached_property,cached_pro
 # Regular expression matching correct function names
 # Allows both snake_case and PascalCase (Ignition convention)
 # Specific Ignition event handlers are explicitly exempted (add more as needed)
-function-rgx=^(?:(?P<exempt>setUp|tearDown|setUpModule|tearDownModule|onMessageReceived|onActionPerformed|onStartup|onShutdown|onBreakpointHit|onBreakpointCleared)|(?P<camel_case>_?[A-Z][a-zA-Z0-9]*)|(?P<snake_case>_?[a-z][a-z0-9_]*))$
+function-rgx=^(?:(?P<exempt>setUp|tearDown|setUpModule|tearDownModule|onMessageReceived|onClick|onActionPerformed|onStartup|onShutdown|onBreakpointHit|onBreakpointCleared|onMouseOut|onMouseOver)|(?P<camel_case>_?[A-Z][a-zA-Z0-9]*)|(?P<snake_case>_?[a-z][a-z0-9_]*))$
 
 # Regular expression matching correct variable names
 variable-rgx=^[a-z_][a-z0-9_]*$
