@@ -525,7 +525,7 @@ The following rules are currently implemented and available for use:
 
 | Rule | Type | Description | Configuration Options | Default Enabled |
 |------|------|-------------|----------------------|-----------------|
-| `NamePatternRule` | Warning | Validates naming conventions for components and other elements | `convention`, `target_node_types`, `custom_pattern`, `node_type_specific_rules` | ✅ |
+| `NamePatternRule` | Warning | Validates naming conventions for components and other elements | `convention`, `pattern`, `target_node_types`, `node_type_specific_rules` | ✅ |
 | `PollingIntervalRule` | Error | Ensures polling intervals meet minimum thresholds to prevent performance issues | `minimum_interval` (default: 10000ms) | ✅ |
 | `PylintScriptRule` | Error | Runs Pylint analysis on all scripts to detect syntax errors, undefined variables, and code quality issues | `pylintrc` (path to custom pylintrc file, defaults to `.config/ignition.pylintrc`) | ✅ |
 | `UnusedCustomPropertiesRule` | Warning | Detects custom properties and view parameters that are defined but never referenced | None | ✅ |
@@ -548,10 +548,16 @@ Validates naming conventions across different node types with flexible configura
 
 **Configuration Options:**
 - `convention`: Use a predefined naming convention (e.g., "PascalCase", "camelCase")
-- `custom_pattern`: Define a custom regex pattern for validation
-- `suggestion_convention`: When using `custom_pattern`, specify which convention to use for generating helpful suggestions
+- `pattern`: Define a custom regex pattern for validation (takes priority over `convention`)
+- `pattern_description`: Optional description of the pattern for error messages
+- `suggestion_convention`: When using `pattern`, specify which convention to use for generating helpful suggestions
 - `target_node_types`: Specify which node types this rule applies to
 - `node_type_specific_rules`: Override settings for specific node types
+
+**Configuration Priority:** `pattern` > `convention`
+- If `pattern` is specified, it's used directly as the validation regex
+- If only `convention` is specified, it's converted to a pattern automatically
+- `suggestion_convention` determines how to generate suggestions for both
 
 **Configuration Example (Predefined Convention):**
 ```json
@@ -577,19 +583,24 @@ Validates naming conventions across different node types with flexible configura
   "NamePatternRule": {
     "enabled": true,
     "kwargs": {
-      "custom_pattern": "^[A-Z][a-z]+(_[A-Z][a-z]+)*$",
-      "suggestion_convention": "PascalCase",
-      "target_node_types": ["component"]
+      "node_type_specific_rules": {
+        "component": {
+          "pattern": "^([A-Z][a-zA-Z0-9]*|[A-Z][A-Z0-9_]*)$",
+          "pattern_description": "PascalCase or SCREAMING_SNAKE_CASE",
+          "suggestion_convention": "PascalCase",
+          "min_length": 3
+        }
+      }
     }
   }
 }
 ```
 
 **Note on Custom Patterns:**
-- When using `custom_pattern`, the rule validates names against your regex but cannot automatically generate suggestions
+- When using `pattern`, the rule validates names against your regex
 - Add `suggestion_convention` to enable helpful naming suggestions in error messages
-- Without `suggestion_convention`, errors will include: "(define 'suggestion_convention' parameter for suggestions)"
-- The `suggestion_convention` should match the intent of your custom pattern (e.g., if your pattern enforces PascalCase-like formatting, use "PascalCase")
+- Add `pattern_description` to customize error messages (e.g., "PascalCase or SCREAMING_SNAKE_CASE")
+- The `suggestion_convention` should match the intent of your pattern (e.g., if your pattern enforces PascalCase-like formatting, use "PascalCase")
 
 #### PollingIntervalRule
 Prevents performance issues by enforcing minimum polling intervals in `now()` expressions.
