@@ -1,0 +1,252 @@
+{
+  "bindings": {
+    "count": 0,
+    "nodes": []
+  },
+  "components": {
+    "count": 10,
+    "nodes": [
+      {
+        "name": "PascalCaseButton",
+        "node_type": "component",
+        "path": "root.root.children[0].PascalCaseButton",
+        "properties_count": 0,
+        "type": "ia.display.button"
+      },
+      {
+        "name": "SCREAMING_SNAKE_CASE_LABEL",
+        "node_type": "component",
+        "path": "root.root.children[1].SCREAMING_SNAKE_CASE_LABEL",
+        "properties_count": 0,
+        "type": "ia.display.label"
+      },
+      {
+        "name": "DAT_02_TT_123_A",
+        "node_type": "component",
+        "path": "root.root.children[2].DAT_02_TT_123_A",
+        "properties_count": 0,
+        "type": "ia.display.label"
+      },
+      {
+        "name": "MyComponentWithNumbers123",
+        "node_type": "component",
+        "path": "root.root.children[3].MyComponentWithNumbers123",
+        "properties_count": 0,
+        "type": "ia.display.label"
+      },
+      {
+        "name": "UPPER_WITH_NUMBERS_456",
+        "node_type": "component",
+        "path": "root.root.children[4].UPPER_WITH_NUMBERS_456",
+        "properties_count": 0,
+        "type": "ia.display.label"
+      },
+      {
+        "name": "camelCaseInvalid",
+        "node_type": "component",
+        "path": "root.root.children[5].camelCaseInvalid",
+        "properties_count": 0,
+        "type": "ia.display.label"
+      },
+      {
+        "name": "snake_case_invalid",
+        "node_type": "component",
+        "path": "root.root.children[6].snake_case_invalid",
+        "properties_count": 0,
+        "type": "ia.display.label"
+      },
+      {
+        "name": "kebab-case-invalid",
+        "node_type": "component",
+        "path": "root.root.children[7].kebab-case-invalid",
+        "properties_count": 0,
+        "type": "ia.display.label"
+      },
+      {
+        "name": "Mixed_PascalCase_Invalid",
+        "node_type": "component",
+        "path": "root.root.children[8].Mixed_PascalCase_Invalid",
+        "properties_count": 0,
+        "type": "ia.display.label"
+      },
+      {
+        "name": "root",
+        "node_type": "component",
+        "path": "root.root",
+        "properties_count": 0,
+        "type": "ia.container.coord"
+      }
+    ]
+  },
+  "custom_methods": {
+    "count": 0,
+    "nodes": []
+  },
+  "event_handlers": {
+    "count": 0,
+    "nodes": []
+  },
+  "expression_bindings": {
+    "count": 0,
+    "nodes": []
+  },
+  "expression_struct_bindings": {
+    "count": 0,
+    "nodes": []
+  },
+  "message_handlers": {
+    "count": 0,
+    "nodes": []
+  },
+  "properties": {
+    "count": 18,
+    "nodes": [
+      {
+        "name": "x",
+        "node_type": "property",
+        "path": "root.root.children.PascalCaseButton.position.x",
+        "value": 0,
+        "value_type": "int"
+      },
+      {
+        "name": "y",
+        "node_type": "property",
+        "path": "root.root.children.PascalCaseButton.position.y",
+        "value": 0,
+        "value_type": "int"
+      },
+      {
+        "name": "x",
+        "node_type": "property",
+        "path": "root.root.children.SCREAMING_SNAKE_CASE_LABEL.position.x",
+        "value": 0,
+        "value_type": "int"
+      },
+      {
+        "name": "y",
+        "node_type": "property",
+        "path": "root.root.children.SCREAMING_SNAKE_CASE_LABEL.position.y",
+        "value": 50,
+        "value_type": "int"
+      },
+      {
+        "name": "x",
+        "node_type": "property",
+        "path": "root.root.children.DAT_02_TT_123_A.position.x",
+        "value": 0,
+        "value_type": "int"
+      },
+      {
+        "name": "y",
+        "node_type": "property",
+        "path": "root.root.children.DAT_02_TT_123_A.position.y",
+        "value": 100,
+        "value_type": "int"
+      },
+      {
+        "name": "x",
+        "node_type": "property",
+        "path": "root.root.children.MyComponentWithNumbers123.position.x",
+        "value": 0,
+        "value_type": "int"
+      },
+      {
+        "name": "y",
+        "node_type": "property",
+        "path": "root.root.children.MyComponentWithNumbers123.position.y",
+        "value": 150,
+        "value_type": "int"
+      },
+      {
+        "name": "x",
+        "node_type": "property",
+        "path": "root.root.children.UPPER_WITH_NUMBERS_456.position.x",
+        "value": 0,
+        "value_type": "int"
+      },
+      {
+        "name": "y",
+        "node_type": "property",
+        "path": "root.root.children.UPPER_WITH_NUMBERS_456.position.y",
+        "value": 200,
+        "value_type": "int"
+      },
+      {
+        "name": "x",
+        "node_type": "property",
+        "path": "root.root.children.camelCaseInvalid.position.x",
+        "value": 0,
+        "value_type": "int"
+      },
+      {
+        "name": "y",
+        "node_type": "property",
+        "path": "root.root.children.camelCaseInvalid.position.y",
+        "value": 250,
+        "value_type": "int"
+      },
+      {
+        "name": "x",
+        "node_type": "property",
+        "path": "root.root.children.snake_case_invalid.position.x",
+        "value": 0,
+        "value_type": "int"
+      },
+      {
+        "name": "y",
+        "node_type": "property",
+        "path": "root.root.children.snake_case_invalid.position.y",
+        "value": 300,
+        "value_type": "int"
+      },
+      {
+        "name": "x",
+        "node_type": "property",
+        "path": "root.root.children.kebab-case-invalid.position.x",
+        "value": 0,
+        "value_type": "int"
+      },
+      {
+        "name": "y",
+        "node_type": "property",
+        "path": "root.root.children.kebab-case-invalid.position.y",
+        "value": 350,
+        "value_type": "int"
+      },
+      {
+        "name": "x",
+        "node_type": "property",
+        "path": "root.root.children.Mixed_PascalCase_Invalid.position.x",
+        "value": 0,
+        "value_type": "int"
+      },
+      {
+        "name": "y",
+        "node_type": "property",
+        "path": "root.root.children.Mixed_PascalCase_Invalid.position.y",
+        "value": 400,
+        "value_type": "int"
+      }
+    ]
+  },
+  "property_bindings": {
+    "count": 0,
+    "nodes": []
+  },
+  "query_bindings": {
+    "count": 0,
+    "nodes": []
+  },
+  "script_transforms": {
+    "count": 0,
+    "nodes": []
+  },
+  "scripts": {
+    "count": 0,
+    "nodes": []
+  },
+  "tag_bindings": {
+    "count": 0,
+    "nodes": []
+  }
+}
