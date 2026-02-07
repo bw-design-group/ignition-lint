@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+- Upgrade Python to 3.13.1 and remove pre-commit version constraint [71ba2a5]
+
 ## [0.3.2] - 2026-02-06
 
 ### Added
