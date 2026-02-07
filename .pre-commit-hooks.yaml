@@ -3,7 +3,6 @@
   description: "Lints Ignition Perspective JSON files for style consistency and common issues"
   entry: ignition-lint
   language: python
-  language_version: python3.12
   types: [json]
   files: view\.json$
   args: ['--config=.ignition-lint-precommit.json', '--files']
