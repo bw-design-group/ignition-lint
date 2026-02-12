@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+- Handle view.params with bindings in UnusedCustomPropertiesRule [536319b]
+
 ## [0.3.3] - 2026-02-07
 
 ### Fixed
