@@ -1,6 +1,7 @@
 {
   "components_by_type": {
     "ia.container.flex": 1,
+    "ia.display.label": 1,
     "ia.input.button": 1,
     "ia.input.date-time-input": 1
   },
@@ -20,17 +21,17 @@
     "properties"
   ],
   "node_type_counts": {
-    "component": 3,
+    "component": 4,
     "custom_method": 1,
     "event_handler": 1,
-    "expression_binding": 5,
+    "expression_binding": 8,
     "expression_struct_binding": 1,
-    "property": 6,
-    "property_binding": 1
+    "property": 16,
+    "property_binding": 2
   },
   "rule_coverage": {
     "BadComponentReferenceRule": {
-      "applicable_node_count": 7,
+      "applicable_node_count": 10,
       "target_types": [
         "custom_method",
         "event_handler",
@@ -40,7 +41,7 @@
       ]
     },
     "ExampleBindingCountRule": {
-      "applicable_node_count": 10,
+      "applicable_node_count": 15,
       "target_types": [
         "component",
         "expression_binding",
@@ -51,31 +52,31 @@
       ]
     },
     "ExampleMixedSeverityRule": {
-      "applicable_node_count": 3,
+      "applicable_node_count": 4,
       "target_types": [
         "component"
       ]
     },
     "ExampleNameLengthRule": {
-      "applicable_node_count": 3,
+      "applicable_node_count": 4,
       "target_types": [
         "component"
       ]
     },
     "ExcessiveContextDataRule": {
-      "applicable_node_count": 18,
+      "applicable_node_count": 33,
       "target_types": [
         "all"
       ]
     },
     "NamePatternRule": {
-      "applicable_node_count": 3,
+      "applicable_node_count": 4,
       "target_types": [
         "component"
       ]
     },
     "PollingIntervalRule": {
-      "applicable_node_count": 7,
+      "applicable_node_count": 11,
       "target_types": [
         "expression_binding",
         "expression_struct_binding",
@@ -94,7 +95,7 @@
       ]
     },
     "UnusedCustomPropertiesRule": {
-      "applicable_node_count": 17,
+      "applicable_node_count": 32,
       "target_types": [
         "component",
         "custom_method",
@@ -108,5 +109,5 @@
       ]
     }
   },
-  "total_nodes": 18
+  "total_nodes": 33
 }

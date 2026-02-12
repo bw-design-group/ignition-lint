@@ -1,6 +1,6 @@
 {
   "bindings": {
-    "count": 7,
+    "count": 11,
     "nodes": [
       {
         "config": {},
@@ -44,14 +44,38 @@
       },
       {
         "config": {},
+        "expression": "{view.params.inputProp} ? 'Active' : 'Inactive'",
+        "node_type": "expression_binding",
+        "path": "propConfig.custom.withBinding"
+      },
+      {
+        "config": {},
+        "expression": "{view.params.usedInputParam}",
+        "node_type": "expression_binding",
+        "path": "propConfig.custom.outputToParent"
+      },
+      {
+        "config": {},
+        "node_type": "property_binding",
+        "path": "propConfig.params.outputWithBinding",
+        "target_path": "view.custom.outputToParent"
+      },
+      {
+        "config": {},
         "expression": "now()",
         "node_type": "expression_binding",
         "path": "root.root.children[0].BadPollingDateTimeInput.propConfig.props.value"
+      },
+      {
+        "config": {},
+        "expression": "{view.custom.usedByExpression}",
+        "node_type": "expression_binding",
+        "path": "root.root.children[1].LabelUsingCustomProp.propConfig.props.text"
       }
     ]
   },
   "components": {
-    "count": 3,
+    "count": 4,
     "nodes": [
       {
         "name": "BadPollingDateTimeInput",
@@ -61,9 +85,16 @@
         "type": "ia.input.date-time-input"
       },
       {
+        "name": "LabelUsingCustomProp",
+        "node_type": "component",
+        "path": "root.root.children[1].LabelUsingCustomProp",
+        "properties_count": 0,
+        "type": "ia.display.label"
+      },
+      {
         "name": "Button",
         "node_type": "component",
-        "path": "root.root.children[1].Button",
+        "path": "root.root.children[2].Button",
         "properties_count": 0,
         "type": "ia.input.button"
       },
@@ -86,7 +117,7 @@
           "var10",
           "var11"
         ],
-        "path": "root.root.children[1].Button.scripts.customMethods[0]",
+        "path": "root.root.children[2].Button.scripts.customMethods[0]",
         "script_length": 51,
         "script_preview": "\t# implement your method here\n\treturn var10 * var11"
       }
@@ -99,7 +130,7 @@
         "event_domain": "component",
         "event_type": "onActionPerformed",
         "node_type": "event_handler",
-        "path": "root.root.children[1].Button.events.component.onActionPerformed",
+        "path": "root.root.children[2].Button.events.component.onActionPerformed",
         "scope": "G",
         "script_length": 13,
         "script_preview": "\treturn event"
@@ -107,7 +138,7 @@
     ]
   },
   "expression_bindings": {
-    "count": 5,
+    "count": 8,
     "nodes": [
       {
         "config": {},
@@ -135,9 +166,27 @@
       },
       {
         "config": {},
+        "expression": "{view.params.inputProp} ? 'Active' : 'Inactive'",
+        "node_type": "expression_binding",
+        "path": "propConfig.custom.withBinding"
+      },
+      {
+        "config": {},
+        "expression": "{view.params.usedInputParam}",
+        "node_type": "expression_binding",
+        "path": "propConfig.custom.outputToParent"
+      },
+      {
+        "config": {},
         "expression": "now()",
         "node_type": "expression_binding",
         "path": "root.root.children[0].BadPollingDateTimeInput.propConfig.props.value"
+      },
+      {
+        "config": {},
+        "expression": "{view.custom.usedByExpression}",
+        "node_type": "expression_binding",
+        "path": "root.root.children[1].LabelUsingCustomProp.propConfig.props.text"
       }
     ]
   },
@@ -161,7 +210,7 @@
     "nodes": []
   },
   "properties": {
-    "count": 6,
+    "count": 16,
     "nodes": [
       {
         "name": "test",
@@ -172,12 +221,75 @@
         "value_type": "int"
       },
       {
+        "name": "usedByExpression",
+        "node_type": "property",
+        "path": "custom.usedByExpression",
+        "value": null,
+        "value_type": "NoneType"
+      },
+      {
+        "name": "withBinding",
+        "node_type": "property",
+        "path": "custom.withBinding",
+        "persistent": true,
+        "value": null,
+        "value_type": "NoneType"
+      },
+      {
+        "name": "unusedCustomProp",
+        "node_type": "property",
+        "path": "custom.unusedCustomProp",
+        "persistent": true,
+        "value": null,
+        "value_type": "NoneType"
+      },
+      {
+        "name": "outputToParent",
+        "node_type": "property",
+        "path": "custom.outputToParent",
+        "persistent": true,
+        "value": null,
+        "value_type": "NoneType"
+      },
+      {
         "name": "inputProp",
         "node_type": "property",
         "path": "params.inputProp",
         "persistent": true,
         "value": false,
         "value_type": "bool"
+      },
+      {
+        "name": "outputWithBinding",
+        "node_type": "property",
+        "path": "params.outputWithBinding",
+        "persistent": true,
+        "value": null,
+        "value_type": "NoneType"
+      },
+      {
+        "name": "outputWithoutBinding",
+        "node_type": "property",
+        "path": "params.outputWithoutBinding",
+        "persistent": true,
+        "value": null,
+        "value_type": "NoneType"
+      },
+      {
+        "name": "unusedInputParam",
+        "node_type": "property",
+        "path": "params.unusedInputParam",
+        "persistent": true,
+        "value": null,
+        "value_type": "NoneType"
+      },
+      {
+        "name": "usedInputParam",
+        "node_type": "property",
+        "path": "params.usedInputParam",
+        "persistent": true,
+        "value": "test",
+        "value_type": "str"
       },
       {
         "name": "basis",
@@ -191,6 +303,20 @@
         "node_type": "property",
         "path": "root.root.children.BadPollingDateTimeInput.props.formattedValue",
         "value": "Sep 29, 2025 6:24 AM",
+        "value_type": "str"
+      },
+      {
+        "name": "basis",
+        "node_type": "property",
+        "path": "root.root.children.LabelUsingCustomProp.position.basis",
+        "value": "32px",
+        "value_type": "str"
+      },
+      {
+        "name": "text",
+        "node_type": "property",
+        "path": "root.root.children.LabelUsingCustomProp.props.text",
+        "value": "Default Text",
         "value_type": "str"
       },
       {
@@ -210,13 +336,19 @@
     ]
   },
   "property_bindings": {
-    "count": 1,
+    "count": 2,
     "nodes": [
       {
         "config": {},
         "node_type": "property_binding",
         "path": "propConfig.custom.transformPolling",
         "target_path": "view.params.inputProp"
+      },
+      {
+        "config": {},
+        "node_type": "property_binding",
+        "path": "propConfig.params.outputWithBinding",
+        "target_path": "view.custom.outputToParent"
       }
     ]
   },
@@ -238,7 +370,7 @@
           "var10",
           "var11"
         ],
-        "path": "root.root.children[1].Button.scripts.customMethods[0]",
+        "path": "root.root.children[2].Button.scripts.customMethods[0]",
         "script_length": 51,
         "script_preview": "\t# implement your method here\n\treturn var10 * var11"
       },
@@ -246,7 +378,7 @@
         "event_domain": "component",
         "event_type": "onActionPerformed",
         "node_type": "event_handler",
-        "path": "root.root.children[1].Button.events.component.onActionPerformed",
+        "path": "root.root.children[2].Button.events.component.onActionPerformed",
         "scope": "G",
         "script_length": 13,
         "script_preview": "\treturn event"

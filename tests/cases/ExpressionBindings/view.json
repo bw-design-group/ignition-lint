@@ -1,9 +1,17 @@
 {
   "custom": {
-    "test": 4
+    "test": 4,
+    "usedByExpression": null,
+    "withBinding": null,
+    "unusedCustomProp": null,
+    "outputToParent": null
   },
   "params": {
-    "inputProp": false
+    "inputProp": false,
+    "outputWithBinding": null,
+    "outputWithoutBinding": null,
+    "unusedInputParam": null,
+    "usedInputParam": "test"
   },
   "propConfig": {
     "custom.expressionPolling": {
@@ -58,7 +66,50 @@
       },
       "persistent": false
     },
+    "custom.withBinding": {
+      "binding": {
+        "config": {
+          "expression": "{view.params.inputProp} ? 'Active' : 'Inactive'"
+        },
+        "type": "expr"
+      },
+      "persistent": true
+    },
+    "custom.unusedCustomProp": {
+      "persistent": true
+    },
+    "custom.outputToParent": {
+      "binding": {
+        "config": {
+          "expression": "{view.params.usedInputParam}"
+        },
+        "type": "expr"
+      },
+      "persistent": true
+    },
     "params.inputProp": {
+      "paramDirection": "input",
+      "persistent": true
+    },
+    "params.outputWithBinding": {
+      "binding": {
+        "config": {
+          "path": "view.custom.outputToParent"
+        },
+        "type": "property"
+      },
+      "paramDirection": "output",
+      "persistent": true
+    },
+    "params.outputWithoutBinding": {
+      "paramDirection": "output",
+      "persistent": true
+    },
+    "params.unusedInputParam": {
+      "paramDirection": "input",
+      "persistent": true
+    },
+    "params.usedInputParam": {
       "paramDirection": "input",
       "persistent": true
     }
@@ -87,6 +138,28 @@
           "formattedValue": "Sep 29, 2025 6:24 AM"
         },
         "type": "ia.input.date-time-input"
+      },
+      {
+        "meta": {
+          "name": "LabelUsingCustomProp"
+        },
+        "position": {
+          "basis": "32px"
+        },
+        "propConfig": {
+          "props.text": {
+            "binding": {
+              "config": {
+                "expression": "{view.custom.usedByExpression}"
+              },
+              "type": "expr"
+            }
+          }
+        },
+        "props": {
+          "text": "Default Text"
+        },
+        "type": "ia.display.label"
       },
       {
         "events": {
