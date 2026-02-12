@@ -2,11 +2,11 @@
 Rule to detect unused custom properties and view parameters.
 
 This rule identifies custom properties and view parameters that are defined but never referenced
-in bindings, scripts, or other expressions throughout the view.
+or populated in bindings, scripts, or other expressions throughout the view.
 
 Custom properties can be located at:
 - custom.* - View-level custom properties
-- params.* - View parameters (inputs to the view)
+- params.* - View parameters (inputs and outputs)
 - {component_path}.custom.* - Component-level custom properties
 
 SUPPORTED DETECTION:
@@ -14,15 +14,22 @@ SUPPORTED DETECTION:
 - ✅ View parameters (params.*)
 - ✅ Component-level custom properties (*.custom.*)
 - ✅ References in expression bindings ({view.custom.prop}, {this.custom.prop})
+- ✅ Properties with bindings (a property with a binding is considered "used")
 - ✅ Persistent vs non-persistent property handling
 
-These properties are considered "used" if they are referenced in:
-- ✅ Expression bindings (e.g., {view.custom.myProp}, {this.custom.myProp})
-- ✅ Property bindings (e.g., tag paths, property paths)
-- ✅ Tag bindings (e.g., tag paths containing property references)
-- ✅ Script expressions in event handlers, message handlers, transforms, etc. (via comprehensive search)
-- ✅ Custom method scripts (via comprehensive search)
-- ✅ Any other context where property paths appear as strings in the view definition
+These properties are considered "used" if:
+1. They have a binding (expression, property, tag, query, etc.) that populates their value
+2. They are referenced in:
+   - ✅ Expression bindings (e.g., {view.custom.myProp}, {this.custom.myProp})
+   - ✅ Property bindings (e.g., property paths like "view.custom.breakerStatus")
+   - ✅ Tag bindings (e.g., tag paths containing property references)
+   - ✅ Script expressions in event handlers, message handlers, transforms, etc.
+   - ✅ Custom method scripts
+   - ✅ Any other context where property paths appear as strings in the view definition
+
+IMPORTANT: Output parameters (paramDirection: "output") are only considered used if they have
+a binding or are referenced elsewhere in the view. An output param without a binding or references
+is unused because it provides no data to parent views.
 """
 
 import re
@@ -119,16 +126,28 @@ class UnusedCustomPropertiesRule(LintingRule):
 		"""Check expression bindings for custom property references."""
 		self._check_expression_for_references(node.expression)
 
+		# Also mark the property that owns this binding as used
+		# A property with a binding is actively being populated/managed
+		self._mark_binding_owner_as_used(node.path)
+
 	def visit_property_binding(self, node):
 		"""Check property bindings for custom property references."""
-		# Property bindings might reference custom properties in their source paths
-		if hasattr(node, 'source_property') and node.source_property:
-			self._check_expression_for_references(node.source_property)
+		# Property bindings might reference custom properties in their target paths
+		if hasattr(node, 'target_path') and node.target_path:
+			self._check_expression_for_references(node.target_path)
+
+		# Also mark the property that owns this binding as used
+		# A property with a binding is actively being populated/managed
+		self._mark_binding_owner_as_used(node.path)
 
 	def visit_tag_binding(self, node):
 		"""Check tag bindings for custom property references in tag paths."""
 		if hasattr(node, 'tag_path') and node.tag_path:
 			self._check_expression_for_references(node.tag_path)
+
+		# Also mark the property that owns this binding as used
+		# A property with a binding is actively being populated/managed
+		self._mark_binding_owner_as_used(node.path)
 
 	def visit_event_handler(self, node):
 		"""Check event handler scripts for custom property references."""
@@ -149,6 +168,48 @@ class UnusedCustomPropertiesRule(LintingRule):
 		"""Check transform scripts for custom property references."""
 		if hasattr(node, 'script') and node.script:
 			self._check_script_for_references(node.script)
+
+	def _mark_binding_owner_as_used(self, binding_path: str):
+		"""
+		Mark the property that owns a binding as used.
+
+		A property with a binding is actively being populated/managed, so it should
+		be considered "used" even if not referenced elsewhere in the view.
+
+		Examples:
+		- propConfig.params.breakerStatus -> marks view.params.breakerStatus as used
+		- propConfig.params.currentDetected.binding.transforms[0] -> marks view.params.currentDetected as used
+		- propConfig.custom.myProp -> marks view.custom.myProp as used
+		"""
+		property_path = binding_path
+
+		# Remove propConfig prefix if present
+		if property_path.startswith('propConfig.'):
+			property_path = property_path[len('propConfig.'):]
+
+		# Remove binding-related suffixes to get just the property name
+		# Strip everything after the property name (binding, transforms, etc.)
+		for suffix in ['.binding', '.persistent', '.paramDirection']:
+			if suffix in property_path:
+				property_path = property_path.split(suffix)[0]
+				break
+
+		# Mark the property as used based on its type
+		if property_path.startswith('custom.') and '.' not in property_path[7:]:
+			# View-level custom property: custom.propName
+			prop_name = property_path[7:]
+			self.used_properties.add(f"view.custom.{prop_name}")
+		elif property_path.startswith('params.') and '.' not in property_path[7:]:
+			# View-level param: params.paramName
+			param_name = property_path[7:]
+			self.used_properties.add(f"view.params.{param_name}")
+		elif '.custom.' in property_path:
+			# Component custom property: something.custom.propName
+			custom_match = re.search(r'([^.]+)\.custom\.([^.]+)$', property_path)
+			if custom_match:
+				component_name = custom_match.group(1)
+				prop_name = custom_match.group(2)
+				self.used_properties.add(f"{component_name}.custom.{prop_name}")
 
 	def _check_expression_for_references(self, expression: str):
 		"""Check an expression string for custom property references."""
