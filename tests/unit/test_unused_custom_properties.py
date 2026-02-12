@@ -21,7 +21,7 @@ from fixtures.test_helpers import get_test_config, create_temp_view_file
 from ignition_lint.common.flatten_json import flatten_file
 
 
-class TestUnusedCustomPropertiesRule(BaseRuleTest):
+class TestUnusedCustomPropertiesRule(BaseRuleTest):  # pylint: disable=too-many-public-methods
 	"""Test the UnusedCustomPropertiesRule to detect unused custom properties and view parameters."""
 
 	def test_unused_view_custom_property(self):
@@ -573,3 +573,285 @@ class TestUnusedCustomPropertiesRule(BaseRuleTest):
 
 		# Should NOT flag properties used with self.view pattern in expressions
 		self.assert_rule_errors(mock_view, rule_config, "UnusedCustomPropertiesRule", expected_error_count=0)
+
+	def test_output_param_with_binding(self):
+		"""Test that output params with bindings are not flagged as unused."""
+		view_data = {
+			"custom": {
+				"dataSource": "test data"
+			},
+			"params": {
+				"outputData": None
+			},
+			"propConfig": {
+				"custom.dataSource": {
+					"binding": {
+						"config": {
+							"expression": "'test'"
+						},
+						"type": "expr"
+					},
+					"persistent": True
+				},
+				"params.outputData": {
+					"binding": {
+						"config": {
+							"path": "view.custom.dataSource"
+						},
+						"type": "property"
+					},
+					"paramDirection": "output",
+					"persistent": True
+				}
+			},
+			"root": {
+				"children": [],
+				"meta": {
+					"name": "root"
+				}
+			}
+		}
+		mock_view_content = json.dumps(view_data, indent=2)
+		mock_view = create_temp_view_file(mock_view_content)
+
+		rule_config = get_test_config("UnusedCustomPropertiesRule")
+
+		# Output param with binding should NOT be flagged - it's actively populated
+		# Custom property with binding should NOT be flagged - it has a binding
+		self.assert_rule_errors(mock_view, rule_config, "UnusedCustomPropertiesRule", expected_error_count=0)
+
+	def test_output_param_without_binding(self):
+		"""Test that output params without bindings or references are flagged as unused."""
+		view_data = {
+			"params": {
+				"outputWithoutBinding": None
+			},
+			"propConfig": {
+				"params.outputWithoutBinding": {
+					"paramDirection": "output",
+					"persistent": True
+				}
+			},
+			"root": {
+				"children": [],
+				"meta": {
+					"name": "root"
+				}
+			}
+		}
+		mock_view_content = json.dumps(view_data, indent=2)
+		mock_view = create_temp_view_file(mock_view_content)
+
+		rule_config = get_test_config("UnusedCustomPropertiesRule")
+
+		# Output param without binding or references should be flagged
+		self.assert_rule_errors(
+			mock_view, rule_config, "UnusedCustomPropertiesRule", expected_error_count=1,
+			error_patterns=["outputWithoutBinding", "never referenced"]
+		)
+
+	def test_output_param_with_tag_binding(self):
+		"""Test that output params with tag bindings are not flagged as unused."""
+		view_data = {
+			"params": {
+				"tagPath": "[default]MyTag",
+				"outputValue": None
+			},
+			"propConfig": {
+				"params.tagPath": {
+					"paramDirection": "input",
+					"persistent": True
+				},
+				"params.outputValue": {
+					"binding": {
+						"config": {
+							"fallbackDelay": 2.5,
+							"mode": "indirect",
+							"references": {
+								"tagPath": "{view.params.tagPath}"
+							},
+							"tagPath": "{tagPath}/Value"
+						},
+						"type": "tag"
+					},
+					"paramDirection": "output",
+					"persistent": True
+				}
+			},
+			"root": {
+				"children": [],
+				"meta": {
+					"name": "root"
+				}
+			}
+		}
+		mock_view_content = json.dumps(view_data, indent=2)
+		mock_view = create_temp_view_file(mock_view_content)
+
+		rule_config = get_test_config("UnusedCustomPropertiesRule")
+
+		# Output param with tag binding should NOT be flagged
+		self.assert_rule_errors(mock_view, rule_config, "UnusedCustomPropertiesRule", expected_error_count=0)
+
+	def test_custom_property_with_binding_not_referenced(self):
+		"""Test that custom properties with bindings are not flagged even if not referenced elsewhere."""
+		view_data = {
+			"custom": {
+				"calculatedValue": None
+			},
+			"params": {
+				"inputA": 5,
+				"inputB": 10
+			},
+			"propConfig": {
+				"custom.calculatedValue": {
+					"binding": {
+						"config": {
+							"expression": "{view.params.inputA} + {view.params.inputB}"
+						},
+						"type": "expr"
+					},
+					"persistent": True
+				},
+				"params.inputA": {
+					"paramDirection": "input",
+					"persistent": True
+				},
+				"params.inputB": {
+					"paramDirection": "input",
+					"persistent": True
+				}
+			},
+			"root": {
+				"children": [],
+				"meta": {
+					"name": "root"
+				}
+			}
+		}
+		mock_view_content = json.dumps(view_data, indent=2)
+		mock_view = create_temp_view_file(mock_view_content)
+
+		rule_config = get_test_config("UnusedCustomPropertiesRule")
+
+		# Custom property with binding should NOT be flagged even if not referenced
+		# It's actively managed and could be used by parent views or future changes
+		self.assert_rule_errors(mock_view, rule_config, "UnusedCustomPropertiesRule", expected_error_count=0)
+
+	def test_unused_input_param(self):
+		"""Test that unused input params are correctly flagged."""
+		view_data = {
+			"params": {
+				"usedInput": "value1",
+				"unusedInput": "value2"
+			},
+			"propConfig": {
+				"params.usedInput": {
+					"paramDirection": "input",
+					"persistent": True
+				},
+				"params.unusedInput": {
+					"paramDirection": "input",
+					"persistent": True
+				}
+			},
+			"root": {
+				"children": [{
+					"meta": {
+						"name": "TestLabel"
+					},
+					"type": "ia.display.label",
+					"propConfig": {
+						"props.text": {
+							"binding": {
+								"config": {
+									"expression": "{view.params.usedInput}"
+								},
+								"type": "expr"
+							}
+						}
+					}
+				}],
+				"meta": {
+					"name": "root"
+				}
+			}
+		}
+		mock_view_content = json.dumps(view_data, indent=2)
+		mock_view = create_temp_view_file(mock_view_content)
+
+		rule_config = get_test_config("UnusedCustomPropertiesRule")
+
+		# Only unusedInput should be flagged
+		self.assert_rule_errors(
+			mock_view, rule_config, "UnusedCustomPropertiesRule", expected_error_count=1,
+			error_patterns=["unusedInput", "never referenced"]
+		)
+
+	def test_mixed_param_scenarios(self):
+		"""Test comprehensive mix of param scenarios."""
+		view_data = {
+			"custom": {
+				"dataSource": "test",
+				"unusedCustom": "not used"
+			},
+			"params": {
+				"usedInput": "value",
+				"unusedInput": "not used",
+				"outputWithBinding": None,
+				"outputWithoutBinding": None
+			},
+			"propConfig": {
+				"custom.dataSource": {
+					"binding": {
+						"config": {
+							"expression": "{view.params.usedInput}"
+						},
+						"type": "expr"
+					},
+					"persistent": True
+				},
+				"custom.unusedCustom": {
+					"persistent": True
+				},
+				"params.usedInput": {
+					"paramDirection": "input",
+					"persistent": True
+				},
+				"params.unusedInput": {
+					"paramDirection": "input",
+					"persistent": True
+				},
+				"params.outputWithBinding": {
+					"binding": {
+						"config": {
+							"path": "view.custom.dataSource"
+						},
+						"type": "property"
+					},
+					"paramDirection": "output",
+					"persistent": True
+				},
+				"params.outputWithoutBinding": {
+					"paramDirection": "output",
+					"persistent": True
+				}
+			},
+			"root": {
+				"children": [],
+				"meta": {
+					"name": "root"
+				}
+			}
+		}
+		mock_view_content = json.dumps(view_data, indent=2)
+		mock_view = create_temp_view_file(mock_view_content)
+
+		rule_config = get_test_config("UnusedCustomPropertiesRule")
+
+		# Should flag: unusedInput, unusedCustom, outputWithoutBinding
+		# Should NOT flag: usedInput (referenced), dataSource (has binding), outputWithBinding (has binding)
+		self.assert_rule_errors(
+			mock_view, rule_config, "UnusedCustomPropertiesRule", expected_error_count=3,
+			error_patterns=["unusedInput", "unusedCustom", "outputWithoutBinding"]
+		)
