@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "ignition-lint"
-version = "0.3.3"
+version = "0.3.4"
 description = "A linter for Ignition JSON files"
 authors = ["Alex Spyksma", "Eric Knorr"]
 license = "MIT"
