@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- Automatic aggregation of batch results into a summary file when multiple batches are detected
+- Automatic cleanup of old batch files from previous runs to prevent unbounded growth
+
 ### Fixed
 - Fix race condition in PylintScriptRule causing FileNotFoundError during parallel execution (e.g., pre-commit)
 - Remove wasteful duplicate file copying in PylintScriptRule debug mode

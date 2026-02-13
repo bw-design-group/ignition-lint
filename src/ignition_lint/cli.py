@@ -66,6 +66,61 @@ except ImportError:
 	from ignition_lint.rules import RULES_MAP
 
 
+def cleanup_old_batch_files(output_path: Path) -> None:
+	"""
+	Clean up old batch files from previous runs to prevent unbounded growth.
+
+	This function is called at the start of a run, before any results are written.
+	It removes batch files from previous runs (identified by different PIDs) but
+	preserves files from the current run (same PID or very recent).
+	"""
+	import time
+
+	if not output_path.parent.exists():
+		return
+
+	# Get current PID
+	current_pid = os.getpid()
+	current_time = time.time()
+
+	# Find all related batch files
+	base_name = output_path.stem
+	pattern = f"{base_name}*batch*.txt"
+
+	files_to_clean = []
+	for file_path in output_path.parent.glob(pattern):
+		# Skip aggregated summary files
+		if 'AGGREGATED_SUMMARY' in file_path.name:
+			continue
+
+		# Extract PID from filename (e.g., results_pid12345_batch1.txt)
+		if f'_pid{current_pid}_' in file_path.name:
+			# Same PID as current run - skip
+			continue
+
+		# Check if file is recent (less than 5 seconds old)
+		# This protects against race conditions with parallel processes
+		try:
+			file_age = current_time - file_path.stat().st_mtime
+			if file_age < 5:
+				# Very recent file, likely from parallel process - skip
+				continue
+		except OSError:
+			pass
+
+		# Old batch file from previous run - mark for deletion
+		files_to_clean.append(file_path)
+
+	# Clean up old files
+	if files_to_clean:
+		for file_path in files_to_clean:
+			try:
+				file_path.unlink()
+			except OSError as e:
+				# Silently ignore errors (file might be in use or already deleted)
+				pass
+
+
 def make_unique_output_path(original_path: Path) -> Path:
 	"""
 	Generate a unique output file path to prevent overwriting in batch processing.
@@ -486,6 +541,122 @@ def write_results_file(
 		f.write("=" * 80 + "\n")
 
 
+def aggregate_batch_results(results_path: Path) -> None:
+	"""
+	Aggregate results from multiple batch files into a summary file.
+
+	When ignition-lint runs in batches (e.g., via pre-commit), multiple result files
+	are created. This function aggregates them into a single summary for easy review.
+	"""
+	import re
+	from datetime import datetime
+
+	# Check if this is a batched result (has _pid and _batch in name)
+	if '_pid' not in results_path.name or '_batch' not in results_path.name:
+		# Not a batch file, no aggregation needed
+		return
+
+	# Find all related result files in the same directory
+	parent_dir = results_path.parent
+	base_name = results_path.stem.split('_pid')[0]  # Get original filename without _pid_batch
+	pattern = f"{base_name}*.txt"
+
+	# Find all matching result files (excluding aggregated summary)
+	result_files = sorted([f for f in parent_dir.glob(pattern) if 'AGGREGATED_SUMMARY' not in f.name])
+	if len(result_files) <= 1:
+		# Only one file, no need to aggregate
+		return
+
+	# Parse each result file and collect totals
+	total_files = 0
+	total_warnings = 0
+	total_errors = 0
+	total_issues = 0
+	total_clean = 0
+	batch_details = []
+
+	for file_path in result_files:
+		try:
+			with open(file_path, 'r', encoding='utf-8') as f:
+				content = f.read()
+
+				# Extract metrics using regex
+				files_match = re.search(r'Files processed:\s+(\d+)', content)
+				warnings_match = re.search(r'Total warnings:\s+(\d+)', content)
+				errors_match = re.search(r'Total errors:\s+(\d+)', content)
+				issues_match = re.search(r'Files with issues:\s+(\d+)', content)
+				clean_match = re.search(r'Clean files:\s+(\d+)', content)
+
+				if files_match:
+					files = int(files_match.group(1))
+					warnings = int(warnings_match.group(1)) if warnings_match else 0
+					errors = int(errors_match.group(1)) if errors_match else 0
+					issues = int(issues_match.group(1)) if issues_match else 0
+					clean = int(clean_match.group(1)) if clean_match else 0
+
+					total_files += files
+					total_warnings += warnings
+					total_errors += errors
+					total_issues += issues
+					total_clean += clean
+
+					batch_details.append({
+						'filename': file_path.name,
+						'files': files,
+						'warnings': warnings,
+						'errors': errors,
+						'issues': issues,
+						'clean': clean
+					})
+		except (OSError, IOError) as e:
+			print(f"⚠️  Warning: Could not read {file_path.name}: {e}")
+			continue
+
+	# Write aggregated summary
+	if batch_details:
+		summary_path = parent_dir / f"{base_name}_AGGREGATED_SUMMARY.txt"
+		try:
+			with open(summary_path, 'w', encoding='utf-8') as f:
+				f.write("=" * 80 + "\n")
+				f.write("AGGREGATED IGNITION-LINT RESULTS SUMMARY\n")
+				f.write("=" * 80 + "\n")
+				f.write(f"Generated: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n")
+				f.write(f"Total batches: {len(batch_details)}\n")
+				f.write("\n")
+
+				# Overall summary
+				f.write("TOTAL SUMMARY ACROSS ALL BATCHES\n")
+				f.write("-" * 80 + "\n")
+				f.write(f"Files processed:      {total_files}\n")
+				f.write(f"Total warnings:       {total_warnings:,}\n")
+				f.write(f"Total errors:         {total_errors:,}\n")
+				f.write(f"Files with issues:    {total_issues}\n")
+				f.write(f"Clean files:          {total_clean}\n")
+				f.write("\n")
+
+				# Breakdown by batch
+				f.write("BREAKDOWN BY BATCH\n")
+				f.write("-" * 80 + "\n")
+				for batch in batch_details:
+					f.write(
+						f"{batch['filename']:<45} "
+						f"Files: {batch['files']:>3}  "
+						f"Warnings: {batch['warnings']:>4}  "
+						f"Errors: {batch['errors']:>4}  "
+						f"Issues: {batch['issues']:>3}  "
+						f"Clean: {batch['clean']:>3}\n"
+					)
+
+				f.write("\n")
+				f.write("=" * 80 + "\n")
+				f.write("END OF AGGREGATED SUMMARY\n")
+				f.write("=" * 80 + "\n")
+
+			print(f"\n📊 Aggregated summary written to: {summary_path}")
+		except (OSError, IOError) as e:
+			print(f"⚠️  Warning: Could not write aggregated summary: {e}")
+
+
 def print_final_summary(
 	processed_files: int, total_warnings: int, total_errors: int, files_with_issues: int, stats_only: bool,
 	ignore_warnings: bool = False
@@ -583,6 +754,12 @@ def main():
 		help="File path to write linting results (e.g., results.txt)",
 	)
 	args = parser.parse_args()
+
+	# Clean up old batch files from previous runs (prevents unbounded growth)
+	if args.results_output:
+		cleanup_old_batch_files(Path(args.results_output))
+	if args.timing_output:
+		cleanup_old_batch_files(Path(args.timing_output))
 
 	# Set up the linting engine
 	lint_engine = setup_linter(args)
@@ -710,6 +887,9 @@ def main():
 			finalize_results
 		)
 		print("\n" + f"📝 Results written to: {results_path}")
+
+		# Aggregate batch results if multiple batches exist
+		aggregate_batch_results(results_path)
 
 	# Print final summary
 	print_final_summary(
