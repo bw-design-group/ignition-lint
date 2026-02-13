@@ -68,9 +68,7 @@ class PylintScriptRule(ScriptRule):
 		# This is where the bundled default config will be when installed via pip/poetry
 		# __file__ is: site-packages/ignition_lint/rules/scripts/lint_script.py
 		# We need to go up to: site-packages/ignition_lint/.config/.pylintrc
-		package_dir = os.path.dirname(
-			os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-		)
+		package_dir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 		bundled_pylintrc = os.path.join(package_dir, ".config", ".pylintrc")
 		if os.path.exists(bundled_pylintrc):
 			return bundled_pylintrc
@@ -142,71 +140,48 @@ class PylintScriptRule(ScriptRule):
 
 	def _run_pylint_batch(self, scripts: Dict[str, ScriptNode]) -> Dict[str, List[str]]:
 		"""Run pylint on multiple scripts at once."""
-		# Always create debug directory (for automatic error reporting)
-		debug_dir = self._setup_debug_directory()
 		combined_content, line_map = self._combine_scripts(scripts)
 		path_to_issues = {path: [] for path in scripts.keys()}
 		temp_file_path = None
 		try:
 			temp_file_path = self._create_temp_file(combined_content)
-			pylint_output = self._run_pylint_on_file(temp_file_path, debug_dir)
-			self._parse_pylint_output(pylint_output, line_map, path_to_issues, debug_dir)
+			pylint_output = self._run_pylint_on_file(temp_file_path)
+			self._parse_pylint_output(pylint_output, line_map, path_to_issues)
 		except (OSError, IOError) as e:
 			error_msg = f"Error with file operations during pylint: {str(e)}"
-			self._handle_pylint_error(error_msg, debug_dir, path_to_issues)
+			self._handle_pylint_error(error_msg, path_to_issues)
 		except ImportError as e:
 			error_msg = f"Error importing pylint modules: {str(e)}"
-			self._handle_pylint_error(error_msg, debug_dir, path_to_issues)
+			self._handle_pylint_error(error_msg, path_to_issues)
 		finally:
-			self._cleanup_temp_file(temp_file_path, debug_dir, path_to_issues)
+			self._cleanup_temp_file(temp_file_path, path_to_issues)
 
 		return path_to_issues
 
-	def _setup_debug_directory(self) -> str:
-		"""Create and return debug directory path. Always creates directory for error reporting."""
+	def _get_debug_directory(self) -> str:
+		"""Determine debug directory path without creating it. Called lazily only when needed."""
 		cwd = os.getcwd()
 
 		# Priority 1: User-configured debug directory
 		if self.debug_dir_config:
 			if os.path.isabs(self.debug_dir_config):
-				debug_dir = self.debug_dir_config
+				return self.debug_dir_config
 			else:
-				debug_dir = os.path.join(cwd, self.debug_dir_config)
-		else:
-			# Priority 2: Try to detect if we're in a test environment and use tests/debug
-			tests_debug_dir = None
-			current_path = cwd
-			while current_path != os.path.dirname(current_path):  # Until we reach root
-				if os.path.basename(current_path) == 'tests':
-					# We're in tests directory
-					tests_debug_dir = os.path.join(current_path, "debug")
-					break
-				elif os.path.exists(os.path.join(current_path, 'tests')):
-					# Tests directory exists in current path
-					tests_debug_dir = os.path.join(current_path, "tests", "debug")
-					break
-				current_path = os.path.dirname(current_path)
+				return os.path.join(cwd, self.debug_dir_config)
 
-			# Priority 3: Use .ignition-lint/debug as standard location for user repos
-			debug_dir = tests_debug_dir if tests_debug_dir else os.path.join(cwd, ".ignition-lint", "debug")
+		# Priority 2: Try to detect if we're in a test environment and use tests/debug
+		current_path = cwd
+		while current_path != os.path.dirname(current_path):  # Until we reach root
+			if os.path.basename(current_path) == 'tests':
+				# We're in tests directory
+				return os.path.join(current_path, "debug")
+			elif os.path.exists(os.path.join(current_path, 'tests')):
+				# Tests directory exists in current path
+				return os.path.join(current_path, "tests", "debug")
+			current_path = os.path.dirname(current_path)
 
-		os.makedirs(debug_dir, exist_ok=True)
-
-		# Show debug directory location in debug mode
-		if self.debug:
-			print(f"🔍 PylintScriptRule: Debug directory: {debug_dir}")
-
-		# Clean up old debug .py files to keep things fresh each run
-		try:
-			for filename in os.listdir(debug_dir):
-				if filename.endswith('.py'):
-					file_path = os.path.join(debug_dir, filename)
-					os.remove(file_path)
-		except OSError:
-			# Silently ignore cleanup errors - debug directory may not be writable
-			pass
-
-		return debug_dir
+		# Priority 3: Use .ignition-lint/debug as standard location for user repos
+		return os.path.join(cwd, ".ignition-lint", "debug")
 
 	def _combine_scripts(self, scripts: Dict[str, ScriptNode]) -> Tuple[str, Dict[int, str]]:
 		"""Combine all scripts into a single string with line mapping."""
@@ -245,26 +220,17 @@ class PylintScriptRule(ScriptRule):
 		return "\n".join(combined_scripts), line_map
 
 	def _create_temp_file(self, content: str) -> str:
-		"""Create temporary file with script content."""
+		"""Create temporary file with script content. Uses PID for uniqueness in parallel execution."""
 		timestamp = datetime.datetime.now().strftime("%H%M%S")
-		with tempfile.NamedTemporaryFile(prefix=f"{timestamp}_", suffix=".py", delete=False) as temp_file:
+		pid = os.getpid()
+		with tempfile.NamedTemporaryFile(
+			prefix=f"{timestamp}_pid{pid}_", suffix=".py", delete=False
+		) as temp_file:
 			temp_file.write(content.encode('utf-8'))
 			return temp_file.name
 
-	def _run_pylint_on_file(self, temp_file_path: str, debug_dir: str) -> str:
+	def _run_pylint_on_file(self, temp_file_path: str) -> str:
 		"""Execute pylint on the temporary file and return output."""
-		# Only save debug files if debug mode is enabled
-		if self.debug and debug_dir:
-			_save_debug_file(temp_file_path, debug_dir)
-
-		# Always write pylintrc info in debug mode to help diagnose config issues
-		if self.debug and debug_dir:
-			with open(os.path.join(debug_dir, "pylintrc_used.txt"), 'w', encoding='utf-8') as f:
-				if self.pylintrc:
-					f.write(f"Using pylintrc: {self.pylintrc}\n")
-				else:
-					f.write("No pylintrc found - using inline configuration\n")
-
 		pylint_output = StringIO()
 
 		# Build pylint arguments
@@ -284,7 +250,7 @@ class PylintScriptRule(ScriptRule):
 		args.extend([
 			'--output-format=text',
 			'--score=no',
-			'--module-rgx=.*',  # Allow any module name (temp files have timestamps)
+			'--module-rgx=.*',  # Allow any module name (temp files have timestamps + PID)
 			temp_file_path,
 		])
 
@@ -299,17 +265,10 @@ class PylintScriptRule(ScriptRule):
 			sys.stdout = old_stdout
 			sys.stderr = old_stderr
 
-		output = pylint_output.getvalue()
-
-		# Only write debug output if debug mode is enabled
-		if self.debug and debug_dir:
-			with open(os.path.join(debug_dir, "pylint_output.txt"), 'w', encoding='utf-8') as f:
-				f.write(output)
-
-		return output
+		return pylint_output.getvalue()
 
 	def _parse_pylint_output(
-		self, output: str, line_map: Dict[int, str], path_to_issues: Dict[str, List[str]], debug_dir: str
+		self, output: str, line_map: Dict[int, str], path_to_issues: Dict[str, List[str]]
 	) -> None:
 		"""Parse pylint output and map issues back to original scripts."""
 		pattern = r'.*:(\d+):\d+: .+: (.+)'
@@ -328,8 +287,10 @@ class PylintScriptRule(ScriptRule):
 					path_to_issues[script_path].append(f"Line {relative_line}: {message}")
 
 			except (ValueError, IndexError) as e:
-				if self.debug and debug_dir:
-					self._log_parse_error(line, e, debug_dir)
+				if self.debug:
+					print(
+						f"⚠️  Warning: Error parsing pylint output line: {line}\n  Exception: {str(e)}"
+					)
 
 	def _find_script_for_line(self, line_num: int, line_map: Dict[int, str]) -> Optional[str]:
 		"""Find which script a line number belongs to."""
@@ -343,47 +304,58 @@ class PylintScriptRule(ScriptRule):
 		script_start_line = min(ln for ln, path in line_map.items() if path == script_path)
 		return line_num - script_start_line + 1
 
-	def _log_parse_error(self, line: str, error: Exception, debug_dir: str) -> None:
-		"""Log parsing errors to debug file."""
-		with open(os.path.join(debug_dir, "pylint_error.txt"), 'a', encoding='utf-8') as f:
-			f.write(f"Error parsing line: {line}\nException: {str(error)}\n\n")
-
-	def _handle_pylint_error(self, error_msg: str, debug_dir: str, path_to_issues: Dict[str, List[str]]) -> None:
+	def _handle_pylint_error(self, error_msg: str, path_to_issues: Dict[str, List[str]]) -> None:
 		"""Handle and log pylint execution errors."""
-		# Only write debug files if debug mode is enabled
-		if self.debug and debug_dir:
-			with open(os.path.join(debug_dir, "pylint_error.txt"), 'w', encoding='utf-8') as f:
-				f.write(error_msg)
+		if self.debug:
+			print(f"⚠️  Pylint error: {error_msg}")
 		for path in path_to_issues:
 			path_to_issues[path].append(error_msg)
 
-	def _cleanup_temp_file(self, temp_file_path: str, debug_dir: str, path_to_issues: Dict[str, List[str]]) -> None:
-		"""Clean up temporary file, keeping it for debug if there were issues or debug mode is enabled."""
-		if temp_file_path and os.path.exists(temp_file_path):
-			has_issues = any(issues for issues in path_to_issues.values())
+	def _cleanup_temp_file(self, temp_file_path: str, path_to_issues: Dict[str, List[str]]) -> None:
+		"""Clean up temporary file. Only saves to debug dir if debug=True OR there are issues."""
+		if not temp_file_path or not os.path.exists(temp_file_path):
+			return
 
-			# Save debug files if:
-			# 1. There are issues (automatic error reporting), OR
-			# 2. Debug mode is explicitly enabled (opt-in for development)
-			should_save = has_issues or self.debug
+		has_issues = any(issues for issues in path_to_issues.values())
+		should_save_debug = has_issues or self.debug
 
-			if should_save and debug_dir:
-				# Preserve original temp filename (timestamp + random chars)
+		if should_save_debug:
+			try:
+				# Lazily create debug directory only when actually needed
+				debug_dir = self._get_debug_directory()
+				os.makedirs(debug_dir, exist_ok=True)
+
+				# Preserve original temp filename (timestamp + PID + random chars)
 				original_filename = os.path.basename(temp_file_path)
 				debug_file_path = os.path.join(debug_dir, original_filename)
-				shutil.copy(temp_file_path, debug_file_path)
 
+				# Copy temp file to debug directory
+				shutil.copyfile(temp_file_path, debug_file_path)
+
+				# Save additional debug info if in debug mode
+				if self.debug:
+					print(f"🔍 Debug directory: {debug_dir}")
+					# Write pylintrc info
+					pylintrc_file = os.path.join(debug_dir, "pylintrc_used.txt")
+					with open(pylintrc_file, 'w', encoding='utf-8') as f:
+						if self.pylintrc:
+							f.write(f"Using pylintrc: {self.pylintrc}\n")
+						else:
+							f.write("No pylintrc found - using inline configuration\n")
+
+				# Print appropriate message
 				if has_issues:
 					print(f"🐛 Pylint found issues. Debug file saved to: {debug_file_path}")
 				elif self.debug:
 					print(f"🔍 Debug mode: Script saved to: {debug_file_path}")
 
-			# Always clean up the temp file (was already copied to debug if needed)
+			except (OSError, IOError) as e:
+				if self.debug:
+					print(f"⚠️  Warning: Could not save debug file: {str(e)}")
+
+		# Always clean up the temp file from /tmp/ (was already copied to debug if needed)
+		try:
 			os.remove(temp_file_path)
-
-
-def _save_debug_file(temp_file_path: str, debug_dir: str):
-	"""Helper function to save temporary file to debug directory with original filename."""
-	debug_file_path = os.path.join(debug_dir, os.path.basename(temp_file_path))
-	shutil.copy2(temp_file_path, debug_file_path)
-	# Note: Old .py files are cleaned up at the start of each run in _setup_debug_directory()
+		except OSError:
+			# Silently ignore if file was already deleted
+			pass

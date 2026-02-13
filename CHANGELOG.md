@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+- Fix race condition in PylintScriptRule causing FileNotFoundError during parallel execution (e.g., pre-commit)
+- Remove wasteful duplicate file copying in PylintScriptRule debug mode
+- Optimize PylintScriptRule to only create debug directory when actually needed (debug=True OR linting issues found)
+
 ## [0.3.4] - 2026-02-12
 
 ### Fixed
