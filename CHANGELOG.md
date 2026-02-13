@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.3.5] - 2026-02-13
+
+### Added
+- Automatic aggregation of batch results with cleanup for pre-commit workflows [e59d6d1]
+
+### Fixed
+- Resolve race conditions and file conflicts when running in parallel execution (e.g., pre-commit hooks) [82f6f21] [bbbda21]
+- Add script indentation validation and smart auto-correction for view.json files [3e116b1]
+- Improve debug file management with automatic cleanup and source file tracking [3e116b1]
+
 ## [0.3.4] - 2026-02-12
 
 ### Fixed
@@ -219,7 +229,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Initial tracked release
 
-[Unreleased]: https://github.com/design-group/ignition-lint/compare/v0.3.4...HEAD
+[Unreleased]: https://github.com/design-group/ignition-lint/compare/v0.3.5...HEAD
+[0.3.5]: https://github.com/design-group/ignition-lint/compare/v0.3.4...v0.3.5
 [0.3.4]: https://github.com/design-group/ignition-lint/compare/v0.3.3...v0.3.4
 [0.3.3]: https://github.com/design-group/ignition-lint/compare/v0.3.2...v0.3.3
 [0.3.2]: https://github.com/design-group/ignition-lint/compare/v0.3.1...v0.3.2

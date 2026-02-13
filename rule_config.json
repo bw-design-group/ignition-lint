@@ -9,7 +9,7 @@
       "debug": false,
       "_debug_dir_comment": "Optional: Specify custom debug directory. Defaults to .ignition-lint/debug/ (or tests/debug/ in ignition-lint repo). Can be absolute or relative path.",
       "debug_dir": null,
-      "_batch_mode_comment": "Optional: Set batch_mode: true to process all files together (faster but harder to read). Default: false (process each file separately for clearer output).",
+      "_batch_mode_comment": "Optional: Set batch_mode: true to process all files together (faster but harder to review). Default: false (process files individually for clearer per-file reporting).",
       "batch_mode": false
     }
   },
