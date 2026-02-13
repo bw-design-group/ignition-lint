@@ -541,12 +541,16 @@ def write_results_file(
 		f.write("=" * 80 + "\n")
 
 
-def aggregate_batch_results(results_path: Path) -> None:
+def aggregate_batch_results(results_path: Path) -> Optional[Dict[str, int]]:
 	"""
 	Aggregate results from multiple batch files into a summary file.
 
 	When ignition-lint runs in batches (e.g., via pre-commit), multiple result files
 	are created. This function aggregates them into a single summary for easy review.
+
+	Returns:
+		Dictionary with aggregated totals if multiple batches exist, None otherwise.
+		Keys: 'files', 'warnings', 'errors', 'issues', 'clean'
 	"""
 	import re
 	from datetime import datetime
@@ -554,7 +558,7 @@ def aggregate_batch_results(results_path: Path) -> None:
 	# Check if this is a batched result (has _pid and _batch in name)
 	if '_pid' not in results_path.name or '_batch' not in results_path.name:
 		# Not a batch file, no aggregation needed
-		return
+		return None
 
 	# Find all related result files in the same directory
 	parent_dir = results_path.parent
@@ -565,7 +569,7 @@ def aggregate_batch_results(results_path: Path) -> None:
 	result_files = sorted([f for f in parent_dir.glob(pattern) if 'AGGREGATED_SUMMARY' not in f.name])
 	if len(result_files) <= 1:
 		# Only one file, no need to aggregate
-		return
+		return None
 
 	# Parse each result file and collect totals
 	total_files = 0
@@ -653,8 +657,19 @@ def aggregate_batch_results(results_path: Path) -> None:
 				f.write("=" * 80 + "\n")
 
 			print(f"\n📊 Aggregated summary written to: {summary_path}")
+
+			# Return aggregated totals for final summary display
+			return {
+				'files': total_files,
+				'warnings': total_warnings,
+				'errors': total_errors,
+				'issues': total_issues,
+				'clean': total_clean
+			}
 		except (OSError, IOError) as e:
 			print(f"⚠️  Warning: Could not write aggregated summary: {e}")
+
+	return None
 
 
 def print_final_summary(
@@ -889,7 +904,14 @@ def main():
 		print("\n" + f"📝 Results written to: {results_path}")
 
 		# Aggregate batch results if multiple batches exist
-		aggregate_batch_results(results_path)
+		aggregated_totals = aggregate_batch_results(results_path)
+
+		# Use aggregated totals for final summary if available
+		if aggregated_totals:
+			total_warnings = aggregated_totals['warnings']
+			total_errors = aggregated_totals['errors']
+			processed_files = aggregated_totals['files']
+			files_with_issues = aggregated_totals['issues']
 
 	# Print final summary
 	print_final_summary(
