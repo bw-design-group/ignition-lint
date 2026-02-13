@@ -639,10 +639,14 @@ def aggregate_batch_results(results_path: Path) -> Optional[Dict[str, int]]:
 	else:
 		base_name = results_path.stem
 
-	# First check if an aggregated summary already exists
+	# Check if this is a batched result (has _pid and _batch in name)
+	is_batch_file = '_pid' in results_path.name and '_batch' in results_path.name
+
+	# If not a batch file, check for existing aggregated summary
 	summary_path = parent_dir / f"{base_name}_AGGREGATED_SUMMARY.txt"
-	if summary_path.exists():
+	if not is_batch_file and summary_path.exists():
 		# Read and return totals from existing aggregated summary
+		# (Only for non-batch files like results.txt)
 		try:
 			with open(summary_path, 'r', encoding='utf-8') as f:
 				content = f.read()
@@ -663,12 +667,12 @@ def aggregate_batch_results(results_path: Path) -> Optional[Dict[str, int]]:
 		except (OSError, IOError):
 			pass  # If we can't read it, fall through to aggregation logic
 
-	# Check if this is a batched result (has _pid and _batch in name)
-	if '_pid' not in results_path.name or '_batch' not in results_path.name:
-		# Not a batch file, no aggregation needed
+	# If not a batch file, no aggregation needed
+	if not is_batch_file:
 		return None
 
-	# Find all related batch files
+	# Find all related batch files and re-aggregate
+	# (Always re-aggregate for batch files to include new batches)
 	pattern = f"{base_name}_pid*.txt"  # Only match batch files with _pid pattern
 
 	# Find all matching result files (excluding aggregated summary)
