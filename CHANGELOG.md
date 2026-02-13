@@ -8,21 +8,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
-- Automatic aggregation of batch results into a summary file when multiple batches are detected [e59d6d1]
-- Automatic cleanup of old batch files from previous runs to prevent unbounded growth [e59d6d1]
-- Display aggregated totals in final summary when multiple batches exist [82e947a]
+- Automatic aggregation of batch results with cleanup for pre-commit workflows [e59d6d1]
 
 ### Fixed
-- Fix race condition in PylintScriptRule causing FileNotFoundError during parallel execution (e.g., pre-commit) [82f6f21]
-- Optimize PylintScriptRule to only create debug directory when actually needed (debug=True OR linting issues found) [82f6f21]
-- Prevent results and timing files from being overwritten in batch processing - each batch now creates uniquely named files [bbbda21]
-- Fix batch result aggregation to only match _pid batch files, preventing incorrect mixing of old and new results [3e116b1]
-- Add automatic cleanup of old debug files from previous runs to prevent unbounded growth [3e116b1]
-- Implement smart script indentation detection to prevent double-indentation when scripts are already formatted [3e116b1]
-- Add validation to report errors when scripts lack proper indentation in view.json files [3e116b1]
-- Add file path tracking in batch mode debug files so each script clearly shows its source file [3e116b1]
-- Improve debug file readability with file-first headers and per-file script numbering [3e116b1]
-- Revert batch_mode default to false for clearer per-file reporting [3e116b1]
+- Resolve race conditions and file conflicts when running in parallel execution (e.g., pre-commit hooks) [82f6f21] [bbbda21]
+- Add script indentation validation and smart auto-correction for view.json files [3e116b1]
+- Improve debug file management with automatic cleanup and source file tracking [3e116b1]
 
 ## [0.3.4] - 2026-02-12
 
