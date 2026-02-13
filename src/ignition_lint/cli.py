@@ -671,12 +671,22 @@ def aggregate_batch_results(results_path: Path) -> Optional[Dict[str, int]]:
 	if not is_batch_file:
 		return None
 
-	# Find all related batch files and re-aggregate
-	# (Always re-aggregate for batch files to include new batches)
-	pattern = f"{base_name}_pid*.txt"  # Only match batch files with _pid pattern
+	# Find all related files to aggregate (base file + batch files)
+	result_files = []
 
-	# Find all matching result files (excluding aggregated summary)
-	result_files = sorted([f for f in parent_dir.glob(pattern) if 'AGGREGATED_SUMMARY' not in f.name])
+	# Check if base file exists (e.g., results.txt from first batch)
+	base_file = parent_dir / f"{base_name}.txt"
+	if base_file.exists():
+		result_files.append(base_file)
+
+	# Find all batch files (e.g., results_pid*_batch*.txt)
+	pattern = f"{base_name}_pid*.txt"
+	batch_files = [f for f in parent_dir.glob(pattern) if 'AGGREGATED_SUMMARY' not in f.name]
+	result_files.extend(batch_files)
+
+	# Sort for consistent ordering
+	result_files = sorted(result_files)
+
 	if len(result_files) <= 1:
 		# Only one file, no need to aggregate
 		return None
