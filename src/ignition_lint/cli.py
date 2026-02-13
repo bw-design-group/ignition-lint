@@ -632,14 +632,43 @@ def aggregate_batch_results(results_path: Path) -> Optional[Dict[str, int]]:
 	import re
 	from datetime import datetime
 
+	# Find base name and directory
+	parent_dir = results_path.parent
+	if '_pid' in results_path.name:
+		base_name = results_path.stem.split('_pid')[0]
+	else:
+		base_name = results_path.stem
+
+	# First check if an aggregated summary already exists
+	summary_path = parent_dir / f"{base_name}_AGGREGATED_SUMMARY.txt"
+	if summary_path.exists():
+		# Read and return totals from existing aggregated summary
+		try:
+			with open(summary_path, 'r', encoding='utf-8') as f:
+				content = f.read()
+				files_match = re.search(r'Files processed:\s+(\d+)', content)
+				warnings_match = re.search(r'Total warnings:\s+(\d+)', content)
+				errors_match = re.search(r'Total errors:\s+(\d+)', content)
+				issues_match = re.search(r'Files with issues:\s+(\d+)', content)
+				clean_match = re.search(r'Clean files:\s+(\d+)', content)
+
+				if files_match:
+					return {
+						'files': int(files_match.group(1)),
+						'warnings': int(warnings_match.group(1)) if warnings_match else 0,
+						'errors': int(errors_match.group(1)) if errors_match else 0,
+						'issues': int(issues_match.group(1)) if issues_match else 0,
+						'clean': int(clean_match.group(1)) if clean_match else 0,
+					}
+		except (OSError, IOError):
+			pass  # If we can't read it, fall through to aggregation logic
+
 	# Check if this is a batched result (has _pid and _batch in name)
 	if '_pid' not in results_path.name or '_batch' not in results_path.name:
 		# Not a batch file, no aggregation needed
 		return None
 
-	# Find all related result files in the same directory
-	parent_dir = results_path.parent
-	base_name = results_path.stem.split('_pid')[0]  # Get original filename without _pid_batch
+	# Find all related batch files
 	pattern = f"{base_name}_pid*.txt"  # Only match batch files with _pid pattern
 
 	# Find all matching result files (excluding aggregated summary)
