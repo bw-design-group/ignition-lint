@@ -3,6 +3,7 @@ Command-line interface for ignition-lint.
 """
 
 import json
+import os
 import sys
 import argparse
 import glob
@@ -63,6 +64,38 @@ except ImportError:
 	from ignition_lint.common.timing import PerformanceTimer, TimingCollector, FileTimings
 	from ignition_lint.linter import LintEngine
 	from ignition_lint.rules import RULES_MAP
+
+
+def make_unique_output_path(original_path: Path) -> Path:
+	"""
+	Generate a unique output file path to prevent overwriting in batch processing.
+
+	When pre-commit or other tools run ignition-lint in multiple batches,
+	each batch would overwrite the same output file. This function ensures
+	uniqueness by appending PID and batch number if the file already exists.
+
+	Examples:
+		results.txt -> results.txt (if doesn't exist)
+		results.txt -> results_pid12345_batch1.txt (if exists)
+		results.txt -> results_pid12345_batch2.txt (if batch1 also exists)
+	"""
+	if not original_path.exists():
+		return original_path
+
+	# File exists - make it unique with PID and batch number
+	pid = os.getpid()
+	stem = original_path.stem  # filename without extension
+	suffix = original_path.suffix  # .txt, .json, etc.
+	parent = original_path.parent
+
+	# Try adding batch numbers until we find one that doesn't exist
+	batch_num = 1
+	while True:
+		new_name = f"{stem}_pid{pid}_batch{batch_num}{suffix}"
+		new_path = parent / new_name
+		if not new_path.exists():
+			return new_path
+		batch_num += 1
 
 
 def load_config(config_path: str) -> dict:
@@ -664,18 +697,19 @@ def main():
 
 	# Write timing report if requested
 	if args.timing_output and timing_collector:
-		timing_path = Path(args.timing_output)
+		timing_path = make_unique_output_path(Path(args.timing_output))
 		timing_collector.write_timing_report(timing_path)
 
 		print("\n" + f"📊 Timing report written to: {timing_path}")
 
 	# Write results file if requested
 	if args.results_output and results_buffer:
+		results_path = make_unique_output_path(Path(args.results_output))
 		write_results_file(
-			Path(args.results_output), results_buffer, total_warnings, total_errors, processed_files,
-			files_with_issues, finalize_results
+			results_path, results_buffer, total_warnings, total_errors, processed_files, files_with_issues,
+			finalize_results
 		)
-		print("\n" + f"📝 Results written to: {args.results_output}")
+		print("\n" + f"📝 Results written to: {results_path}")
 
 	# Print final summary
 	print_final_summary(
