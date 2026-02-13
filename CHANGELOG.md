@@ -8,14 +8,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
-- Automatic aggregation of batch results into a summary file when multiple batches are detected
-- Automatic cleanup of old batch files from previous runs to prevent unbounded growth
+- Automatic aggregation of batch results into a summary file when multiple batches are detected [e59d6d1]
+- Automatic cleanup of old batch files from previous runs to prevent unbounded growth [e59d6d1]
 
 ### Fixed
-- Fix race condition in PylintScriptRule causing FileNotFoundError during parallel execution (e.g., pre-commit)
-- Remove wasteful duplicate file copying in PylintScriptRule debug mode
-- Optimize PylintScriptRule to only create debug directory when actually needed (debug=True OR linting issues found)
-- Prevent results and timing files from being overwritten in batch processing - each batch now creates uniquely named files
+- Fix race condition in PylintScriptRule causing FileNotFoundError during parallel execution (e.g., pre-commit) [82f6f21]
+- Remove wasteful duplicate file copying in PylintScriptRule debug mode [82f6f21]
+- Optimize PylintScriptRule to only create debug directory when actually needed (debug=True OR linting issues found) [82f6f21]
+- Prevent results and timing files from being overwritten in batch processing - each batch now creates uniquely named files [bbbda21]
 
 ## [0.3.4] - 2026-02-12
 
