@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- Automatic aggregation of batch results with cleanup for pre-commit workflows [e59d6d1]
+
+### Fixed
+- Resolve race conditions and file conflicts when running in parallel execution (e.g., pre-commit hooks) [82f6f21] [bbbda21]
+- Add script indentation validation and smart auto-correction for view.json files [3e116b1]
+- Improve debug file management with automatic cleanup and source file tracking [3e116b1]
+
 ## [0.3.4] - 2026-02-12
 
 ### Fixed

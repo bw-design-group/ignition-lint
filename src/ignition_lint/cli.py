@@ -3,6 +3,7 @@ Command-line interface for ignition-lint.
 """
 
 import json
+import os
 import sys
 import argparse
 import glob
@@ -63,6 +64,170 @@ except ImportError:
 	from ignition_lint.common.timing import PerformanceTimer, TimingCollector, FileTimings
 	from ignition_lint.linter import LintEngine
 	from ignition_lint.rules import RULES_MAP
+
+
+def cleanup_debug_files() -> None:
+	"""
+	Clean up old debug files from previous runs to prevent unbounded growth.
+
+	Debug files are Python scripts saved by PylintScriptRule for troubleshooting.
+	This removes files from previous runs (different PIDs) while preserving recent files.
+	"""
+	import time
+
+	# Determine debug directory using same logic as PylintScriptRule
+	cwd = os.getcwd()
+	debug_dir = None
+
+	# Check if we're in test environment (same logic as _get_debug_directory)
+	current_path = cwd
+	while current_path != os.path.dirname(current_path):
+		if os.path.basename(current_path) == 'tests':
+			debug_dir = os.path.join(current_path, "debug")
+			break
+		elif os.path.exists(os.path.join(current_path, 'tests')):
+			debug_dir = os.path.join(current_path, "tests", "debug")
+			break
+		current_path = os.path.dirname(current_path)
+
+	# Fallback to .ignition-lint/debug
+	if not debug_dir:
+		debug_dir = os.path.join(cwd, ".ignition-lint", "debug")
+
+	# Only clean if directory exists
+	if not os.path.exists(debug_dir):
+		return
+
+	current_pid = os.getpid()
+	current_time = time.time()
+
+	# Find all .py debug files (format: HHMMSS_pid{PID}_{random}.py)
+	files_to_clean = []
+	for file_path in Path(debug_dir).glob("*_pid*_*.py"):
+		# Extract PID from filename
+		if f'_pid{current_pid}_' in file_path.name:
+			# Same PID as current run - skip
+			continue
+
+		# Check if file is recent (less than 5 seconds old)
+		try:
+			file_age = current_time - file_path.stat().st_mtime
+			if file_age < 5:
+				# Very recent file, likely from parallel process - skip
+				continue
+		except OSError:
+			pass
+
+		# Old debug file from previous run - mark for deletion
+		files_to_clean.append(file_path)
+
+	# Clean up old files
+	if files_to_clean:
+		for file_path in files_to_clean:
+			try:
+				file_path.unlink()
+			except OSError:
+				# Silently ignore errors
+				pass
+
+
+def cleanup_old_batch_files(output_path: Path) -> None:
+	"""
+	Clean up old batch files from previous runs to prevent unbounded growth.
+
+	This function is called at the start of a run, before any results are written.
+	It removes batch files from previous runs (identified by different PIDs) but
+	preserves files from the current run (same PID or very recent).
+	"""
+	import time
+
+	if not output_path.parent.exists():
+		return
+
+	# Get current PID
+	current_pid = os.getpid()
+	current_time = time.time()
+
+	# Find all related files (both base file and batch files)
+	base_name = output_path.stem
+
+	files_to_clean = []
+
+	# Check the base file (e.g., results.txt)
+	if output_path.exists():
+		try:
+			file_age = current_time - output_path.stat().st_mtime
+			if file_age >= 5:
+				# Old base file from previous run - mark for deletion
+				files_to_clean.append(output_path)
+		except OSError:
+			pass
+
+	# Check batch files (e.g., results_pid*_batch*.txt)
+	pattern = f"{base_name}*batch*.txt"
+	for file_path in output_path.parent.glob(pattern):
+		# Skip aggregated summary files
+		if 'AGGREGATED_SUMMARY' in file_path.name:
+			continue
+
+		# Extract PID from filename (e.g., results_pid12345_batch1.txt)
+		if f'_pid{current_pid}_' in file_path.name:
+			# Same PID as current run - skip
+			continue
+
+		# Check if file is recent (less than 5 seconds old)
+		# This protects against race conditions with parallel processes
+		try:
+			file_age = current_time - file_path.stat().st_mtime
+			if file_age < 5:
+				# Very recent file, likely from parallel process - skip
+				continue
+		except OSError:
+			pass
+
+		# Old batch file from previous run - mark for deletion
+		files_to_clean.append(file_path)
+
+	# Clean up old files
+	if files_to_clean:
+		for file_path in files_to_clean:
+			try:
+				file_path.unlink()
+			except OSError as e:
+				# Silently ignore errors (file might be in use or already deleted)
+				pass
+
+
+def make_unique_output_path(original_path: Path) -> Path:
+	"""
+	Generate a unique output file path to prevent overwriting in batch processing.
+
+	When pre-commit or other tools run ignition-lint in multiple batches,
+	each batch would overwrite the same output file. This function ensures
+	uniqueness by appending PID and batch number if the file already exists.
+
+	Examples:
+		results.txt -> results.txt (if doesn't exist)
+		results.txt -> results_pid12345_batch1.txt (if exists)
+		results.txt -> results_pid12345_batch2.txt (if batch1 also exists)
+	"""
+	if not original_path.exists():
+		return original_path
+
+	# File exists - make it unique with PID and batch number
+	pid = os.getpid()
+	stem = original_path.stem  # filename without extension
+	suffix = original_path.suffix  # .txt, .json, etc.
+	parent = original_path.parent
+
+	# Try adding batch numbers until we find one that doesn't exist
+	batch_num = 1
+	while True:
+		new_name = f"{stem}_pid{pid}_batch{batch_num}{suffix}"
+		new_path = parent / new_name
+		if not new_path.exists():
+			return new_path
+		batch_num += 1
 
 
 def load_config(config_path: str) -> dict:
@@ -453,6 +618,180 @@ def write_results_file(
 		f.write("=" * 80 + "\n")
 
 
+def aggregate_batch_results(results_path: Path) -> Optional[Dict[str, int]]:
+	"""
+	Aggregate results from multiple batch files into a summary file.
+
+	When ignition-lint runs in batches (e.g., via pre-commit), multiple result files
+	are created. This function aggregates them into a single summary for easy review.
+
+	Returns:
+		Dictionary with aggregated totals if multiple batches exist, None otherwise.
+		Keys: 'files', 'warnings', 'errors', 'issues', 'clean'
+	"""
+	import re
+	from datetime import datetime
+
+	# Find base name and directory
+	parent_dir = results_path.parent
+	if '_pid' in results_path.name:
+		base_name = results_path.stem.split('_pid')[0]
+	else:
+		base_name = results_path.stem
+
+	# Check if this is a batched result (has _pid and _batch in name)
+	is_batch_file = '_pid' in results_path.name and '_batch' in results_path.name
+
+	# If not a batch file, check for existing aggregated summary
+	summary_path = parent_dir / f"{base_name}_AGGREGATED_SUMMARY.txt"
+	if not is_batch_file and summary_path.exists():
+		# Read and return totals from existing aggregated summary
+		# (Only for non-batch files like results.txt)
+		try:
+			with open(summary_path, 'r', encoding='utf-8') as f:
+				content = f.read()
+				files_match = re.search(r'Files processed:\s+(\d+)', content)
+				warnings_match = re.search(r'Total warnings:\s+(\d+)', content)
+				errors_match = re.search(r'Total errors:\s+(\d+)', content)
+				issues_match = re.search(r'Files with issues:\s+(\d+)', content)
+				clean_match = re.search(r'Clean files:\s+(\d+)', content)
+
+				if files_match:
+					return {
+						'files': int(files_match.group(1)),
+						'warnings': int(warnings_match.group(1)) if warnings_match else 0,
+						'errors': int(errors_match.group(1)) if errors_match else 0,
+						'issues': int(issues_match.group(1)) if issues_match else 0,
+						'clean': int(clean_match.group(1)) if clean_match else 0,
+					}
+		except (OSError, IOError):
+			pass  # If we can't read it, fall through to aggregation logic
+
+	# If not a batch file, no aggregation needed
+	if not is_batch_file:
+		return None
+
+	# Find all related files to aggregate (base file + batch files)
+	result_files = []
+
+	# Check if base file exists (e.g., results.txt from first batch)
+	base_file = parent_dir / f"{base_name}.txt"
+	if base_file.exists():
+		result_files.append(base_file)
+
+	# Find all batch files (e.g., results_pid*_batch*.txt)
+	pattern = f"{base_name}_pid*.txt"
+	batch_files = [f for f in parent_dir.glob(pattern) if 'AGGREGATED_SUMMARY' not in f.name]
+	result_files.extend(batch_files)
+
+	# Sort for consistent ordering
+	result_files = sorted(result_files)
+
+	if len(result_files) <= 1:
+		# Only one file, no need to aggregate
+		return None
+
+	# Parse each result file and collect totals
+	total_files = 0
+	total_warnings = 0
+	total_errors = 0
+	total_issues = 0
+	total_clean = 0
+	batch_details = []
+
+	for file_path in result_files:
+		try:
+			with open(file_path, 'r', encoding='utf-8') as f:
+				content = f.read()
+
+				# Extract metrics using regex
+				files_match = re.search(r'Files processed:\s+(\d+)', content)
+				warnings_match = re.search(r'Total warnings:\s+(\d+)', content)
+				errors_match = re.search(r'Total errors:\s+(\d+)', content)
+				issues_match = re.search(r'Files with issues:\s+(\d+)', content)
+				clean_match = re.search(r'Clean files:\s+(\d+)', content)
+
+				if files_match:
+					files = int(files_match.group(1))
+					warnings = int(warnings_match.group(1)) if warnings_match else 0
+					errors = int(errors_match.group(1)) if errors_match else 0
+					issues = int(issues_match.group(1)) if issues_match else 0
+					clean = int(clean_match.group(1)) if clean_match else 0
+
+					total_files += files
+					total_warnings += warnings
+					total_errors += errors
+					total_issues += issues
+					total_clean += clean
+
+					batch_details.append({
+						'filename': file_path.name,
+						'files': files,
+						'warnings': warnings,
+						'errors': errors,
+						'issues': issues,
+						'clean': clean
+					})
+		except (OSError, IOError) as e:
+			print(f"⚠️  Warning: Could not read {file_path.name}: {e}")
+			continue
+
+	# Write aggregated summary
+	if batch_details:
+		summary_path = parent_dir / f"{base_name}_AGGREGATED_SUMMARY.txt"
+		try:
+			with open(summary_path, 'w', encoding='utf-8') as f:
+				f.write("=" * 80 + "\n")
+				f.write("AGGREGATED IGNITION-LINT RESULTS SUMMARY\n")
+				f.write("=" * 80 + "\n")
+				f.write(f"Generated: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n")
+				f.write(f"Total batches: {len(batch_details)}\n")
+				f.write("\n")
+
+				# Overall summary
+				f.write("TOTAL SUMMARY ACROSS ALL BATCHES\n")
+				f.write("-" * 80 + "\n")
+				f.write(f"Files processed:      {total_files}\n")
+				f.write(f"Total warnings:       {total_warnings:,}\n")
+				f.write(f"Total errors:         {total_errors:,}\n")
+				f.write(f"Files with issues:    {total_issues}\n")
+				f.write(f"Clean files:          {total_clean}\n")
+				f.write("\n")
+
+				# Breakdown by batch
+				f.write("BREAKDOWN BY BATCH\n")
+				f.write("-" * 80 + "\n")
+				for batch in batch_details:
+					f.write(
+						f"{batch['filename']:<45} "
+						f"Files: {batch['files']:>3}  "
+						f"Warnings: {batch['warnings']:>4}  "
+						f"Errors: {batch['errors']:>4}  "
+						f"Issues: {batch['issues']:>3}  "
+						f"Clean: {batch['clean']:>3}\n"
+					)
+
+				f.write("\n")
+				f.write("=" * 80 + "\n")
+				f.write("END OF AGGREGATED SUMMARY\n")
+				f.write("=" * 80 + "\n")
+
+			print(f"\n📊 Aggregated summary written to: {summary_path}")
+
+			# Return aggregated totals for final summary display
+			return {
+				'files': total_files,
+				'warnings': total_warnings,
+				'errors': total_errors,
+				'issues': total_issues,
+				'clean': total_clean
+			}
+		except (OSError, IOError) as e:
+			print(f"⚠️  Warning: Could not write aggregated summary: {e}")
+
+	return None
+
+
 def print_final_summary(
 	processed_files: int, total_warnings: int, total_errors: int, files_with_issues: int, stats_only: bool,
 	ignore_warnings: bool = False
@@ -550,6 +889,15 @@ def main():
 		help="File path to write linting results (e.g., results.txt)",
 	)
 	args = parser.parse_args()
+
+	# Clean up old batch files from previous runs (prevents unbounded growth)
+	if args.results_output:
+		cleanup_old_batch_files(Path(args.results_output))
+	if args.timing_output:
+		cleanup_old_batch_files(Path(args.timing_output))
+
+	# Clean up old debug files from previous runs
+	cleanup_debug_files()
 
 	# Set up the linting engine
 	lint_engine = setup_linter(args)
@@ -664,18 +1012,29 @@ def main():
 
 	# Write timing report if requested
 	if args.timing_output and timing_collector:
-		timing_path = Path(args.timing_output)
+		timing_path = make_unique_output_path(Path(args.timing_output))
 		timing_collector.write_timing_report(timing_path)
 
 		print("\n" + f"📊 Timing report written to: {timing_path}")
 
 	# Write results file if requested
 	if args.results_output and results_buffer:
+		results_path = make_unique_output_path(Path(args.results_output))
 		write_results_file(
-			Path(args.results_output), results_buffer, total_warnings, total_errors, processed_files,
-			files_with_issues, finalize_results
+			results_path, results_buffer, total_warnings, total_errors, processed_files, files_with_issues,
+			finalize_results
 		)
-		print("\n" + f"📝 Results written to: {args.results_output}")
+		print("\n" + f"📝 Results written to: {results_path}")
+
+		# Aggregate batch results if multiple batches exist
+		aggregated_totals = aggregate_batch_results(results_path)
+
+		# Use aggregated totals for final summary if available
+		if aggregated_totals:
+			total_warnings = aggregated_totals['warnings']
+			total_errors = aggregated_totals['errors']
+			processed_files = aggregated_totals['files']
+			files_with_issues = aggregated_totals['issues']
 
 	# Print final summary
 	print_final_summary(
