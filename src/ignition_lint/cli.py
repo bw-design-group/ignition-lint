@@ -66,6 +66,71 @@ except ImportError:
 	from ignition_lint.rules import RULES_MAP
 
 
+def cleanup_debug_files() -> None:
+	"""
+	Clean up old debug files from previous runs to prevent unbounded growth.
+
+	Debug files are Python scripts saved by PylintScriptRule for troubleshooting.
+	This removes files from previous runs (different PIDs) while preserving recent files.
+	"""
+	import time
+
+	# Determine debug directory using same logic as PylintScriptRule
+	cwd = os.getcwd()
+	debug_dir = None
+
+	# Check if we're in test environment (same logic as _get_debug_directory)
+	current_path = cwd
+	while current_path != os.path.dirname(current_path):
+		if os.path.basename(current_path) == 'tests':
+			debug_dir = os.path.join(current_path, "debug")
+			break
+		elif os.path.exists(os.path.join(current_path, 'tests')):
+			debug_dir = os.path.join(current_path, "tests", "debug")
+			break
+		current_path = os.path.dirname(current_path)
+
+	# Fallback to .ignition-lint/debug
+	if not debug_dir:
+		debug_dir = os.path.join(cwd, ".ignition-lint", "debug")
+
+	# Only clean if directory exists
+	if not os.path.exists(debug_dir):
+		return
+
+	current_pid = os.getpid()
+	current_time = time.time()
+
+	# Find all .py debug files (format: HHMMSS_pid{PID}_{random}.py)
+	files_to_clean = []
+	for file_path in Path(debug_dir).glob("*_pid*_*.py"):
+		# Extract PID from filename
+		if f'_pid{current_pid}_' in file_path.name:
+			# Same PID as current run - skip
+			continue
+
+		# Check if file is recent (less than 5 seconds old)
+		try:
+			file_age = current_time - file_path.stat().st_mtime
+			if file_age < 5:
+				# Very recent file, likely from parallel process - skip
+				continue
+		except OSError:
+			pass
+
+		# Old debug file from previous run - mark for deletion
+		files_to_clean.append(file_path)
+
+	# Clean up old files
+	if files_to_clean:
+		for file_path in files_to_clean:
+			try:
+				file_path.unlink()
+			except OSError:
+				# Silently ignore errors
+				pass
+
+
 def cleanup_old_batch_files(output_path: Path) -> None:
 	"""
 	Clean up old batch files from previous runs to prevent unbounded growth.
@@ -563,7 +628,7 @@ def aggregate_batch_results(results_path: Path) -> Optional[Dict[str, int]]:
 	# Find all related result files in the same directory
 	parent_dir = results_path.parent
 	base_name = results_path.stem.split('_pid')[0]  # Get original filename without _pid_batch
-	pattern = f"{base_name}*.txt"
+	pattern = f"{base_name}_pid*.txt"  # Only match batch files with _pid pattern
 
 	# Find all matching result files (excluding aggregated summary)
 	result_files = sorted([f for f in parent_dir.glob(pattern) if 'AGGREGATED_SUMMARY' not in f.name])
@@ -775,6 +840,9 @@ def main():
 		cleanup_old_batch_files(Path(args.results_output))
 	if args.timing_output:
 		cleanup_old_batch_files(Path(args.timing_output))
+
+	# Clean up old debug files from previous runs
+	cleanup_debug_files()
 
 	# Set up the linting engine
 	lint_engine = setup_linter(args)

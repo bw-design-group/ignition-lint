@@ -25,14 +25,19 @@ class PylintScriptRule(ScriptRule):
 	def __init__(self, severity="error", pylintrc=None, debug=False, batch_mode=False, debug_dir=None):
 		super().__init__(severity=severity)  # Targets all script types by default
 		self.debug = debug  # Debug mode disabled by default for performance
-		self.batch_mode = batch_mode  # Batch mode DISABLED by default for clarity (can be enabled for performance)
+		self.batch_mode = batch_mode  # Batch mode DISABLED by default for clearer per-file reporting (set to True for faster processing)
 		self.debug_dir_config = debug_dir  # User-configured debug directory
+		self.current_source_file = None  # Track current file being processed
 		self.pylintrc = self._resolve_pylintrc_path(pylintrc)
 		if self.debug:
 			if self.pylintrc:
 				print(f"🔍 PylintScriptRule: Using pylintrc: {self.pylintrc}")
 			else:
 				print("🔍 PylintScriptRule: No pylintrc found, using inline configuration")
+
+	def set_source_file(self, source_file_path: Optional[str]) -> None:
+		"""Set the current source file being processed (called by LintEngine)."""
+		self.current_source_file = source_file_path
 
 	def _resolve_pylintrc_path(self, pylintrc: Optional[str]) -> Optional[str]:
 		"""Resolve the pylintrc file path with fallback to standard location."""
@@ -79,6 +84,14 @@ class PylintScriptRule(ScriptRule):
 	@property
 	def error_message(self) -> str:
 		return "Pylint detected issues in script"
+
+	def _collect_script(self, node):
+		"""Override to include file path in script tracking."""
+		if isinstance(node, ScriptNode):
+			# Use composite key: file_path::script_path for unique identification
+			file_prefix = self.current_source_file if self.current_source_file else "unknown"
+			composite_key = f"{file_prefix}::{node.path}"
+			self.collected_scripts[composite_key] = node
 
 	def process_nodes(self, nodes):
 		"""Override to handle batch mode - don't reset scripts when batching across files."""
@@ -129,7 +142,20 @@ class PylintScriptRule(ScriptRule):
 		if all(not script.script.strip() for script in scripts.values()):
 			return
 
-		# Run pylint on all scripts at once
+		# Check for improperly indented scripts (data quality issue)
+		for composite_key, script_obj in scripts.items():
+			if script_obj.script.strip():
+				# Check if script lacks proper indentation
+				lines = script_obj.script.split('\n')
+				first_code_line = next((line for line in lines if line.strip()), None)
+				if first_code_line and not (first_code_line.startswith('\t') or first_code_line.startswith('    ')):
+					# Script is not indented - this is a data quality issue
+					self.add_violation(
+						f"{composite_key}: Script lacks proper indentation in view.json "
+						"(scripts should be indented with tabs or spaces for valid Python syntax)"
+					)
+
+		# Run pylint on all scripts at once (with auto-fixed indentation)
 		path_to_issues = self._run_pylint_batch(scripts)
 
 		# Add issues to our errors list
@@ -199,17 +225,38 @@ class PylintScriptRule(ScriptRule):
 		]
 		line_count += len(combined_scripts)
 
-		for i, (path, script_obj) in enumerate(scripts.items()):
-			header = f"# Script {i+1}: {path}"
+		# Track current file and script number per file
+		current_file = None
+		script_num_in_file = 0
+
+		for composite_key, script_obj in scripts.items():
+			# Parse composite key: file_path::script_path
+			if "::" in composite_key:
+				file_path, script_path = composite_key.split("::", 1)
+
+				# Check if we've moved to a new file
+				if file_path != current_file:
+					current_file = file_path
+					script_num_in_file = 1
+				else:
+					script_num_in_file += 1
+
+				header = f"# File: {file_path}\n# Script {script_num_in_file}: {script_path}"
+			else:
+				# Fallback for non-composite keys
+				script_num_in_file += 1
+				header = f"# Script {script_num_in_file}: {composite_key}"
+				script_path = composite_key
+
 			combined_scripts.append(header)
-			line_count += 1
+			line_count += 2 if "::" in composite_key else 1  # Account for 2-line header
 
 			formatted_script = script_obj.get_formatted_script()
 			script_lines = formatted_script.count('\n') + 1
 
-			# Record line numbers for this script
+			# Record line numbers for this script (use composite key for full context)
 			for line_num in range(line_count, line_count + script_lines):
-				line_map[line_num] = path
+				line_map[line_num] = composite_key
 
 			combined_scripts.append(formatted_script)
 			line_count += script_lines
