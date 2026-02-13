@@ -148,11 +148,23 @@ def cleanup_old_batch_files(output_path: Path) -> None:
 	current_pid = os.getpid()
 	current_time = time.time()
 
-	# Find all related batch files
+	# Find all related files (both base file and batch files)
 	base_name = output_path.stem
-	pattern = f"{base_name}*batch*.txt"
 
 	files_to_clean = []
+
+	# Check the base file (e.g., results.txt)
+	if output_path.exists():
+		try:
+			file_age = current_time - output_path.stat().st_mtime
+			if file_age >= 5:
+				# Old base file from previous run - mark for deletion
+				files_to_clean.append(output_path)
+		except OSError:
+			pass
+
+	# Check batch files (e.g., results_pid*_batch*.txt)
+	pattern = f"{base_name}*batch*.txt"
 	for file_path in output_path.parent.glob(pattern):
 		# Skip aggregated summary files
 		if 'AGGREGATED_SUMMARY' in file_path.name:
