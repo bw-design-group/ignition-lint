@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- Mixed tabs/spaces detection with clear error messages [369173a]
 - Tests for script indentation with comments [e85b26f]
 
 ### Fixed
