@@ -9,6 +9,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 - Add whitelist feature for managing technical debt [dbe1363]
+- Tests for script indentation with comments [e85b26f]
+
+### Fixed
+- Skip comment lines when checking script indentation [b2788e7]
 
 ## [0.3.5] - 2026-02-13
 
