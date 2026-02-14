@@ -145,15 +145,32 @@ class PylintScriptRule(ScriptRule):
 		# Check for improperly indented scripts (data quality issue)
 		for composite_key, script_obj in scripts.items():
 			if script_obj.script.strip():
-				# Check if script lacks proper indentation
+				# Check if script lacks proper indentation (skip comment-only lines)
 				lines = script_obj.script.split('\n')
-				first_code_line = next((line for line in lines if line.strip()), None)
-				if first_code_line and not (first_code_line.startswith('\t') or first_code_line.startswith('    ')):
+				first_code_line = next(
+					(line for line in lines if line.strip() and not line.strip().startswith('#')),
+					None
+				)
+				if first_code_line and not (
+					first_code_line.startswith('\t') or first_code_line.startswith('    ')
+				):
 					# Script is not indented - this is a data quality issue
 					self.add_violation(
 						f"{composite_key}: Script lacks proper indentation in view.json "
 						"(scripts should be indented with tabs or spaces for valid Python syntax)"
 					)
+
+				# Check for mixed tabs and spaces in indentation (data quality issue)
+				# Look for lines that have both tabs AND spaces in their leading whitespace
+				for line in lines:
+					if line.strip():  # Skip empty lines
+						leading_whitespace = line[:len(line) - len(line.lstrip())]
+						if '\t' in leading_whitespace and ' ' in leading_whitespace:
+							self.add_violation(
+								f"{composite_key}: Script mixes tabs and spaces for indentation. "
+								"Use either tabs OR spaces consistently."
+							)
+							break  # Only report once per script
 
 		# Run pylint on all scripts at once (with auto-fixed indentation)
 		path_to_issues = self._run_pylint_batch(scripts)
