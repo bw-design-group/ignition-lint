@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- Add whitelist feature for managing technical debt [dbe1363]
+
 ## [0.3.5] - 2026-02-13
 
 ### Added
