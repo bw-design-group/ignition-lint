@@ -188,6 +188,126 @@ for row in range(dataset.rowCount):
 			f"Code line should be indented with one tab, got: {repr(code_line)}"
 		)
 
+	def test_script_with_mixed_tabs_and_spaces(self):
+		"""Test that scripts mixing tabs and spaces are detected with clear error message."""
+		# Create a test view with a script that mixes tabs and spaces
+		view_content = {
+			"custom": {},
+			"params": {},
+			"propConfig": {
+				"custom.testProp": {
+					"binding": {
+						"type": "tag",
+						"config": {
+							"tagPath": "[default]TestTag"
+						},
+						"transforms": [{
+							"type": "script",
+							# Script with mixed tabs and spaces: base tab + spaces for nested indentation
+							"code":
+								"\tdataset = value\n\t    if True:\n\t        return dataset"
+						}]
+					}
+				}
+			},
+			"props": {},
+			"root": {
+				"meta": {
+					"name": "root"
+				},
+				"type": "ia.container.flex"
+			}
+		}
+
+		import json
+		import tempfile
+		from pathlib import Path
+		view_file = tempfile.NamedTemporaryFile(mode='w', suffix='.json', delete=False)
+		json.dump(view_content, view_file)
+		view_file.close()
+
+		try:
+			# Run linting
+			self.run_lint_on_file(Path(view_file.name), self.rule_config)
+			errors = self.get_errors_for_rule("PylintScriptRule")
+
+			# Should have at least one error
+			self.assertGreater(len(errors), 0, "Expected errors for mixed tabs/spaces")
+
+			# Check that the explicit mixed tabs/spaces error is present
+			mixed_tabs_error_found = any(
+				"mixes tabs and spaces for indentation" in error for error in errors
+			)
+			self.assertTrue(
+				mixed_tabs_error_found, f"Expected 'mixes tabs and spaces' error message. Got: {errors}"
+			)
+
+			# Verify the error message is clear and actionable
+			mixed_error = next((error for error in errors if "mixes tabs and spaces" in error), None)
+			self.assertIn(
+				"Use either tabs OR spaces consistently", mixed_error,
+				"Error message should provide clear guidance"
+			)
+
+		finally:
+			import os
+			os.unlink(view_file.name)
+
+	def test_script_with_only_tabs(self):
+		"""Test that scripts using only tabs don't trigger mixed indentation error."""
+		# Create a test view with a script that uses only tabs
+		view_content = {
+			"custom": {},
+			"params": {},
+			"propConfig": {
+				"custom.testProp": {
+					"binding": {
+						"type": "tag",
+						"config": {
+							"tagPath": "[default]TestTag"
+						},
+						"transforms": [{
+							"type": "script",
+							# Script with only tabs
+							"code": "\tdataset = value\n\tif True:\n\t\treturn dataset"
+						}]
+					}
+				}
+			},
+			"props": {},
+			"root": {
+				"meta": {
+					"name": "root"
+				},
+				"type": "ia.container.flex"
+			}
+		}
+
+		import json
+		import tempfile
+		from pathlib import Path
+		view_file = tempfile.NamedTemporaryFile(mode='w', suffix='.json', delete=False)
+		json.dump(view_content, view_file)
+		view_file.close()
+
+		try:
+			# Run linting
+			self.run_lint_on_file(Path(view_file.name), self.rule_config)
+			errors = self.get_errors_for_rule("PylintScriptRule")
+
+			# Should NOT have mixed tabs/spaces error
+			mixed_tabs_error_found = any(
+				"mixes tabs and spaces for indentation" in error for error in errors
+			)
+			self.assertFalse(
+				mixed_tabs_error_found,
+				f"Should not report mixed indentation for tabs-only script. Got: {errors}"
+			)
+
+		finally:
+			import os
+			os.unlink(view_file.name)
+
 
 if __name__ == "__main__":
 	unittest.main()

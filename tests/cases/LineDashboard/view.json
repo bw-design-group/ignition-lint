@@ -256,7 +256,7 @@
                       },
                       "transforms": [
                         {
-                          "code": "\tdanone_path \u003d DanPT.Model.get_danone_path_from_url(value)\n\treturn Views.ImageManagement.get_image_url(danone_path, 1)",
+                          "code": "\tequip_path \u003d DanPT.Model.get_equip_path_from_url(value)\n\treturn Views.ImageManagement.get_image_url(equip_path, 1)",
                           "type": "script"
                         }
                       ],
