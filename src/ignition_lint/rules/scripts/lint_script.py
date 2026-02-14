@@ -132,6 +132,16 @@ class PylintScriptRule(ScriptRule):
 			self.errors = []
 			self.warnings = []
 
+	def _format_script_path(self, composite_key: str) -> str:
+		"""Format script path for error messages, removing file path in non-batch mode."""
+		if self.batch_mode:
+			# Batch mode: keep full path for clarity across multiple files
+			return composite_key
+		# Non-batch mode: strip file path prefix (everything before ::)
+		if "::" in composite_key:
+			return composite_key.split("::", 1)[1]
+		return composite_key
+
 	def process_scripts(self, scripts: Dict[str, ScriptNode]):
 		"""Process all collected scripts with pylint."""
 		# Quick exit: Skip processing if there are no scripts
@@ -156,7 +166,7 @@ class PylintScriptRule(ScriptRule):
 				):
 					# Script is not indented - this is a data quality issue
 					self.add_violation(
-						f"{composite_key}: Script lacks proper indentation in view.json "
+						f"{self._format_script_path(composite_key)}: Script lacks proper indentation in view.json "
 						"(scripts should be indented with tabs or spaces for valid Python syntax)"
 					)
 
@@ -167,7 +177,7 @@ class PylintScriptRule(ScriptRule):
 						leading_whitespace = line[:len(line) - len(line.lstrip())]
 						if '\t' in leading_whitespace and ' ' in leading_whitespace:
 							self.add_violation(
-								f"{composite_key}: Script mixes tabs and spaces for indentation. "
+								f"{self._format_script_path(composite_key)}: Script mixes tabs and spaces for indentation. "
 								"Use either tabs OR spaces consistently."
 							)
 							break  # Only report once per script
@@ -179,7 +189,7 @@ class PylintScriptRule(ScriptRule):
 		for path, issues in path_to_issues.items():
 			for issue in issues:
 				# Pylint issues (syntax errors, undefined variables, etc.) - use configured severity
-				self.add_violation(f"{path}: {issue}")
+				self.add_violation(f"{self._format_script_path(path)}: {issue}")
 
 	def _run_pylint_batch(self, scripts: Dict[str, ScriptNode]) -> Dict[str, List[str]]:
 		"""Run pylint on multiple scripts at once."""
