@@ -96,11 +96,22 @@ class TestWhitelistIntegration(unittest.TestCase):
 			"ignition_lint.cli",
 		] + args
 
+		# Set up environment with proper Python path
+		import os
+		env = os.environ.copy()
+		# Add src directory to PYTHONPATH to ensure module can be imported
+		src_dir = str(project_root / "src")
+		if "PYTHONPATH" in env:
+			env["PYTHONPATH"] = f"{src_dir}{os.pathsep}{env['PYTHONPATH']}"
+		else:
+			env["PYTHONPATH"] = src_dir
+
 		return subprocess.run(
 			cmd,
 			cwd=self.temp_path,
 			capture_output=True,
-			text=True
+			text=True,
+			env=env
 		)
 
 	def test_cli_with_whitelist_filters_files(self):
