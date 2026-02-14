@@ -240,6 +240,135 @@ def load_config(config_path: str) -> dict:
 		return {}
 
 
+def load_whitelist(whitelist_path: str) -> set:
+	"""
+	Load whitelist file containing paths to ignore.
+
+	Args:
+		whitelist_path: Path to whitelist text file
+
+	Returns:
+		Set of absolute file paths to ignore (empty set if file doesn't exist)
+	"""
+	whitelist = set()
+
+	try:
+		whitelist_file = Path(whitelist_path)
+		if not whitelist_file.exists():
+			return whitelist
+
+		with open(whitelist_file, 'r', encoding='utf-8') as f:
+			for line in f:
+				# Strip whitespace
+				line = line.strip()
+
+				# Skip empty lines and comments
+				if not line or line.startswith('#'):
+					continue
+
+				# Convert relative path to absolute
+				try:
+					file_path = Path(line).resolve()
+					whitelist.add(file_path)
+				except (ValueError, OSError) as e:
+					print(f"⚠️  Warning: Invalid path in whitelist '{line}': {e}")
+					continue
+
+		return whitelist
+
+	except (OSError, IOError) as e:
+		print(f"⚠️  Warning: Could not read whitelist file {whitelist_path}: {e}")
+		return set()
+
+
+def generate_whitelist(
+	patterns: List[str], output_file: str, append: bool = False, dry_run: bool = False
+) -> None:
+	"""
+	Generate whitelist file from glob patterns.
+
+	Args:
+		patterns: List of glob patterns to match files
+		output_file: Path to output whitelist file
+		append: If True, append to existing file; if False, overwrite
+		dry_run: If True, print matched files without writing
+	"""
+	# Collect all matching files
+	all_files = []
+	for pattern in patterns:
+		matching_files = glob.glob(pattern, recursive=True)
+		all_files.extend(matching_files)
+
+	# Convert to relative paths and sort
+	relative_paths = []
+	cwd = Path.cwd()
+	for file_path in all_files:
+		try:
+			abs_path = Path(file_path).resolve()
+			relative_path = abs_path.relative_to(cwd)
+			relative_paths.append(str(relative_path))
+		except (ValueError, OSError):
+			# If path can't be made relative, use absolute
+			relative_paths.append(file_path)
+
+	# Remove duplicates and sort
+	relative_paths = sorted(set(relative_paths))
+
+	if dry_run:
+		print(f"🔍 Would add {len(relative_paths)} files to whitelist:")
+		for path in relative_paths[:20]:  # Show first 20
+			print(f"  {path}")
+		if len(relative_paths) > 20:
+			print(f"  ... and {len(relative_paths) - 20} more files")
+		return
+
+	# Handle append mode
+	existing_paths = set()
+	if append and Path(output_file).exists():
+		try:
+			with open(output_file, 'r', encoding='utf-8') as f:
+				for line in f:
+					line = line.strip()
+					if line and not line.startswith('#'):
+						existing_paths.add(line)
+		except (OSError, IOError) as e:
+			print(f"⚠️  Warning: Could not read existing whitelist: {e}")
+
+	# Combine existing and new paths
+	if append:
+		all_paths = sorted(existing_paths.union(set(relative_paths)))
+	else:
+		all_paths = relative_paths
+
+	# Write whitelist file
+	try:
+		output_path = Path(output_file)
+		output_path.parent.mkdir(parents=True, exist_ok=True)
+
+		with open(output_path, 'w', encoding='utf-8') as f:
+			f.write("# Ignition-lint whitelist - files to ignore during linting\n")
+			f.write("# Lines starting with # are comments\n")
+			f.write("# One file path per line (relative to repository root)\n")
+			f.write(f"# Generated: {len(relative_paths)} files added\n")
+			if append and existing_paths:
+				f.write(f"# Existing: {len(existing_paths)} files\n")
+			f.write("\n")
+
+			for path in all_paths:
+				f.write(f"{path}\n")
+
+		mode = "appended to" if append and existing_paths else "generated"
+		print(f"✓ Whitelist {mode}: {output_path}")
+		print(f"  Total files: {len(all_paths)}")
+		if append and existing_paths:
+			print(f"  New files: {len(relative_paths)}")
+			print(f"  Existing files: {len(existing_paths)}")
+
+	except (OSError, IOError) as e:
+		print(f"❌ Error writing whitelist file {output_file}: {e}")
+		sys.exit(1)
+
+
 def create_rules_from_config(config: dict) -> list:
 	"""
 	Create rule instances from config dictionary using self-processing rules.
@@ -283,18 +412,37 @@ def get_view_file(file_path: Path) -> Dict[str, Any]:
 		return {}
 
 
-def collect_files(args) -> List[Path]:
-	"""Collect files to process based on arguments."""
+def collect_files(args, whitelist: set) -> tuple[List[Path], List[Path]]:
+	"""
+	Collect files to process based on arguments.
+
+	Args:
+		args: Command-line arguments
+		whitelist: Set of absolute file paths to ignore
+
+	Returns:
+		Tuple of (files_to_process, whitelisted_files)
+	"""
 	files_to_process = []
+	files_ignored = []
 
 	# If filenames are provided directly (e.g., from pre-commit), use them
 	if args.filenames:
 		for filename in args.filenames:
 			file_path = Path(filename)
-			if file_path.exists():
-				files_to_process.append(file_path)
-			else:
+			if not file_path.exists():
 				print(f"Warning: File {filename} does not exist")
+				continue
+
+			# Check if file is whitelisted
+			abs_path = file_path.resolve()
+			if abs_path in whitelist:
+				files_ignored.append(file_path)
+				# Always print when a file is skipped (not just verbose mode)
+				print(f"🔒 Skipped (whitelisted): {file_path}")
+				continue
+
+			files_to_process.append(file_path)
 
 	# Otherwise, use glob patterns
 	elif args.files:
@@ -305,10 +453,24 @@ def collect_files(args) -> List[Path]:
 			for file_path_str in matching_files:
 				file_path = Path(file_path_str)
 				# Only include view.json files specifically
-				if file_path.exists() and file_path.name == "view.json":
-					files_to_process.append(file_path)
+				if not file_path.exists() or file_path.name != "view.json":
+					continue
 
-	return files_to_process
+				# Check if file is whitelisted
+				abs_path = file_path.resolve()
+				if abs_path in whitelist:
+					files_ignored.append(file_path)
+					# Always print when a file is skipped (not just verbose mode)
+					print(f"🔒 Skipped (whitelisted): {file_path}")
+					continue
+
+				files_to_process.append(file_path)
+
+	# Print summary if verbose mode
+	if files_ignored and args.verbose:
+		print(f"\n📊 Whitelist Summary: {len(files_ignored)} files skipped")
+
+	return files_to_process, files_ignored
 
 
 def print_file_results(file_path: Path, lint_results) -> tuple[int, int]:
@@ -526,7 +688,7 @@ def process_single_file(
 
 def write_results_file(
 	output_path: Path, results: List[Dict], total_warnings: int, total_errors: int, processed_files: int,
-	files_with_issues: int, finalize_results=None
+	files_with_issues: int, finalize_results=None, whitelisted_files: List[Path] = None
 ):
 	"""Write linting results to an output file with detailed warnings and errors."""
 	# Ensure parent directory exists
@@ -544,7 +706,19 @@ def write_results_file(
 		f.write(f"Total warnings:  {total_warnings}\n")
 		f.write(f"Total errors:    {total_errors}\n")
 		f.write(f"Files with issues: {files_with_issues}\n")
-		f.write(f"Clean files:     {processed_files - files_with_issues}\n\n")
+		f.write(f"Clean files:     {processed_files - files_with_issues}\n")
+		if whitelisted_files:
+			f.write(f"Files whitelisted: {len(whitelisted_files)}\n")
+		f.write("\n")
+
+		# Whitelisted files section
+		if whitelisted_files:
+			f.write("WHITELISTED FILES (SKIPPED)\n")
+			f.write("-" * 80 + "\n")
+			f.write(f"The following {len(whitelisted_files)} file(s) were skipped due to whitelist:\n\n")
+			for file_path in whitelisted_files:
+				f.write(f"  🔒 {file_path}\n")
+			f.write("\n")
 
 		# Per-file results
 		f.write("PER-FILE RESULTS\n")
@@ -888,7 +1062,48 @@ def main():
 		"--results-output",
 		help="File path to write linting results (e.g., results.txt)",
 	)
+	parser.add_argument(
+		"--whitelist",
+		default=None,
+		help="Path to whitelist file containing files to ignore (e.g., .whitelist.txt)",
+	)
+	parser.add_argument(
+		"--no-whitelist",
+		action="store_true",
+		help="Disable whitelist even if --whitelist is specified (overrides --whitelist)",
+	)
+	parser.add_argument(
+		"--generate-whitelist",
+		nargs="+",
+		metavar="PATTERN",
+		help="Generate whitelist from glob patterns (e.g., 'views/legacy/**/*.json')",
+	)
+	parser.add_argument(
+		"--whitelist-output",
+		default=".whitelist.txt",
+		help="Output file for generated whitelist (default: .whitelist.txt)",
+	)
+	parser.add_argument(
+		"--append",
+		action="store_true",
+		help="Append to existing whitelist instead of overwriting (use with --generate-whitelist)",
+	)
+	parser.add_argument(
+		"--dry-run",
+		action="store_true",
+		help="Show what would be added to whitelist without writing file (use with --generate-whitelist)",
+	)
 	args = parser.parse_args()
+
+	# Handle whitelist generation mode
+	if args.generate_whitelist:
+		generate_whitelist(
+			patterns=args.generate_whitelist,
+			output_file=args.whitelist_output,
+			append=args.append,
+			dry_run=args.dry_run
+		)
+		sys.exit(0)  # Exit after generating whitelist
 
 	# Clean up old batch files from previous runs (prevents unbounded growth)
 	if args.results_output:
@@ -899,11 +1114,22 @@ def main():
 	# Clean up old debug files from previous runs
 	cleanup_debug_files()
 
+	# Load whitelist if specified and not disabled
+	whitelist = set()
+	if args.whitelist and not args.no_whitelist:
+		whitelist = load_whitelist(args.whitelist)
+		if whitelist and args.verbose:
+			print(f"🔒 Loaded whitelist with {len(whitelist)} files")
+		elif not whitelist and args.verbose:
+			print(f"⚠️  Whitelist file specified but empty or not found: {args.whitelist}")
+	elif args.no_whitelist and args.verbose:
+		print("ℹ️  Whitelist disabled via --no-whitelist")
+
 	# Set up the linting engine
 	lint_engine = setup_linter(args)
 
-	# Collect files to process
-	file_paths = collect_files(args)
+	# Collect files to process (excludes whitelisted files)
+	file_paths, whitelisted_files = collect_files(args, whitelist)
 	if not file_paths:
 		print("❌ No files specified or found")
 		sys.exit(0)
@@ -1022,7 +1248,7 @@ def main():
 		results_path = make_unique_output_path(Path(args.results_output))
 		write_results_file(
 			results_path, results_buffer, total_warnings, total_errors, processed_files, files_with_issues,
-			finalize_results
+			finalize_results, whitelisted_files
 		)
 		print("\n" + f"📝 Results written to: {results_path}")
 

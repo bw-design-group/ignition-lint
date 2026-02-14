@@ -881,7 +881,109 @@ ignition-lint --files "services/**/view.json" \
 
 > **Why not use `pre-commit run --all-files`?** Pre-commit passes all matched filenames as command-line arguments, which can exceed system ARG_MAX limits in large repositories (e.g., 725 files with long paths). The CLI tool uses internal glob matching to avoid this limitation.
 
-### 3. GitHub Actions Workflow
+### 3. Whitelist Configuration (Managing Technical Debt)
+
+The whitelist feature allows you to exclude specific files from linting, which is essential for managing technical debt at scale. This is particularly useful when you have legacy code that can't be immediately fixed but shouldn't block development workflows.
+
+#### Quick Start
+
+```bash
+# Generate whitelist from legacy files
+ignition-lint --generate-whitelist "views/legacy/**/*.json" "views/deprecated/**/*.json"
+
+# Use whitelist during linting
+ignition-lint --config rule_config.json --whitelist .whitelist.txt --files "**/view.json"
+```
+
+#### Whitelist File Format
+
+**Filename:** `.whitelist.txt` (recommended default)
+**Format:** Plain text, one file path per line
+
+```text
+# Comments start with # and are ignored
+# Document WHY files are whitelisted (JIRA tickets, dates, etc.)
+
+# Legacy views - scheduled for refactor Q2 2026 (JIRA-1234)
+views/legacy/OldDashboard/view.json
+views/legacy/MainScreen/view.json
+
+# Deprecated views - being replaced
+views/deprecated/TempView/view.json
+views/deprecated/OldWidget/view.json
+
+# Known issues - technical debt tracked in backlog
+views/components/ComponentWithKnownIssues/view.json
+```
+
+#### Generating Whitelists
+
+```bash
+# Generate from single pattern
+ignition-lint --generate-whitelist "views/legacy/**/*.json"
+
+# Generate from multiple patterns
+ignition-lint --generate-whitelist \
+    "views/legacy/**/*.json" \
+    "views/deprecated/**/*.json"
+
+# Custom output file
+ignition-lint --generate-whitelist "views/legacy/**/*.json" \
+    --whitelist-output custom-whitelist.txt
+
+# Append to existing whitelist
+ignition-lint --generate-whitelist "views/temp/**/*.json" --append
+
+# Dry run (preview without writing)
+ignition-lint --generate-whitelist "views/legacy/**/*.json" --dry-run
+```
+
+#### Using Whitelists
+
+```bash
+# Use whitelist (whitelisted files are skipped)
+ignition-lint --config rule_config.json \
+    --whitelist .whitelist.txt \
+    --files "**/view.json"
+
+# Disable whitelist (overrides --whitelist)
+ignition-lint --config rule_config.json \
+    --whitelist .whitelist.txt \
+    --no-whitelist \
+    --files "**/view.json"
+
+# Verbose mode (show ignored files)
+ignition-lint --config rule_config.json \
+    --whitelist .whitelist.txt \
+    --files "**/view.json" \
+    --verbose
+```
+
+**Important:** By default, ignition-lint does NOT use a whitelist unless you explicitly specify `--whitelist <path>`.
+
+#### Pre-commit Integration with Whitelist
+
+```yaml
+# .pre-commit-config.yaml
+repos:
+  - repo: https://github.com/bw-design-group/ignition-lint
+    rev: v0.2.4
+    hooks:
+      - id: ignition-lint
+        # Add whitelist argument to use project-specific whitelist
+        args: ['--config=rule_config.json', '--whitelist=.whitelist.txt', '--files']
+```
+
+**Workflow:**
+1. Generate whitelist: `ignition-lint --generate-whitelist "views/legacy/**/*.json"`
+2. Review and edit `.whitelist.txt` to add comments explaining why files are whitelisted
+3. Commit whitelist: `git add .whitelist.txt && git commit -m "Add whitelist for legacy views"`
+4. Update `.pre-commit-config.yaml` to use whitelist (add `--whitelist=.whitelist.txt` to args)
+5. Pre-commit now skips whitelisted files automatically
+
+**For detailed documentation**, see [docs/whitelist-guide.md](docs/whitelist-guide.md).
+
+### 4. GitHub Actions Workflow
 
 Create `.github/workflows/ignition-lint.yml`:
 
@@ -919,7 +1021,7 @@ jobs:
           done
 ```
 
-### 4. Development Mode with Poetry
+### 5. Development Mode with Poetry
 
 For contributors and package developers:
 
