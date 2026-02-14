@@ -101,7 +101,7 @@
   "root.root.children[0].Header.children[0].FlexContainer.children[0].Line Image.propConfig.props.params.eq_path.binding.config.path": "view.custom.eq_path",
   "root.root.children[0].Header.children[0].FlexContainer.children[0].Line Image.propConfig.props.params.eq_path.binding.type": "property",
   "root.root.children[0].Header.children[0].FlexContainer.children[0].Line Image.propConfig.props.params.img_path.binding.config.expression": "{view.params.eq_path_url}",
-  "root.root.children[0].Header.children[0].FlexContainer.children[0].Line Image.propConfig.props.params.img_path.binding.transforms[0].code": "\tdanone_path = DanPT.Model.get_danone_path_from_url(value)\n\treturn Views.ImageManagement.get_image_url(danone_path, 1)",
+  "root.root.children[0].Header.children[0].FlexContainer.children[0].Line Image.propConfig.props.params.img_path.binding.transforms[0].code": "\tequip_path = DanPT.Model.get_equip_path_from_url(value)\n\treturn Views.ImageManagement.get_image_url(equip_path, 1)",
   "root.root.children[0].Header.children[0].FlexContainer.children[0].Line Image.propConfig.props.params.img_path.binding.transforms[0].type": "script",
   "root.root.children[0].Header.children[0].FlexContainer.children[0].Line Image.propConfig.props.params.img_path.binding.type": "expr",
   "root.root.children[0].Header.children[0].FlexContainer.children[0].Line Image.propConfig.props.params.mode_name.binding.config.path": "view.custom.mode_name",
