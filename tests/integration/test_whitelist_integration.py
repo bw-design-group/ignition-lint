@@ -4,10 +4,12 @@ Integration tests for whitelist feature.
 Tests end-to-end workflows including CLI invocation and file filtering.
 """
 
-import unittest
-import tempfile
+import os
+import shutil
 import subprocess
 import sys
+import tempfile
+import unittest
 from pathlib import Path
 
 # Add parent directory to path for imports
@@ -36,7 +38,6 @@ class TestWhitelistIntegration(unittest.TestCase):
 
 	def tearDown(self):
 		"""Clean up temporary files."""
-		import shutil
 		shutil.rmtree(self.temp_dir, ignore_errors=True)
 
 	def create_test_view(self, relative_path: str, valid: bool = True):
@@ -97,7 +98,6 @@ class TestWhitelistIntegration(unittest.TestCase):
 		] + args
 
 		# Set up environment with proper Python path
-		import os
 		env = os.environ.copy()
 		# Add src directory to PYTHONPATH to ensure module can be imported
 		src_dir = str(project_root / "src")
