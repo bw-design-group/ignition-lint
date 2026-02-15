@@ -120,9 +120,7 @@ class TestPylintCategoryMapping(unittest.TestCase):
 			PylintViolation(
 				category='E', code='E0602', message="Undefined variable 'x'", path='script1', line=5
 			),
-			PylintViolation(
-				category='E', code='E1101', message="No member 'foo'", path='script2', line=10
-			),
+			PylintViolation(category='E', code='E1101', message="No member 'foo'", path='script2', line=10),
 		]
 
 		grouped = rule.get_category_grouped_violations()
@@ -360,16 +358,23 @@ test.py:1:0: C0114: Missing module docstring (missing-module-docstring)"""
 
 		# Verify output contains expected elements
 		self.assertIsNotNone(output)
-		self.assertIn("Error (E)", output)
-		self.assertIn("Warning (W)", output)
-		self.assertIn("E0602", output)
-		self.assertIn("W0611", output)
-		self.assertIn("root.Button.script", output)
-		self.assertIn("root.Label.transform", output)
+		self.assertIsInstance(output, dict)
+		self.assertIn('errors', output)
+		self.assertIn('warnings', output)
+
+		# Check error output
+		self.assertIn("Pylint - Error (E)", output['errors'])
+		self.assertIn("E0602", output['errors'])
+		self.assertIn("root.Button.script", output['errors'])
+
+		# Check warning output
+		self.assertIn("Pylint - Warning (W)", output['warnings'])
+		self.assertIn("W0611", output['warnings'])
+		self.assertIn("root.Label.transform", output['warnings'])
 
 	@patch('sys.stdout', new_callable=StringIO)
 	def test_print_category_grouped_output_severity_icons(self, mock_stdout):
-		"""Test that correct severity icons are used in output."""
+		"""Test that correct category labels are used in output."""
 		# Create rule with error and warning
 		rule = PylintScriptRule()
 		rule.pylint_violations = [
@@ -380,10 +385,14 @@ test.py:1:0: C0114: Missing module docstring (missing-module-docstring)"""
 		# Get formatted output
 		output = rule.format_violations_grouped()
 
-		# Should have error icon ❌ for E category
-		self.assertIn("❌", output)
-		# Should have warning icon ⚠️ for W category
-		self.assertIn("⚠️", output)
+		# Verify output is a dict with errors and warnings
+		self.assertIsInstance(output, dict)
+		self.assertIn('errors', output)
+		self.assertIn('warnings', output)
+
+		# Check category labels (no emojis - clean format)
+		self.assertIn("Pylint - Error (E)", output['errors'])
+		self.assertIn("Pylint - Warning (W)", output['warnings'])
 
 
 if __name__ == '__main__':
