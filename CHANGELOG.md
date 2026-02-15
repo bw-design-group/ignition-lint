@@ -8,15 +8,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
-- Whitelist feature for managing technical debt by ignoring rules [dbe1363]
+- Whitelist feature for managing technical debt by ignoring specific views [dbe1363]
 - CLI helper functions to generate whitelist from glob patterns [dbe1363]
 - ComponentReferenceValidationRule to validate that component references resolve to actual components [057d0f2]
 - BadComponentReference test case with property, expression, and script getChild references [eb08041]
 - Mixed tabs/spaces detection with clear error messages [369173a]
 - Tests for script indentation with comments [e85b26f]
+- Implement feature for custom formatting output by rule and configured pylint category mapping[c7c1402]
 
 ### Changed
-- Optimize script error messages in non-batch mode of pylint rule[11a7683]
+- Optimize script error messages in non-batch mode of pylint rule [11a7683]
 - ComponentReferenceValidationRule added to default rule_config.json [c63f540]
 - Disabled duplicate-code check in pylint config for test files [88b68f5]
 - Enforce yapf style file usage in all CLAUDE.md commands [7b5be3a]
