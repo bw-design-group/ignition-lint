@@ -1,6 +1,6 @@
 {
   "bindings": {
-    "count": 13,
+    "count": 15,
     "nodes": [
       {
         "config": {},
@@ -46,9 +46,21 @@
       },
       {
         "config": {},
+        "expression": "{this.meta.name}",
+        "node_type": "expression_binding",
+        "path": "root.root.children[5].TopContainer.children[2].ParentContainerProperty.children[4].GrandParentProperty.propConfig.meta.tooltip.text"
+      },
+      {
+        "config": {},
         "node_type": "property_binding",
         "path": "root.root.children[5].TopContainer.children[2].ParentContainerProperty.children[4].GrandParentProperty.propConfig.props.enabled",
         "target_path": "..../TopContainer.position.display"
+      },
+      {
+        "config": {},
+        "node_type": "property_binding",
+        "path": "root.root.children[5].TopContainer.children[2].ParentContainerProperty.children[4].GrandParentProperty.propConfig.props.text",
+        "target_path": "this.meta.name"
       },
       {
         "config": {},
@@ -377,7 +389,7 @@
     ]
   },
   "expression_bindings": {
-    "count": 6,
+    "count": 7,
     "nodes": [
       {
         "config": {},
@@ -390,6 +402,12 @@
         "expression": "self.parent.getChild('DataSource').props.data",
         "node_type": "expression_binding",
         "path": "root.root.children[2].ContainerWithBadScript.propConfig.props.children"
+      },
+      {
+        "config": {},
+        "expression": "{this.meta.name}",
+        "node_type": "expression_binding",
+        "path": "root.root.children[5].TopContainer.children[2].ParentContainerProperty.children[4].GrandParentProperty.propConfig.meta.tooltip.text"
       },
       {
         "config": {},
@@ -862,7 +880,7 @@
     ]
   },
   "property_bindings": {
-    "count": 7,
+    "count": 8,
     "nodes": [
       {
         "config": {},
@@ -899,6 +917,12 @@
         "node_type": "property_binding",
         "path": "root.root.children[5].TopContainer.children[2].ParentContainerProperty.children[4].GrandParentProperty.propConfig.props.enabled",
         "target_path": "..../TopContainer.position.display"
+      },
+      {
+        "config": {},
+        "node_type": "property_binding",
+        "path": "root.root.children[5].TopContainer.children[2].ParentContainerProperty.children[4].GrandParentProperty.propConfig.props.text",
+        "target_path": "this.meta.name"
       },
       {
         "config": {},

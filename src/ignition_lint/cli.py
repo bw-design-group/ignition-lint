@@ -51,8 +51,11 @@ def get_version() -> str:
 # Handle both relative and absolute imports
 try:
 	# Try relative imports first (when run as module)
-	from .common.flatten_json import read_json_file, flatten_json
+	from .common.flatten_json import read_json_file, write_json_file, flatten_json
 	from .common.timing import PerformanceTimer, TimingCollector, FileTimings
+	from .common.path_translator import PathTranslator
+	from .common.fix_engine import FixEngine
+	from .common.fix_operations import FixOperationType
 	from .linter import LintEngine
 	from .rules import RULES_MAP
 except ImportError:
@@ -62,8 +65,11 @@ except ImportError:
 	if str(src_dir) not in sys.path:
 		sys.path.insert(0, str(src_dir))
 
-	from ignition_lint.common.flatten_json import read_json_file, flatten_json
+	from ignition_lint.common.flatten_json import read_json_file, write_json_file, flatten_json
 	from ignition_lint.common.timing import PerformanceTimer, TimingCollector, FileTimings
+	from ignition_lint.common.path_translator import PathTranslator
+	from ignition_lint.common.fix_engine import FixEngine
+	from ignition_lint.common.fix_operations import FixOperationType
 	from ignition_lint.linter import LintEngine
 	from ignition_lint.rules import RULES_MAP
 
@@ -700,11 +706,18 @@ def process_single_file(
 	# Run linting (unless stats-only mode)
 	file_timings = None
 	if not args.stats_only:
+		# Set up fix context if fix mode is active
+		fix_mode = getattr(args, 'fix', False) or getattr(args, 'fix_dry_run', False)
+		path_translator = None
+		if fix_mode:
+			path_translator = PathTranslator(json_data)
+
 		# Time rule execution
 		if file_timer:
 			timer.start()
 		lint_results = lint_engine.process(
-			flattened_json, source_file_path=str(file_path), enable_timing=bool(file_timer)
+			flattened_json, source_file_path=str(file_path), enable_timing=bool(file_timer),
+			json_data=json_data if fix_mode else None, path_translator=path_translator
 		)
 		if file_timer:
 			rule_exec_ms = timer.stop()
@@ -713,6 +726,27 @@ def process_single_file(
 
 		if file_errors == 0 and file_warnings == 0:
 			print(f"✅ No issues found")
+
+		# Handle fixes if fix mode is active and there are fixes
+		if fix_mode and lint_results.fixes:
+			fix_engine = FixEngine(path_translator)
+			safe_only = not getattr(args, 'fix_unsafe', False)
+			rule_filter = None
+			if getattr(args, 'fix_rules', None):
+				rule_filter = [r.strip() for r in args.fix_rules.split(',')]
+
+			if getattr(args, 'fix_dry_run', False):
+				# Dry run: preview without modifying
+				fix_result = fix_engine.dry_run(
+					lint_results.fixes, safe_only=safe_only, rule_filter=rule_filter
+				)
+				print_fix_dry_run(lint_results.fixes, file_path, safe_only, rule_filter)
+			else:
+				# Apply fixes
+				fix_result = fix_engine.apply_fixes(
+					lint_results.fixes, safe_only=safe_only, rule_filter=rule_filter
+				)
+				apply_and_report_fixes(fix_result, json_data, file_path)
 
 		# Create timing record if profiling
 		if file_timer:
@@ -1080,6 +1114,69 @@ def aggregate_batch_results(results_path: Path) -> Optional[Dict[str, int]]:
 	return None
 
 
+def print_fix_dry_run(fixes, file_path, safe_only, rule_filter):
+	"""Show proposed fixes without applying them."""
+	print(f"\n{'=' * LINE_WIDTH}")
+	print(f"Proposed Fixes for {file_path}:")
+	print(f"{'=' * LINE_WIDTH}")
+
+	safe_count = 0
+	unsafe_count = 0
+	filtered_count = 0
+
+	for i, fix in enumerate(fixes, 1):
+		# Check rule filter
+		if rule_filter and fix.rule_name not in rule_filter:
+			filtered_count += 1
+			continue
+
+		if fix.is_safe:
+			safe_count += 1
+			safety_label = "SAFE"
+		else:
+			unsafe_count += 1
+			safety_label = f"UNSAFE - {fix.safety_notes}" if fix.safety_notes else "UNSAFE"
+
+		print(f"\n  Fix {i} ({fix.rule_name}) [{safety_label}]:")
+		print(f"    {fix.description}")
+		print(f"    Operations:")
+		for op in fix.operations:
+			if op.operation == FixOperationType.SET_VALUE:
+				print(f"      SET {op.format_path()}: '{op.old_value}' -> '{op.new_value}'")
+			elif op.operation == FixOperationType.STRING_REPLACE:
+				print(f"      REPLACE in {op.format_path()}:")
+				print(f"              '{op.old_substring}' -> '{op.new_substring}'")
+
+	total = safe_count + unsafe_count
+	print(f"\nSummary: {total} fixes ({safe_count} safe, {unsafe_count} unsafe)")
+	if filtered_count:
+		print(f"  Filtered out: {filtered_count} (not in --fix-rules)")
+	if safe_only and unsafe_count > 0:
+		print(f"  --fix would apply: {safe_count} safe fix(es)")
+		print(f"  --fix --fix-unsafe would apply: {total} fix(es)")
+	else:
+		print(f"  Would apply: {total} fix(es)")
+
+
+def apply_and_report_fixes(fix_result, json_data, file_path):
+	"""Apply fixes and report results, writing modified JSON back to file."""
+	if fix_result.applied_count > 0:
+		print(f"\nApplying fixes to {file_path}:")
+		for applied_fix in fix_result.applied:
+			print(f"  Applied: {applied_fix.fix.description}")
+
+		# Write modified JSON back to file
+		write_json_file(file_path, json_data)
+		print(f"  File updated: {file_path}")
+
+	if fix_result.skipped_count > 0:
+		for skipped_fix in fix_result.skipped:
+			print(f"  Skipped: {skipped_fix.fix.description} ({skipped_fix.skip_reason})")
+
+	print(f"\nApplied: {fix_result.applied_count} fix(es) | "
+		f"Skipped: {fix_result.skipped_count} fix(es)")
+
+
 def print_final_summary(
 	processed_files: int, total_warnings: int, total_errors: int, files_with_issues: int, stats_only: bool,
 	ignore_warnings: bool = False
@@ -1206,6 +1303,26 @@ def main():
 		"--dry-run",
 		action="store_true",
 		help="Show what would be added to whitelist without writing file (use with --generate-whitelist)",
+	)
+	parser.add_argument(
+		"--fix",
+		action="store_true",
+		help="Apply safe auto-fixes to view.json files",
+	)
+	parser.add_argument(
+		"--fix-unsafe",
+		action="store_true",
+		help="Also apply fixes that update references (use with --fix)",
+	)
+	parser.add_argument(
+		"--fix-dry-run",
+		action="store_true",
+		help="Show what fixes would be applied without modifying files",
+	)
+	parser.add_argument(
+		"--fix-rules",
+		default=None,
+		help="Comma-separated list of rules to apply fixes from (default: all fixable rules)",
 	)
 	args = parser.parse_args()
 
