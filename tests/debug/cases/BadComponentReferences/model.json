@@ -284,8 +284,8 @@
         "node_type": "custom_method",
         "params": [],
         "path": "root.root.children[3].CustomMethodComponent.scripts.customMethods[0]",
-        "script_length": 144,
-        "script_preview": "\n# Bad pattern in custom method\ntarget = self.getSibling('StatusLabel')\ntarget.props.text = 'Updated..."
+        "script_length": 149,
+        "script_preview": "\t\n\t# Bad pattern in custom method\n\ttarget = self.getSibling('StatusLabel')\n\ttarget.props.text = 'Upd..."
       },
       {
         "name": "navigateHierarchy",
@@ -294,13 +294,13 @@
           "direction"
         ],
         "path": "root.root.children[3].CustomMethodComponent.scripts.customMethods[1]",
-        "script_length": 293,
-        "script_preview": "\n# Multiple bad patterns in one method\nif direction == 'up':\n    return self.getParent().props.name\n..."
+        "script_length": 303,
+        "script_preview": "\t\n\t# Multiple bad patterns in one method\n\tif direction == 'up':\n\t    return self.getParent().props.n..."
       }
     ]
   },
   "event_handlers": {
-    "count": 7,
+    "count": 8,
     "nodes": [
       {
         "event_domain": "component",
@@ -310,6 +310,15 @@
         "scope": "G",
         "script_length": 206,
         "script_preview": "\n# Bad pattern 1: getSibling\nsibling = self.getSibling('StatusLabel')\nsibling.props.text = 'Button c..."
+      },
+      {
+        "event_domain": "dom",
+        "event_type": "onClick",
+        "node_type": "event_handler",
+        "path": "root.root.children[2].ContainerWithBadScript.events.dom.onClick",
+        "scope": "G",
+        "script_length": 72,
+        "script_preview": "\t#error test case for undefined\n\tsystem.perspective.print(undefined_var)"
       },
       {
         "event_domain": "component",
@@ -413,7 +422,7 @@
     "nodes": []
   },
   "message_handlers": {
-    "count": 1,
+    "count": 2,
     "nodes": [
       {
         "message_type": "update-status",
@@ -424,7 +433,19 @@
           "session": false,
           "view": true
         },
-        "script_length": 234,
+        "script_length": 242,
+        "script_preview": "\t\n\t# Bad pattern in message handler\n\tstatusLabel = self.getSibling('StatusLabel')\n\tstatusLabel.props..."
+      },
+      {
+        "message_type": "bad-indentation",
+        "node_type": "message_handler",
+        "path": "root.root.children[4].MessageHandlerComponent.scripts.messageHandlers[1]",
+        "scope": {
+          "page": true,
+          "session": false,
+          "view": false
+        },
+        "script_length": 233,
         "script_preview": "\n# Bad pattern in message handler\nstatusLabel = self.getSibling('StatusLabel')\nstatusLabel.props.tex..."
       }
     ]
@@ -896,7 +917,7 @@
     "nodes": []
   },
   "scripts": {
-    "count": 10,
+    "count": 12,
     "nodes": [
       {
         "message_type": "update-status",
@@ -907,7 +928,19 @@
           "session": false,
           "view": true
         },
-        "script_length": 234,
+        "script_length": 242,
+        "script_preview": "\t\n\t# Bad pattern in message handler\n\tstatusLabel = self.getSibling('StatusLabel')\n\tstatusLabel.props..."
+      },
+      {
+        "message_type": "bad-indentation",
+        "node_type": "message_handler",
+        "path": "root.root.children[4].MessageHandlerComponent.scripts.messageHandlers[1]",
+        "scope": {
+          "page": true,
+          "session": false,
+          "view": false
+        },
+        "script_length": 233,
         "script_preview": "\n# Bad pattern in message handler\nstatusLabel = self.getSibling('StatusLabel')\nstatusLabel.props.tex..."
       },
       {
@@ -915,8 +948,8 @@
         "node_type": "custom_method",
         "params": [],
         "path": "root.root.children[3].CustomMethodComponent.scripts.customMethods[0]",
-        "script_length": 144,
-        "script_preview": "\n# Bad pattern in custom method\ntarget = self.getSibling('StatusLabel')\ntarget.props.text = 'Updated..."
+        "script_length": 149,
+        "script_preview": "\t\n\t# Bad pattern in custom method\n\ttarget = self.getSibling('StatusLabel')\n\ttarget.props.text = 'Upd..."
       },
       {
         "name": "navigateHierarchy",
@@ -925,8 +958,8 @@
           "direction"
         ],
         "path": "root.root.children[3].CustomMethodComponent.scripts.customMethods[1]",
-        "script_length": 293,
-        "script_preview": "\n# Multiple bad patterns in one method\nif direction == 'up':\n    return self.getParent().props.name\n..."
+        "script_length": 303,
+        "script_preview": "\t\n\t# Multiple bad patterns in one method\n\tif direction == 'up':\n\t    return self.getParent().props.n..."
       },
       {
         "event_domain": "component",
@@ -936,6 +969,15 @@
         "scope": "G",
         "script_length": 206,
         "script_preview": "\n# Bad pattern 1: getSibling\nsibling = self.getSibling('StatusLabel')\nsibling.props.text = 'Button c..."
+      },
+      {
+        "event_domain": "dom",
+        "event_type": "onClick",
+        "node_type": "event_handler",
+        "path": "root.root.children[2].ContainerWithBadScript.events.dom.onClick",
+        "scope": "G",
+        "script_length": 72,
+        "script_preview": "\t#error test case for undefined\n\tsystem.perspective.print(undefined_var)"
       },
       {
         "event_domain": "component",

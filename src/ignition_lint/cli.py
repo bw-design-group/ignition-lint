@@ -16,6 +16,8 @@ except ImportError:
 	# Python < 3.8
 	from importlib_metadata import version, PackageNotFoundError
 
+LINE_WIDTH = 120
+
 
 def get_version() -> str:
 	"""Get package version, with fallback for development/testing."""
@@ -281,9 +283,7 @@ def load_whitelist(whitelist_path: str) -> set:
 		return set()
 
 
-def generate_whitelist(
-	patterns: List[str], output_file: str, append: bool = False, dry_run: bool = False
-) -> None:
+def generate_whitelist(patterns: List[str], output_file: str, append: bool = False, dry_run: bool = False) -> None:
 	"""
 	Generate whitelist file from glob patterns.
 
@@ -473,13 +473,41 @@ def collect_files(args, whitelist: set) -> tuple[List[Path], List[Path]]:
 	return files_to_process, files_ignored
 
 
-def print_file_results(file_path: Path, lint_results) -> tuple[int, int]:
+def print_rule_violations(rule_name: str, violations: list, custom_formatted_output: str = None):
+	"""
+	Print violations for a rule, using custom formatting if available.
+
+	Args:
+		rule_name: Name of the rule
+		violations: List of violation strings
+		custom_formatted_output: Pre-captured custom formatted output for this severity
+	"""
+	if not violations and not custom_formatted_output:
+		return
+
+	print(f"\n  {rule_name}:")
+
+	# Show regular violations first (e.g., indentation errors, data quality issues)
+	# Filter out empty placeholders (used for counting only)
+	if violations:
+		for violation in violations:
+			if violation.strip():  # Only show non-empty violations
+				print(f"    • {violation}")
+
+	# Then show custom formatted output (e.g., category-grouped pylint violations)
+	if custom_formatted_output:
+		print(custom_formatted_output)
+
+	print()  # Extra blank line between rules
+
+
+def print_file_results(lint_results, lint_engine=None) -> tuple[int, int]:
 	"""
 	Print warnings and errors for a file and return the counts.
 
 	Args:
-		file_path: Path to the file with results
 		lint_results: LintResults object containing warnings and errors
+		lint_engine: Optional LintEngine instance (needed for custom rule formatting)
 
 	Returns:
 		tuple[int, int]: (warning_count, error_count)
@@ -487,23 +515,37 @@ def print_file_results(file_path: Path, lint_results) -> tuple[int, int]:
 	warning_count = sum(len(warning_list) for warning_list in lint_results.warnings.values())
 	error_count = sum(len(error_list) for error_list in lint_results.errors.values())
 
-	# Print warnings first
-	if warning_count > 0:
-		print(f"\n⚠️  Found {warning_count} warnings:")
-		for rule_name, warning_list in lint_results.warnings.items():
-			if warning_list:
-				print(f"\n  📋 {rule_name} (warning):")
-				for warning in warning_list:
-					print(f"    • {warning}")
+	# Get custom formatted outputs if available
+	custom_formatted_warnings = lint_results.custom_formatted_warnings if hasattr(
+		lint_results, 'custom_formatted_warnings'
+	) else {}
+	custom_formatted_errors = lint_results.custom_formatted_errors if hasattr(
+		lint_results, 'custom_formatted_errors'
+	) else {}
 
-	# Print errors
-	if error_count > 0:
+	# Print errors first (more critical)
+	# Show errors if there are regular violations OR custom formatted errors
+	if error_count > 0 or custom_formatted_errors:
 		print(f"\n❌ Found {error_count} errors:")
 		for rule_name, error_list in lint_results.errors.items():
-			if error_list:
-				print(f"\n  📋 {rule_name} (error):")
-				for error in error_list:
-					print(f"    • {error}")
+			custom_output = custom_formatted_errors.get(rule_name)
+			print_rule_violations(rule_name, error_list, custom_formatted_output=custom_output)
+		# Handle rules that only have custom formatted errors (no regular violations)
+		for rule_name, custom_output in custom_formatted_errors.items():
+			if rule_name not in lint_results.errors:
+				print_rule_violations(rule_name, [], custom_formatted_output=custom_output)
+
+	# Print warnings second
+	# Show warnings if there are regular violations OR custom formatted warnings
+	if warning_count > 0 or custom_formatted_warnings:
+		print(f"\n⚠️  Found {warning_count} warnings:")
+		for rule_name, warning_list in lint_results.warnings.items():
+			custom_output = custom_formatted_warnings.get(rule_name)
+			print_rule_violations(rule_name, warning_list, custom_formatted_output=custom_output)
+		# Handle rules that only have custom formatted warnings (no regular violations)
+		for rule_name, custom_output in custom_formatted_warnings.items():
+			if rule_name not in lint_results.warnings:
+				print_rule_violations(rule_name, [], custom_formatted_output=custom_output)
 
 	return warning_count, error_count
 
@@ -667,7 +709,7 @@ def process_single_file(
 		if file_timer:
 			rule_exec_ms = timer.stop()
 
-		file_warnings, file_errors = print_file_results(file_path, lint_results)
+		file_warnings, file_errors = print_file_results(lint_results, lint_engine)
 
 		if file_errors == 0 and file_warnings == 0:
 			print(f"✅ No issues found")
@@ -686,22 +728,63 @@ def process_single_file(
 	return 0, 0, None, None
 
 
+def format_rule_violations_for_file(rule_name: str, violations: list, custom_formatted_output: str = None) -> str:
+	"""
+	Format violations for a rule for file output, using custom formatting if available.
+
+	Args:
+		rule_name: Name of the rule
+		violations: List of violation strings
+		custom_formatted_output: Pre-captured custom formatted output from LintResults
+
+	Returns:
+		Formatted string for file output
+	"""
+	if not violations and not custom_formatted_output:
+		return ""
+
+	lines = []
+	lines.append(f"  {rule_name}:")
+
+	# Show regular violations first (e.g., indentation errors, data quality issues)
+	# Filter out empty placeholders (used for counting only)
+	if violations:
+		for violation in violations:
+			if violation.strip():  # Only show non-empty violations
+				lines.append(f"    • {violation}")
+
+	# Then show custom formatted output (e.g., category-grouped pylint violations)
+	if custom_formatted_output:
+		lines.append(custom_formatted_output)
+
+	lines.append("")  # Extra blank line between rules
+	lines.append("")
+
+	return '\n'.join(lines)
+
+
 def write_results_file(
 	output_path: Path, results: List[Dict], total_warnings: int, total_errors: int, processed_files: int,
-	files_with_issues: int, finalize_results=None, whitelisted_files: List[Path] = None
+	files_with_issues: int, finalize_results=None, whitelisted_files: List[Path] = None, lint_engine=None
 ):
 	"""Write linting results to an output file with detailed warnings and errors."""
 	# Ensure parent directory exists
 	output_path.parent.mkdir(parents=True, exist_ok=True)
 
+	# Get rule instances for custom formatting
+	rule_instances = {}
+	if lint_engine:
+		for rule in lint_engine.rules:
+			rule_instances[rule.__class__.__name__] = rule
+
 	with open(output_path, 'w', encoding='utf-8') as f:
-		f.write("=" * 80 + "\n")
+		f.write("=" * LINE_WIDTH + "\n")
 		f.write("IGNITION-LINT RESULTS\n")
-		f.write("=" * 80 + "\n\n")
+		f.write("=" * LINE_WIDTH + "\n\n")
 
 		# Summary
 		f.write("SUMMARY\n")
-		f.write("-" * 80 + "\n")
+		f.write("-" * LINE_WIDTH + "\n")
 		f.write(f"Files processed: {processed_files}\n")
 		f.write(f"Total warnings:  {total_warnings}\n")
 		f.write(f"Total errors:    {total_errors}\n")
@@ -714,7 +797,7 @@ def write_results_file(
 		# Whitelisted files section
 		if whitelisted_files:
 			f.write("WHITELISTED FILES (SKIPPED)\n")
-			f.write("-" * 80 + "\n")
+			f.write("-" * LINE_WIDTH + "\n")
 			f.write(f"The following {len(whitelisted_files)} file(s) were skipped due to whitelist:\n\n")
 			for file_path in whitelisted_files:
 				f.write(f"  🔒 {file_path}\n")
@@ -722,34 +805,55 @@ def write_results_file(
 
 		# Per-file results
 		f.write("PER-FILE RESULTS\n")
-		f.write("=" * 80 + "\n\n")
+		f.write("=" * LINE_WIDTH + "\n\n")
 
 		for result in results:
-			status = "✅ CLEAN" if result['warnings'] == 0 and result['errors'] == 0 else "⚠️  ISSUES"
-			f.write(f"{status} - {result['file']}\n")
-			f.write("-" * 80 + "\n")
+			# Determine status icon
+			if result['errors'] > 0:
+				status_icon = "❌"
+			elif result['warnings'] > 0:
+				status_icon = "⚠️"
+			else:
+				status_icon = "✅"
+
+			# Separator line before filename for clear blocks
+			f.write("-" * LINE_WIDTH + "\n")
+			f.write(f"{status_icon} {result['file']}\n")
+			f.write("-" * LINE_WIDTH + "\n")
 
 			lint_results = result.get('lint_results')
 			if lint_results:
-				# Write warnings with details
-				if lint_results.warnings:
-					f.write(f"⚠️  WARNINGS ({result['warnings']} total):\n\n")
-					for rule_name, warning_list in lint_results.warnings.items():
-						if warning_list:
-							f.write(f"  📋 {rule_name}:\n")
-							for warning in warning_list:
-								f.write(f"    • {warning}\n")
-							f.write("\n")
+				# Get custom formatted outputs if available
+				custom_formatted_warnings = lint_results.custom_formatted_warnings if hasattr(
+					lint_results, 'custom_formatted_warnings'
+				) else {}
+				custom_formatted_errors = lint_results.custom_formatted_errors if hasattr(
+					lint_results, 'custom_formatted_errors'
+				) else {}
 
-				# Write errors with details
+				# Write errors first (more critical)
 				if lint_results.errors:
-					f.write(f"❌ ERRORS ({result['errors']} total):\n\n")
+					f.write(f"\nERRORS ({result['errors']} total):\n\n")
 					for rule_name, error_list in lint_results.errors.items():
 						if error_list:
-							f.write(f"  📋 {rule_name}:\n")
-							for error in error_list:
-								f.write(f"    • {error}\n")
-							f.write("\n")
+							custom_output = custom_formatted_errors.get(rule_name)
+							formatted = format_rule_violations_for_file(
+								rule_name, error_list,
+								custom_formatted_output=custom_output
+							)
+							f.write(formatted)
+
+				# Write warnings second
+				if lint_results.warnings:
+					f.write(f"\nWARNINGS ({result['warnings']} total):\n\n")
+					for rule_name, warning_list in lint_results.warnings.items():
+						if warning_list:
+							custom_output = custom_formatted_warnings.get(rule_name)
+							formatted = format_rule_violations_for_file(
+								rule_name, warning_list,
+								custom_formatted_output=custom_output
+							)
+							f.write(formatted)
 			else:
 				# Fallback to just counts if lint_results not available
 				if result['warnings'] > 0:
@@ -761,35 +865,45 @@ def write_results_file(
 
 		# Batch finalization results (if any)
 		if finalize_results and (finalize_results.warnings or finalize_results.errors):
-			f.write("=" * 80 + "\n")
+			f.write("=" * LINE_WIDTH + "\n")
 			f.write("📦 BATCH RULE FINALIZATION RESULTS\n")
-			f.write("=" * 80 + "\n\n")
+			f.write("=" * LINE_WIDTH + "\n\n")
 
-			# Write finalization warnings
-			if finalize_results.warnings:
-				warning_count = sum(len(w) for w in finalize_results.warnings.values())
-				f.write(f"⚠️  WARNINGS ({warning_count} total):\n\n")
-				for rule_name, warning_list in finalize_results.warnings.items():
-					if warning_list:
-						f.write(f"  📋 {rule_name}:\n")
-						for warning in warning_list:
-							f.write(f"    • {warning}\n")
-						f.write("\n")
+			# Get custom formatted outputs if available
+			finalize_custom_formatted_warnings = finalize_results.custom_formatted_warnings if hasattr(
+				finalize_results, 'custom_formatted_warnings'
+			) else {}
+			finalize_custom_formatted_errors = finalize_results.custom_formatted_errors if hasattr(
+				finalize_results, 'custom_formatted_errors'
+			) else {}
 
-			# Write finalization errors
+			# Write finalization errors first (more critical)
 			if finalize_results.errors:
 				error_count = sum(len(e) for e in finalize_results.errors.values())
-				f.write(f"❌ ERRORS ({error_count} total):\n\n")
+				f.write(f"\nERRORS ({error_count} total):\n\n")
 				for rule_name, error_list in finalize_results.errors.items():
 					if error_list:
-						f.write(f"  📋 {rule_name}:\n")
-						for error in error_list:
-							f.write(f"    • {error}\n")
-						f.write("\n")
+						custom_output = finalize_custom_formatted_errors.get(rule_name)
+						formatted = format_rule_violations_for_file(
+							rule_name, error_list, custom_formatted_output=custom_output
+						)
+						f.write(formatted)
 
-		f.write("=" * 80 + "\n")
+			# Write finalization warnings second
+			if finalize_results.warnings:
+				warning_count = sum(len(w) for w in finalize_results.warnings.values())
+				f.write(f"\nWARNINGS ({warning_count} total):\n\n")
+				for rule_name, warning_list in finalize_results.warnings.items():
+					if warning_list:
+						custom_output = finalize_custom_formatted_warnings.get(rule_name)
+						formatted = format_rule_violations_for_file(
+							rule_name, warning_list, custom_formatted_output=custom_output
+						)
+						f.write(formatted)
+
+		f.write("=" * LINE_WIDTH + "\n")
 		f.write("END OF RESULTS\n")
-		f.write("=" * 80 + "\n")
+		f.write("=" * LINE_WIDTH + "\n")
 
 
 def aggregate_batch_results(results_path: Path) -> Optional[Dict[str, int]]:
@@ -1098,9 +1212,7 @@ def main():
 	# Handle whitelist generation mode
 	if args.generate_whitelist:
 		generate_whitelist(
-			patterns=args.generate_whitelist,
-			output_file=args.whitelist_output,
-			append=args.append,
+			patterns=args.generate_whitelist, output_file=args.whitelist_output, append=args.append,
 			dry_run=args.dry_run
 		)
 		sys.exit(0)  # Exit after generating whitelist
@@ -1194,7 +1306,7 @@ def main():
 			if len(file_paths) == 1:
 				# Print warnings
 				if finalize_warning_count > 0:
-					print(f"\n⚠️  Found {finalize_warning_count} warnings:")
+					print(f"\n⚠️ Found {finalize_warning_count} warnings:")
 					for rule_name, warning_list in finalize_results.warnings.items():
 						if warning_list:
 							print(f"  📋 {rule_name} (warning):")
@@ -1220,7 +1332,7 @@ def main():
 				# Print warnings and errors
 				for rule_name, warning_list in finalize_results.warnings.items():
 					for warning in warning_list:
-						print(f"⚠️  {rule_name}: {warning}")
+						print(f"⚠️ {rule_name}: {warning}")
 						total_warnings += 1
 
 				for rule_name, error_list in finalize_results.errors.items():
@@ -1248,7 +1360,7 @@ def main():
 		results_path = make_unique_output_path(Path(args.results_output))
 		write_results_file(
 			results_path, results_buffer, total_warnings, total_errors, processed_files, files_with_issues,
-			finalize_results, whitelisted_files
+			finalize_results, whitelisted_files, lint_engine
 		)
 		print("\n" + f"📝 Results written to: {results_path}")
 

@@ -1,0 +1,21 @@
+{
+  "propConfig.custom.status.binding.config.expression": "'Status'",
+  "propConfig.custom.status.binding.transforms[0].code": "\t# Transform with violations\n\timport os\n\timport datetime\n\t\n\t# W0611: Unused imports\n\t# E0602: Undefined variable\n\tvalue = value + missing_var\n\t\n\treturn value",
+  "propConfig.custom.status.binding.transforms[0].type": "script",
+  "propConfig.custom.status.binding.type": "expr",
+  "root.root.children[0].SubmitButton.events.component.onActionPerformed.config.script": "\t# This script has multiple pylint violations\n\timport json\n\timport sys\n\t\n\t# E0602: Undefined variable\n\tprint(undefined_variable)\n\t\n\t# W0611: Unused import (json, sys above)\n\t# E1101: No member error\n\tresult = some_object.nonexistent_method()\n\t\n\t# C0114: Missing docstring\n\tdef helper_function():\n\t\tpass",
+  "root.root.children[0].SubmitButton.events.component.onActionPerformed.scope": "G",
+  "root.root.children[0].SubmitButton.events.component.onActionPerformed.type": "script",
+  "root.root.children[0].SubmitButton.meta.name": "SubmitButton",
+  "root.root.children[0].SubmitButton.scripts.customMethods[0].name": "custom_method_with_errors",
+  "root.root.children[0].SubmitButton.scripts.customMethods[0].script": "\t# Custom method with fatal error\n\t# F0401: Unable to import\n\timport nonexistent_module\n\t\n\t# R0913: Too many arguments (simulated)\n\tdef complex_function(a, b, c, d, e, f, g):\n\t\treturn a + b + c",
+  "root.root.children[0].SubmitButton.scripts.messageHandlers[0].messageType": "test-message",
+  "root.root.children[0].SubmitButton.scripts.messageHandlers[0].pageScope": true,
+  "root.root.children[0].SubmitButton.scripts.messageHandlers[0].script": "\t# Message handler with convention violations\n\t# C0103: Invalid name\n\tMyBadVariable = 123\n\t\n\t# C0114: Missing module docstring\n\tdef process():\n\t\tpass",
+  "root.root.children[0].SubmitButton.scripts.messageHandlers[0].sessionScope": false,
+  "root.root.children[0].SubmitButton.scripts.messageHandlers[0].viewScope": false,
+  "root.root.children[0].SubmitButton.type": "ia.input.button",
+  "root.root.meta.name": "root",
+  "root.root.props.direction": "column",
+  "root.root.type": "ia.container.flex"
+}

@@ -451,6 +451,75 @@ Rules are configured via JSON files (default: `rule_config.json`):
 }
 ```
 
+### Pylint Category Mapping
+
+The `PylintScriptRule` supports configurable category mapping to control how Pylint's message categories map to ignition-lint severity levels.
+
+**Pylint Categories:**
+- **F** (Fatal): Prevents analysis - syntax errors, import failures
+- **E** (Error): Likely bugs - undefined variables, attribute errors
+- **W** (Warning): Potential problems - unused imports, variables
+- **C** (Convention): Style violations - missing docstrings, naming
+- **R** (Refactor): Code quality - too many arguments, complexity
+
+**Default mapping** (Fatal/Error → error, Warning/Convention/Refactor → warning):
+```json
+{
+  "PylintScriptRule": {
+    "enabled": true,
+    "kwargs": {
+      "pylintrc": ".config/.pylintrc",
+      "category_mapping": {
+        "F": "error",
+        "E": "error",
+        "W": "warning",
+        "C": "warning",
+        "R": "warning"
+      }
+    }
+  }
+}
+```
+
+**Strict mode** (everything is an error):
+```json
+{
+  "PylintScriptRule": {
+    "enabled": true,
+    "kwargs": {
+      "pylintrc": ".config/.pylintrc",
+      "category_mapping": {
+        "F": "error",
+        "E": "error",
+        "W": "error",
+        "C": "error",
+        "R": "error"
+      }
+    }
+  }
+}
+```
+
+**Output format** - violations are grouped by category with mapping legend:
+```
+❌ PylintScriptRule (error):
+
+  📚 Category Mapping:
+    Fatal (F) → Error
+    Error (E) → Error
+    Warning (W) → Warning
+
+  📋 Violations by Category:
+
+    ❌ Error (E) → Error:
+      • root.Button.onActionPerformed: Line 5: Undefined variable 'x' (E0602)
+
+    ⚠️  Warning (W) → Warning:
+      • root.Label.transform: Line 2: Unused import 'json' (W0611)
+```
+
+**For detailed examples and best practices**, see [docs/pylint-category-mapping-examples.md](docs/pylint-category-mapping-examples.md).
+
 ## Adding New Rules
 
 The framework supports **extensible rule registration** - developers can add new rules without modifying core files:

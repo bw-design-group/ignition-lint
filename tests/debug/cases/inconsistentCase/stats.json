@@ -34,6 +34,18 @@
         "transform"
       ]
     },
+    "ComponentReferenceValidationRule": {
+      "applicable_node_count": 7,
+      "target_types": [
+        "component",
+        "custom_method",
+        "event_handler",
+        "expression_binding",
+        "message_handler",
+        "property_binding",
+        "transform"
+      ]
+    },
     "ExampleBindingCountRule": {
       "applicable_node_count": 7,
       "target_types": [
