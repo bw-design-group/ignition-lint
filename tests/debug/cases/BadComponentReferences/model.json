@@ -1,12 +1,24 @@
 {
   "bindings": {
-    "count": 13,
+    "count": 17,
     "nodes": [
       {
         "config": {},
         "expression": "self.getSibling('OtherLabel').props.text + ' - Updated'",
         "node_type": "expression_binding",
         "path": "propConfig.props.root.children.0.props.text"
+      },
+      {
+        "config": {},
+        "expression": "{../StatusLabel.position.display} || {../ContainerWithBadScript.position.display}",
+        "node_type": "expression_binding",
+        "path": "root.root.children[0].BadButton.propConfig.props.enabled"
+      },
+      {
+        "config": {},
+        "expression": "\"Click Me\"",
+        "node_type": "expression_binding",
+        "path": "root.root.children[0].BadButton.propConfig.props.text"
       },
       {
         "config": {},
@@ -46,9 +58,21 @@
       },
       {
         "config": {},
+        "expression": "{this.meta.name}",
+        "node_type": "expression_binding",
+        "path": "root.root.children[5].TopContainer.children[2].ParentContainerProperty.children[4].GrandParentProperty.propConfig.meta.tooltip.text"
+      },
+      {
+        "config": {},
         "node_type": "property_binding",
         "path": "root.root.children[5].TopContainer.children[2].ParentContainerProperty.children[4].GrandParentProperty.propConfig.props.enabled",
         "target_path": "..../TopContainer.position.display"
+      },
+      {
+        "config": {},
+        "node_type": "property_binding",
+        "path": "root.root.children[5].TopContainer.children[2].ParentContainerProperty.children[4].GrandParentProperty.propConfig.props.text",
+        "target_path": "this.meta.name"
       },
       {
         "config": {},
@@ -377,7 +401,7 @@
     ]
   },
   "expression_bindings": {
-    "count": 6,
+    "count": 9,
     "nodes": [
       {
         "config": {},
@@ -387,9 +411,27 @@
       },
       {
         "config": {},
+        "expression": "{../StatusLabel.position.display} || {../ContainerWithBadScript.position.display}",
+        "node_type": "expression_binding",
+        "path": "root.root.children[0].BadButton.propConfig.props.enabled"
+      },
+      {
+        "config": {},
+        "expression": "\"Click Me\"",
+        "node_type": "expression_binding",
+        "path": "root.root.children[0].BadButton.propConfig.props.text"
+      },
+      {
+        "config": {},
         "expression": "self.parent.getChild('DataSource').props.data",
         "node_type": "expression_binding",
         "path": "root.root.children[2].ContainerWithBadScript.propConfig.props.children"
+      },
+      {
+        "config": {},
+        "expression": "{this.meta.name}",
+        "node_type": "expression_binding",
+        "path": "root.root.children[5].TopContainer.children[2].ParentContainerProperty.children[4].GrandParentProperty.propConfig.meta.tooltip.text"
       },
       {
         "config": {},
@@ -451,7 +493,7 @@
     ]
   },
   "properties": {
-    "count": 58,
+    "count": 57,
     "nodes": [
       {
         "name": "shrink",
@@ -459,13 +501,6 @@
         "path": "root.root.children.BadButton.position.shrink",
         "value": 0,
         "value_type": "int"
-      },
-      {
-        "name": "text",
-        "node_type": "property",
-        "path": "root.root.children.BadButton.props.text",
-        "value": "Click Me",
-        "value_type": "str"
       },
       {
         "name": "shrink",
@@ -862,7 +897,7 @@
     ]
   },
   "property_bindings": {
-    "count": 7,
+    "count": 8,
     "nodes": [
       {
         "config": {},
@@ -899,6 +934,12 @@
         "node_type": "property_binding",
         "path": "root.root.children[5].TopContainer.children[2].ParentContainerProperty.children[4].GrandParentProperty.propConfig.props.enabled",
         "target_path": "..../TopContainer.position.display"
+      },
+      {
+        "config": {},
+        "node_type": "property_binding",
+        "path": "root.root.children[5].TopContainer.children[2].ParentContainerProperty.children[4].GrandParentProperty.propConfig.props.text",
+        "target_path": "this.meta.name"
       },
       {
         "config": {},

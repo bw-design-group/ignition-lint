@@ -4,8 +4,10 @@ Fixed NamePatternRule that properly handles node-specific pattern configurations
 import re
 from typing import Dict, Optional, Set, Callable, Any
 from dataclasses import dataclass
-from ..common import LintingRule
+from ..common import LintingRule, FixableMixin
 from ...model.node_types import ViewNode, NodeType
+from ...common.fix_operations import Fix, FixOperation, FixOperationType
+from ...common.reference_finder import ComponentReferenceFinder
 
 
 @dataclass
@@ -37,10 +39,12 @@ class NamePatternConfig:
 			raise ValueError(f"severity must be 'warning' or 'error', got '{self.severity}'")
 
 
-class NamePatternRule(LintingRule):
+class NamePatternRule(FixableMixin, LintingRule):
 	"""
 	A flexible naming rule that can validate names for different types of nodes.
 	Supports predefined naming conventions, custom regex patterns, and node-specific configurations.
+	Also supports auto-fix: when fix context is available, generates Fix objects to rename
+	components to match the configured naming convention.
 	"""
 
 	@classmethod
@@ -192,7 +196,8 @@ class NamePatternRule(LintingRule):
 				auto_detect_abbreviations=kwargs.get('auto_detect_abbreviations', True),
 				severity=kwargs.get('severity', severity)  # Use provided severity or default
 			)
-		# Store configurations - use properties for backward compatibility access
+		# Flattened JSON data (set by LintEngine via set_flattened_json)
+		self.flattened_json = {}
 
 		# Advanced configurations
 		self.node_type_specific_rules = node_type_specific_rules or {}
@@ -219,6 +224,15 @@ class NamePatternRule(LintingRule):
 
 		# Process node-specific rules to ensure they have patterns
 		self._process_node_specific_rules()
+
+	def set_flattened_json(self, flattened_json):
+		"""Store flattened JSON for reference finding during fix generation."""
+		self.flattened_json = flattened_json
+
+	def process_nodes(self, nodes):
+		"""Override to reset fixes before processing."""
+		self.reset_fixes()
+		super().process_nodes(nodes)
 
 	# Properties for backward compatibility
 	@property
@@ -419,7 +433,9 @@ class NamePatternRule(LintingRule):
 			node_convention = self._get_node_specific_config(node_type, 'convention', self.convention)
 
 			# Show suggestions if either suggestion_convention or convention is set
-			if node_suggestion_convention or (node_convention and node_convention in self.NAMING_CONVENTIONS):
+			if node_suggestion_convention or (
+				node_convention and node_convention in self.NAMING_CONVENTIONS
+			):
 				suggestion = self._suggest_name(name, node_type)
 				if suggestion:
 					error_msg += f" (suggestion: '{suggestion}')"
@@ -443,7 +459,12 @@ class NamePatternRule(LintingRule):
 				node_severity = self._get_node_specific_config(
 					node.node_type, 'severity', self.severity
 				)
-				self.add_violation(f"{node.path}: {error}", node_severity)
+				violation_msg = f"{node.path}: {error}"
+				self.add_violation(violation_msg, node_severity)
+
+				# Generate fix for component naming violations when fix context is available
+				if node.node_type == NodeType.COMPONENT and self.has_fix_context:
+					self._generate_component_fix(node, name, violation_msg)
 
 	# Specific visit methods that delegate to the generic method
 	def visit_component(self, node: ViewNode):
@@ -462,6 +483,63 @@ class NamePatternRule(LintingRule):
 		self.visit_generic(node)
 
 	# visit_event_handler intentionally not implemented - event handler names are framework-defined
+
+	def _generate_component_fix(self, node: ViewNode, current_name: str, violation_msg: str):
+		"""
+		Generate a Fix object for a component naming violation.
+
+		Checks for references to determine if the fix is safe (no references)
+		or unsafe (references need updating too).
+		"""
+		suggested_name = self._suggest_name(current_name, node.node_type)
+		if not suggested_name or suggested_name == current_name:
+			return
+
+		# Get the JSON path to this component's meta.name
+		name_path = self._path_translator.get_component_name_path(node.path)
+		if not name_path:
+			return
+
+		# Create the primary rename operation
+		rename_op = FixOperation(
+			operation=FixOperationType.SET_VALUE, json_path=name_path, old_value=current_name,
+			new_value=suggested_name, description=f"Rename component '{current_name}' to '{suggested_name}'"
+		)
+
+		# Check for references to this component and self-name bindings
+		ref_finder = ComponentReferenceFinder(self.flattened_json, self._path_translator)
+		references = ref_finder.find_references(current_name)
+		has_self_name_ref = ref_finder.has_self_name_binding(node.path)
+
+		if references or has_self_name_ref:
+			# Unsafe fix: references or this.meta.name bindings exist
+			all_operations = [rename_op]
+			if references:
+				ref_operations = ref_finder.build_rename_operations(
+					current_name, suggested_name, references
+				)
+				all_operations.extend(ref_operations)
+
+			safety_parts = []
+			if has_self_name_ref:
+				safety_parts.append("component uses 'this.meta.name' binding")
+			if references:
+				safety_parts.append(f"updates {len(references)} reference(s)")
+
+			fix = Fix(
+				rule_name=self.error_key, violation_message=violation_msg,
+				description=f"Rename component '{current_name}' to '{suggested_name}'",
+				operations=all_operations, is_safe=False, safety_notes="; ".join(safety_parts)
+			)
+		else:
+			# Safe fix: no references to update
+			fix = Fix(
+				rule_name=self.error_key, violation_message=violation_msg,
+				description=f"Rename component '{current_name}' to '{suggested_name}'",
+				operations=[rename_op], is_safe=True
+			)
+
+		self.add_fix(fix)
 
 	def _process_abbreviations(self, name: str, node_type: NodeType) -> str:
 		"""Process a name to handle abbreviations according to the naming convention."""

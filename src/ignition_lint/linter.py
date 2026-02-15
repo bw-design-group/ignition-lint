@@ -21,6 +21,7 @@ class LintResults(NamedTuple):
 	rule_timings: Dict[str, float] = {}
 	custom_formatted_warnings: Dict[str, str] = {}  # rule_name -> custom formatted warnings
 	custom_formatted_errors: Dict[str, str] = {}  # rule_name -> custom formatted errors
+	fixes: List[Any] = []  # List of Fix objects from fixable rules
 
 
 class LintEngine:
@@ -43,9 +44,18 @@ class LintEngine:
 
 	def process(
 		self, flattened_json: Dict[str, Any], source_file_path: Optional[str] = None,
-		enable_timing: bool = False
+		enable_timing: bool = False, *, json_data=None, path_translator=None
 	) -> LintResults:
-		"""Lint the given flattened JSON and return warnings and errors."""
+		"""
+		Lint the given flattened JSON and return warnings and errors.
+
+		Args:
+			flattened_json: The flattened JSON data to lint.
+			source_file_path: Optional path to the source file being linted.
+			enable_timing: Whether to time rule execution.
+			json_data: Optional original JSON data (needed for fix mode).
+			path_translator: Optional PathTranslator instance (needed for fix mode).
+		"""
 		# Build the object model (only if flattened_json changed)
 		if self.flattened_json is not flattened_json:
 			self.flattened_json = flattened_json
@@ -80,13 +90,7 @@ class LintEngine:
 			if enable_timing:
 				start_time = time.perf_counter()
 
-			# Give rules access to flattened JSON if they need it
-			if hasattr(rule, 'set_flattened_json'):
-				rule.set_flattened_json(self.flattened_json)
-
-			# Give rules access to source file path if they need it (for batch mode grouping)
-			if hasattr(rule, 'set_source_file'):
-				rule.set_source_file(source_file_path)
+			self._prepare_rule(rule, source_file_path, json_data, path_translator)
 
 			# Let the rule process all nodes it's interested in
 			rule.process_nodes(all_nodes)
@@ -98,14 +102,7 @@ class LintEngine:
 
 			# Capture custom formatted output BEFORE collecting violations
 			# (this must happen before process_nodes resets structured violations)
-			if hasattr(rule, 'format_violations_grouped'):
-				formatted_output = rule.format_violations_grouped()
-				if formatted_output:
-					# Extract warnings and errors from the dict
-					if formatted_output.get('warnings'):
-						custom_formatted_warnings[rule.error_key] = formatted_output['warnings']
-					if formatted_output.get('errors'):
-						custom_formatted_errors[rule.error_key] = formatted_output['errors']
+			self._collect_custom_formatted(rule, custom_formatted_warnings, custom_formatted_errors)
 
 			# Collect warnings from this rule
 			if rule.warnings:
@@ -115,6 +112,9 @@ class LintEngine:
 			if rule.errors:
 				errors[rule.error_key] = rule.errors
 
+		# Collect fixes from fixable rules
+		all_fixes = self._collect_fixes()
+
 		return LintResults(
 			warnings=warnings,
 			errors=errors,
@@ -122,7 +122,36 @@ class LintEngine:
 			rule_timings=rule_timings,
 			custom_formatted_warnings=custom_formatted_warnings,
 			custom_formatted_errors=custom_formatted_errors,
+			fixes=all_fixes,
 		)
+
+	def _prepare_rule(self, rule, source_file_path, json_data, path_translator):
+		"""Set up a rule with context before processing nodes."""
+		if hasattr(rule, 'set_flattened_json'):
+			rule.set_flattened_json(self.flattened_json)
+		if hasattr(rule, 'set_source_file'):
+			rule.set_source_file(source_file_path)
+		if json_data is not None and path_translator is not None:
+			if hasattr(rule, 'set_fix_context'):
+				rule.set_fix_context(json_data, path_translator)
+
+	def _collect_custom_formatted(self, rule, custom_formatted_warnings, custom_formatted_errors):
+		"""Capture custom formatted output from a rule."""
+		if hasattr(rule, 'format_violations_grouped'):
+			formatted_output = rule.format_violations_grouped()
+			if formatted_output:
+				if formatted_output.get('warnings'):
+					custom_formatted_warnings[rule.error_key] = formatted_output['warnings']
+				if formatted_output.get('errors'):
+					custom_formatted_errors[rule.error_key] = formatted_output['errors']
+
+	def _collect_fixes(self) -> List[Any]:
+		"""Collect fixes from all fixable rules."""
+		all_fixes = []
+		for rule in self.rules:
+			if hasattr(rule, 'supports_fix') and rule.supports_fix:
+				all_fixes.extend(rule.get_fixes())
+		return all_fixes
 
 	def finalize_batch_rules(self, enable_timing: bool = False) -> LintResults:
 		"""
