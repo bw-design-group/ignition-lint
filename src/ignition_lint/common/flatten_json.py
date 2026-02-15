@@ -46,7 +46,7 @@ def format_json(obj):
 	Returns:
 		str: Formatted JSON string.
 	"""
-	return json.dumps(obj, indent=2, ensure_ascii=False).rstrip()
+	return json.dumps(obj, indent=2, ensure_ascii=True).rstrip()
 
 
 def read_json_file(file_path):
