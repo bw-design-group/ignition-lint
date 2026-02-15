@@ -1,12 +1,24 @@
 {
   "bindings": {
-    "count": 15,
+    "count": 17,
     "nodes": [
       {
         "config": {},
         "expression": "self.getSibling('OtherLabel').props.text + ' - Updated'",
         "node_type": "expression_binding",
         "path": "propConfig.props.root.children.0.props.text"
+      },
+      {
+        "config": {},
+        "expression": "{../StatusLabel.position.display} || {../ContainerWithBadScript.position.display}",
+        "node_type": "expression_binding",
+        "path": "root.root.children[0].BadButton.propConfig.props.enabled"
+      },
+      {
+        "config": {},
+        "expression": "\"Click Me\"",
+        "node_type": "expression_binding",
+        "path": "root.root.children[0].BadButton.propConfig.props.text"
       },
       {
         "config": {},
@@ -389,13 +401,25 @@
     ]
   },
   "expression_bindings": {
-    "count": 7,
+    "count": 9,
     "nodes": [
       {
         "config": {},
         "expression": "self.getSibling('OtherLabel').props.text + ' - Updated'",
         "node_type": "expression_binding",
         "path": "propConfig.props.root.children.0.props.text"
+      },
+      {
+        "config": {},
+        "expression": "{../StatusLabel.position.display} || {../ContainerWithBadScript.position.display}",
+        "node_type": "expression_binding",
+        "path": "root.root.children[0].BadButton.propConfig.props.enabled"
+      },
+      {
+        "config": {},
+        "expression": "\"Click Me\"",
+        "node_type": "expression_binding",
+        "path": "root.root.children[0].BadButton.propConfig.props.text"
       },
       {
         "config": {},
@@ -469,7 +493,7 @@
     ]
   },
   "properties": {
-    "count": 58,
+    "count": 57,
     "nodes": [
       {
         "name": "shrink",
@@ -477,13 +501,6 @@
         "path": "root.root.children.BadButton.position.shrink",
         "value": 0,
         "value_type": "int"
-      },
-      {
-        "name": "text",
-        "node_type": "property",
-        "path": "root.root.children.BadButton.props.text",
-        "value": "Click Me",
-        "value_type": "str"
       },
       {
         "name": "shrink",
