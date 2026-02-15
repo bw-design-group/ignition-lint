@@ -15,6 +15,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Mixed tabs/spaces detection with clear error messages [369173a]
 - Tests for script indentation with comments [e85b26f]
 - Implement feature for custom formatting output by rule and configured pylint category mapping[c7c1402]
+- Support for BadComponentReferenceRule severity to be defined by user in rule config [ce39662]
 
 ### Changed
 - Optimize script error messages in non-batch mode of pylint rule [11a7683]
