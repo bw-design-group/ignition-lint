@@ -62,7 +62,7 @@ def format_json(obj):
 	Returns:
 		str: Formatted JSON string with Ignition-style unicode escapes.
 	"""
-	result = json.dumps(obj, indent=2, ensure_ascii=True).rstrip()
+	result = json.dumps(obj, indent=2, ensure_ascii=False).rstrip()
 	for char, escape in IGNITION_UNICODE_ESCAPES.items():
 		result = result.replace(char, escape)
 	return result
