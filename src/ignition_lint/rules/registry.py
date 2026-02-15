@@ -191,7 +191,7 @@ class RuleRegistry:
 _global_registry = RuleRegistry()
 
 
-def register_rule(rule_class: Type[LintingRule], rule_name: Optional[str] = None) -> str:
+def register_rule(rule_class: Type[LintingRule], rule_name: Optional[str] = None) -> Type[LintingRule]:
 	"""
 	Decorator and function for registering rules.
 
@@ -206,7 +206,8 @@ def register_rule(rule_class: Type[LintingRule], rule_name: Optional[str] = None
 		# or with custom name
 		register_rule(MyRule, "CustomRuleName")
 	"""
-	return _global_registry.register_rule(rule_class, rule_name)
+	_global_registry.register_rule(rule_class, rule_name)
+	return rule_class  # Return the class for proper decorator behavior
 
 
 def get_registry() -> RuleRegistry:
