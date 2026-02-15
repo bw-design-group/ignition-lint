@@ -102,9 +102,7 @@ class LintEngine:
 
 			# Capture custom formatted output BEFORE collecting violations
 			# (this must happen before process_nodes resets structured violations)
-			self._collect_custom_formatted(
-				rule, custom_formatted_warnings, custom_formatted_errors
-			)
+			self._collect_custom_formatted(rule, custom_formatted_warnings, custom_formatted_errors)
 
 			# Collect warnings from this rule
 			if rule.warnings:
