@@ -75,7 +75,9 @@
   "BadComponentReferenceRule": {
     "enabled": true,
     "kwargs": {
-      "_comment": "Detects brittle component references like .getSibling(), .getParent(), .getChild(), .parent, .children that create tight coupling to view structure. Use view.custom properties or message handling instead."
+      "_comment": "Detects brittle component references like .getSibling(), .getParent(), .getChild(), .parent, .children that create tight coupling to view structure. Use view.custom properties or message handling instead.",
+      "severity": "error",
+      "_severity_comment": "Optional: Set to 'warning' if you want to detect these patterns without blocking builds. Use 'error' (default) for strict enforcement to prevent brittle view structure dependencies."
     }
   },
   "ComponentReferenceValidationRule": {
@@ -96,7 +98,7 @@
       "PylintScriptRule": "error - syntax errors, undefined variables, etc.",
       "UnusedCustomPropertiesRule": "error - dead code that should be removed",
       "ExcessiveContextDataRule": "error - architectural issue, data should be in databases",
-      "BadComponentReferenceRule": "error - brittle view structure dependencies that break during refactoring",
+      "BadComponentReferenceRule": "error (configurable) - brittle view structure dependencies that break during refactoring",
       "ComponentReferenceValidationRule": "error - references to non-existent components cause runtime errors"
     },
     "note": "Users cannot configure severity levels - they are determined by what each rule checks.",
@@ -120,6 +122,16 @@
       "example_strict": "To treat all violations as errors: {\"F\": \"error\", \"E\": \"error\", \"W\": \"error\", \"C\": \"error\", \"R\": \"error\"}",
       "debug_dir": "Directory for pylint debug files. Defaults to .ignition-lint/debug/ in user repos, tests/debug/ in ignition-lint repo. Files are cleaned up at start of each run.",
       "debug": "When true, always saves debug files. When false, only saves when violations found. Debug files help troubleshoot pylint issues."
+    },
+    "BadComponentReferenceRule_config": {
+      "severity": "Configurable severity level: 'error' (default) or 'warning'",
+      "severity_use_cases": {
+        "error": "Recommended for most projects - strictly enforces best practices to prevent brittle view structure dependencies that break during refactoring",
+        "warning": "Use when migrating legacy views or during gradual adoption - allows you to detect these patterns without blocking builds/commits"
+      },
+      "example_warning": "To use as warnings: \"kwargs\": {\"severity\": \"warning\"}",
+      "forbidden_patterns": "Optional: Customize the list of forbidden patterns to detect. Defaults include .getSibling(), .getParent(), .getChild(), .parent, .children, and path traversal (../, ./)",
+      "case_sensitive": "Optional: Set to false for case-insensitive pattern matching. Default: true"
     }
   }
 }

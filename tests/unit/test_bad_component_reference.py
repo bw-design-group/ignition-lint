@@ -31,7 +31,9 @@ class TestBadComponentReferenceRule(BaseRuleTest):
 
 			# Should detect .getSibling( pattern
 			found_get_sibling = any(".getSibling(" in error for error in rule_errors)
-			self.assertTrue(found_get_sibling, f"Should detect .getSibling pattern. Found errors: {rule_errors}")
+			self.assertTrue(
+				found_get_sibling, f"Should detect .getSibling pattern. Found errors: {rule_errors}"
+			)
 		except FileNotFoundError:
 			self.skipTest("BadComponentReferences test case not found")
 
@@ -106,8 +108,7 @@ class TestBadComponentReferenceRule(BaseRuleTest):
 	def test_case_sensitivity_option(self):
 		"""Test case sensitivity configuration."""
 		# Test case-insensitive mode
-		case_insensitive_config = get_test_config("BadComponentReferenceRule",
-													case_sensitive=False)
+		case_insensitive_config = get_test_config("BadComponentReferenceRule", case_sensitive=False)
 
 		script_content = """
 		def test():
@@ -123,8 +124,9 @@ class TestBadComponentReferenceRule(BaseRuleTest):
 
 	def test_custom_forbidden_methods(self):
 		"""Test custom forbidden methods configuration."""
-		custom_config = get_test_config("BadComponentReferenceRule",
-										forbidden_patterns=['.getSibling(', '.customBadMethod('])
+		custom_config = get_test_config(
+			"BadComponentReferenceRule", forbidden_patterns=['.getSibling(', '.customBadMethod(']
+		)
 
 		script_content = """
 		def test():
@@ -164,8 +166,47 @@ class TestBadComponentReferenceRule(BaseRuleTest):
 				self.run_lint_on_mock_view(mock_view, self.rule_config)
 
 				rule_errors = self.get_errors_for_rule("BadComponentReferenceRule")
-				self.assertEqual(len(rule_errors), 1,
-								f"Should detect bad reference in {script_type} scripts")
+				self.assertEqual(
+					len(rule_errors), 1, f"Should detect bad reference in {script_type} scripts"
+				)
+
+	def test_severity_configuration_error(self):
+		"""Test that severity='error' adds violations to errors list."""
+		error_config = get_test_config("BadComponentReferenceRule", severity="error")
+
+		script_content = """
+		def badMethod():
+			return self.getSibling("target")
+		"""
+
+		mock_view = create_mock_script("message_handler", script_content)
+		self.run_lint_on_mock_view(mock_view, error_config)
+
+		# Should be in errors, not warnings
+		rule_errors = self.get_errors_for_rule("BadComponentReferenceRule")
+		rule_warnings = self.get_warnings_for_rule("BadComponentReferenceRule")
+
+		self.assertEqual(len(rule_errors), 1, "Should report as error when severity='error'")
+		self.assertEqual(len(rule_warnings), 0, "Should not report as warning when severity='error'")
+
+	def test_severity_configuration_warning(self):
+		"""Test that severity='warning' adds violations to warnings list."""
+		warning_config = get_test_config("BadComponentReferenceRule", severity="warning")
+
+		script_content = """
+		def badMethod():
+			return self.getParent()
+		"""
+
+		mock_view = create_mock_script("message_handler", script_content)
+		self.run_lint_on_mock_view(mock_view, warning_config)
+
+		# Should be in warnings, not errors
+		rule_errors = self.get_errors_for_rule("BadComponentReferenceRule")
+		rule_warnings = self.get_warnings_for_rule("BadComponentReferenceRule")
+
+		self.assertEqual(len(rule_errors), 0, "Should not report as error when severity='warning'")
+		self.assertEqual(len(rule_warnings), 1, "Should report as warning when severity='warning'")
 
 
 class TestBadComponentReferenceEdgeCases(BaseRuleTest):
