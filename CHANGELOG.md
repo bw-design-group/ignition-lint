@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.4.0] - 2026-02-15
+
 ### Added
 - Auto-fix framework with `--fix`, `--fix-unsafe`, `--fix-dry-run`, and `--fix-rules` CLI flags [fd17cbf]
 - NamePatternRule generates auto-fix suggestions to rename components to match naming conventions [fd17cbf]
@@ -260,7 +262,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Initial tracked release
 
-[Unreleased]: https://github.com/design-group/ignition-lint/compare/v0.3.6...HEAD
+[Unreleased]: https://github.com/design-group/ignition-lint/compare/v0.4.0...HEAD
+[0.4.0]: https://github.com/design-group/ignition-lint/compare/v0.3.6...v0.4.0
 [0.3.6]: https://github.com/design-group/ignition-lint/compare/v0.3.5...v0.3.6
 [0.3.5]: https://github.com/design-group/ignition-lint/compare/v0.3.4...v0.3.5
 [0.3.4]: https://github.com/design-group/ignition-lint/compare/v0.3.3...v0.3.4
