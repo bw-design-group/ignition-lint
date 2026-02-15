@@ -233,7 +233,63 @@ ignition-lint --files "**/view.json" --stats-only
 
 # Debug specific node types
 ignition-lint --config rule_config.json --files "**/view.json" --debug-nodes expression_binding property
+
+# Whitelist Configuration (Managing Technical Debt)
+
+# Generate whitelist from legacy files
+ignition-lint --generate-whitelist "views/legacy/**/*.json" "views/deprecated/**/*.json"
+
+# Use whitelist during linting (whitelisted files are skipped)
+ignition-lint --config rule_config.json --whitelist .whitelist.txt --files "**/view.json"
+
+# Custom whitelist file
+ignition-lint --config rule_config.json --whitelist path/to/custom-whitelist.txt --files "**/view.json"
+
+# Append to existing whitelist
+ignition-lint --generate-whitelist "views/temp/**/*.json" --append
+
+# Dry run (preview without writing)
+ignition-lint --generate-whitelist "views/legacy/**/*.json" --dry-run
+
+# Disable whitelist (overrides --whitelist)
+ignition-lint --config rule_config.json --whitelist .whitelist.txt --no-whitelist --files "**/view.json"
+
+# Verbose mode (show ignored files)
+ignition-lint --config rule_config.json --whitelist .whitelist.txt --files "**/view.json" --verbose
 ```
+
+**Whitelist File Format:**
+- **Filename:** `.whitelist.txt` (recommended default)
+- **Format:** Plain text, one file path per line (relative to repository root)
+- **Comments:** Lines starting with `#` are ignored
+- **Best Practice:** Document WHY files are whitelisted (JIRA tickets, dates, etc.)
+
+**Example Whitelist:**
+```text
+# Legacy views - scheduled for refactor Q2 2026 (JIRA-1234)
+views/legacy/OldDashboard/view.json
+views/legacy/MainScreen/view.json
+
+# Deprecated views - being replaced
+views/deprecated/TempView/view.json
+views/deprecated/OldWidget/view.json
+```
+
+**Pre-commit Integration:**
+```yaml
+# .pre-commit-config.yaml
+repos:
+  - repo: https://github.com/your-org/ignition-lint
+    rev: v1.0.0
+    hooks:
+      - id: ignition-lint
+        # Add whitelist argument to use project-specific whitelist
+        args: ['--config=.ignition-lint-precommit.json', '--whitelist=.whitelist.txt', '--files']
+```
+
+**Important:** By default, ignition-lint does NOT use a whitelist unless you explicitly specify `--whitelist <path>`.
+
+**For detailed documentation**, see [docs/whitelist-guide.md](docs/whitelist-guide.md).
 
 ## Debugging and Analysis
 
