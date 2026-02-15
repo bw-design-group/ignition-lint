@@ -46,7 +46,9 @@ class BadComponentReferenceRule(LintingRule):
 			'self.parent\n',
 			'self.children\n',
 			'self.parent\r',
-			'self.children\r'
+			'self.children\r',
+			'../',  # Relative path traversal in expressions
+			'./',  # Current path traversal in expressions
 		]
 		# Allow case-insensitive matching
 		self.case_sensitive = case_sensitive

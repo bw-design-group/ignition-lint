@@ -1,0 +1,168 @@
+{
+  "bindings": {
+    "count": 1,
+    "nodes": [
+      {
+        "config": {},
+        "expression": "'Status'",
+        "node_type": "expression_binding",
+        "path": "propConfig.custom.status"
+      }
+    ]
+  },
+  "components": {
+    "count": 2,
+    "nodes": [
+      {
+        "name": "SubmitButton",
+        "node_type": "component",
+        "path": "root.root.children[0].SubmitButton",
+        "properties_count": 0,
+        "type": "ia.input.button"
+      },
+      {
+        "name": "root",
+        "node_type": "component",
+        "path": "root.root",
+        "properties_count": 0,
+        "type": "ia.container.flex"
+      }
+    ]
+  },
+  "custom_methods": {
+    "count": 1,
+    "nodes": [
+      {
+        "name": "custom_method_with_errors",
+        "node_type": "custom_method",
+        "params": [],
+        "path": "root.root.children[0].SubmitButton.scripts.customMethods[0]",
+        "script_length": 193,
+        "script_preview": "\t# Custom method with fatal error\n\t# F0401: Unable to import\n\timport nonexistent_module\n\t\n\t# R0913: ..."
+      }
+    ]
+  },
+  "event_handlers": {
+    "count": 1,
+    "nodes": [
+      {
+        "event_domain": "component",
+        "event_type": "onActionPerformed",
+        "node_type": "event_handler",
+        "path": "root.root.children[0].SubmitButton.events.component.onActionPerformed",
+        "scope": "G",
+        "script_length": 302,
+        "script_preview": "\t# This script has multiple pylint violations\n\timport json\n\timport sys\n\t\n\t# E0602: Undefined variabl..."
+      }
+    ]
+  },
+  "expression_bindings": {
+    "count": 1,
+    "nodes": [
+      {
+        "config": {},
+        "expression": "'Status'",
+        "node_type": "expression_binding",
+        "path": "propConfig.custom.status"
+      }
+    ]
+  },
+  "expression_struct_bindings": {
+    "count": 0,
+    "nodes": []
+  },
+  "message_handlers": {
+    "count": 1,
+    "nodes": [
+      {
+        "message_type": "test-message",
+        "node_type": "message_handler",
+        "path": "root.root.children[0].SubmitButton.scripts.messageHandlers[0]",
+        "scope": {
+          "page": true,
+          "session": false,
+          "view": false
+        },
+        "script_length": 149,
+        "script_preview": "\t# Message handler with convention violations\n\t# C0103: Invalid name\n\tMyBadVariable = 123\n\t\n\t# C0114..."
+      }
+    ]
+  },
+  "properties": {
+    "count": 1,
+    "nodes": [
+      {
+        "name": "direction",
+        "node_type": "property",
+        "path": "root.root.props.direction",
+        "value": "column",
+        "value_type": "str"
+      }
+    ]
+  },
+  "property_bindings": {
+    "count": 0,
+    "nodes": []
+  },
+  "query_bindings": {
+    "count": 0,
+    "nodes": []
+  },
+  "script_transforms": {
+    "count": 1,
+    "nodes": [
+      {
+        "binding_path": "propConfig.custom.status",
+        "node_type": "transform",
+        "path": "propConfig.custom.status.binding.transforms[0]",
+        "script_length": 157,
+        "script_preview": "\t# Transform with violations\n\timport os\n\timport datetime\n\t\n\t# W0611: Unused imports\n\t# E0602: Undefi..."
+      }
+    ]
+  },
+  "scripts": {
+    "count": 4,
+    "nodes": [
+      {
+        "binding_path": "propConfig.custom.status",
+        "node_type": "transform",
+        "path": "propConfig.custom.status.binding.transforms[0]",
+        "script_length": 157,
+        "script_preview": "\t# Transform with violations\n\timport os\n\timport datetime\n\t\n\t# W0611: Unused imports\n\t# E0602: Undefi..."
+      },
+      {
+        "message_type": "test-message",
+        "node_type": "message_handler",
+        "path": "root.root.children[0].SubmitButton.scripts.messageHandlers[0]",
+        "scope": {
+          "page": true,
+          "session": false,
+          "view": false
+        },
+        "script_length": 149,
+        "script_preview": "\t# Message handler with convention violations\n\t# C0103: Invalid name\n\tMyBadVariable = 123\n\t\n\t# C0114..."
+      },
+      {
+        "name": "custom_method_with_errors",
+        "node_type": "custom_method",
+        "params": [],
+        "path": "root.root.children[0].SubmitButton.scripts.customMethods[0]",
+        "script_length": 193,
+        "script_preview": "\t# Custom method with fatal error\n\t# F0401: Unable to import\n\timport nonexistent_module\n\t\n\t# R0913: ..."
+      },
+      {
+        "event_domain": "component",
+        "event_type": "onActionPerformed",
+        "node_type": "event_handler",
+        "path": "root.root.children[0].SubmitButton.events.component.onActionPerformed",
+        "scope": "G",
+        "script_length": 302,
+        "script_preview": "\t# This script has multiple pylint violations\n\timport json\n\timport sys\n\t\n\t# E0602: Undefined variabl..."
+      }
+    ]
+  },
+  "tag_bindings": {
+    "count": 0,
+    "nodes": []
+  }
+}

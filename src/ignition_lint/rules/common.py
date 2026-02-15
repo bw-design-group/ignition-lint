@@ -3,12 +3,27 @@ This module contains common and base node types for rule implementation
 """
 
 from abc import ABC, abstractmethod
-from typing import Set, List, Dict, Any, Literal
+from dataclasses import dataclass, field
+from typing import Set, List, Dict, Any, Literal, Optional
 from ..model.node_types import Property, ViewNode, NodeType, ScriptNode, ALL_BINDINGS, ALL_SCRIPTS
 
 # Type definition for severity levels
 Severity = Literal["warning", "error"]
 RESERVED_KEY_NAMES = {"_JavaDate"}
+
+
+@dataclass
+class StructuredViolation:
+	"""
+	Base class for structured violations with metadata.
+
+	Rules can optionally store violations as structured objects instead of strings.
+	This enables custom formatting and grouping of violations.
+	"""
+	message: str
+	severity: str  # "error" or "warning"
+	metadata: Dict[str, Any] = field(default_factory=dict)
+
 
 class NodeVisitor(ABC):
 	"""Simplified base visitor class that rules can extend."""
@@ -48,7 +63,10 @@ class NodeVisitor(ABC):
 class LintingRule(NodeVisitor):
 	"""Base class for linting rules with simplified interface and self-processing capability."""
 
-	def __init__(self, target_node_types: Set[NodeType] = None, severity: str = "error", include_private_properties: bool = False):
+	def __init__(
+		self, target_node_types: Set[NodeType] = None, severity: str = "error",
+		include_private_properties: bool = False
+	):
 		"""
 		Initialize the rule.
 
@@ -63,6 +81,7 @@ class LintingRule(NodeVisitor):
 		self.include_private_properties = include_private_properties
 		self.errors = []
 		self.warnings = []
+		self.structured_violations: List[StructuredViolation] = []
 
 	@classmethod
 	def preprocess_config(cls, config: Dict[str, Any]) -> Dict[str, Any]:
@@ -143,6 +162,37 @@ class LintingRule(NodeVisitor):
 		else:
 			self.warnings.append(message)
 
+	def format_violations_grouped(self) -> Optional[Dict[str, str]]:
+		"""
+		Override this method to provide custom formatted output for violations.
+
+		Returns:
+			Dictionary with 'warnings' and 'errors' keys containing formatted strings,
+			or None to use default formatting. Each key can be None if no violations
+			of that severity exist.
+
+		Example:
+			def format_violations_grouped(self) -> Optional[Dict[str, str]]:
+				warnings_output = []
+				errors_output = []
+
+				for category, violations in self.get_grouped_violations().items():
+					if category.severity == "warning":
+						warnings_output.append(f"  {category}:")
+						for v in violations:
+							warnings_output.append(f"    • {v}")
+					else:
+						errors_output.append(f"  {category}:")
+						for v in violations:
+							errors_output.append(f"    • {v}")
+
+				return {
+					"warnings": "\\n".join(warnings_output) if warnings_output else None,
+					"errors": "\\n".join(errors_output) if errors_output else None
+				}
+		"""
+		return None
+
 	@property
 	@abstractmethod
 	def error_message(self) -> str:
@@ -157,7 +207,10 @@ class LintingRule(NodeVisitor):
 class BindingRule(LintingRule):
 	"""Base class for binding-specific rules."""
 
-	def __init__(self, target_node_types: Set[NodeType] = None, severity: str = "error", include_private_properties: bool = False):
+	def __init__(
+		self, target_node_types: Set[NodeType] = None, severity: str = "error",
+		include_private_properties: bool = False
+	):
 		if target_node_types is None:
 			target_node_types = ALL_BINDINGS
 		super().__init__(target_node_types, severity, include_private_properties)
@@ -166,7 +219,10 @@ class BindingRule(LintingRule):
 class ScriptRule(LintingRule):
 	"""Base class for script-specific rules with built-in script collection."""
 
-	def __init__(self, target_node_types: Set[NodeType] = None, severity: str = "error", include_private_properties: bool = False):
+	def __init__(
+		self, target_node_types: Set[NodeType] = None, severity: str = "error",
+		include_private_properties: bool = False
+	):
 		if target_node_types is None:
 			target_node_types = ALL_SCRIPTS
 		super().__init__(target_node_types, severity, include_private_properties)

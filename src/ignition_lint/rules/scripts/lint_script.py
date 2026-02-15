@@ -4,11 +4,13 @@ It collects all script nodes, combines them into a single temporary file, and ru
 """
 
 import datetime
+import glob
 import os
 import re
 import shutil
 import sys
 import tempfile
+from dataclasses import dataclass
 from typing import Dict, List, Optional, Tuple
 
 from io import StringIO
@@ -19,21 +21,57 @@ from ..common import ScriptRule
 from ...model.node_types import ScriptNode
 
 
+@dataclass
+class PylintViolation:
+	"""
+	Structured data for a pylint violation.
+
+	This is a specialized violation type for pylint that stores category-specific information.
+	"""
+	category: str  # E, W, C, R, F
+	code: str  # E0602, W0611, etc.
+	message: str  # The violation message
+	path: str  # Script path
+	line: int  # Line number within script
+	severity: str = ''  # Severity level ("error" or "warning") - set by rule
+
+
 class PylintScriptRule(ScriptRule):
 	"""Rule to run pylint on all script types using the simplified interface."""
 
-	def __init__(self, severity="error", pylintrc=None, debug=False, batch_mode=False, debug_dir=None):
+	def __init__(
+		self, severity="error", pylintrc=None, debug=False, batch_mode=False, debug_dir=None,
+		category_mapping=None
+	):
 		super().__init__(severity=severity)  # Targets all script types by default
 		self.debug = debug  # Debug mode disabled by default for performance
 		self.batch_mode = batch_mode  # Batch mode DISABLED by default for clearer per-file reporting (set to True for faster processing)
 		self.debug_dir_config = debug_dir  # User-configured debug directory
 		self.current_source_file = None  # Track current file being processed
 		self.pylintrc = self._resolve_pylintrc_path(pylintrc)
+
+		# Category mapping: maps pylint categories (E, W, C, R, F) to ignition-lint severity (error, warning)
+		# Default: Fatal and Error → error, Warning/Convention/Refactor → warning
+		self.category_mapping = category_mapping or {
+			'F': 'error',  # Fatal
+			'E': 'error',  # Error
+			'W': 'warning',  # Warning
+			'C': 'warning',  # Convention
+			'R': 'warning',  # Refactor
+		}
+
+		# Structured storage for pylint violations (for category-grouped output)
+		self.pylint_violations: List[PylintViolation] = []
+
+		# Track if debug directory has been cleaned up this run
+		self._debug_cleanup_done = False
+
 		if self.debug:
 			if self.pylintrc:
 				print(f"🔍 PylintScriptRule: Using pylintrc: {self.pylintrc}")
 			else:
 				print("🔍 PylintScriptRule: No pylintrc found, using inline configuration")
+			print(f"🔍 PylintScriptRule: Category mapping: {self.category_mapping}")
 
 	def set_source_file(self, source_file_path: Optional[str]) -> None:
 		"""Set the current source file being processed (called by LintEngine)."""
@@ -58,13 +96,13 @@ class PylintScriptRule(ScriptRule):
 					print(f"⚠️  Warning: Specified pylintrc not found: {pylintrc}")
 					print(f"   Tried: {abs_path}")
 					print(f"   Current directory: {os.getcwd()}")
-					print(f"   Falling back to standard location search...")
+					print("   Falling back to standard location search...")
 
 		# Fall back to standard location: .config/ignition.pylintrc
 		# First, search from current directory up to find the project root (user's custom config)
 		current_path = os.getcwd()
 		while current_path != os.path.dirname(current_path):  # Until we reach root
-			standard_pylintrc = os.path.join(current_path, ".config", "ignition.pylintrc")
+			standard_pylintrc = os.path.join(current_path, ".config", ".ignition-pylintrc")
 			if os.path.exists(standard_pylintrc):
 				return standard_pylintrc
 			current_path = os.path.dirname(current_path)
@@ -74,7 +112,7 @@ class PylintScriptRule(ScriptRule):
 		# __file__ is: site-packages/ignition_lint/rules/scripts/lint_script.py
 		# We need to go up to: site-packages/ignition_lint/.config/.pylintrc
 		package_dir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-		bundled_pylintrc = os.path.join(package_dir, ".config", ".pylintrc")
+		bundled_pylintrc = os.path.join(package_dir, ".config", ".ignition-pylintrc")
 		if os.path.exists(bundled_pylintrc):
 			return bundled_pylintrc
 
@@ -99,6 +137,7 @@ class PylintScriptRule(ScriptRule):
 			# Non-batch mode: reset everything per file and process immediately
 			self.errors = []
 			self.warnings = []
+			self.pylint_violations = []
 			self.collected_scripts = {}
 		# In batch mode: don't reset anything - accumulate across all files
 
@@ -131,6 +170,7 @@ class PylintScriptRule(ScriptRule):
 			# Clear them so they don't get collected again by finalize
 			self.errors = []
 			self.warnings = []
+			self.pylint_violations = []
 
 	def _format_script_path(self, composite_key: str) -> str:
 		"""Format script path for error messages, removing file path in non-batch mode."""
@@ -142,8 +182,88 @@ class PylintScriptRule(ScriptRule):
 			return composite_key.split("::", 1)[1]
 		return composite_key
 
+	def get_category_grouped_violations(self) -> Dict[str, Dict[str, List[str]]]:
+		"""
+		Get violations grouped by category with severity mapping information.
+
+		Returns:
+			Dict with structure:
+			{
+				'F': {'severity': 'error', 'name': 'Fatal', 'violations': [...]},
+				'E': {'severity': 'error', 'name': 'Error', 'violations': [...]},
+				...
+			}
+		"""
+		category_names = {
+			'F': 'Fatal',
+			'E': 'Error',
+			'W': 'Warning',
+			'C': 'Convention',
+			'R': 'Refactor',
+		}
+
+		# Group violations by category
+		grouped = {}
+		for violation in self.pylint_violations:
+			if violation.category not in grouped:
+				grouped[violation.category] = {
+					'severity': self.category_mapping.get(violation.category, self.severity),
+					'name': category_names.get(violation.category, violation.category),
+					'violations': []
+				}
+
+			formatted_path = self._format_script_path(violation.path)
+			message = f"{formatted_path}: Line {violation.line}: {violation.message} ({violation.code})"
+			grouped[violation.category]['violations'].append(message)
+
+		# Sort categories: F, E, W, C, R
+		category_order = ['F', 'E', 'W', 'C', 'R']
+		return {cat: grouped[cat] for cat in category_order if cat in grouped}
+
+	def format_violations_grouped(self) -> Optional[Dict[str, str]]:
+		"""
+		Format violations grouped by category for display.
+
+		This method provides custom formatting for pylint violations,
+		grouping them by category (Fatal, Error, Warning, Convention, Refactor).
+
+		Returns:
+			Dictionary with 'warnings' and 'errors' keys containing formatted strings,
+			or None if no violations.
+		"""
+		grouped = self.get_category_grouped_violations()
+
+		if not grouped:
+			return None
+
+		warnings_lines = []
+		errors_lines = []
+
+		# Format each category, splitting by severity
+		for category, data in grouped.items():
+			# Category header (no emoticons for cleaner output)
+			category_output = [f"\n    Pylint - {data['name']} ({category}):"]
+
+			# Violations
+			for violation in data['violations']:
+				category_output.append(f"      • {violation}")
+
+			# Add to appropriate severity list
+			if data['severity'] == "error":
+				errors_lines.extend(category_output)
+			else:
+				warnings_lines.extend(category_output)
+
+		return {
+			"warnings": '\n'.join(warnings_lines) if warnings_lines else None,
+			"errors": '\n'.join(errors_lines) if errors_lines else None
+		}
+
 	def process_scripts(self, scripts: Dict[str, ScriptNode]):
 		"""Process all collected scripts with pylint."""
+		# Clean up debug directory from previous runs (only done once per run)
+		self._cleanup_debug_directory()
+
 		# Quick exit: Skip processing if there are no scripts
 		if not scripts:
 			return
@@ -183,13 +303,16 @@ class PylintScriptRule(ScriptRule):
 							break  # Only report once per script
 
 		# Run pylint on all scripts at once (with auto-fixed indentation)
-		path_to_issues = self._run_pylint_batch(scripts)
+		# Note: _run_pylint_batch populates self.pylint_violations with structured data
+		_path_to_issues = self._run_pylint_batch(scripts)
 
-		# Add issues to our errors list
-		for path, issues in path_to_issues.items():
-			for issue in issues:
-				# Pylint issues (syntax errors, undefined variables, etc.) - use configured severity
-				self.add_violation(f"{self._format_script_path(path)}: {issue}")
+		# Add placeholder violations for counting purposes (won't be displayed due to custom formatting)
+		# This ensures file counts are correct
+		for violation in self.pylint_violations:
+			# Map pylint category to ignition-lint severity
+			severity = self.category_mapping.get(violation.category, self.severity)
+			# Add empty placeholder - format_violations_grouped() will provide actual display
+			self.add_violation("", severity=severity)
 
 	def _run_pylint_batch(self, scripts: Dict[str, ScriptNode]) -> Dict[str, List[str]]:
 		"""Run pylint on multiple scripts at once."""
@@ -210,6 +333,36 @@ class PylintScriptRule(ScriptRule):
 			self._cleanup_temp_file(temp_file_path, path_to_issues)
 
 		return path_to_issues
+
+	def _cleanup_debug_directory(self) -> None:
+		"""Clean up debug directory at the start of a run (called once per run)."""
+		if self._debug_cleanup_done:
+			return
+
+		try:
+			debug_dir = self._get_debug_directory()
+			if os.path.exists(debug_dir):
+				# Remove all .py files from previous runs
+				for debug_file in glob.glob(os.path.join(debug_dir, "*.py")):
+					try:
+						os.remove(debug_file)
+					except OSError:
+						pass  # Ignore errors removing individual files
+
+				# Also remove pylintrc info files
+				for info_file in glob.glob(os.path.join(debug_dir, "pylintrc_used.txt")):
+					try:
+						os.remove(info_file)
+					except OSError:
+						pass
+
+				if self.debug:
+					print(f"🧹 Cleaned up debug directory: {debug_dir}")
+
+			self._debug_cleanup_done = True
+		except (OSError, IOError):
+			# If cleanup fails, just continue - not critical
+			self._debug_cleanup_done = True
 
 	def _get_debug_directory(self) -> str:
 		"""Determine debug directory path without creating it. Called lazily only when needed."""
@@ -345,7 +498,9 @@ class PylintScriptRule(ScriptRule):
 		self, output: str, line_map: Dict[int, str], path_to_issues: Dict[str, List[str]]
 	) -> None:
 		"""Parse pylint output and map issues back to original scripts."""
-		pattern = r'.*:(\d+):\d+: .+: (.+)'
+		# Enhanced pattern to capture category and code: E0602, W0611, etc.
+		# Example line: test.py:10:5: E0602: Undefined variable 'x' (undefined-variable)
+		pattern = r'.*:(\d+):\d+: ([EWCRF]\d+): (.+)'
 		for line in output.splitlines():
 			match = re.match(pattern, line)
 			if not match:
@@ -353,12 +508,24 @@ class PylintScriptRule(ScriptRule):
 
 			try:
 				line_num = int(match.group(1))
-				message = match.group(2)
+				code = match.group(2)  # E0602, W0611, etc.
+				message = match.group(3)  # Rest of the message
+				category = code[0]  # E, W, C, R, or F
+
 				script_path = self._find_script_for_line(line_num, line_map)
 
 				if script_path and script_path in path_to_issues:
 					relative_line = self._calculate_relative_line(line_num, script_path, line_map)
-					path_to_issues[script_path].append(f"Line {relative_line}: {message}")
+
+					# Store structured violation for category-grouped output
+					violation = PylintViolation(
+						category=category, code=code, message=message, path=script_path,
+						line=relative_line
+					)
+					self.pylint_violations.append(violation)
+
+					# Also add to path_to_issues for backward compatibility
+					path_to_issues[script_path].append(f"Line {relative_line}: {message} ({code})")
 
 			except (ValueError, IndexError) as e:
 				if self.debug:
