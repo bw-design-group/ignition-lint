@@ -8,10 +8,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- ComponentReferenceValidationRule to validate that component references resolve to actual components [057d0f2]
+- BadComponentReference test case with property, expression, and script getChild references [eb08041]
 - Mixed tabs/spaces detection with clear error messages [369173a]
 - Tests for script indentation with comments [e85b26f]
 
+### Changed
+- ComponentReferenceValidationRule added to default rule_config.json [c63f540]
+- Disabled duplicate-code check in pylint config for test files [88b68f5]
+- Enforce yapf style file usage in all CLAUDE.md commands [7b5be3a]
+
 ### Fixed
+- Handle custom property references (.custom.) in ComponentReferenceValidationRule [dd10a0f]
 - Skip comment lines when checking script indentation [b2788e7]
 
 ## [0.3.5] - 2026-02-13
