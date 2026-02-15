@@ -1,0 +1,45 @@
+# Ignition-lint Whitelist Example
+# ================================
+#
+# This file demonstrates the whitelist format for ignition-lint.
+# Copy this file to .whitelist.txt and customize for your project.
+#
+# Format:
+# - One file path per line (relative to repository root)
+# - Lines starting with # are comments
+# - Blank lines are ignored
+# - Whitespace is trimmed
+#
+# Usage:
+# - Generate whitelist: ignition-lint --generate-whitelist "views/legacy/**/*.json"
+# - Use whitelist: ignition-lint --config rule_config.json --whitelist .whitelist.txt --files "**/view.json"
+#
+# Pre-commit Integration:
+# Add to your .pre-commit-config.yaml:
+#
+#   - repo: https://github.com/your-org/ignition-lint
+#     rev: v1.0.0
+#     hooks:
+#       - id: ignition-lint
+#         args: ['--config=.ignition-lint-precommit.json', '--whitelist=.whitelist.txt', '--files']
+
+# Legacy views - scheduled for refactor Q2 2026 (JIRA-1234)
+views/legacy/OldDashboard/view.json
+views/legacy/MainScreen/view.json
+views/legacy/ControlPanel/view.json
+
+# Deprecated views - being replaced by new system
+views/deprecated/TempView/view.json
+views/deprecated/OldWidget/view.json
+views/deprecated/LegacyButton/view.json
+
+# Prototype views - experimental features
+views/prototype/ExperimentalView/view.json
+views/prototype/TestDashboard/view.json
+
+# Third-party views - from external vendor (cannot modify)
+views/vendor/VendorDashboard/view.json
+views/vendor/VendorWidget/view.json
+
+# Known issues - technical debt tracked in backlog
+views/components/ComponentWithKnownIssues/view.json

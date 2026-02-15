@@ -57,6 +57,17 @@
         "type": "ia.display.label"
       },
       {
+        "events": {
+          "dom": {
+            "onClick": {
+              "config": {
+                "script": "\t#error test case for undefined\n\tsystem.perspective.print(undefined_var)"
+              },
+              "scope": "G",
+              "type": "script"
+            }
+          }
+        },
         "meta": {
           "name": "ContainerWithBadScript"
         },
@@ -90,14 +101,14 @@
             {
               "name": "updateSibling",
               "params": [],
-              "script": "\n# Bad pattern in custom method\ntarget \u003d self.getSibling(\u0027StatusLabel\u0027)\ntarget.props.text \u003d \u0027Updated by custom method\u0027\nreturn target.props.text\n"
+              "script": "\t\n\t# Bad pattern in custom method\n\ttarget \u003d self.getSibling(\u0027StatusLabel\u0027)\n\ttarget.props.text \u003d \u0027Updated by custom method\u0027\n\treturn target.props.text\n"
             },
             {
               "name": "navigateHierarchy",
               "params": [
                 "direction"
               ],
-              "script": "\n# Multiple bad patterns in one method\nif direction \u003d\u003d \u0027up\u0027:\n    return self.getParent().props.name\nelif direction \u003d\u003d \u0027down\u0027:\n    children \u003d self.getChildren()\n    return [child.props.name for child in children]\nelse:\n    sibling \u003d self.getSibling(\u0027StatusLabel\u0027)\n    return sibling.props.text\n"
+              "script": "\t\n\t# Multiple bad patterns in one method\n\tif direction \u003d\u003d \u0027up\u0027:\n\t    return self.getParent().props.name\n\telif direction \u003d\u003d \u0027down\u0027:\n\t    children \u003d self.getChildren()\n\t    return [child.props.name for child in children]\n\telse:\n\t    sibling \u003d self.getSibling(\u0027StatusLabel\u0027)\n\t    return sibling.props.text\n"
             }
           ],
           "extensionFunctions": null,
@@ -122,13 +133,439 @@
             {
               "messageType": "update-status",
               "pageScope": false,
-              "script": "\n# Bad pattern in message handler\nstatusLabel \u003d self.getSibling(\u0027StatusLabel\u0027)\nstatusLabel.props.text \u003d payload[\u0027newStatus\u0027]\n\n# Another bad pattern\ncontainer \u003d self.getParent()\ncontainer.props.style.backgroundColor \u003d payload[\u0027color\u0027]\n",
+              "script": "\t\n\t# Bad pattern in message handler\n\tstatusLabel \u003d self.getSibling(\u0027StatusLabel\u0027)\n\tstatusLabel.props.text \u003d payload[\u0027newStatus\u0027]\n\t\n\t# Another bad pattern\n\tcontainer \u003d self.getParent()\n\tcontainer.props.style.backgroundColor \u003d payload[\u0027color\u0027]\n",
               "sessionScope": false,
               "viewScope": true
+            },
+            {
+              "messageType": "bad-indentation",
+              "pageScope": true,
+              "script": "\n# Bad pattern in message handler\nstatusLabel \u003d self.getSibling(\u0027StatusLabel\u0027)\nstatusLabel.props.text \u003d payload[\u0027newStatus\u0027]\n\n# Another bad pattern\ncontainer \u003d self.getParent()\ncontainer.props.style.backgroundColor \u003d payload[\u0027color\u0027]",
+              "sessionScope": false,
+              "viewScope": false
             }
           ]
         },
         "type": "ia.display.label"
+      },
+      {
+        "children": [
+          {
+            "meta": {
+              "name": "ParentButton"
+            },
+            "position": {
+              "basis": "40px",
+              "shrink": 0
+            },
+            "propConfig": {
+              "props.enabled": {
+                "binding": {
+                  "config": {
+                    "path": ".../BadButton.props.enabled"
+                  },
+                  "type": "property"
+                }
+              }
+            },
+            "props": {
+              "style": {
+                "width": "120px"
+              }
+            },
+            "type": "ia.input.button"
+          },
+          {
+            "events": {
+              "component": {
+                "onActionPerformed": {
+                  "config": {
+                    "script": "\tsystem.perspective.print(self.parent.getChild(\"ParentContainerScripts\").getChild(\"ParentScript\").props.text)"
+                  },
+                  "scope": "G",
+                  "type": "script"
+                }
+              }
+            },
+            "meta": {
+              "name": "ParentScript"
+            },
+            "position": {
+              "basis": "40px",
+              "shrink": 0
+            },
+            "props": {
+              "style": {
+                "width": "120px"
+              }
+            },
+            "type": "ia.input.button"
+          },
+          {
+            "children": [
+              {
+                "meta": {
+                  "name": "ParentProperty"
+                },
+                "position": {
+                  "basis": "120px",
+                  "shrink": 0
+                },
+                "propConfig": {
+                  "props.enabled": {
+                    "binding": {
+                      "config": {
+                        "path": ".../ParentButton.props.enabled"
+                      },
+                      "type": "property"
+                    }
+                  }
+                },
+                "type": "ia.input.button"
+              },
+              {
+                "meta": {
+                  "name": "SiblingProperty"
+                },
+                "position": {
+                  "basis": "120px",
+                  "shrink": 0
+                },
+                "propConfig": {
+                  "props.enabled": {
+                    "binding": {
+                      "config": {
+                        "path": "../NestedButton1.props.enabled"
+                      },
+                      "type": "property"
+                    }
+                  }
+                },
+                "type": "ia.input.button"
+              },
+              {
+                "meta": {
+                  "name": "MissingProperty"
+                },
+                "position": {
+                  "basis": "120px",
+                  "shrink": 0
+                },
+                "propConfig": {
+                  "props.enabled": {
+                    "binding": {
+                      "config": {
+                        "path": "../NestedButton4.props.enabled"
+                      },
+                      "type": "property"
+                    }
+                  }
+                },
+                "type": "ia.input.button"
+              },
+              {
+                "meta": {
+                  "name": "CousinProperty"
+                },
+                "position": {
+                  "basis": "120px",
+                  "shrink": 0
+                },
+                "propConfig": {
+                  "props.enabled": {
+                    "binding": {
+                      "config": {
+                        "path": ".../ParentContainerExpression/SiblingExpression.props.enabled"
+                      },
+                      "type": "property"
+                    }
+                  }
+                },
+                "type": "ia.input.button"
+              },
+              {
+                "meta": {
+                  "name": "GrandParentProperty"
+                },
+                "position": {
+                  "basis": "120px",
+                  "shrink": 0
+                },
+                "propConfig": {
+                  "props.enabled": {
+                    "binding": {
+                      "config": {
+                        "path": "..../TopContainer.position.display"
+                      },
+                      "type": "property"
+                    }
+                  }
+                },
+                "type": "ia.input.button"
+              }
+            ],
+            "meta": {
+              "name": "ParentContainerProperty"
+            },
+            "position": {
+              "grow": 1
+            },
+            "props": {
+              "style": {
+                "width": "100%"
+              }
+            },
+            "type": "ia.container.flex"
+          },
+          {
+            "children": [
+              {
+                "meta": {
+                  "name": "ParentExpression"
+                },
+                "position": {
+                  "basis": "120px",
+                  "shrink": 0
+                },
+                "propConfig": {
+                  "props.enabled": {
+                    "binding": {
+                      "config": {
+                        "expression": "{.../ParentButton.props.enabled}"
+                      },
+                      "type": "expr"
+                    }
+                  }
+                },
+                "type": "ia.input.button"
+              },
+              {
+                "meta": {
+                  "name": "SiblingExpression"
+                },
+                "position": {
+                  "basis": "120px",
+                  "shrink": 0
+                },
+                "propConfig": {
+                  "props.enabled": {
+                    "binding": {
+                      "config": {
+                        "expression": "{../NestedButton1.props.enabled}"
+                      },
+                      "type": "expr"
+                    }
+                  }
+                },
+                "type": "ia.input.button"
+              },
+              {
+                "meta": {
+                  "name": "MissingExpression"
+                },
+                "position": {
+                  "basis": "120px",
+                  "shrink": 0
+                },
+                "propConfig": {
+                  "props.enabled": {
+                    "binding": {
+                      "config": {
+                        "path": "../NestedButton4.props.enabled"
+                      },
+                      "type": "property"
+                    }
+                  }
+                },
+                "type": "ia.input.button"
+              },
+              {
+                "meta": {
+                  "name": "CousinExpression"
+                },
+                "position": {
+                  "basis": "120px",
+                  "shrink": 0
+                },
+                "propConfig": {
+                  "props.enabled": {
+                    "binding": {
+                      "config": {
+                        "expression": "{.../ParentContainerProperty/NestedButton1.props.enabled}"
+                      },
+                      "type": "expr"
+                    }
+                  }
+                },
+                "type": "ia.input.button"
+              },
+              {
+                "meta": {
+                  "name": "GrandParentExpression"
+                },
+                "position": {
+                  "basis": "120px",
+                  "shrink": 0
+                },
+                "propConfig": {
+                  "props.enabled": {
+                    "binding": {
+                      "config": {
+                        "expression": "{..../TopContainer.position.display}"
+                      },
+                      "type": "expr"
+                    }
+                  }
+                },
+                "type": "ia.input.button"
+              }
+            ],
+            "meta": {
+              "name": "ParentContainerExpression"
+            },
+            "position": {
+              "grow": 1
+            },
+            "props": {
+              "style": {
+                "width": "100%"
+              }
+            },
+            "type": "ia.container.flex"
+          },
+          {
+            "children": [
+              {
+                "events": {
+                  "component": {
+                    "onActionPerformed": {
+                      "config": {
+                        "script": "\tsystem.perspective.print(self.parent.parent.getChild(\"ParentButton\").props.text)"
+                      },
+                      "scope": "G",
+                      "type": "script"
+                    }
+                  }
+                },
+                "meta": {
+                  "name": "ParentScript"
+                },
+                "position": {
+                  "basis": "120px",
+                  "shrink": 0
+                },
+                "type": "ia.input.button"
+              },
+              {
+                "events": {
+                  "component": {
+                    "onActionPerformed": {
+                      "config": {
+                        "script": "\tsystem.perspective.print(self.getSibling(\"ParentScript\").props.text)"
+                      },
+                      "scope": "G",
+                      "type": "script"
+                    }
+                  }
+                },
+                "meta": {
+                  "name": "SiblingScript"
+                },
+                "position": {
+                  "basis": "120px",
+                  "shrink": 0
+                },
+                "type": "ia.input.button"
+              },
+              {
+                "events": {
+                  "component": {
+                    "onActionPerformed": {
+                      "config": {
+                        "script": "\tsystem.perspective.print(self.getSibling(\"UnknownButton\").props.text)"
+                      },
+                      "scope": "G",
+                      "type": "script"
+                    }
+                  }
+                },
+                "meta": {
+                  "name": "BadScript"
+                },
+                "position": {
+                  "basis": "120px",
+                  "shrink": 0
+                },
+                "type": "ia.input.button"
+              },
+              {
+                "events": {
+                  "component": {
+                    "onActionPerformed": {
+                      "config": {
+                        "script": "\tsystem.perspective.print(self.parent.parent.getChild(\"ParentContainerProperty\").getChild(\"ParentProperty\").props.text)"
+                      },
+                      "scope": "G",
+                      "type": "script"
+                    }
+                  }
+                },
+                "meta": {
+                  "name": "CousinScript"
+                },
+                "position": {
+                  "basis": "120px",
+                  "shrink": 0
+                },
+                "type": "ia.input.button"
+              },
+              {
+                "events": {
+                  "component": {
+                    "onActionPerformed": {
+                      "config": {
+                        "script": "\tsystem.perspective.print(self.parent.parent.parent.getChild(\"MessageHandlerComponent\").props.text)"
+                      },
+                      "scope": "G",
+                      "type": "script"
+                    }
+                  }
+                },
+                "meta": {
+                  "name": "GrandParentScript"
+                },
+                "position": {
+                  "basis": "120px",
+                  "shrink": 0
+                },
+                "type": "ia.input.button"
+              }
+            ],
+            "meta": {
+              "name": "ParentContainerScripts"
+            },
+            "position": {
+              "grow": 1
+            },
+            "props": {
+              "style": {
+                "width": "100%"
+              }
+            },
+            "type": "ia.container.flex"
+          }
+        ],
+        "meta": {
+          "name": "TopContainer"
+        },
+        "position": {
+          "shrink": 0
+        },
+        "props": {
+          "alignItems": "flex-start",
+          "direction": "column"
+        },
+        "type": "ia.container.flex"
       }
     ],
     "meta": {

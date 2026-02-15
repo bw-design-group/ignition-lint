@@ -3,14 +3,22 @@
   "PylintScriptRule": {
     "enabled": true,
     "kwargs": {
-      "_comment": "Optional: Specify a custom pylintrc file path. If not specified, uses .config/ignition.pylintrc",
+      "_comment": "Optional: Specify a custom pylintrc file path. If not specified, uses .config/.ignition-pylintrc",
       "pylintrc": null,
-      "_debug_comment": "Optional: Set debug: true to save script files even when there are no errors. Debug files are ALWAYS saved automatically when pylint finds errors.",
+      "_debug_comment": "Optional: Set debug: true to save script files even when there are no errors. Debug files are ALWAYS saved automatically when pylint finds errors, and are cleaned up at the start of each run.",
       "debug": false,
       "_debug_dir_comment": "Optional: Specify custom debug directory. Defaults to .ignition-lint/debug/ (or tests/debug/ in ignition-lint repo). Can be absolute or relative path.",
-      "debug_dir": null,
+      "debug_dir": ".ignition-lint/debug/",
       "_batch_mode_comment": "Optional: Set batch_mode: true to process all files together (faster but harder to review). Default: false (process files individually for clearer per-file reporting).",
-      "batch_mode": false
+      "batch_mode": false,
+      "_category_mapping_comment": "Optional: Map pylint message categories to severity levels. Default: F/E → error, W/C/R → warning. Categories: F=Fatal, E=Error, W=Warning, C=Convention, R=Refactor.",
+      "category_mapping": {
+        "F": "error",
+        "E": "error",
+        "W": "warning",
+        "C": "warning",
+        "R": "warning"
+      }
     }
   },
   "PollingIntervalRule": {
@@ -26,19 +34,27 @@
       "node_type_specific_rules": {
         "component": {
           "convention": "PascalCase",
-          "min_length": 3
+          "min_length": 3,
+          "severity": "error",
+          "_severity_comment": "Components: Use 'error' for strict enforcement of naming standards"
         },
         "property": {
           "convention": "camelCase",
-          "min_length": 2
+          "min_length": 2,
+          "severity": "warning",
+          "_severity_comment": "Properties: Use 'warning' for more lenient custom property naming"
         },
         "message_handler": {
           "convention": "kebab-case",
-          "min_length": 2
+          "min_length": 2,
+          "severity": "warning",
+          "_severity_comment": "Message handlers: Use 'warning' to allow flexibility in message naming"
         },
         "custom_method": {
           "convention": "snake_case",
-          "min_length": 2
+          "min_length": 2,
+          "severity": "error",
+          "_severity_comment": "Custom methods: Use 'error' for consistent Python-style method naming"
         }
       },
       "_pattern_example_comment": "Example using custom pattern with suggestion_convention:",
@@ -67,20 +83,33 @@
   "BadComponentReferenceRule": {
     "enabled": true,
     "kwargs": {
-      "_comment": "Detects brittle component references like .getSibling(), .getParent(), .getChild(), .parent, .children that create tight coupling to view structure. Use view.custom properties or message handling instead."
+      "_comment": "Detects brittle component references like .getSibling(), .getParent(), .getChild(), .parent, .children that create tight coupling to view structure. Use view.custom properties or message handling instead.",
+      "severity": "error",
+      "_severity_comment": "Optional: Set to 'warning' if you want to detect these patterns without blocking builds. Use 'error' (default) for strict enforcement to prevent brittle view structure dependencies."
+    }
+  },
+  "ComponentReferenceValidationRule": {
+    "enabled": true,
+    "kwargs": {
+      "_comment": "Validates that component references (expressions, property bindings, scripts) resolve to components that actually exist in the view hierarchy. Prevents runtime errors from broken references.",
+      "validate_expressions": true,
+      "validate_property_bindings": true,
+      "validate_scripts": true,
+      "_validation_comment": "Set individual validation flags to false to disable checking specific reference types (expressions: {../Component.props.value}, property bindings: ../Component.props.enabled, scripts: self.getSibling('Component'))"
     }
   },
   "_info": {
     "_description": "Rule severity levels are defined by rule developers:",
     "rule_severities": {
-      "NamePatternRule": "warning - naming conventions are style preferences",
+      "NamePatternRule": "configurable per node type - naming conventions can be strict (error) or lenient (warning) based on component type",
       "PollingIntervalRule": "error - performance issues that can cause system problems",
       "PylintScriptRule": "error - syntax errors, undefined variables, etc.",
       "UnusedCustomPropertiesRule": "error - dead code that should be removed",
       "ExcessiveContextDataRule": "error - architectural issue, data should be in databases",
-      "BadComponentReferenceRule": "error - brittle view structure dependencies that break during refactoring"
+      "BadComponentReferenceRule": "error (configurable) - brittle view structure dependencies that break during refactoring",
+      "ComponentReferenceValidationRule": "error - references to non-existent components cause runtime errors"
     },
-    "note": "Users cannot configure severity levels - they are determined by what each rule checks.",
+    "note": "Most rule severity levels are fixed, but NamePatternRule and BadComponentReferenceRule allow user configuration.",
     "NamePatternRule_node_types": {
       "component": "User-defined component names (PascalCase)",
       "property": "User-defined custom property names (camelCase)",
@@ -89,7 +118,40 @@
     },
     "PylintScriptRule_config": {
       "pylintrc": "Path to custom pylintrc file. Defaults to .config/ignition.pylintrc if not specified.",
-      "example": "\"pylintrc\": \"/path/to/custom.pylintrc\" or \"pylintrc\": \"relative/path/.pylintrc\""
+      "example_pylintrc": "\"pylintrc\": \"/path/to/custom.pylintrc\" or \"pylintrc\": \"relative/path/.pylintrc\"",
+      "category_mapping": "Maps pylint message categories (F/E/W/C/R) to ignition-lint severity levels (error/warning). Violations are grouped by category in output.",
+      "category_mapping_default": {
+        "F": "error (Fatal errors like import failures)",
+        "E": "error (Errors like undefined variables)",
+        "W": "warning (Warnings like unused variables)",
+        "C": "warning (Convention violations like naming)",
+        "R": "warning (Refactor suggestions like complexity)"
+      },
+      "example_strict": "To treat all violations as errors: {\"F\": \"error\", \"E\": \"error\", \"W\": \"error\", \"C\": \"error\", \"R\": \"error\"}",
+      "debug_dir": "Directory for pylint debug files. Defaults to .ignition-lint/debug/ in user repos, tests/debug/ in ignition-lint repo. Files are cleaned up at start of each run.",
+      "debug": "When true, always saves debug files. When false, only saves when violations found. Debug files help troubleshoot pylint issues."
+    },
+    "NamePatternRule_config": {
+      "severity": "Configurable per node type: 'error' or 'warning'. Each node type (component, property, message_handler, custom_method) can have its own severity level.",
+      "severity_use_cases": {
+        "component_error": "Recommended - Strictly enforce component naming standards (PascalCase) as these are visible throughout the application",
+        "property_warning": "Recommended - Allow flexibility in custom property naming while still providing guidance",
+        "message_handler_warning": "Recommended - Allow flexibility in message type naming to accommodate team conventions",
+        "custom_method_error": "Recommended - Enforce Python-style method naming (snake_case) for consistency with Ignition scripting"
+      },
+      "configuration_example": "Set severity per node type in node_type_specific_rules: {\"component\": {\"convention\": \"PascalCase\", \"severity\": \"error\"}, \"property\": {\"convention\": \"camelCase\", \"severity\": \"warning\"}}",
+      "granularity": "Per-node-type severity allows fine-grained control - enforce strict standards where it matters (components, methods) while allowing flexibility elsewhere (properties, message handlers)",
+      "migration_strategy": "Start with all 'warning' to identify issues, then gradually move critical node types (components, custom_methods) to 'error' for enforcement"
+    },
+    "BadComponentReferenceRule_config": {
+      "severity": "Configurable severity level: 'error' (default) or 'warning'",
+      "severity_use_cases": {
+        "error": "Recommended for most projects - strictly enforces best practices to prevent brittle view structure dependencies that break during refactoring",
+        "warning": "Use when migrating legacy views or during gradual adoption - allows you to detect these patterns without blocking builds/commits"
+      },
+      "example_warning": "To use as warnings: \"kwargs\": {\"severity\": \"warning\"}",
+      "forbidden_patterns": "Optional: Customize the list of forbidden patterns to detect. Defaults include .getSibling(), .getParent(), .getChild(), .parent, .children, and path traversal (../, ./)",
+      "case_sensitive": "Optional: Set to false for case-insensitive pattern matching. Default: true"
     }
   }
 }

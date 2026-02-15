@@ -209,18 +209,21 @@ class ScriptNode(ViewNode):
 		if not self.script.strip():
 			self.script = "\tpass"
 
-		# Check if script is already indented by looking at first non-empty line
+		# Check if script is already indented by looking at first non-empty, non-comment line
 		lines = self.script.split('\n')
-		first_code_line = next((line for line in lines if line.strip()), None)
-		already_indented = first_code_line and (first_code_line.startswith('\t') or first_code_line.startswith('    '))
+		first_code_line = next((line for line in lines if line.strip() and not line.strip().startswith('#')),
+					None)
+		already_indented = first_code_line and (
+			first_code_line.startswith('\t') or first_code_line.startswith('    ')
+		)
 
 		if already_indented:
 			# Script already has indentation - use as-is
 			return f"{self.function_def}\n{self.script}"
-		else:
-			# Script needs indentation - add tab to each line
-			indented_script = '\n'.join('\t' + line if line.strip() else '' for line in lines)
-			return f"{self.function_def}\n{indented_script}"
+
+		# Script needs indentation - add tab to each line
+		indented_script = '\n'.join('\t' + line if line.strip() else '' for line in lines)
+		return f"{self.function_def}\n{indented_script}"
 
 	def _get_serializable_attrs(self) -> Dict[str, Any]:
 		return {

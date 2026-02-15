@@ -1,10 +1,7 @@
 {
   "components_by_type": {
-    "ia.container.flex": 5,
-    "ia.display.label": 3,
-    "ia.display.table": 1,
-    "ia.display.view": 1,
-    "ia.input.dropdown": 3
+    "ia.container.flex": 1,
+    "ia.input.button": 1
   },
   "model_keys": [
     "components",
@@ -22,13 +19,13 @@
     "properties"
   ],
   "node_type_counts": {
-    "component": 13,
+    "component": 2,
+    "custom_method": 1,
     "event_handler": 1,
-    "expression_binding": 2,
-    "expression_struct_binding": 1,
-    "property": 147,
-    "property_binding": 10,
-    "transform": 2
+    "expression_binding": 1,
+    "message_handler": 1,
+    "property": 1,
+    "transform": 1
   },
   "rule_coverage": {
     "BadComponentReferenceRule": {
@@ -42,7 +39,7 @@
       ]
     },
     "ComponentReferenceValidationRule": {
-      "applicable_node_count": 28,
+      "applicable_node_count": 7,
       "target_types": [
         "component",
         "custom_method",
@@ -54,7 +51,7 @@
       ]
     },
     "ExampleBindingCountRule": {
-      "applicable_node_count": 26,
+      "applicable_node_count": 3,
       "target_types": [
         "component",
         "expression_binding",
@@ -65,31 +62,31 @@
       ]
     },
     "ExampleMixedSeverityRule": {
-      "applicable_node_count": 13,
+      "applicable_node_count": 2,
       "target_types": [
         "component"
       ]
     },
     "ExampleNameLengthRule": {
-      "applicable_node_count": 13,
+      "applicable_node_count": 2,
       "target_types": [
         "component"
       ]
     },
     "ExcessiveContextDataRule": {
-      "applicable_node_count": 176,
+      "applicable_node_count": 8,
       "target_types": [
         "all"
       ]
     },
     "NamePatternRule": {
-      "applicable_node_count": 13,
+      "applicable_node_count": 2,
       "target_types": [
         "component"
       ]
     },
     "PollingIntervalRule": {
-      "applicable_node_count": 13,
+      "applicable_node_count": 1,
       "target_types": [
         "expression_binding",
         "expression_struct_binding",
@@ -99,7 +96,7 @@
       ]
     },
     "PylintScriptRule": {
-      "applicable_node_count": 3,
+      "applicable_node_count": 4,
       "target_types": [
         "custom_method",
         "event_handler",
@@ -108,7 +105,7 @@
       ]
     },
     "UnusedCustomPropertiesRule": {
-      "applicable_node_count": 175,
+      "applicable_node_count": 8,
       "target_types": [
         "component",
         "custom_method",
@@ -122,5 +119,5 @@
       ]
     }
   },
-  "total_nodes": 176
+  "total_nodes": 8
 }

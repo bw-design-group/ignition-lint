@@ -1702,8 +1702,8 @@
         "binding_path": "root.root.children[0].Header.children[0].FlexContainer.children[0].Line Image.propConfig.props.params.img_path",
         "node_type": "transform",
         "path": "root.root.children[0].Header.children[0].FlexContainer.children[0].Line Image.propConfig.props.params.img_path.binding.transforms[0]",
-        "script_length": 118,
-        "script_preview": "\tdanone_path = DanPT.Model.get_danone_path_from_url(value)\n\treturn Views.ImageManagement.get_image_u..."
+        "script_length": 115,
+        "script_preview": "\tequip_path = DanPT.Model.get_equip_path_from_url(value)\n\treturn Views.ImageManagement.get_image_url..."
       },
       {
         "binding_path": "root.root.children[0].Header.children[0].FlexContainer.children[1].Left Labels.children[0].Name.children[0].Line Name.propConfig.props.text",
@@ -1770,8 +1770,8 @@
         "binding_path": "root.root.children[0].Header.children[0].FlexContainer.children[0].Line Image.propConfig.props.params.img_path",
         "node_type": "transform",
         "path": "root.root.children[0].Header.children[0].FlexContainer.children[0].Line Image.propConfig.props.params.img_path.binding.transforms[0]",
-        "script_length": 118,
-        "script_preview": "\tdanone_path = DanPT.Model.get_danone_path_from_url(value)\n\treturn Views.ImageManagement.get_image_u..."
+        "script_length": 115,
+        "script_preview": "\tequip_path = DanPT.Model.get_equip_path_from_url(value)\n\treturn Views.ImageManagement.get_image_url..."
       },
       {
         "binding_path": "root.root.children[0].Header.children[0].FlexContainer.children[1].Left Labels.children[0].Name.children[0].Line Name.propConfig.props.text",

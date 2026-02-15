@@ -176,11 +176,11 @@ poetry run pylint src/ tests/ scripts/
 # Run full linting check (MUST pass with 0 errors)
 poetry run pylint src/ tests/ scripts/
 
-# Format code with yapf (uses .style.yapf configuration)
-poetry run yapf -ir src/ tests/ scripts/
+# Format code with yapf (MUST use --style=.config/.style.yapf)
+poetry run yapf -ir --style=.config/.style.yapf src/ tests/ scripts/
 
 # Check formatting without modifying files
-poetry run yapf -dr src/ tests/ scripts/
+poetry run yapf -dr --style=.config/.style.yapf src/ tests/ scripts/
 ```
 
 **Linting Rules and Standards:**
@@ -233,7 +233,63 @@ ignition-lint --files "**/view.json" --stats-only
 
 # Debug specific node types
 ignition-lint --config rule_config.json --files "**/view.json" --debug-nodes expression_binding property
+
+# Whitelist Configuration (Managing Technical Debt)
+
+# Generate whitelist from legacy files
+ignition-lint --generate-whitelist "views/legacy/**/*.json" "views/deprecated/**/*.json"
+
+# Use whitelist during linting (whitelisted files are skipped)
+ignition-lint --config rule_config.json --whitelist .whitelist.txt --files "**/view.json"
+
+# Custom whitelist file
+ignition-lint --config rule_config.json --whitelist path/to/custom-whitelist.txt --files "**/view.json"
+
+# Append to existing whitelist
+ignition-lint --generate-whitelist "views/temp/**/*.json" --append
+
+# Dry run (preview without writing)
+ignition-lint --generate-whitelist "views/legacy/**/*.json" --dry-run
+
+# Disable whitelist (overrides --whitelist)
+ignition-lint --config rule_config.json --whitelist .whitelist.txt --no-whitelist --files "**/view.json"
+
+# Verbose mode (show ignored files)
+ignition-lint --config rule_config.json --whitelist .whitelist.txt --files "**/view.json" --verbose
 ```
+
+**Whitelist File Format:**
+- **Filename:** `.whitelist.txt` (recommended default)
+- **Format:** Plain text, one file path per line (relative to repository root)
+- **Comments:** Lines starting with `#` are ignored
+- **Best Practice:** Document WHY files are whitelisted (JIRA tickets, dates, etc.)
+
+**Example Whitelist:**
+```text
+# Legacy views - scheduled for refactor Q2 2026 (JIRA-1234)
+views/legacy/OldDashboard/view.json
+views/legacy/MainScreen/view.json
+
+# Deprecated views - being replaced
+views/deprecated/TempView/view.json
+views/deprecated/OldWidget/view.json
+```
+
+**Pre-commit Integration:**
+```yaml
+# .pre-commit-config.yaml
+repos:
+  - repo: https://github.com/your-org/ignition-lint
+    rev: v1.0.0
+    hooks:
+      - id: ignition-lint
+        # Add whitelist argument to use project-specific whitelist
+        args: ['--config=.ignition-lint-precommit.json', '--whitelist=.whitelist.txt', '--files']
+```
+
+**Important:** By default, ignition-lint does NOT use a whitelist unless you explicitly specify `--whitelist <path>`.
+
+**For detailed documentation**, see [docs/whitelist-guide.md](docs/whitelist-guide.md).
 
 ## Debugging and Analysis
 
@@ -394,6 +450,75 @@ Rules are configured via JSON files (default: `rule_config.json`):
   }
 }
 ```
+
+### Pylint Category Mapping
+
+The `PylintScriptRule` supports configurable category mapping to control how Pylint's message categories map to ignition-lint severity levels.
+
+**Pylint Categories:**
+- **F** (Fatal): Prevents analysis - syntax errors, import failures
+- **E** (Error): Likely bugs - undefined variables, attribute errors
+- **W** (Warning): Potential problems - unused imports, variables
+- **C** (Convention): Style violations - missing docstrings, naming
+- **R** (Refactor): Code quality - too many arguments, complexity
+
+**Default mapping** (Fatal/Error → error, Warning/Convention/Refactor → warning):
+```json
+{
+  "PylintScriptRule": {
+    "enabled": true,
+    "kwargs": {
+      "pylintrc": ".config/.pylintrc",
+      "category_mapping": {
+        "F": "error",
+        "E": "error",
+        "W": "warning",
+        "C": "warning",
+        "R": "warning"
+      }
+    }
+  }
+}
+```
+
+**Strict mode** (everything is an error):
+```json
+{
+  "PylintScriptRule": {
+    "enabled": true,
+    "kwargs": {
+      "pylintrc": ".config/.pylintrc",
+      "category_mapping": {
+        "F": "error",
+        "E": "error",
+        "W": "error",
+        "C": "error",
+        "R": "error"
+      }
+    }
+  }
+}
+```
+
+**Output format** - violations are grouped by category with mapping legend:
+```
+❌ PylintScriptRule (error):
+
+  📚 Category Mapping:
+    Fatal (F) → Error
+    Error (E) → Error
+    Warning (W) → Warning
+
+  📋 Violations by Category:
+
+    ❌ Error (E) → Error:
+      • root.Button.onActionPerformed: Line 5: Undefined variable 'x' (E0602)
+
+    ⚠️  Warning (W) → Warning:
+      • root.Label.transform: Line 2: Unused import 'json' (W0611)
+```
+
+**For detailed examples and best practices**, see [docs/pylint-category-mapping-examples.md](docs/pylint-category-mapping-examples.md).
 
 ## Adding New Rules
 
@@ -574,19 +699,33 @@ Based on `.style.yapf`, the project uses:
 ### Formatting Commands
 **Directory**: Repository root (`.`)
 
-```bash
-# Verify you're in the repository root (should show .style.yapf)
-ls .style.yapf
+**⚠️ CRITICAL: Always use `--style=.config/.style.yapf`**
 
-# Format all code with yapf
-poetry run yapf -ir src/ tests/
+The project uses a custom yapf configuration at `.config/.style.yapf` that enforces tabs (not spaces). **Never run yapf without this flag** or code will be formatted incorrectly with spaces.
+
+```bash
+# Verify you're in the repository root (should show .config/.style.yapf)
+ls .config/.style.yapf
+
+# Format all code with yapf (ALWAYS use --style flag)
+poetry run yapf -ir --style=.config/.style.yapf src/ tests/
 
 # Check formatting without changes
-poetry run yapf -dr src/ tests/
+poetry run yapf -dr --style=.config/.style.yapf src/ tests/
 
 # Format specific file
-poetry run yapf -i src/ignition_lint/cli.py
+poetry run yapf -i --style=.config/.style.yapf src/ignition_lint/cli.py
+
+# Format multiple specific files
+poetry run yapf -i --style=.config/.style.yapf src/ignition_lint/model/node_types.py tests/unit/test_script_linting.py
 ```
+
+**Why this matters**: The `.config/.style.yapf` file configures:
+- `USE_TABS = True` (8-character width)
+- `COLUMN_LIMIT = 120`
+- `CONTINUATION_INDENT_WIDTH = 4`
+
+Without this flag, yapf uses default settings with spaces, causing pylint errors.
 
 ### Pre-commit Hooks
 **Directory**: Repository root (`.`)
@@ -720,7 +859,7 @@ ls .pylintrc
 poetry run pylint ignition_lint/
 
 # Check yapf formatting
-poetry run yapf -dr ignition_lint/
+poetry run yapf -dr --style=.config/.style.yapf ignition_lint/
 ```
 
 This style guide ensures consistent, readable code across the project while maintaining compatibility with the existing codebase and automated formatting tools.
@@ -745,7 +884,7 @@ poetry run python -m ignition_lint.main --files "**/view.json"
 
 # Code quality
 poetry run pylint ignition_lint/
-poetry run yapf -ir ignition_lint/
+poetry run yapf -ir --style=.config/.style.yapf ignition_lint/
 
 # Local CI testing
 scripts/test-actions.sh

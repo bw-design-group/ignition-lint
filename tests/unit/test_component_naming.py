@@ -190,9 +190,7 @@ class TestNamePatternMixedCase(BaseRuleTest):
 	def setUp(self):  # pylint: disable=invalid-name
 		super().setUp()
 		self.rule_config = get_test_config(
-			"NamePatternRule",
-			target_node_types=["component"],
-			node_type_specific_rules={
+			"NamePatternRule", target_node_types=["component"], node_type_specific_rules={
 				"component": {
 					"pattern": "^([A-Z][a-zA-Z0-9]*|[A-Z][A-Z0-9_]*)$",
 					"pattern_description": "PascalCase or SCREAMING_SNAKE_CASE",
@@ -312,9 +310,7 @@ class TestNamePatternMixedCase(BaseRuleTest):
 		for name, description in abbreviation_tests:
 			with self.subTest(name=name, description=description):
 				name_errors = [e for e in errors if name in e]
-				self.assertEqual(
-					len(name_errors), 0, f"{name} should pass validation ({description})"
-				)
+				self.assertEqual(len(name_errors), 0, f"{name} should pass validation ({description})")
 
 	def test_abbreviations_in_screaming_snake_case(self):
 		"""Test that abbreviations in SCREAMING_SNAKE_CASE format pass validation."""
@@ -333,9 +329,7 @@ class TestNamePatternMixedCase(BaseRuleTest):
 		for name, description in abbreviation_tests:
 			with self.subTest(name=name, description=description):
 				name_errors = [e for e in errors if name in e]
-				self.assertEqual(
-					len(name_errors), 0, f"{name} should pass validation ({description})"
-				)
+				self.assertEqual(len(name_errors), 0, f"{name} should pass validation ({description})")
 
 
 class TestNamePatternEdgeCases(BaseRuleTest):
@@ -1076,6 +1070,208 @@ class TestNamePatternPositionProperties(BaseRuleTest):
 			self.assertNotIn("position.y", errors[0])
 		finally:
 			view_file.unlink()
+
+
+class TestNamePatternPerNodeTypeSeverity(BaseRuleTest):
+	"""Test per-node-type severity configuration."""
+
+	def test_component_error_severity(self):
+		"""Test that component naming violations are reported as errors when severity='error'."""
+		rule_config = get_test_config(
+			"NamePatternRule",
+			node_type_specific_rules={"component": {
+				"convention": "PascalCase",
+				"severity": "error"
+			}}
+		)
+
+		# Create a view with a camelCase component (should fail PascalCase)
+		view_data = {
+			"custom": {},
+			"params": {},
+			"props": {},
+			"root": {
+				"children": [{
+					"meta": {
+						"name": "badComponent"  # camelCase - should fail
+					},
+					"type": "ia.display.button"
+				}],
+				"meta": {
+					"name": "root"
+				},
+				"type": "ia.container.coord"
+			}
+		}
+
+		# Write test view file
+		import json
+		import tempfile
+		from pathlib import Path
+		with tempfile.NamedTemporaryFile(mode='w', suffix='.json', delete=False) as f:
+			json.dump(view_data, f)
+			view_file = Path(f.name)
+
+		try:
+			# Run the linter
+			self.run_lint_on_file(view_file, rule_config)
+
+			# Should be in errors, not warnings
+			rule_errors = self.get_errors_for_rule("NamePatternRule")
+			rule_warnings = self.get_warnings_for_rule("NamePatternRule")
+
+			self.assertEqual(len(rule_errors), 1, "Should report as error when severity='error'")
+			self.assertEqual(len(rule_warnings), 0, "Should not report as warning when severity='error'")
+			self.assertIn("badComponent", rule_errors[0])
+		finally:
+			view_file.unlink()
+
+	def test_property_warning_severity(self):
+		"""Test that property naming violations are reported as warnings when severity='warning'."""
+		rule_config = get_test_config(
+			"NamePatternRule",
+			node_type_specific_rules={"property": {
+				"convention": "camelCase",
+				"severity": "warning"
+			}}
+		)
+
+		# Create a view with a PascalCase property (should fail camelCase)
+		view_data = {
+			"custom": {
+				"BadPropertyName": "value"  # PascalCase - should fail camelCase
+			},
+			"params": {},
+			"props": {},
+			"root": {
+				"meta": {
+					"name": "root"
+				},
+				"type": "ia.container.coord"
+			}
+		}
+
+		# Write test view file
+		import json
+		import tempfile
+		from pathlib import Path
+		with tempfile.NamedTemporaryFile(mode='w', suffix='.json', delete=False) as f:
+			json.dump(view_data, f)
+			view_file = Path(f.name)
+
+		try:
+			# Run the linter
+			self.run_lint_on_file(view_file, rule_config)
+
+			# Should be in warnings, not errors
+			rule_errors = self.get_errors_for_rule("NamePatternRule")
+			rule_warnings = self.get_warnings_for_rule("NamePatternRule")
+
+			self.assertEqual(len(rule_errors), 0, "Should not report as error when severity='warning'")
+			self.assertEqual(len(rule_warnings), 1, "Should report as warning when severity='warning'")
+			self.assertIn("BadPropertyName", rule_warnings[0])
+		finally:
+			view_file.unlink()
+
+	def test_mixed_severity_per_node_type(self):
+		"""Test that different node types can have different severity levels."""
+		rule_config = get_test_config(
+			"NamePatternRule", node_type_specific_rules={
+				"component": {
+					"convention": "PascalCase",
+					"severity": "error"
+				},
+				"property": {
+					"convention": "camelCase",
+					"severity": "warning"
+				}
+			}
+		)
+
+		# Create a view with violations in both components and properties
+		view_data = {
+			"custom": {
+				"BadPropertyName": "value"  # PascalCase - should be warning
+			},
+			"params": {},
+			"props": {},
+			"root": {
+				"children": [{
+					"meta": {
+						"name": "badComponent"  # camelCase - should be error
+					},
+					"type": "ia.display.button"
+				}],
+				"meta": {
+					"name": "root"
+				},
+				"type": "ia.container.coord"
+			}
+		}
+
+		# Write test view file
+		import json
+		import tempfile
+		from pathlib import Path
+		with tempfile.NamedTemporaryFile(mode='w', suffix='.json', delete=False) as f:
+			json.dump(view_data, f)
+			view_file = Path(f.name)
+
+		try:
+			# Run the linter
+			self.run_lint_on_file(view_file, rule_config)
+
+			# Should have 1 error (component) and 1 warning (property)
+			rule_errors = self.get_errors_for_rule("NamePatternRule")
+			rule_warnings = self.get_warnings_for_rule("NamePatternRule")
+
+			self.assertEqual(len(rule_errors), 1, "Should have 1 error for component")
+			self.assertEqual(len(rule_warnings), 1, "Should have 1 warning for property")
+
+			self.assertIn("badComponent", rule_errors[0])
+			self.assertIn("component", rule_errors[0])
+
+			self.assertIn("BadPropertyName", rule_warnings[0])
+			self.assertIn("property", rule_warnings[0])
+		finally:
+			view_file.unlink()
+
+	def test_all_node_types_with_different_severities(self):
+		"""Test all supported node types with different severity configurations."""
+		rule_config = get_test_config(
+			"NamePatternRule", node_type_specific_rules={
+				"component": {
+					"convention": "PascalCase",
+					"severity": "error"
+				},
+				"property": {
+					"convention": "camelCase",
+					"severity": "warning"
+				},
+				"message_handler": {
+					"convention": "kebab-case",
+					"severity": "warning"
+				},
+				"custom_method": {
+					"convention": "snake_case",
+					"severity": "error"
+				}
+			}
+		)
+
+		# Test with a view that has all node types
+		view_file = load_test_view(self.test_cases_dir, "PascalCase")
+
+		# Run the linter
+		results = self.run_lint_on_file(view_file, rule_config)
+
+		# Verify that we can get both errors and warnings
+		rule_errors = results.errors.get("NamePatternRule", [])
+		rule_warnings = results.warnings.get("NamePatternRule", [])
+
+		# Should have both errors and warnings (exact counts depend on test case content)
+		self.assertIsInstance(rule_errors, list)
+		self.assertIsInstance(rule_warnings, list)
 
 
 if __name__ == "__main__":

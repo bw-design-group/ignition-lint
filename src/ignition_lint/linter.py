@@ -19,6 +19,8 @@ class LintResults(NamedTuple):
 	errors: Dict[str, List[str]]
 	has_errors: bool
 	rule_timings: Dict[str, float] = {}
+	custom_formatted_warnings: Dict[str, str] = {}  # rule_name -> custom formatted warnings
+	custom_formatted_errors: Dict[str, str] = {}  # rule_name -> custom formatted errors
 
 
 class LintEngine:
@@ -69,6 +71,8 @@ class LintEngine:
 		warnings = {}
 		errors = {}
 		rule_timings = {}
+		custom_formatted_warnings = {}
+		custom_formatted_errors = {}
 
 		# Apply each rule to the nodes
 		for rule in self.rules:
@@ -92,6 +96,17 @@ class LintEngine:
 				duration_ms = (time.perf_counter() - start_time) * 1000.0
 				rule_timings[rule.__class__.__name__] = duration_ms
 
+			# Capture custom formatted output BEFORE collecting violations
+			# (this must happen before process_nodes resets structured violations)
+			if hasattr(rule, 'format_violations_grouped'):
+				formatted_output = rule.format_violations_grouped()
+				if formatted_output:
+					# Extract warnings and errors from the dict
+					if formatted_output.get('warnings'):
+						custom_formatted_warnings[rule.error_key] = formatted_output['warnings']
+					if formatted_output.get('errors'):
+						custom_formatted_errors[rule.error_key] = formatted_output['errors']
+
 			# Collect warnings from this rule
 			if rule.warnings:
 				warnings[rule.error_key] = rule.warnings
@@ -100,7 +115,14 @@ class LintEngine:
 			if rule.errors:
 				errors[rule.error_key] = rule.errors
 
-		return LintResults(warnings=warnings, errors=errors, has_errors=bool(errors), rule_timings=rule_timings)
+		return LintResults(
+			warnings=warnings,
+			errors=errors,
+			has_errors=bool(errors),
+			rule_timings=rule_timings,
+			custom_formatted_warnings=custom_formatted_warnings,
+			custom_formatted_errors=custom_formatted_errors,
+		)
 
 	def finalize_batch_rules(self, enable_timing: bool = False) -> LintResults:
 		"""
@@ -118,6 +140,8 @@ class LintEngine:
 		warnings = {}
 		errors = {}
 		rule_timings = {}
+		custom_formatted_warnings = {}
+		custom_formatted_errors = {}
 
 		# Finalize each rule that supports batching
 		for rule in self.rules:
@@ -134,6 +158,18 @@ class LintEngine:
 					duration_ms = (time.perf_counter() - start_time) * 1000.0
 					rule_timings[f"{rule.__class__.__name__}_finalize"] = duration_ms
 
+				# Capture custom formatted output after finalization
+				if hasattr(rule, 'format_violations_grouped'):
+					formatted_output = rule.format_violations_grouped()
+					if formatted_output:
+						# Extract warnings and errors from the dict
+						if formatted_output.get('warnings'):
+							custom_formatted_warnings[rule.error_key
+											] = formatted_output['warnings']
+						if formatted_output.get('errors'):
+							custom_formatted_errors[rule.error_key
+										] = formatted_output['errors']
+
 				# Collect warnings from finalization
 				if rule.warnings:
 					warnings[rule.error_key] = rule.warnings
@@ -142,7 +178,14 @@ class LintEngine:
 				if rule.errors:
 					errors[rule.error_key] = rule.errors
 
-		return LintResults(warnings=warnings, errors=errors, has_errors=bool(errors), rule_timings=rule_timings)
+		return LintResults(
+			warnings=warnings,
+			errors=errors,
+			has_errors=bool(errors),
+			rule_timings=rule_timings,
+			custom_formatted_warnings=custom_formatted_warnings,
+			custom_formatted_errors=custom_formatted_errors,
+		)
 
 	def get_model_statistics(self, flattened_json: Dict[str, Any]) -> Dict[str, Any]:
 		"""Get statistics about the parsed model for debugging/analysis."""

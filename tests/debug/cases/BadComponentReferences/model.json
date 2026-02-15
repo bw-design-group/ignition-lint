@@ -1,6 +1,6 @@
 {
   "bindings": {
-    "count": 2,
+    "count": 13,
     "nodes": [
       {
         "config": {},
@@ -13,11 +13,77 @@
         "expression": "self.parent.getChild('DataSource').props.data",
         "node_type": "expression_binding",
         "path": "root.root.children[2].ContainerWithBadScript.propConfig.props.children"
+      },
+      {
+        "config": {},
+        "node_type": "property_binding",
+        "path": "root.root.children[5].TopContainer.children[0].ParentButton.propConfig.props.enabled",
+        "target_path": ".../BadButton.props.enabled"
+      },
+      {
+        "config": {},
+        "node_type": "property_binding",
+        "path": "root.root.children[5].TopContainer.children[2].ParentContainerProperty.children[0].ParentProperty.propConfig.props.enabled",
+        "target_path": ".../ParentButton.props.enabled"
+      },
+      {
+        "config": {},
+        "node_type": "property_binding",
+        "path": "root.root.children[5].TopContainer.children[2].ParentContainerProperty.children[1].SiblingProperty.propConfig.props.enabled",
+        "target_path": "../NestedButton1.props.enabled"
+      },
+      {
+        "config": {},
+        "node_type": "property_binding",
+        "path": "root.root.children[5].TopContainer.children[2].ParentContainerProperty.children[2].MissingProperty.propConfig.props.enabled",
+        "target_path": "../NestedButton4.props.enabled"
+      },
+      {
+        "config": {},
+        "node_type": "property_binding",
+        "path": "root.root.children[5].TopContainer.children[2].ParentContainerProperty.children[3].CousinProperty.propConfig.props.enabled",
+        "target_path": ".../ParentContainerExpression/SiblingExpression.props.enabled"
+      },
+      {
+        "config": {},
+        "node_type": "property_binding",
+        "path": "root.root.children[5].TopContainer.children[2].ParentContainerProperty.children[4].GrandParentProperty.propConfig.props.enabled",
+        "target_path": "..../TopContainer.position.display"
+      },
+      {
+        "config": {},
+        "expression": "{.../ParentButton.props.enabled}",
+        "node_type": "expression_binding",
+        "path": "root.root.children[5].TopContainer.children[3].ParentContainerExpression.children[0].ParentExpression.propConfig.props.enabled"
+      },
+      {
+        "config": {},
+        "expression": "{../NestedButton1.props.enabled}",
+        "node_type": "expression_binding",
+        "path": "root.root.children[5].TopContainer.children[3].ParentContainerExpression.children[1].SiblingExpression.propConfig.props.enabled"
+      },
+      {
+        "config": {},
+        "node_type": "property_binding",
+        "path": "root.root.children[5].TopContainer.children[3].ParentContainerExpression.children[2].MissingExpression.propConfig.props.enabled",
+        "target_path": "../NestedButton4.props.enabled"
+      },
+      {
+        "config": {},
+        "expression": "{.../ParentContainerProperty/NestedButton1.props.enabled}",
+        "node_type": "expression_binding",
+        "path": "root.root.children[5].TopContainer.children[3].ParentContainerExpression.children[3].CousinExpression.propConfig.props.enabled"
+      },
+      {
+        "config": {},
+        "expression": "{..../TopContainer.position.display}",
+        "node_type": "expression_binding",
+        "path": "root.root.children[5].TopContainer.children[3].ParentContainerExpression.children[4].GrandParentExpression.propConfig.props.enabled"
       }
     ]
   },
   "components": {
-    "count": 6,
+    "count": 27,
     "nodes": [
       {
         "name": "BadButton",
@@ -55,6 +121,153 @@
         "type": "ia.display.label"
       },
       {
+        "name": "ParentButton",
+        "node_type": "component",
+        "path": "root.root.children[5].TopContainer.children[0].ParentButton",
+        "properties_count": 0,
+        "type": "ia.input.button"
+      },
+      {
+        "name": "ParentScript",
+        "node_type": "component",
+        "path": "root.root.children[5].TopContainer.children[1].ParentScript",
+        "properties_count": 0,
+        "type": "ia.input.button"
+      },
+      {
+        "name": "ParentProperty",
+        "node_type": "component",
+        "path": "root.root.children[5].TopContainer.children[2].ParentContainerProperty.children[0].ParentProperty",
+        "properties_count": 0,
+        "type": "ia.input.button"
+      },
+      {
+        "name": "SiblingProperty",
+        "node_type": "component",
+        "path": "root.root.children[5].TopContainer.children[2].ParentContainerProperty.children[1].SiblingProperty",
+        "properties_count": 0,
+        "type": "ia.input.button"
+      },
+      {
+        "name": "MissingProperty",
+        "node_type": "component",
+        "path": "root.root.children[5].TopContainer.children[2].ParentContainerProperty.children[2].MissingProperty",
+        "properties_count": 0,
+        "type": "ia.input.button"
+      },
+      {
+        "name": "CousinProperty",
+        "node_type": "component",
+        "path": "root.root.children[5].TopContainer.children[2].ParentContainerProperty.children[3].CousinProperty",
+        "properties_count": 0,
+        "type": "ia.input.button"
+      },
+      {
+        "name": "GrandParentProperty",
+        "node_type": "component",
+        "path": "root.root.children[5].TopContainer.children[2].ParentContainerProperty.children[4].GrandParentProperty",
+        "properties_count": 0,
+        "type": "ia.input.button"
+      },
+      {
+        "name": "ParentContainerProperty",
+        "node_type": "component",
+        "path": "root.root.children[5].TopContainer.children[2].ParentContainerProperty",
+        "properties_count": 0,
+        "type": "ia.container.flex"
+      },
+      {
+        "name": "ParentExpression",
+        "node_type": "component",
+        "path": "root.root.children[5].TopContainer.children[3].ParentContainerExpression.children[0].ParentExpression",
+        "properties_count": 0,
+        "type": "ia.input.button"
+      },
+      {
+        "name": "SiblingExpression",
+        "node_type": "component",
+        "path": "root.root.children[5].TopContainer.children[3].ParentContainerExpression.children[1].SiblingExpression",
+        "properties_count": 0,
+        "type": "ia.input.button"
+      },
+      {
+        "name": "MissingExpression",
+        "node_type": "component",
+        "path": "root.root.children[5].TopContainer.children[3].ParentContainerExpression.children[2].MissingExpression",
+        "properties_count": 0,
+        "type": "ia.input.button"
+      },
+      {
+        "name": "CousinExpression",
+        "node_type": "component",
+        "path": "root.root.children[5].TopContainer.children[3].ParentContainerExpression.children[3].CousinExpression",
+        "properties_count": 0,
+        "type": "ia.input.button"
+      },
+      {
+        "name": "GrandParentExpression",
+        "node_type": "component",
+        "path": "root.root.children[5].TopContainer.children[3].ParentContainerExpression.children[4].GrandParentExpression",
+        "properties_count": 0,
+        "type": "ia.input.button"
+      },
+      {
+        "name": "ParentContainerExpression",
+        "node_type": "component",
+        "path": "root.root.children[5].TopContainer.children[3].ParentContainerExpression",
+        "properties_count": 0,
+        "type": "ia.container.flex"
+      },
+      {
+        "name": "ParentScript",
+        "node_type": "component",
+        "path": "root.root.children[5].TopContainer.children[4].ParentContainerScripts.children[0].ParentScript",
+        "properties_count": 0,
+        "type": "ia.input.button"
+      },
+      {
+        "name": "SiblingScript",
+        "node_type": "component",
+        "path": "root.root.children[5].TopContainer.children[4].ParentContainerScripts.children[1].SiblingScript",
+        "properties_count": 0,
+        "type": "ia.input.button"
+      },
+      {
+        "name": "BadScript",
+        "node_type": "component",
+        "path": "root.root.children[5].TopContainer.children[4].ParentContainerScripts.children[2].BadScript",
+        "properties_count": 0,
+        "type": "ia.input.button"
+      },
+      {
+        "name": "CousinScript",
+        "node_type": "component",
+        "path": "root.root.children[5].TopContainer.children[4].ParentContainerScripts.children[3].CousinScript",
+        "properties_count": 0,
+        "type": "ia.input.button"
+      },
+      {
+        "name": "GrandParentScript",
+        "node_type": "component",
+        "path": "root.root.children[5].TopContainer.children[4].ParentContainerScripts.children[4].GrandParentScript",
+        "properties_count": 0,
+        "type": "ia.input.button"
+      },
+      {
+        "name": "ParentContainerScripts",
+        "node_type": "component",
+        "path": "root.root.children[5].TopContainer.children[4].ParentContainerScripts",
+        "properties_count": 0,
+        "type": "ia.container.flex"
+      },
+      {
+        "name": "TopContainer",
+        "node_type": "component",
+        "path": "root.root.children[5].TopContainer",
+        "properties_count": 0,
+        "type": "ia.container.flex"
+      },
+      {
         "name": "root",
         "node_type": "component",
         "path": "root.root",
@@ -71,8 +284,8 @@
         "node_type": "custom_method",
         "params": [],
         "path": "root.root.children[3].CustomMethodComponent.scripts.customMethods[0]",
-        "script_length": 144,
-        "script_preview": "\n# Bad pattern in custom method\ntarget = self.getSibling('StatusLabel')\ntarget.props.text = 'Updated..."
+        "script_length": 149,
+        "script_preview": "\t\n\t# Bad pattern in custom method\n\ttarget = self.getSibling('StatusLabel')\n\ttarget.props.text = 'Upd..."
       },
       {
         "name": "navigateHierarchy",
@@ -81,13 +294,13 @@
           "direction"
         ],
         "path": "root.root.children[3].CustomMethodComponent.scripts.customMethods[1]",
-        "script_length": 293,
-        "script_preview": "\n# Multiple bad patterns in one method\nif direction == 'up':\n    return self.getParent().props.name\n..."
+        "script_length": 303,
+        "script_preview": "\t\n\t# Multiple bad patterns in one method\n\tif direction == 'up':\n\t    return self.getParent().props.n..."
       }
     ]
   },
   "event_handlers": {
-    "count": 1,
+    "count": 8,
     "nodes": [
       {
         "event_domain": "component",
@@ -97,11 +310,74 @@
         "scope": "G",
         "script_length": 206,
         "script_preview": "\n# Bad pattern 1: getSibling\nsibling = self.getSibling('StatusLabel')\nsibling.props.text = 'Button c..."
+      },
+      {
+        "event_domain": "dom",
+        "event_type": "onClick",
+        "node_type": "event_handler",
+        "path": "root.root.children[2].ContainerWithBadScript.events.dom.onClick",
+        "scope": "G",
+        "script_length": 72,
+        "script_preview": "\t#error test case for undefined\n\tsystem.perspective.print(undefined_var)"
+      },
+      {
+        "event_domain": "component",
+        "event_type": "onActionPerformed",
+        "node_type": "event_handler",
+        "path": "root.root.children[5].TopContainer.children[1].ParentScript.events.component.onActionPerformed",
+        "scope": "G",
+        "script_length": 109,
+        "script_preview": "\tsystem.perspective.print(self.parent.getChild(\"ParentContainerScripts\").getChild(\"ParentScript\").pr..."
+      },
+      {
+        "event_domain": "component",
+        "event_type": "onActionPerformed",
+        "node_type": "event_handler",
+        "path": "root.root.children[5].TopContainer.children[4].ParentContainerScripts.children[0].ParentScript.events.component.onActionPerformed",
+        "scope": "G",
+        "script_length": 81,
+        "script_preview": "\tsystem.perspective.print(self.parent.parent.getChild(\"ParentButton\").props.text)"
+      },
+      {
+        "event_domain": "component",
+        "event_type": "onActionPerformed",
+        "node_type": "event_handler",
+        "path": "root.root.children[5].TopContainer.children[4].ParentContainerScripts.children[1].SiblingScript.events.component.onActionPerformed",
+        "scope": "G",
+        "script_length": 69,
+        "script_preview": "\tsystem.perspective.print(self.getSibling(\"ParentScript\").props.text)"
+      },
+      {
+        "event_domain": "component",
+        "event_type": "onActionPerformed",
+        "node_type": "event_handler",
+        "path": "root.root.children[5].TopContainer.children[4].ParentContainerScripts.children[2].BadScript.events.component.onActionPerformed",
+        "scope": "G",
+        "script_length": 70,
+        "script_preview": "\tsystem.perspective.print(self.getSibling(\"UnknownButton\").props.text)"
+      },
+      {
+        "event_domain": "component",
+        "event_type": "onActionPerformed",
+        "node_type": "event_handler",
+        "path": "root.root.children[5].TopContainer.children[4].ParentContainerScripts.children[3].CousinScript.events.component.onActionPerformed",
+        "scope": "G",
+        "script_length": 119,
+        "script_preview": "\tsystem.perspective.print(self.parent.parent.getChild(\"ParentContainerProperty\").getChild(\"ParentPro..."
+      },
+      {
+        "event_domain": "component",
+        "event_type": "onActionPerformed",
+        "node_type": "event_handler",
+        "path": "root.root.children[5].TopContainer.children[4].ParentContainerScripts.children[4].GrandParentScript.events.component.onActionPerformed",
+        "scope": "G",
+        "script_length": 99,
+        "script_preview": "\tsystem.perspective.print(self.parent.parent.parent.getChild(\"MessageHandlerComponent\").props.text)"
       }
     ]
   },
   "expression_bindings": {
-    "count": 2,
+    "count": 6,
     "nodes": [
       {
         "config": {},
@@ -114,6 +390,30 @@
         "expression": "self.parent.getChild('DataSource').props.data",
         "node_type": "expression_binding",
         "path": "root.root.children[2].ContainerWithBadScript.propConfig.props.children"
+      },
+      {
+        "config": {},
+        "expression": "{.../ParentButton.props.enabled}",
+        "node_type": "expression_binding",
+        "path": "root.root.children[5].TopContainer.children[3].ParentContainerExpression.children[0].ParentExpression.propConfig.props.enabled"
+      },
+      {
+        "config": {},
+        "expression": "{../NestedButton1.props.enabled}",
+        "node_type": "expression_binding",
+        "path": "root.root.children[5].TopContainer.children[3].ParentContainerExpression.children[1].SiblingExpression.propConfig.props.enabled"
+      },
+      {
+        "config": {},
+        "expression": "{.../ParentContainerProperty/NestedButton1.props.enabled}",
+        "node_type": "expression_binding",
+        "path": "root.root.children[5].TopContainer.children[3].ParentContainerExpression.children[3].CousinExpression.propConfig.props.enabled"
+      },
+      {
+        "config": {},
+        "expression": "{..../TopContainer.position.display}",
+        "node_type": "expression_binding",
+        "path": "root.root.children[5].TopContainer.children[3].ParentContainerExpression.children[4].GrandParentExpression.propConfig.props.enabled"
       }
     ]
   },
@@ -122,7 +422,7 @@
     "nodes": []
   },
   "message_handlers": {
-    "count": 1,
+    "count": 2,
     "nodes": [
       {
         "message_type": "update-status",
@@ -133,13 +433,25 @@
           "session": false,
           "view": true
         },
-        "script_length": 234,
+        "script_length": 242,
+        "script_preview": "\t\n\t# Bad pattern in message handler\n\tstatusLabel = self.getSibling('StatusLabel')\n\tstatusLabel.props..."
+      },
+      {
+        "message_type": "bad-indentation",
+        "node_type": "message_handler",
+        "path": "root.root.children[4].MessageHandlerComponent.scripts.messageHandlers[1]",
+        "scope": {
+          "page": true,
+          "session": false,
+          "view": false
+        },
+        "script_length": 233,
         "script_preview": "\n# Bad pattern in message handler\nstatusLabel = self.getSibling('StatusLabel')\nstatusLabel.props.tex..."
       }
     ]
   },
   "properties": {
-    "count": 13,
+    "count": 58,
     "nodes": [
       {
         "name": "shrink",
@@ -212,6 +524,321 @@
         "value_type": "str"
       },
       {
+        "name": "basis",
+        "node_type": "property",
+        "path": "root.root.children.TopContainer.children.ParentButton.position.basis",
+        "value": "40px",
+        "value_type": "str"
+      },
+      {
+        "name": "shrink",
+        "node_type": "property",
+        "path": "root.root.children.TopContainer.children.ParentButton.position.shrink",
+        "value": 0,
+        "value_type": "int"
+      },
+      {
+        "name": "width",
+        "node_type": "property",
+        "path": "root.root.children.TopContainer.children.ParentButton.props.style.width",
+        "value": "120px",
+        "value_type": "str"
+      },
+      {
+        "name": "basis",
+        "node_type": "property",
+        "path": "root.root.children.TopContainer.children.ParentScript.position.basis",
+        "value": "40px",
+        "value_type": "str"
+      },
+      {
+        "name": "shrink",
+        "node_type": "property",
+        "path": "root.root.children.TopContainer.children.ParentScript.position.shrink",
+        "value": 0,
+        "value_type": "int"
+      },
+      {
+        "name": "width",
+        "node_type": "property",
+        "path": "root.root.children.TopContainer.children.ParentScript.props.style.width",
+        "value": "120px",
+        "value_type": "str"
+      },
+      {
+        "name": "basis",
+        "node_type": "property",
+        "path": "root.root.children.TopContainer.children.ParentContainerProperty.children.ParentProperty.position.basis",
+        "value": "120px",
+        "value_type": "str"
+      },
+      {
+        "name": "shrink",
+        "node_type": "property",
+        "path": "root.root.children.TopContainer.children.ParentContainerProperty.children.ParentProperty.position.shrink",
+        "value": 0,
+        "value_type": "int"
+      },
+      {
+        "name": "basis",
+        "node_type": "property",
+        "path": "root.root.children.TopContainer.children.ParentContainerProperty.children.SiblingProperty.position.basis",
+        "value": "120px",
+        "value_type": "str"
+      },
+      {
+        "name": "shrink",
+        "node_type": "property",
+        "path": "root.root.children.TopContainer.children.ParentContainerProperty.children.SiblingProperty.position.shrink",
+        "value": 0,
+        "value_type": "int"
+      },
+      {
+        "name": "basis",
+        "node_type": "property",
+        "path": "root.root.children.TopContainer.children.ParentContainerProperty.children.MissingProperty.position.basis",
+        "value": "120px",
+        "value_type": "str"
+      },
+      {
+        "name": "shrink",
+        "node_type": "property",
+        "path": "root.root.children.TopContainer.children.ParentContainerProperty.children.MissingProperty.position.shrink",
+        "value": 0,
+        "value_type": "int"
+      },
+      {
+        "name": "basis",
+        "node_type": "property",
+        "path": "root.root.children.TopContainer.children.ParentContainerProperty.children.CousinProperty.position.basis",
+        "value": "120px",
+        "value_type": "str"
+      },
+      {
+        "name": "shrink",
+        "node_type": "property",
+        "path": "root.root.children.TopContainer.children.ParentContainerProperty.children.CousinProperty.position.shrink",
+        "value": 0,
+        "value_type": "int"
+      },
+      {
+        "name": "basis",
+        "node_type": "property",
+        "path": "root.root.children.TopContainer.children.ParentContainerProperty.children.GrandParentProperty.position.basis",
+        "value": "120px",
+        "value_type": "str"
+      },
+      {
+        "name": "shrink",
+        "node_type": "property",
+        "path": "root.root.children.TopContainer.children.ParentContainerProperty.children.GrandParentProperty.position.shrink",
+        "value": 0,
+        "value_type": "int"
+      },
+      {
+        "name": "grow",
+        "node_type": "property",
+        "path": "root.root.children.TopContainer.children.ParentContainerProperty.position.grow",
+        "value": 1,
+        "value_type": "int"
+      },
+      {
+        "name": "width",
+        "node_type": "property",
+        "path": "root.root.children.TopContainer.children.ParentContainerProperty.props.style.width",
+        "value": "100%",
+        "value_type": "str"
+      },
+      {
+        "name": "basis",
+        "node_type": "property",
+        "path": "root.root.children.TopContainer.children.ParentContainerExpression.children.ParentExpression.position.basis",
+        "value": "120px",
+        "value_type": "str"
+      },
+      {
+        "name": "shrink",
+        "node_type": "property",
+        "path": "root.root.children.TopContainer.children.ParentContainerExpression.children.ParentExpression.position.shrink",
+        "value": 0,
+        "value_type": "int"
+      },
+      {
+        "name": "basis",
+        "node_type": "property",
+        "path": "root.root.children.TopContainer.children.ParentContainerExpression.children.SiblingExpression.position.basis",
+        "value": "120px",
+        "value_type": "str"
+      },
+      {
+        "name": "shrink",
+        "node_type": "property",
+        "path": "root.root.children.TopContainer.children.ParentContainerExpression.children.SiblingExpression.position.shrink",
+        "value": 0,
+        "value_type": "int"
+      },
+      {
+        "name": "basis",
+        "node_type": "property",
+        "path": "root.root.children.TopContainer.children.ParentContainerExpression.children.MissingExpression.position.basis",
+        "value": "120px",
+        "value_type": "str"
+      },
+      {
+        "name": "shrink",
+        "node_type": "property",
+        "path": "root.root.children.TopContainer.children.ParentContainerExpression.children.MissingExpression.position.shrink",
+        "value": 0,
+        "value_type": "int"
+      },
+      {
+        "name": "basis",
+        "node_type": "property",
+        "path": "root.root.children.TopContainer.children.ParentContainerExpression.children.CousinExpression.position.basis",
+        "value": "120px",
+        "value_type": "str"
+      },
+      {
+        "name": "shrink",
+        "node_type": "property",
+        "path": "root.root.children.TopContainer.children.ParentContainerExpression.children.CousinExpression.position.shrink",
+        "value": 0,
+        "value_type": "int"
+      },
+      {
+        "name": "basis",
+        "node_type": "property",
+        "path": "root.root.children.TopContainer.children.ParentContainerExpression.children.GrandParentExpression.position.basis",
+        "value": "120px",
+        "value_type": "str"
+      },
+      {
+        "name": "shrink",
+        "node_type": "property",
+        "path": "root.root.children.TopContainer.children.ParentContainerExpression.children.GrandParentExpression.position.shrink",
+        "value": 0,
+        "value_type": "int"
+      },
+      {
+        "name": "grow",
+        "node_type": "property",
+        "path": "root.root.children.TopContainer.children.ParentContainerExpression.position.grow",
+        "value": 1,
+        "value_type": "int"
+      },
+      {
+        "name": "width",
+        "node_type": "property",
+        "path": "root.root.children.TopContainer.children.ParentContainerExpression.props.style.width",
+        "value": "100%",
+        "value_type": "str"
+      },
+      {
+        "name": "basis",
+        "node_type": "property",
+        "path": "root.root.children.TopContainer.children.ParentContainerScripts.children.ParentScript.position.basis",
+        "value": "120px",
+        "value_type": "str"
+      },
+      {
+        "name": "shrink",
+        "node_type": "property",
+        "path": "root.root.children.TopContainer.children.ParentContainerScripts.children.ParentScript.position.shrink",
+        "value": 0,
+        "value_type": "int"
+      },
+      {
+        "name": "basis",
+        "node_type": "property",
+        "path": "root.root.children.TopContainer.children.ParentContainerScripts.children.SiblingScript.position.basis",
+        "value": "120px",
+        "value_type": "str"
+      },
+      {
+        "name": "shrink",
+        "node_type": "property",
+        "path": "root.root.children.TopContainer.children.ParentContainerScripts.children.SiblingScript.position.shrink",
+        "value": 0,
+        "value_type": "int"
+      },
+      {
+        "name": "basis",
+        "node_type": "property",
+        "path": "root.root.children.TopContainer.children.ParentContainerScripts.children.BadScript.position.basis",
+        "value": "120px",
+        "value_type": "str"
+      },
+      {
+        "name": "shrink",
+        "node_type": "property",
+        "path": "root.root.children.TopContainer.children.ParentContainerScripts.children.BadScript.position.shrink",
+        "value": 0,
+        "value_type": "int"
+      },
+      {
+        "name": "basis",
+        "node_type": "property",
+        "path": "root.root.children.TopContainer.children.ParentContainerScripts.children.CousinScript.position.basis",
+        "value": "120px",
+        "value_type": "str"
+      },
+      {
+        "name": "shrink",
+        "node_type": "property",
+        "path": "root.root.children.TopContainer.children.ParentContainerScripts.children.CousinScript.position.shrink",
+        "value": 0,
+        "value_type": "int"
+      },
+      {
+        "name": "basis",
+        "node_type": "property",
+        "path": "root.root.children.TopContainer.children.ParentContainerScripts.children.GrandParentScript.position.basis",
+        "value": "120px",
+        "value_type": "str"
+      },
+      {
+        "name": "shrink",
+        "node_type": "property",
+        "path": "root.root.children.TopContainer.children.ParentContainerScripts.children.GrandParentScript.position.shrink",
+        "value": 0,
+        "value_type": "int"
+      },
+      {
+        "name": "grow",
+        "node_type": "property",
+        "path": "root.root.children.TopContainer.children.ParentContainerScripts.position.grow",
+        "value": 1,
+        "value_type": "int"
+      },
+      {
+        "name": "width",
+        "node_type": "property",
+        "path": "root.root.children.TopContainer.children.ParentContainerScripts.props.style.width",
+        "value": "100%",
+        "value_type": "str"
+      },
+      {
+        "name": "shrink",
+        "node_type": "property",
+        "path": "root.root.children.TopContainer.position.shrink",
+        "value": 0,
+        "value_type": "int"
+      },
+      {
+        "name": "alignItems",
+        "node_type": "property",
+        "path": "root.root.children.TopContainer.props.alignItems",
+        "value": "flex-start",
+        "value_type": "str"
+      },
+      {
+        "name": "direction",
+        "node_type": "property",
+        "path": "root.root.children.TopContainer.props.direction",
+        "value": "column",
+        "value_type": "str"
+      },
+      {
         "name": "direction",
         "node_type": "property",
         "path": "root.root.props.direction",
@@ -235,8 +862,51 @@
     ]
   },
   "property_bindings": {
-    "count": 0,
-    "nodes": []
+    "count": 7,
+    "nodes": [
+      {
+        "config": {},
+        "node_type": "property_binding",
+        "path": "root.root.children[5].TopContainer.children[0].ParentButton.propConfig.props.enabled",
+        "target_path": ".../BadButton.props.enabled"
+      },
+      {
+        "config": {},
+        "node_type": "property_binding",
+        "path": "root.root.children[5].TopContainer.children[2].ParentContainerProperty.children[0].ParentProperty.propConfig.props.enabled",
+        "target_path": ".../ParentButton.props.enabled"
+      },
+      {
+        "config": {},
+        "node_type": "property_binding",
+        "path": "root.root.children[5].TopContainer.children[2].ParentContainerProperty.children[1].SiblingProperty.propConfig.props.enabled",
+        "target_path": "../NestedButton1.props.enabled"
+      },
+      {
+        "config": {},
+        "node_type": "property_binding",
+        "path": "root.root.children[5].TopContainer.children[2].ParentContainerProperty.children[2].MissingProperty.propConfig.props.enabled",
+        "target_path": "../NestedButton4.props.enabled"
+      },
+      {
+        "config": {},
+        "node_type": "property_binding",
+        "path": "root.root.children[5].TopContainer.children[2].ParentContainerProperty.children[3].CousinProperty.propConfig.props.enabled",
+        "target_path": ".../ParentContainerExpression/SiblingExpression.props.enabled"
+      },
+      {
+        "config": {},
+        "node_type": "property_binding",
+        "path": "root.root.children[5].TopContainer.children[2].ParentContainerProperty.children[4].GrandParentProperty.propConfig.props.enabled",
+        "target_path": "..../TopContainer.position.display"
+      },
+      {
+        "config": {},
+        "node_type": "property_binding",
+        "path": "root.root.children[5].TopContainer.children[3].ParentContainerExpression.children[2].MissingExpression.propConfig.props.enabled",
+        "target_path": "../NestedButton4.props.enabled"
+      }
+    ]
   },
   "query_bindings": {
     "count": 0,
@@ -247,7 +917,7 @@
     "nodes": []
   },
   "scripts": {
-    "count": 4,
+    "count": 12,
     "nodes": [
       {
         "message_type": "update-status",
@@ -258,7 +928,19 @@
           "session": false,
           "view": true
         },
-        "script_length": 234,
+        "script_length": 242,
+        "script_preview": "\t\n\t# Bad pattern in message handler\n\tstatusLabel = self.getSibling('StatusLabel')\n\tstatusLabel.props..."
+      },
+      {
+        "message_type": "bad-indentation",
+        "node_type": "message_handler",
+        "path": "root.root.children[4].MessageHandlerComponent.scripts.messageHandlers[1]",
+        "scope": {
+          "page": true,
+          "session": false,
+          "view": false
+        },
+        "script_length": 233,
         "script_preview": "\n# Bad pattern in message handler\nstatusLabel = self.getSibling('StatusLabel')\nstatusLabel.props.tex..."
       },
       {
@@ -266,8 +948,8 @@
         "node_type": "custom_method",
         "params": [],
         "path": "root.root.children[3].CustomMethodComponent.scripts.customMethods[0]",
-        "script_length": 144,
-        "script_preview": "\n# Bad pattern in custom method\ntarget = self.getSibling('StatusLabel')\ntarget.props.text = 'Updated..."
+        "script_length": 149,
+        "script_preview": "\t\n\t# Bad pattern in custom method\n\ttarget = self.getSibling('StatusLabel')\n\ttarget.props.text = 'Upd..."
       },
       {
         "name": "navigateHierarchy",
@@ -276,8 +958,8 @@
           "direction"
         ],
         "path": "root.root.children[3].CustomMethodComponent.scripts.customMethods[1]",
-        "script_length": 293,
-        "script_preview": "\n# Multiple bad patterns in one method\nif direction == 'up':\n    return self.getParent().props.name\n..."
+        "script_length": 303,
+        "script_preview": "\t\n\t# Multiple bad patterns in one method\n\tif direction == 'up':\n\t    return self.getParent().props.n..."
       },
       {
         "event_domain": "component",
@@ -287,6 +969,69 @@
         "scope": "G",
         "script_length": 206,
         "script_preview": "\n# Bad pattern 1: getSibling\nsibling = self.getSibling('StatusLabel')\nsibling.props.text = 'Button c..."
+      },
+      {
+        "event_domain": "dom",
+        "event_type": "onClick",
+        "node_type": "event_handler",
+        "path": "root.root.children[2].ContainerWithBadScript.events.dom.onClick",
+        "scope": "G",
+        "script_length": 72,
+        "script_preview": "\t#error test case for undefined\n\tsystem.perspective.print(undefined_var)"
+      },
+      {
+        "event_domain": "component",
+        "event_type": "onActionPerformed",
+        "node_type": "event_handler",
+        "path": "root.root.children[5].TopContainer.children[1].ParentScript.events.component.onActionPerformed",
+        "scope": "G",
+        "script_length": 109,
+        "script_preview": "\tsystem.perspective.print(self.parent.getChild(\"ParentContainerScripts\").getChild(\"ParentScript\").pr..."
+      },
+      {
+        "event_domain": "component",
+        "event_type": "onActionPerformed",
+        "node_type": "event_handler",
+        "path": "root.root.children[5].TopContainer.children[4].ParentContainerScripts.children[0].ParentScript.events.component.onActionPerformed",
+        "scope": "G",
+        "script_length": 81,
+        "script_preview": "\tsystem.perspective.print(self.parent.parent.getChild(\"ParentButton\").props.text)"
+      },
+      {
+        "event_domain": "component",
+        "event_type": "onActionPerformed",
+        "node_type": "event_handler",
+        "path": "root.root.children[5].TopContainer.children[4].ParentContainerScripts.children[1].SiblingScript.events.component.onActionPerformed",
+        "scope": "G",
+        "script_length": 69,
+        "script_preview": "\tsystem.perspective.print(self.getSibling(\"ParentScript\").props.text)"
+      },
+      {
+        "event_domain": "component",
+        "event_type": "onActionPerformed",
+        "node_type": "event_handler",
+        "path": "root.root.children[5].TopContainer.children[4].ParentContainerScripts.children[2].BadScript.events.component.onActionPerformed",
+        "scope": "G",
+        "script_length": 70,
+        "script_preview": "\tsystem.perspective.print(self.getSibling(\"UnknownButton\").props.text)"
+      },
+      {
+        "event_domain": "component",
+        "event_type": "onActionPerformed",
+        "node_type": "event_handler",
+        "path": "root.root.children[5].TopContainer.children[4].ParentContainerScripts.children[3].CousinScript.events.component.onActionPerformed",
+        "scope": "G",
+        "script_length": 119,
+        "script_preview": "\tsystem.perspective.print(self.parent.parent.getChild(\"ParentContainerProperty\").getChild(\"ParentPro..."
+      },
+      {
+        "event_domain": "component",
+        "event_type": "onActionPerformed",
+        "node_type": "event_handler",
+        "path": "root.root.children[5].TopContainer.children[4].ParentContainerScripts.children[4].GrandParentScript.events.component.onActionPerformed",
+        "scope": "G",
+        "script_length": 99,
+        "script_preview": "\tsystem.perspective.print(self.parent.parent.parent.getChild(\"MessageHandlerComponent\").props.text)"
       }
     ]
   },
