@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.3.6] - 2026-02-15
+
 ### Added
 - Whitelist feature for managing technical debt by ignoring specific views [dbe1363]
 - CLI helper functions to generate whitelist from glob patterns [dbe1363]
@@ -249,7 +251,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Initial tracked release
 
-[Unreleased]: https://github.com/design-group/ignition-lint/compare/v0.3.5...HEAD
+[Unreleased]: https://github.com/design-group/ignition-lint/compare/v0.3.6...HEAD
+[0.3.6]: https://github.com/design-group/ignition-lint/compare/v0.3.5...v0.3.6
 [0.3.5]: https://github.com/design-group/ignition-lint/compare/v0.3.4...v0.3.5
 [0.3.4]: https://github.com/design-group/ignition-lint/compare/v0.3.3...v0.3.4
 [0.3.3]: https://github.com/design-group/ignition-lint/compare/v0.3.2...v0.3.3
