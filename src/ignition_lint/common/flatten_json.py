@@ -9,6 +9,17 @@ import re
 from collections import OrderedDict
 from pathlib import Path
 
+# Characters that Ignition Perspective encodes as unicode escapes in view.json.
+# These are valid ASCII but Ignition uses escapes for HTML/XSS safety.
+# After json.loads decodes them, we must re-encode on write.
+IGNITION_UNICODE_ESCAPES = {
+	"'": "\\u0027",
+	"<": "\\u003c",
+	">": "\\u003e",
+	"&": "\\u0026",
+	"=": "\\u003d",
+}
+
 UNICODE_REPLACEMENTS = {
 	r"\\u003c": "UNICODE_LT",
 	r"\\u003e": "UNICODE_GT",
@@ -38,15 +49,23 @@ def restore_unicode_escapes(text):
 
 
 def format_json(obj):
-	"""Format JSON with 2-space indentation and no trailing whitespace.
+	"""Format JSON with 2-space indentation, preserving Ignition unicode escapes.
+
+	Ignition Perspective encodes certain ASCII characters as unicode escapes
+	(e.g., ' as \\u0027) in view.json files. Since json.loads decodes these
+	into literal characters, we re-encode them after json.dumps to maintain
+	round-trip fidelity.
 
 	Args:
 		obj: JSON-serializable object.
 
 	Returns:
-		str: Formatted JSON string.
+		str: Formatted JSON string with Ignition-style unicode escapes.
 	"""
-	return json.dumps(obj, indent=2, ensure_ascii=True).rstrip()
+	result = json.dumps(obj, indent=2, ensure_ascii=True).rstrip()
+	for char, escape in IGNITION_UNICODE_ESCAPES.items():
+		result = result.replace(char, escape)
+	return result
 
 
 def read_json_file(file_path):
