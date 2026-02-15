@@ -36,8 +36,23 @@
         "position": {
           "shrink": 0
         },
-        "props": {
-          "text": "Click Me"
+        "propConfig": {
+          "props.enabled": {
+            "binding": {
+              "config": {
+                "expression": "{../StatusLabel.position.display} || {../ContainerWithBadScript.position.display}"
+              },
+              "type": "expr"
+            }
+          },
+          "props.text": {
+            "binding": {
+              "config": {
+                "expression": "\"Click Me\""
+              },
+              "type": "expr"
+            }
+          }
         },
         "type": "ia.input.button"
       },
@@ -285,17 +300,34 @@
               },
               {
                 "meta": {
-                  "name": "GrandParentProperty"
+                  "name": "GrandParentProperty",
+                  "tooltip": {}
                 },
                 "position": {
                   "basis": "120px",
                   "shrink": 0
                 },
                 "propConfig": {
+                  "meta.tooltip.text": {
+                    "binding": {
+                      "config": {
+                        "expression": "{this.meta.name}"
+                      },
+                      "type": "expr"
+                    }
+                  },
                   "props.enabled": {
                     "binding": {
                       "config": {
                         "path": "..../TopContainer.position.display"
+                      },
+                      "type": "property"
+                    }
+                  },
+                  "props.text": {
+                    "binding": {
+                      "config": {
+                        "path": "this.meta.name"
                       },
                       "type": "property"
                     }

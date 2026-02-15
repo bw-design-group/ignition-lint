@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- Auto-fix framework with `--fix`, `--fix-unsafe`, `--fix-dry-run`, and `--fix-rules` CLI flags [fd17cbf]
+- NamePatternRule generates auto-fix suggestions to rename components to match naming conventions [fd17cbf]
+- Safety tiers: safe fixes (unreferenced renames) vs unsafe fixes (reference updates, `this.meta.name` bindings) [fd17cbf]
+- FixableMixin for rules to opt into providing auto-fixes [fd17cbf]
+
+### Fixed
+- Preserve Ignition unicode escapes (`\u0027`, `\u003c`, etc.) when writing view.json files after fixes [3dc40cb]
+
 ## [0.3.6] - 2026-02-15
 
 ### Added

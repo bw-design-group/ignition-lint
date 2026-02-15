@@ -6,6 +6,7 @@ from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
 from typing import Set, List, Dict, Any, Literal, Optional
 from ..model.node_types import Property, ViewNode, NodeType, ScriptNode, ALL_BINDINGS, ALL_SCRIPTS
+from ..common.fix_operations import Fix
 
 # Type definition for severity levels
 Severity = Literal["warning", "error"]
@@ -202,6 +203,56 @@ class LintingRule(NodeVisitor):
 	def error_key(self) -> str:
 		"""Key to use in the errors dict for this rule."""
 		return self.__class__.__name__
+
+
+class FixableMixin:
+	"""
+	Mixin for rules that can provide auto-fixes.
+
+	Rules that want to provide fixes should inherit from both FixableMixin and LintingRule:
+		class MyRule(FixableMixin, LintingRule):
+			...
+
+	The mixin manages a list of Fix objects that the rule populates during node visits.
+	Fixes are collected by the LintEngine after rule processing.
+	"""
+
+	def __init__(self, *args, **kwargs):
+		super().__init__(*args, **kwargs)
+		self._fixes: List[Fix] = []
+		self._json_context = None  # Set by LintEngine when fix mode is active
+		self._path_translator = None  # Set by LintEngine when fix mode is active
+
+	def add_fix(self, fix: Fix):
+		"""Add a fix to the collection."""
+		self._fixes.append(fix)
+
+	def get_fixes(self) -> List[Fix]:
+		"""Return all collected fixes."""
+		return list(self._fixes)
+
+	def reset_fixes(self):
+		"""Clear all collected fixes."""
+		self._fixes = []
+
+	def set_fix_context(self, json_data, path_translator):
+		"""
+		Set the JSON context needed for generating fixes.
+
+		Called by LintEngine when fix mode is active.
+		"""
+		self._json_context = json_data
+		self._path_translator = path_translator
+
+	@property
+	def supports_fix(self) -> bool:
+		"""Indicates this rule can provide auto-fixes."""
+		return True
+
+	@property
+	def has_fix_context(self) -> bool:
+		"""Check if fix context has been set (fix mode is active)."""
+		return self._path_translator is not None
 
 
 class BindingRule(LintingRule):
