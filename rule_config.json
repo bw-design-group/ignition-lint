@@ -34,19 +34,27 @@
       "node_type_specific_rules": {
         "component": {
           "convention": "PascalCase",
-          "min_length": 3
+          "min_length": 3,
+          "severity": "error",
+          "_severity_comment": "Components: Use 'error' for strict enforcement of naming standards"
         },
         "property": {
           "convention": "camelCase",
-          "min_length": 2
+          "min_length": 2,
+          "severity": "warning",
+          "_severity_comment": "Properties: Use 'warning' for more lenient custom property naming"
         },
         "message_handler": {
           "convention": "kebab-case",
-          "min_length": 2
+          "min_length": 2,
+          "severity": "warning",
+          "_severity_comment": "Message handlers: Use 'warning' to allow flexibility in message naming"
         },
         "custom_method": {
           "convention": "snake_case",
-          "min_length": 2
+          "min_length": 2,
+          "severity": "error",
+          "_severity_comment": "Custom methods: Use 'error' for consistent Python-style method naming"
         }
       },
       "_pattern_example_comment": "Example using custom pattern with suggestion_convention:",
@@ -93,7 +101,7 @@
   "_info": {
     "_description": "Rule severity levels are defined by rule developers:",
     "rule_severities": {
-      "NamePatternRule": "warning - naming conventions are style preferences",
+      "NamePatternRule": "configurable per node type - naming conventions can be strict (error) or lenient (warning) based on component type",
       "PollingIntervalRule": "error - performance issues that can cause system problems",
       "PylintScriptRule": "error - syntax errors, undefined variables, etc.",
       "UnusedCustomPropertiesRule": "error - dead code that should be removed",
@@ -101,7 +109,7 @@
       "BadComponentReferenceRule": "error (configurable) - brittle view structure dependencies that break during refactoring",
       "ComponentReferenceValidationRule": "error - references to non-existent components cause runtime errors"
     },
-    "note": "Users cannot configure severity levels - they are determined by what each rule checks.",
+    "note": "Most rule severity levels are fixed, but NamePatternRule and BadComponentReferenceRule allow user configuration.",
     "NamePatternRule_node_types": {
       "component": "User-defined component names (PascalCase)",
       "property": "User-defined custom property names (camelCase)",
@@ -122,6 +130,18 @@
       "example_strict": "To treat all violations as errors: {\"F\": \"error\", \"E\": \"error\", \"W\": \"error\", \"C\": \"error\", \"R\": \"error\"}",
       "debug_dir": "Directory for pylint debug files. Defaults to .ignition-lint/debug/ in user repos, tests/debug/ in ignition-lint repo. Files are cleaned up at start of each run.",
       "debug": "When true, always saves debug files. When false, only saves when violations found. Debug files help troubleshoot pylint issues."
+    },
+    "NamePatternRule_config": {
+      "severity": "Configurable per node type: 'error' or 'warning'. Each node type (component, property, message_handler, custom_method) can have its own severity level.",
+      "severity_use_cases": {
+        "component_error": "Recommended - Strictly enforce component naming standards (PascalCase) as these are visible throughout the application",
+        "property_warning": "Recommended - Allow flexibility in custom property naming while still providing guidance",
+        "message_handler_warning": "Recommended - Allow flexibility in message type naming to accommodate team conventions",
+        "custom_method_error": "Recommended - Enforce Python-style method naming (snake_case) for consistency with Ignition scripting"
+      },
+      "configuration_example": "Set severity per node type in node_type_specific_rules: {\"component\": {\"convention\": \"PascalCase\", \"severity\": \"error\"}, \"property\": {\"convention\": \"camelCase\", \"severity\": \"warning\"}}",
+      "granularity": "Per-node-type severity allows fine-grained control - enforce strict standards where it matters (components, methods) while allowing flexibility elsewhere (properties, message handlers)",
+      "migration_strategy": "Start with all 'warning' to identify issues, then gradually move critical node types (components, custom_methods) to 'error' for enforcement"
     },
     "BadComponentReferenceRule_config": {
       "severity": "Configurable severity level: 'error' (default) or 'warning'",
