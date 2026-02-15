@@ -7,7 +7,6 @@ Tests validation of component references in expressions, property bindings, and 
 import unittest
 import json
 from typing import Dict, Any
-from pathlib import Path
 
 from fixtures.base_test import BaseRuleTest
 from fixtures.test_helpers import get_test_config, load_test_view
@@ -673,6 +672,172 @@ class TestComponentReferenceValidationRule(BaseRuleTest):
 		# Should pass: ChildButton.parent.parent -> root, root.getChild('Container2')
 		self.assertEqual(
 			len(rule_errors), 0, f"Valid parent.parent.getChild should pass. Errors: {rule_errors}"
+		)
+
+	def test_valid_expression_with_custom_property(self):
+		"""Test valid expression binding referencing custom properties."""
+		components = {
+			"children": [{
+				"meta": {
+					"name": "Switch1"
+				},
+				"type": "ia.input.switch",
+				"custom": {
+					"energized": True
+				}
+			}, {
+				"meta": {
+					"name": "Button1"
+				},
+				"type": "ia.input.button",
+				"propConfig": {
+					"props.enabled": {
+						"binding": {
+							"config": {
+								"expression": "{../Switch1.custom.energized}"
+							},
+							"type": "expr"
+						}
+					}
+				}
+			}],
+			"meta": {
+				"name": "root"
+			},
+			"type": "ia.container.coord"
+		}
+
+		mock_view = self._create_mock_view_with_components(components)
+		self.run_lint_on_mock_view(mock_view, self.rule_config)
+
+		rule_errors = self.get_errors_for_rule("ComponentReferenceValidationRule")
+		# Should pass: Switch1 exists as sibling, .custom. should be stripped correctly
+		self.assertEqual(
+			len(rule_errors), 0, f"Valid custom property reference should pass. Errors: {rule_errors}"
+		)
+
+	def test_valid_property_binding_with_custom_property(self):
+		"""Test valid property binding referencing custom properties."""
+		components = {
+			"children": [{
+				"meta": {
+					"name": "Sensor1"
+				},
+				"type": "ia.display.label",
+				"custom": {
+					"value": 42
+				}
+			}, {
+				"meta": {
+					"name": "Display1"
+				},
+				"type": "ia.display.label",
+				"propConfig": {
+					"props.text": {
+						"binding": {
+							"config": {
+								"path": "../Sensor1.custom.value"
+							},
+							"type": "property"
+						}
+					}
+				}
+			}],
+			"meta": {
+				"name": "root"
+			},
+			"type": "ia.container.coord"
+		}
+
+		mock_view = self._create_mock_view_with_components(components)
+		self.run_lint_on_mock_view(mock_view, self.rule_config)
+
+		rule_errors = self.get_errors_for_rule("ComponentReferenceValidationRule")
+		# Should pass: Sensor1 exists as sibling
+		self.assertEqual(
+			len(rule_errors), 0, f"Valid custom property binding should pass. Errors: {rule_errors}"
+		)
+
+	def test_invalid_expression_with_custom_property(self):
+		"""Test invalid expression binding with custom property - component doesn't exist."""
+		components = {
+			"children": [{
+				"meta": {
+					"name": "Button1"
+				},
+				"type": "ia.input.button",
+				"propConfig": {
+					"props.enabled": {
+						"binding": {
+							"config": {
+								"expression": "{../NonExistentSwitch.custom.energized}"
+							},
+							"type": "expr"
+						}
+					}
+				}
+			}],
+			"meta": {
+				"name": "root"
+			},
+			"type": "ia.container.coord"
+		}
+
+		mock_view = self._create_mock_view_with_components(components)
+		self.run_lint_on_mock_view(mock_view, self.rule_config)
+
+		rule_errors = self.get_errors_for_rule("ComponentReferenceValidationRule")
+		# Should error: NonExistentSwitch doesn't exist
+		self.assertEqual(len(rule_errors), 1, "Invalid custom property reference should be detected")
+		self.assertIn("NonExistentSwitch", rule_errors[0])
+
+	def test_nested_custom_property_reference(self):
+		"""Test custom property reference with nested path."""
+		components = {
+			"children": [{
+				"meta": {
+					"name": "Container1"
+				},
+				"type": "ia.container.flex",
+				"children": [{
+					"meta": {
+						"name": "Switch1"
+					},
+					"type": "ia.input.switch",
+					"custom": {
+						"state": "on"
+					}
+				}]
+			}, {
+				"meta": {
+					"name": "Button1"
+				},
+				"type": "ia.input.button",
+				"propConfig": {
+					"props.enabled": {
+						"binding": {
+							"config": {
+								"expression": "{../Container1/Switch1.custom.state}"
+							},
+							"type": "expr"
+						}
+					}
+				}
+			}],
+			"meta": {
+				"name": "root"
+			},
+			"type": "ia.container.coord"
+		}
+
+		mock_view = self._create_mock_view_with_components(components)
+		self.run_lint_on_mock_view(mock_view, self.rule_config)
+
+		rule_errors = self.get_errors_for_rule("ComponentReferenceValidationRule")
+		# Should pass: Container1/Switch1 is valid nested path with custom property
+		self.assertEqual(
+			len(rule_errors), 0,
+			f"Valid nested custom property reference should pass. Errors: {rule_errors}"
 		)
 
 

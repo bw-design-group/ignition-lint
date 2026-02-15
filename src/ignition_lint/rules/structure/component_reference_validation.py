@@ -211,9 +211,10 @@ class ComponentReferenceValidationRule(LintingRule):
 			Button.props.enabled -> Button
 			Container/Child.props.text -> Container/Child
 			Component.position.display -> Component
+			Switch1.custom.energized -> Switch1
 		"""
 		# Remove property access suffix
-		for suffix in ['.props.', '.position.', '.meta.']:
+		for suffix in ['.props.', '.position.', '.meta.', '.custom.']:
 			if suffix in ref_path:
 				return ref_path.split(suffix)[0]
 
