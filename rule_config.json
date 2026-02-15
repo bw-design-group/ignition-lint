@@ -70,6 +70,16 @@
       "_comment": "Detects brittle component references like .getSibling(), .getParent(), .getChild(), .parent, .children that create tight coupling to view structure. Use view.custom properties or message handling instead."
     }
   },
+  "ComponentReferenceValidationRule": {
+    "enabled": true,
+    "kwargs": {
+      "_comment": "Validates that component references (expressions, property bindings, scripts) resolve to components that actually exist in the view hierarchy. Prevents runtime errors from broken references.",
+      "validate_expressions": true,
+      "validate_property_bindings": true,
+      "validate_scripts": true,
+      "_validation_comment": "Set individual validation flags to false to disable checking specific reference types (expressions: {../Component.props.value}, property bindings: ../Component.props.enabled, scripts: self.getSibling('Component'))"
+    }
+  },
   "_info": {
     "_description": "Rule severity levels are defined by rule developers:",
     "rule_severities": {
@@ -78,7 +88,8 @@
       "PylintScriptRule": "error - syntax errors, undefined variables, etc.",
       "UnusedCustomPropertiesRule": "error - dead code that should be removed",
       "ExcessiveContextDataRule": "error - architectural issue, data should be in databases",
-      "BadComponentReferenceRule": "error - brittle view structure dependencies that break during refactoring"
+      "BadComponentReferenceRule": "error - brittle view structure dependencies that break during refactoring",
+      "ComponentReferenceValidationRule": "error - references to non-existent components cause runtime errors"
     },
     "note": "Users cannot configure severity levels - they are determined by what each rule checks.",
     "NamePatternRule_node_types": {
