@@ -1,10 +1,12 @@
 name: Publish to PyPI
 
 on:
-  release:
-    types: [published]
   workflow_dispatch:
     inputs:
+      tag:
+        description: 'Git tag to publish (e.g. v0.1.0)'
+        required: true
+        type: string
       test_pypi:
         description: 'Publish to Test PyPI instead of production'
         required: false
@@ -15,12 +17,14 @@ permissions:
   contents: read
 
 jobs:
-  publish:
+  build:
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.tag }}
 
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -35,16 +39,44 @@ jobs:
       - name: Build package
         run: poetry build
 
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: dist
+          path: dist/
+
+  publish-test-pypi:
+    needs: build
+    if: github.event.inputs.test_pypi == 'true'
+    runs-on: ubuntu-latest
+    environment: Test PyPI
+    permissions:
+      id-token: write
+    steps:
+      - name: Download build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: dist
+          path: dist/
+
       - name: Publish to Test PyPI
-        if: github.event.inputs.test_pypi == 'true'
-        env:
-          POETRY_PYPI_TOKEN_TESTPYPI: ${{ secrets.TEST_PYPI_API_TOKEN }}
-        run: |
-          poetry config repositories.testpypi https://test.pypi.org/legacy/
-          poetry publish -r testpypi
+        uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          repository-url: https://test.pypi.org/legacy/
+
+  publish-pypi:
+    needs: build
+    if: github.event.inputs.test_pypi != 'true'
+    runs-on: ubuntu-latest
+    environment: Prod PyPI
+    permissions:
+      id-token: write
+    steps:
+      - name: Download build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: dist
+          path: dist/
 
       - name: Publish to PyPI
-        if: github.event_name == 'release' && github.event.inputs.test_pypi != 'true'
-        env:
-          POETRY_PYPI_TOKEN_PYPI: ${{ secrets.PYPI_API_TOKEN }}
-        run: poetry publish
+        uses: pypa/gh-action-pypi-publish@release/v1
