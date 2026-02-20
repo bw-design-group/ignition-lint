@@ -29,7 +29,7 @@ The whitelist feature allows you to exclude specific files from linting, even wh
 cd /path/to/ignition-project
 
 # Generate whitelist from legacy views
-ignition-lint --generate-whitelist \
+ign-lint --generate-whitelist \
     "views/legacy/**/*.json" \
     "views/deprecated/**/*.json"
 
@@ -41,7 +41,7 @@ ignition-lint --generate-whitelist \
 
 ```bash
 # Lint with whitelist (whitelisted files are skipped)
-ignition-lint \
+ign-lint \
     --config rule_config.json \
     --whitelist .whitelist.txt \
     --files "**/view.json"
@@ -55,8 +55,8 @@ repos:
   - repo: https://github.com/your-org/ignition-lint
     rev: v1.0.0
     hooks:
-      - id: ignition-lint
-        args: ['--config=.ignition-lint-precommit.json', '--whitelist=.whitelist.txt', '--files']
+      - id: ign-lint
+        args: ['--config=.ign-lint-precommit.json', '--whitelist=.whitelist.txt', '--files']
 ```
 
 ## Whitelist File Format
@@ -108,10 +108,10 @@ views/components/ComponentWithKnownIssues/view.json
 
 ```bash
 # Generate from single pattern
-ignition-lint --generate-whitelist "views/legacy/**/*.json"
+ign-lint --generate-whitelist "views/legacy/**/*.json"
 
 # Generate from multiple patterns
-ignition-lint --generate-whitelist \
+ign-lint --generate-whitelist \
     "views/legacy/**/*.json" \
     "views/deprecated/**/*.json" \
     "views/prototype/**/*.json"
@@ -121,7 +121,7 @@ ignition-lint --generate-whitelist \
 
 ```bash
 # Specify custom output file
-ignition-lint --generate-whitelist "views/legacy/**/*.json" \
+ign-lint --generate-whitelist "views/legacy/**/*.json" \
     --whitelist-output custom-whitelist.txt
 ```
 
@@ -129,7 +129,7 @@ ignition-lint --generate-whitelist "views/legacy/**/*.json" \
 
 ```bash
 # Append to existing whitelist (preserves existing entries)
-ignition-lint --generate-whitelist "views/temp/**/*.json" \
+ign-lint --generate-whitelist "views/temp/**/*.json" \
     --append
 
 # Append automatically deduplicates entries
@@ -139,7 +139,7 @@ ignition-lint --generate-whitelist "views/temp/**/*.json" \
 
 ```bash
 # Preview what would be added without writing file
-ignition-lint --generate-whitelist "views/legacy/**/*.json" \
+ign-lint --generate-whitelist "views/legacy/**/*.json" \
     --dry-run
 
 # Output shows first 20 matches:
@@ -155,17 +155,17 @@ ignition-lint --generate-whitelist "views/legacy/**/*.json" \
 
 ```bash
 # Use default whitelist (.whitelist.txt)
-ignition-lint --config rule_config.json \
+ign-lint --config rule_config.json \
     --whitelist .whitelist.txt \
     --files "**/view.json"
 
 # Use custom whitelist
-ignition-lint --config rule_config.json \
+ign-lint --config rule_config.json \
     --whitelist path/to/custom-whitelist.txt \
     --files "**/view.json"
 
 # Disable whitelist (overrides --whitelist)
-ignition-lint --config rule_config.json \
+ign-lint --config rule_config.json \
     --whitelist .whitelist.txt \
     --no-whitelist \
     --files "**/view.json"
@@ -173,21 +173,21 @@ ignition-lint --config rule_config.json \
 
 ### Default Behavior
 
-**Important:** By default, ignition-lint does NOT use a whitelist unless you explicitly specify `--whitelist <path>`.
+**Important:** By default, ign-lint does NOT use a whitelist unless you explicitly specify `--whitelist <path>`.
 
 ```bash
 # No whitelist used (processes all files)
-ignition-lint --config rule_config.json --files "**/view.json"
+ign-lint --config rule_config.json --files "**/view.json"
 
 # Whitelist explicitly enabled
-ignition-lint --config rule_config.json --whitelist .whitelist.txt --files "**/view.json"
+ign-lint --config rule_config.json --whitelist .whitelist.txt --files "**/view.json"
 ```
 
 ### Verbose Mode
 
 ```bash
 # Show detailed information about whitelisted files
-ignition-lint --config rule_config.json \
+ign-lint --config rule_config.json \
     --whitelist .whitelist.txt \
     --files "**/view.json" \
     --verbose
@@ -211,9 +211,9 @@ repos:
   - repo: https://github.com/your-org/ignition-lint
     rev: v1.0.0  # Use specific tag
     hooks:
-      - id: ignition-lint
+      - id: ign-lint
         # Add whitelist argument (opt-in)
-        args: ['--config=.ignition-lint-precommit.json', '--whitelist=.whitelist.txt', '--files']
+        args: ['--config=.ign-lint-precommit.json', '--whitelist=.whitelist.txt', '--files']
         # Exclude test files that intentionally contain violations
         exclude: '^tests/.*|.*test.*\.json$'
 ```
@@ -222,7 +222,7 @@ repos:
 
 ```bash
 # Generate whitelist from legacy files
-ignition-lint --generate-whitelist "views/legacy/**/*.json"
+ign-lint --generate-whitelist "views/legacy/**/*.json"
 
 # Commit whitelist to repository
 git add .whitelist.txt
@@ -245,9 +245,9 @@ git add views/
 git commit -m "Update dashboards"
 
 # Pre-commit behavior:
-# 1. Passes NewDashboard/view.json to ignition-lint
-# 2. Passes OldDashboard/view.json to ignition-lint
-# 3. ignition-lint filters out OldDashboard (whitelisted)
+# 1. Passes NewDashboard/view.json to ign-lint
+# 2. Passes OldDashboard/view.json to ign-lint
+# 3. ign-lint filters out OldDashboard (whitelisted)
 # 4. Only NewDashboard is linted
 # 5. Commit succeeds if NewDashboard passes linting
 ```
@@ -269,19 +269,19 @@ git commit -m "Update dashboards"
 
 ```bash
 # Generate whitelist
-ignition-lint --generate-whitelist "views/legacy/**/*.json"
+ign-lint --generate-whitelist "views/legacy/**/*.json"
 
 # Use whitelist
-ignition-lint --config rule_config.json --whitelist .whitelist.txt --files "**/view.json"
+ign-lint --config rule_config.json --whitelist .whitelist.txt --files "**/view.json"
 
 # Generate and append
-ignition-lint --generate-whitelist "views/temp/**/*.json" --append
+ign-lint --generate-whitelist "views/temp/**/*.json" --append
 
 # Dry run
-ignition-lint --generate-whitelist "views/legacy/**/*.json" --dry-run
+ign-lint --generate-whitelist "views/legacy/**/*.json" --dry-run
 
 # Override whitelist
-ignition-lint --config rule_config.json --whitelist .whitelist.txt --no-whitelist --files "**/view.json"
+ign-lint --config rule_config.json --whitelist .whitelist.txt --no-whitelist --files "**/view.json"
 ```
 
 ## Workflow Examples
@@ -294,7 +294,7 @@ find views/legacy -name "view.json" | wc -l
 # Output: 612 files
 
 # Step 2: Generate whitelist
-ignition-lint --generate-whitelist "views/legacy/**/*.json"
+ign-lint --generate-whitelist "views/legacy/**/*.json"
 
 # Step 3: Review generated whitelist
 cat .whitelist.txt
@@ -310,7 +310,7 @@ git commit -m "Add whitelist for legacy views (technical debt)"
 vim .pre-commit-config.yaml  # Add --whitelist=.whitelist.txt to args
 
 # Step 7: Test linting with whitelist
-ignition-lint --config rule_config.json --whitelist .whitelist.txt --files "**/view.json"
+ign-lint --config rule_config.json --whitelist .whitelist.txt --files "**/view.json"
 ```
 
 ### Adding New Files to Whitelist
@@ -320,7 +320,7 @@ ignition-lint --config rule_config.json --whitelist .whitelist.txt --files "**/v
 echo "views/problematic/NewFile/view.json" >> .whitelist.txt
 
 # Option 2: Generate and append
-ignition-lint --generate-whitelist "views/problematic/**/*.json" --append
+ign-lint --generate-whitelist "views/problematic/**/*.json" --append
 
 # Commit changes
 git add .whitelist.txt
@@ -347,7 +347,7 @@ git commit -m "Remove OldDashboard from whitelist (fixed)"
 ```bash
 # Files have moved from views/legacy to views/archive
 # Regenerate whitelist
-ignition-lint --generate-whitelist "views/archive/**/*.json"
+ign-lint --generate-whitelist "views/archive/**/*.json"
 
 # Review changes
 git diff .whitelist.txt
@@ -453,7 +453,7 @@ git commit -m "WIP"
 
 ```bash
 # 1. Verify whitelist is being loaded
-ignition-lint --config rule_config.json --whitelist .whitelist.txt --files "**/view.json" --verbose
+ign-lint --config rule_config.json --whitelist .whitelist.txt --files "**/view.json" --verbose
 
 # Should show: "🔒 Loaded whitelist with N files"
 
@@ -464,7 +464,7 @@ cat .whitelist.txt
 
 # 3. Test with single file
 echo "views/legacy/Dashboard/view.json" > test_whitelist.txt
-ignition-lint --config rule_config.json --whitelist test_whitelist.txt --files "views/legacy/Dashboard/view.json"
+ign-lint --config rule_config.json --whitelist test_whitelist.txt --files "views/legacy/Dashboard/view.json"
 ```
 
 ### Performance Issues
@@ -478,7 +478,7 @@ ignition-lint --config rule_config.json --whitelist test_whitelist.txt --files "
 wc -l .whitelist.txt
 
 # 2. Profile with timing output
-ignition-lint --config rule_config.json --whitelist .whitelist.txt --files "**/view.json" --timing-output timing.txt
+ign-lint --config rule_config.json --whitelist .whitelist.txt --files "**/view.json" --timing-output timing.txt
 
 # Whitelist overhead should be < 2ms even for 1000+ files
 ```
@@ -495,9 +495,9 @@ repos:
   - repo: https://github.com/your-org/ignition-lint
     rev: v1.0.0
     hooks:
-      - id: ignition-lint
+      - id: ign-lint
         # IMPORTANT: Add whitelist argument explicitly
-        args: ['--config=.ignition-lint-precommit.json', '--whitelist=.whitelist.txt', '--files']
+        args: ['--config=.ign-lint-precommit.json', '--whitelist=.whitelist.txt', '--files']
 ```
 
 ### Whitelist File Not Found
@@ -508,19 +508,19 @@ repos:
 
 ```bash
 # 1. Create whitelist if it doesn't exist
-ignition-lint --generate-whitelist "views/legacy/**/*.json"
+ign-lint --generate-whitelist "views/legacy/**/*.json"
 
 # 2. Or specify correct path
-ignition-lint --config rule_config.json --whitelist path/to/whitelist.txt --files "**/view.json"
+ign-lint --config rule_config.json --whitelist path/to/whitelist.txt --files "**/view.json"
 
 # 3. Or disable whitelist if not needed
-ignition-lint --config rule_config.json --no-whitelist --files "**/view.json"
+ign-lint --config rule_config.json --no-whitelist --files "**/view.json"
 ```
 
 ## FAQ
 
 **Q: Is whitelist mandatory?**
-A: No, whitelist is completely optional. By default, ignition-lint processes all files unless you specify `--whitelist <path>`.
+A: No, whitelist is completely optional. By default, ign-lint processes all files unless you specify `--whitelist <path>`.
 
 **Q: Can I use glob patterns in the whitelist file?**
 A: No, the whitelist file only supports explicit file paths (one per line). Use `--generate-whitelist` with glob patterns to populate the whitelist.

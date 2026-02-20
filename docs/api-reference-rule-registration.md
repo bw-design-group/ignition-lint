@@ -2,7 +2,7 @@
 
 > 📚 **Navigation:** [Documentation Index](README.md) | [Tutorial](tutorial-creating-your-first-rule.md) | [Developer Guide](developer-guide-rule-creation.md) | [Troubleshooting](troubleshooting-rule-development.md)
 
-This document provides complete API documentation for the ignition-lint rule registration system implemented in Story 1.4.
+This document provides complete API documentation for the ign-lint rule registration system implemented in Story 1.4.
 
 > 💡 **Looking for examples?** Check the [Developer Guide](developer-guide-rule-creation.md) for practical usage examples and patterns.
 

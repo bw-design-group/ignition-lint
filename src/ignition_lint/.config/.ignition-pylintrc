@@ -228,7 +228,7 @@ inlinevar-rgx=^[a-z_][a-z0-9_]*$
 class-rgx=^_?[A-Z][a-zA-Z0-9]*$
 
 # Regular expression matching correct module names
-# Allow any pattern (temp files from ignition-lint have timestamps in names)
+# Allow any pattern (temp files from ign-lint have timestamps in names)
 module-rgx=.*
 
 # Regular expression matching correct method names

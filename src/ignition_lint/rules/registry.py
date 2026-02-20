@@ -1,5 +1,5 @@
 """
-Rule Registration System for ignition-lint
+Rule Registration System for ign-lint
 
 This module provides a dynamic rule registration system that allows developers
 to register new linting rules without modifying core framework files.

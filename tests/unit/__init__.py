@@ -1,3 +1,3 @@
 """
-Unit tests package for ignition-lint rules.
+Unit tests package for ign-lint rules.
 """

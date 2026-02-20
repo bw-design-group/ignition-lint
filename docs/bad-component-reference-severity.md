@@ -153,11 +153,11 @@ repos:
   - repo: https://github.com/your-org/ignition-lint
     rev: v1.0.0
     hooks:
-      - id: ignition-lint
-        args: ['--config=.ignition-lint.json', '--files']
+      - id: ign-lint
+        args: ['--config=.ign-lint.json', '--files']
 ```
 
-With `.ignition-lint.json`:
+With `.ign-lint.json`:
 ```json
 {
   "BadComponentReferenceRule": {

@@ -1,4 +1,4 @@
-# Makefile for ignition-lint development
+# Makefile for ign-lint development
 # Simple, essential commands for productive development
 
 .DEFAULT_GOAL := help
@@ -22,7 +22,7 @@ SCRIPTS_DIR := scripts
 
 .PHONY: help
 help: ## Show this help message
-	@echo "$(BLUE)ignition-lint - Development Commands$(NC)"
+	@echo "$(BLUE)ign-lint - Development Commands$(NC)"
 	@echo ""
 	@echo "$(YELLOW)General Workflow:$(NC)"
 	@echo "  1. make setup          - First time setup"
@@ -124,7 +124,7 @@ precommit: ## Run pre-commit hooks on all files
 .PHONY: info
 info: ## Show project information
 	@echo "$(BLUE)Project Information:$(NC)"
-	@echo "  Name:        ignition-lint"
+	@echo "  Name:        ign-lint"
 	@echo "  Python:      $$($(PYTHON) --version)"
 	@echo "  Poetry:      $$($(POETRY) --version 2>/dev/null || echo 'Not installed')"
 	@echo "  Location:    $$(pwd)"

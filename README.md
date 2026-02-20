@@ -15,10 +15,10 @@ Ignition Lint is a Python framework designed to analyze and lint Ignition Perspe
 #### Option 1: Install from PyPI (Recommended for Users)
 ```bash
 # Install the package
-pip install ignition-lint
+pip install ign-lint
 
 # Verify installation
-ignition-lint --help
+ign-lint --help
 ```
 
 #### Option 2: Development Setup with Poetry
@@ -74,7 +74,7 @@ poetry run python -m ignition_lint path/to/view.json
 poetry run python -m ignition_lint --config my_rules.json --files "views/**/view.json"
 
 # Using the CLI entry point
-poetry run ignition-lint path/to/view.json
+poetry run ign-lint path/to/view.json
 ```
 
 ### Building and Distribution
@@ -741,30 +741,30 @@ This package can be utilized in several ways to fit different development workfl
 
 #### Using the Installed Package
 ```bash
-# After pip install ignition-lint
-ignition-lint path/to/view.json
+# After pip install ign-lint
+ign-lint path/to/view.json
 
 # Lint multiple files with glob pattern
-ignition-lint --files "**/view.json"
+ign-lint --files "**/view.json"
 
 # Use custom configuration
-ignition-lint --config my_rules.json --files "views/**/view.json"
+ign-lint --config my_rules.json --files "views/**/view.json"
 
 # Show help
-ignition-lint --help
+ign-lint --help
 ```
 
 #### Using Poetry (Development)
 ```bash
 # Using the CLI entry point
-poetry run ignition-lint path/to/view.json
+poetry run ign-lint path/to/view.json
 
 # Using the module directly
 poetry run python -m ignition_lint path/to/view.json
 
 # If you've activated the Poetry shell
 poetry shell
-ignition-lint path/to/view.json
+ign-lint path/to/view.json
 ```
 
 ### 2. Pre-commit Hook Integration
@@ -776,7 +776,7 @@ repos:
   - repo: https://github.com/bw-design-group/ignition-lint
     rev: v0.2.4  # Use the latest release tag
     hooks:
-      - id: ignition-lint
+      - id: ign-lint
         # Hook runs on view.json files by default with warnings-only mode
 ```
 
@@ -786,9 +786,9 @@ repos:
 repos:
   - repo: local
     hooks:
-      - id: ignition-lint
+      - id: ign-lint
         name: Ignition Lint
-        entry: ignition-lint
+        entry: ign-lint
         language: python
         types: [json]
         files: view\.json$
@@ -807,7 +807,7 @@ repos:
   - repo: https://github.com/bw-design-group/ignition-lint
     rev: v0.2.4
     hooks:
-      - id: ignition-lint
+      - id: ign-lint
         args: ['--config=rule_config.json', '--files']
 ```
 
@@ -817,9 +817,9 @@ repos:
 repos:
   - repo: local
     hooks:
-      - id: ignition-lint
+      - id: ign-lint
         name: Ignition Lint
-        entry: ignition-lint
+        entry: ign-lint
         language: python
         types: [json]
         files: view\.json$
@@ -861,7 +861,7 @@ repos:
   - repo: https://github.com/bw-design-group/ignition-lint
     rev: v0.2.4
     hooks:
-      - id: ignition-lint
+      - id: ign-lint
         args: ['--config=rule_config.json', '--files', '--ignore-warnings']
 ```
 
@@ -870,10 +870,10 @@ This is useful for teams that want to gradually address warnings without blockin
 **For full repository scans**, use the CLI directly instead of `pre-commit run --all-files`:
 ```bash
 # Scan all view.json files in the repository
-ignition-lint --files "services/**/view.json" --config rule_config.json
+ign-lint --files "services/**/view.json" --config rule_config.json
 
 # With timing and results output
-ignition-lint --files "services/**/view.json" \
+ign-lint --files "services/**/view.json" \
   --config rule_config.json \
   --timing-output timing.txt \
   --results-output results.txt
@@ -889,10 +889,10 @@ The whitelist feature allows you to exclude specific files from linting, which i
 
 ```bash
 # Generate whitelist from legacy files
-ignition-lint --generate-whitelist "views/legacy/**/*.json" "views/deprecated/**/*.json"
+ign-lint --generate-whitelist "views/legacy/**/*.json" "views/deprecated/**/*.json"
 
 # Use whitelist during linting
-ignition-lint --config rule_config.json --whitelist .whitelist.txt --files "**/view.json"
+ign-lint --config rule_config.json --whitelist .whitelist.txt --files "**/view.json"
 ```
 
 #### Whitelist File Format
@@ -920,46 +920,46 @@ views/components/ComponentWithKnownIssues/view.json
 
 ```bash
 # Generate from single pattern
-ignition-lint --generate-whitelist "views/legacy/**/*.json"
+ign-lint --generate-whitelist "views/legacy/**/*.json"
 
 # Generate from multiple patterns
-ignition-lint --generate-whitelist \
+ign-lint --generate-whitelist \
     "views/legacy/**/*.json" \
     "views/deprecated/**/*.json"
 
 # Custom output file
-ignition-lint --generate-whitelist "views/legacy/**/*.json" \
+ign-lint --generate-whitelist "views/legacy/**/*.json" \
     --whitelist-output custom-whitelist.txt
 
 # Append to existing whitelist
-ignition-lint --generate-whitelist "views/temp/**/*.json" --append
+ign-lint --generate-whitelist "views/temp/**/*.json" --append
 
 # Dry run (preview without writing)
-ignition-lint --generate-whitelist "views/legacy/**/*.json" --dry-run
+ign-lint --generate-whitelist "views/legacy/**/*.json" --dry-run
 ```
 
 #### Using Whitelists
 
 ```bash
 # Use whitelist (whitelisted files are skipped)
-ignition-lint --config rule_config.json \
+ign-lint --config rule_config.json \
     --whitelist .whitelist.txt \
     --files "**/view.json"
 
 # Disable whitelist (overrides --whitelist)
-ignition-lint --config rule_config.json \
+ign-lint --config rule_config.json \
     --whitelist .whitelist.txt \
     --no-whitelist \
     --files "**/view.json"
 
 # Verbose mode (show ignored files)
-ignition-lint --config rule_config.json \
+ign-lint --config rule_config.json \
     --whitelist .whitelist.txt \
     --files "**/view.json" \
     --verbose
 ```
 
-**Important:** By default, ignition-lint does NOT use a whitelist unless you explicitly specify `--whitelist <path>`.
+**Important:** By default, ign-lint does NOT use a whitelist unless you explicitly specify `--whitelist <path>`.
 
 #### Pre-commit Integration with Whitelist
 
@@ -969,13 +969,13 @@ repos:
   - repo: https://github.com/bw-design-group/ignition-lint
     rev: v0.2.4
     hooks:
-      - id: ignition-lint
+      - id: ign-lint
         # Add whitelist argument to use project-specific whitelist
         args: ['--config=rule_config.json', '--whitelist=.whitelist.txt', '--files']
 ```
 
 **Workflow:**
-1. Generate whitelist: `ignition-lint --generate-whitelist "views/legacy/**/*.json"`
+1. Generate whitelist: `ign-lint --generate-whitelist "views/legacy/**/*.json"`
 2. Review and edit `.whitelist.txt` to add comments explaining why files are whitelisted
 3. Commit whitelist: `git add .whitelist.txt && git commit -m "Add whitelist for legacy views"`
 4. Update `.pre-commit-config.yaml` to use whitelist (add `--whitelist=.whitelist.txt` to args)
@@ -1009,15 +1009,15 @@ jobs:
         with:
           python-version: "3.11"
 
-      - name: Install ignition-lint
-        run: pip install ignition-lint
+      - name: Install ign-lint
+        run: pip install ign-lint
 
-      - name: Run ignition-lint
+      - name: Run ign-lint
         run: |
           # Lint all view.json files in the repository
           find . -name "view.json" -type f | while read file; do
             echo "Linting $file"
-            ignition-lint "$file"
+            ign-lint "$file"
           done
 ```
 
@@ -1034,7 +1034,7 @@ cd ignition-lint
 poetry install
 
 # Test the package locally
-poetry run ignition-lint tests/cases/PreferredStyle/view.json
+poetry run ign-lint tests/cases/PreferredStyle/view.json
 
 # Run the full test suite
 cd tests

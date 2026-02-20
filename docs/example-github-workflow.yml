@@ -1,7 +1,7 @@
-# Sample workflow demonstrating the ignition-lint GitHub action
+# Sample workflow demonstrating the ign-lint GitHub action
 #
 # This file serves as both documentation and a test workflow.
-# Copy this to .github/workflows/ in your repository to use ignition-lint
+# Copy this to .github/workflows/ in your repository to use ign-lint
 # as a GitHub Action on your Ignition projects.
 name: Lint Ignition Views
 on:

@@ -1,5 +1,5 @@
 """
-Linting rules package for ignition-lint.
+Linting rules package for ign-lint.
 
 This module provides the rule system infrastructure and built-in rules
 for linting Ignition Perspective view files. It includes the dynamic rule

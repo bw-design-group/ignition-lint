@@ -1,6 +1,6 @@
 # Rule Organization and Development Guide
 
-This document defines the organizational structure for ignition-lint rules and provides guidelines for developers to extend the framework using test-driven development principles.
+This document defines the organizational structure for ign-lint rules and provides guidelines for developers to extend the framework using test-driven development principles.
 
 ## Table of Contents
 - [Rule Folder Structure](#rule-folder-structure)

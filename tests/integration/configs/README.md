@@ -1,6 +1,6 @@
 # Integration Test Configurations
 
-This directory contains configuration-driven integration tests for ignition-lint rules. Each rule category has its own subdirectory with JSON configuration files that define comprehensive test scenarios.
+This directory contains configuration-driven integration tests for ign-lint rules. Each rule category has its own subdirectory with JSON configuration files that define comprehensive test scenarios.
 
 ## Directory Structure
 

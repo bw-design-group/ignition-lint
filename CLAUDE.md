@@ -223,39 +223,39 @@ poetry run python -m ignition_lint.main --files "**/view.json"
 poetry run python -m ignition_lint.main --config my_rules.json --files "views/**/view.json"
 
 # CLI entry point (after poetry install)
-ignition-lint --config rule_config.json --files "**/view.json"
+ign-lint --config rule_config.json --files "**/view.json"
 
 # Verbose mode with statistics
-ignition-lint --config rule_config.json --files "**/view.json" --verbose
+ign-lint --config rule_config.json --files "**/view.json" --verbose
 
 # Stats-only mode (no linting, just model analysis)
-ignition-lint --files "**/view.json" --stats-only
+ign-lint --files "**/view.json" --stats-only
 
 # Debug specific node types
-ignition-lint --config rule_config.json --files "**/view.json" --debug-nodes expression_binding property
+ign-lint --config rule_config.json --files "**/view.json" --debug-nodes expression_binding property
 
 # Whitelist Configuration (Managing Technical Debt)
 
 # Generate whitelist from legacy files
-ignition-lint --generate-whitelist "views/legacy/**/*.json" "views/deprecated/**/*.json"
+ign-lint --generate-whitelist "views/legacy/**/*.json" "views/deprecated/**/*.json"
 
 # Use whitelist during linting (whitelisted files are skipped)
-ignition-lint --config rule_config.json --whitelist .whitelist.txt --files "**/view.json"
+ign-lint --config rule_config.json --whitelist .whitelist.txt --files "**/view.json"
 
 # Custom whitelist file
-ignition-lint --config rule_config.json --whitelist path/to/custom-whitelist.txt --files "**/view.json"
+ign-lint --config rule_config.json --whitelist path/to/custom-whitelist.txt --files "**/view.json"
 
 # Append to existing whitelist
-ignition-lint --generate-whitelist "views/temp/**/*.json" --append
+ign-lint --generate-whitelist "views/temp/**/*.json" --append
 
 # Dry run (preview without writing)
-ignition-lint --generate-whitelist "views/legacy/**/*.json" --dry-run
+ign-lint --generate-whitelist "views/legacy/**/*.json" --dry-run
 
 # Disable whitelist (overrides --whitelist)
-ignition-lint --config rule_config.json --whitelist .whitelist.txt --no-whitelist --files "**/view.json"
+ign-lint --config rule_config.json --whitelist .whitelist.txt --no-whitelist --files "**/view.json"
 
 # Verbose mode (show ignored files)
-ignition-lint --config rule_config.json --whitelist .whitelist.txt --files "**/view.json" --verbose
+ign-lint --config rule_config.json --whitelist .whitelist.txt --files "**/view.json" --verbose
 ```
 
 **Whitelist File Format:**
@@ -282,12 +282,12 @@ repos:
   - repo: https://github.com/your-org/ignition-lint
     rev: v1.0.0
     hooks:
-      - id: ignition-lint
+      - id: ign-lint
         # Add whitelist argument to use project-specific whitelist
-        args: ['--config=.ignition-lint-precommit.json', '--whitelist=.whitelist.txt', '--files']
+        args: ['--config=.ign-lint-precommit.json', '--whitelist=.whitelist.txt', '--files']
 ```
 
-**Important:** By default, ignition-lint does NOT use a whitelist unless you explicitly specify `--whitelist <path>`.
+**Important:** By default, ign-lint does NOT use a whitelist unless you explicitly specify `--whitelist <path>`.
 
 **For detailed documentation**, see [docs/whitelist-guide.md](docs/whitelist-guide.md).
 
@@ -296,16 +296,16 @@ repos:
 ### Analysis Commands
 ```bash
 # Get model statistics without running rules
-ignition-lint --files "**/view.json" --stats-only --verbose
+ign-lint --files "**/view.json" --stats-only --verbose
 
 # Analyze rule impact and coverage
-ignition-lint --config rule_config.json --files "**/view.json" --analyze-rules
+ign-lint --config rule_config.json --files "**/view.json" --analyze-rules
 
 # Debug specific node types (useful for rule development)
-ignition-lint --files "**/view.json" --debug-nodes component expression_binding property
+ign-lint --files "**/view.json" --debug-nodes component expression_binding property
 
 # Combined analysis with debug output
-ignition-lint --config rule_config.json --files "**/view.json" --verbose --debug-output ./analysis --analyze-rules
+ign-lint --config rule_config.json --files "**/view.json" --verbose --debug-output ./analysis --analyze-rules
 ```
 
 ## Release Process
@@ -453,7 +453,7 @@ Rules are configured via JSON files (default: `rule_config.json`):
 
 ### Pylint Category Mapping
 
-The `PylintScriptRule` supports configurable category mapping to control how Pylint's message categories map to ignition-lint severity levels.
+The `PylintScriptRule` supports configurable category mapping to control how Pylint's message categories map to ign-lint severity levels.
 
 **Pylint Categories:**
 - **F** (Fatal): Prevents analysis - syntax errors, import failures
@@ -730,7 +730,7 @@ Without this flag, yapf uses default settings with spaces, causing pylint errors
 ### Pre-commit Hooks
 **Directory**: Repository root (`.`)
 
-The project uses pre-commit hooks for code quality and includes ignition-lint integration:
+The project uses pre-commit hooks for code quality and includes ign-lint integration:
 
 ```bash
 # Verify you're in the repository root (should show .pre-commit-config.yaml)
@@ -742,16 +742,16 @@ poetry run pre-commit install
 # Run hooks manually on all files
 poetry run pre-commit run --all-files
 
-# Run only ignition-lint hook
-poetry run pre-commit run ignition-lint
+# Run only ign-lint hook
+poetry run pre-commit run ign-lint
 
 # Run hooks on specific files
-poetry run pre-commit run ignition-lint --files path/to/view.json
+poetry run pre-commit run ign-lint --files path/to/view.json
 ```
 
-#### Ignition-Lint Pre-commit Integration
+#### Ign-Lint Pre-commit Integration
 
-The repository includes an ignition-lint pre-commit hook that automatically runs on `view.json` files. The hook:
+The repository includes an ign-lint pre-commit hook that automatically runs on `view.json` files. The hook:
 
 - **Runs automatically** on staged `view.json` files during `git commit`
 - **Uses warning-only configuration** (`pre-commit-config.json`) to avoid blocking commits
@@ -760,10 +760,10 @@ The repository includes an ignition-lint pre-commit hook that automatically runs
 
 **Configuration Files:**
 - `.pre-commit-config.yaml`: Pre-commit hook definitions
-- `pre-commit-config.json`: Ignition-lint configuration optimized for pre-commit use
+- `pre-commit-config.json`: Ign-lint configuration optimized for pre-commit use
 - `rule_config.json`: Full configuration with errors (for CI/CD and manual runs)
 
-**Setting up ignition-lint pre-commit hook in your project:**
+**Setting up ign-lint pre-commit hook in your project:**
 
 **Option 1: Remote Repository (Recommended)**
 ```yaml
@@ -772,29 +772,29 @@ repos:
   - repo: https://github.com/your-org/ignition-lint
     rev: v1.0.0  # Use specific tag or 'main' for latest
     hooks:
-      - id: ignition-lint
+      - id: ign-lint
         exclude: '^tests/.*|.*test.*\.json$'  # Exclude test files
 ```
 
 **Benefits of Remote Repository Approach:**
 - ✅ **No local installation required** - pre-commit handles everything
-- ✅ **Automatic dependency management** - pre-commit installs ignition-lint automatically
+- ✅ **Automatic dependency management** - pre-commit installs ign-lint automatically
 - ✅ **Version consistency** - all team members use the same version
 - ✅ **Easy updates** - change `rev` to update to newer versions
 - ✅ **Isolation** - doesn't interfere with project dependencies
 
 **Option 2: Local Installation**
 ```yaml
-# Add to your .pre-commit-config.yaml (requires local ignition-lint installation)
+# Add to your .pre-commit-config.yaml (requires local ign-lint installation)
 repos:
   - repo: local
     hooks:
-      - id: ignition-lint
-        name: ignition-lint
+      - id: ign-lint
+        name: ign-lint
         entry: poetry run python -m ignition_lint
         language: system
         args:
-          - "--config=.ignition-lint.json"
+          - "--config=.ign-lint.json"
           - "--files"
         files: '.*view\.json$'
         types: [json]
@@ -803,10 +803,10 @@ repos:
 
 **Configuration for Remote Repository Usage:**
 
-The remote repository includes a default configuration (`.ignition-lint-precommit.json`) optimized for pre-commit use. You can override this by creating your own configuration file:
+The remote repository includes a default configuration (`.ign-lint-precommit.json`) optimized for pre-commit use. You can override this by creating your own configuration file:
 
 **Option A: Use default configuration (no additional setup required)**
-- The hook automatically uses the included `.ignition-lint-precommit.json`
+- The hook automatically uses the included `.ign-lint-precommit.json`
 - Focuses on warnings to avoid blocking commits
 - Includes basic naming and performance rules
 
@@ -817,7 +817,7 @@ repos:
   - repo: https://github.com/your-org/ignition-lint
     rev: v1.0.0
     hooks:
-      - id: ignition-lint
+      - id: ign-lint
         args: ['--config=my-custom-config.json', '--files']
         exclude: '^tests/.*|.*test.*\.json$'
 ```

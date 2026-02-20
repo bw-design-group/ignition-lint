@@ -1,6 +1,6 @@
 # pylint: disable=wrong-import-position,import-error
 """
-Configuration-driven test framework for ignition-lint.
+Configuration-driven test framework for ign-lint.
 This module allows defining test cases in JSON configuration files
 and automatically generates and runs the appropriate tests.
 """
@@ -427,7 +427,7 @@ class ConfigurableTestRunner(unittest.TestCase):
 if __name__ == "__main__":
 	import argparse
 
-	parser = argparse.ArgumentParser(description="Configuration-driven test framework for ignition-lint")
+	parser = argparse.ArgumentParser(description="Configuration-driven test framework for ign-lint")
 	parser.add_argument("--run-tests", action="store_true", help="Run all configured tests")
 	parser.add_argument("--tags", nargs="+", help="Filter tests by tags")
 	parser.add_argument("--generate-template", help="Generate a template config for a specific rule")

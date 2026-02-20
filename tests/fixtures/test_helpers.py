@@ -1,5 +1,5 @@
 """
-Helper functions and utilities for ignition-lint tests.
+Helper functions and utilities for ign-lint tests.
 """
 
 import json

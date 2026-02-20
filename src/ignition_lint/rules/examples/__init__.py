@@ -1,5 +1,5 @@
 """
-Example rules for learning and testing ignition-lint framework.
+Example rules for learning and testing ign-lint framework.
 
 This package contains example rules that demonstrate:
 - Basic rule structure and patterns

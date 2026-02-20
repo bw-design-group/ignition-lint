@@ -38,7 +38,7 @@
 • Maintain existing functionality while improving infrastructure reliability
 
 **Background Context**:
-The ignition-lint framework has accumulated technical debt in its CI/CD infrastructure and testing systems that impedes development velocity and deployment reliability. The GitHub Actions are failing, and the automated test suite has execution issues. Simultaneously, there's demand for new extensibility features. This enhancement addresses infrastructure stability first, then adds value through expanded user capabilities, ensuring a solid foundation for future development.
+The ign-lint framework has accumulated technical debt in its CI/CD infrastructure and testing systems that impedes development velocity and deployment reliability. The GitHub Actions are failing, and the automated test suite has execution issues. Simultaneously, there's demand for new extensibility features. This enhancement addresses infrastructure stability first, then adds value through expanded user capabilities, ensuring a solid foundation for future development.
 
 **Change Log**:
 | Change | Date | Version | Description | Author |

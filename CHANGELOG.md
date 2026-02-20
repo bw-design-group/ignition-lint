@@ -84,7 +84,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [0.3.0] - 2026-02-03
 
 ### Added
-- Prep package to be available on PyPI - install with `pip install ignition-lint` [02ad134]
+- Prep package to be available on PyPI - install with `pip install ign-lint` [02ad134]
 - Python 3.13 support [02ad134]
 - PyPI metadata: keywords and classifiers for better package discoverability [02ad134]
 - Automated release preparation workflow triggered by RC tags [41d9491]
@@ -225,7 +225,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Deprecated stage name warnings in pre-commit configuration
 
 ### Removed
-- Redundant .ignition-lint-precommit.json file
+- Redundant .ign-lint-precommit.json file
 - --pylintrc CLI argument (all configuration now via rule_config.json)
 - Unnecessary target_node_types from rule_config.json (auto-derived)
 

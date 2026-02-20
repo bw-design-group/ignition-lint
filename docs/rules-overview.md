@@ -1,6 +1,6 @@
 # Ignition Lint Rules Overview
 
-This document provides a high-level overview of all available linting rules in the ignition-lint framework.
+This document provides a high-level overview of all available linting rules in the ign-lint framework.
 
 ## Quick Reference
 

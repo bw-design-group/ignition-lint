@@ -1,10 +1,10 @@
-# ignition-lint Developer Documentation
+# ign-lint Developer Documentation
 
-Welcome to the comprehensive developer documentation for ignition-lint! This guide will help you get started with the framework, create custom linting rules, and contribute to the project.
+Welcome to the comprehensive developer documentation for ign-lint! This guide will help you get started with the framework, create custom linting rules, and contribute to the project.
 
 ## 🚀 Quick Start
 
-**New to ignition-lint?** Start here:
+**New to ign-lint?** Start here:
 1. [**Getting Started Tutorial**](#tutorial-creating-your-first-rule) - Build your first rule in 15 minutes
 2. [**Developer Guide**](#developer-guide) - Complete reference for rule development
 3. [**API Reference**](#api-reference) - Detailed API documentation
@@ -84,7 +84,7 @@ Comprehensive troubleshooting covering:
 
 ## 🏗️ Framework Architecture Overview
 
-ignition-lint is built on a modular architecture with these key components:
+ign-lint is built on a modular architecture with these key components:
 
 ```
 ┌─────────────────┐    ┌──────────────────┐    ┌─────────────────┐

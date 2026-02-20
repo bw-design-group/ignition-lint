@@ -1,7 +1,7 @@
-# Release Process for ignition-lint
+# Release Process for ign-lint
 
 ## Overview
-This document describes the process for releasing new versions of ignition-lint to PyPI.
+This document describes the process for releasing new versions of ign-lint to PyPI.
 
 ## Prerequisites
 - Maintainer access to GitHub repository
@@ -84,15 +84,15 @@ The publish workflow automatically:
 
 **Monitor progress:**
 - Actions: https://github.com/design-group/ignition-lint/actions
-- PyPI: https://pypi.org/project/ignition-lint/
+- PyPI: https://pypi.org/project/ign-lint/
 
 ### Step 6: Verify Installation
 ```bash
 # Wait 1-2 minutes for PyPI propagation
-pip install ignition-lint==X.Y.Z
+pip install ign-lint==X.Y.Z
 
 # Verify version
-ignition-lint --version
+ign-lint --version
 ```
 
 ## Testing Release Process
@@ -106,7 +106,7 @@ Before production release, test with Test PyPI:
 # Check "test_pypi" option
 
 # 2. After workflow completes, test installation
-pip install --index-url https://test.pypi.org/simple/ ignition-lint==0.3.1
+pip install --index-url https://test.pypi.org/simple/ ign-lint==0.3.1
 ```
 
 ## Changelog Maintenance
@@ -311,7 +311,7 @@ poetry publish -r testpypi
 # Verify test installation
 pip install --index-url https://test.pypi.org/simple/ \
     --extra-index-url https://pypi.org/simple/ \
-    ignition-lint==0.3.0
+    ign-lint==0.3.0
 
 # Production publish
 poetry publish

@@ -1,6 +1,6 @@
 # pylint: disable=wrong-import-position,import-error,attribute-defined-outside-init
 """
-Base test classes providing common functionality for ignition-lint tests.
+Base test classes providing common functionality for ign-lint tests.
 """
 
 import unittest

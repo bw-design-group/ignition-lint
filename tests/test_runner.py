@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # pylint: disable=import-error,wrong-import-position
 """
-Modular test runner script for ignition-lint.
+Modular test runner script for ign-lint.
 This script provides a simple command-line interface for running organized tests.
 """
 
@@ -194,7 +194,7 @@ def run_test_by_name(test_name, verbosity=2):
 def main():
 	"""Main entry point for the modular test runner."""
 	parser = argparse.ArgumentParser(
-		description="Modular test runner for ignition-lint",
+		description="Modular test runner for ign-lint",
 		formatter_class=argparse.RawDescriptionHelpFormatter, epilog="""
 	Examples:
 		python test_runner.py --run-unit                    # Run all unit tests

@@ -1,5 +1,5 @@
 """
-Mock data generators for testing ignition-lint rules.
+Mock data generators for testing ign-lint rules.
 """
 
 from typing import Dict, Any

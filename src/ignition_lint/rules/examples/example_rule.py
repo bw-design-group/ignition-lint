@@ -2,7 +2,7 @@
 Example Rule Implementation
 
 This file demonstrates how to create and register a new linting rule
-for ignition-lint without modifying core framework files.
+for ign-lint without modifying core framework files.
 """
 
 from typing import Set

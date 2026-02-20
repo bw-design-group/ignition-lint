@@ -1,7 +1,7 @@
 # Ignition-lint Whitelist Example
 # ================================
 #
-# This file demonstrates the whitelist format for ignition-lint.
+# This file demonstrates the whitelist format for ign-lint.
 # Copy this file to .whitelist.txt and customize for your project.
 #
 # Format:
@@ -11,17 +11,17 @@
 # - Whitespace is trimmed
 #
 # Usage:
-# - Generate whitelist: ignition-lint --generate-whitelist "views/legacy/**/*.json"
-# - Use whitelist: ignition-lint --config rule_config.json --whitelist .whitelist.txt --files "**/view.json"
+# - Generate whitelist: ign-lint --generate-whitelist "views/legacy/**/*.json"
+# - Use whitelist: ign-lint --config rule_config.json --whitelist .whitelist.txt --files "**/view.json"
 #
 # Pre-commit Integration:
 # Add to your .pre-commit-config.yaml:
 #
-#   - repo: https://github.com/your-org/ignition-lint
+#   - repo: https://github.com/your-org/ign-lint
 #     rev: v1.0.0
 #     hooks:
-#       - id: ignition-lint
-#         args: ['--config=.ignition-lint-precommit.json', '--whitelist=.whitelist.txt', '--files']
+#       - id: ign-lint
+#         args: ['--config=.ign-lint-precommit.json', '--whitelist=.whitelist.txt', '--files']
 
 # Legacy views - scheduled for refactor Q2 2026 (JIRA-1234)
 views/legacy/OldDashboard/view.json

@@ -1,11 +1,11 @@
-- id: ignition-lint
+- id: ign-lint
   name: Ignition Lint
   description: "Lints Ignition Perspective JSON files for style consistency and common issues"
-  entry: ignition-lint
+  entry: ign-lint
   language: python
   types: [json]
   files: view\.json$
-  args: ['--config=.ignition-lint-precommit.json', '--files']
+  args: ['--config=.ign-lint-precommit.json', '--files']
   pass_filenames: true
   minimum_pre_commit_version: '2.9.0'
   additional_dependencies: []

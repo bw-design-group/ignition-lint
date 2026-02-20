@@ -2,9 +2,9 @@
 
 > 📚 **Navigation:** [Documentation Index](README.md) | [Developer Guide](developer-guide-rule-creation.md) | [API Reference](api-reference-rule-registration.md) | [Troubleshooting](troubleshooting-rule-development.md)
 
-This step-by-step tutorial will guide you through creating your first custom linting rule for ignition-lint. We'll build a rule that ensures component descriptions are not empty.
+This step-by-step tutorial will guide you through creating your first custom linting rule for ign-lint. We'll build a rule that ensures component descriptions are not empty.
 
-> 💡 **New to ignition-lint?** This tutorial is perfect for beginners. For comprehensive reference material, see the [Developer Guide](developer-guide-rule-creation.md).
+> 💡 **New to ign-lint?** This tutorial is perfect for beginners. For comprehensive reference material, see the [Developer Guide](developer-guide-rule-creation.md).
 
 ## What You'll Build
 
@@ -17,7 +17,7 @@ By the end of this tutorial, you'll have created a `ComponentDescriptionRule` th
 ## Prerequisites
 
 - Python 3.9+ installed
-- ignition-lint development environment set up
+- ign-lint development environment set up
 - Basic understanding of Python classes and inheritance
 
 ## Step 1: Set Up Your Development Environment
@@ -613,4 +613,4 @@ class ComponentDescriptionRule(LintingRule):
         return None
 ```
 
-Congratulations! You've successfully created your first custom linting rule for ignition-lint!
+Congratulations! You've successfully created your first custom linting rule for ign-lint!

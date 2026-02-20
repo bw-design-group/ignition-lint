@@ -1,5 +1,5 @@
 """
-Command-line interface for ignition-lint.
+Command-line interface for ign-lint.
 """
 
 import json
@@ -22,7 +22,7 @@ LINE_WIDTH = 120
 def get_version() -> str:
 	"""Get package version, with fallback for development/testing."""
 	try:
-		return version('ignition-lint')
+		return version('ign-lint')
 	except PackageNotFoundError:
 		# Package not installed (development/testing mode)
 		# Try to read version from pyproject.toml
@@ -98,9 +98,9 @@ def cleanup_debug_files() -> None:
 			break
 		current_path = os.path.dirname(current_path)
 
-	# Fallback to .ignition-lint/debug
+	# Fallback to .ign-lint/debug
 	if not debug_dir:
-		debug_dir = os.path.join(cwd, ".ignition-lint", "debug")
+		debug_dir = os.path.join(cwd, ".ign-lint", "debug")
 
 	# Only clean if directory exists
 	if not os.path.exists(debug_dir):
@@ -210,7 +210,7 @@ def make_unique_output_path(original_path: Path) -> Path:
 	"""
 	Generate a unique output file path to prevent overwriting in batch processing.
 
-	When pre-commit or other tools run ignition-lint in multiple batches,
+	When pre-commit or other tools run ign-lint in multiple batches,
 	each batch would overwrite the same output file. This function ensures
 	uniqueness by appending PID and batch number if the file already exists.
 
@@ -944,7 +944,7 @@ def aggregate_batch_results(results_path: Path) -> Optional[Dict[str, int]]:
 	"""
 	Aggregate results from multiple batch files into a summary file.
 
-	When ignition-lint runs in batches (e.g., via pre-commit), multiple result files
+	When ign-lint runs in batches (e.g., via pre-commit), multiple result files
 	are created. This function aggregates them into a single summary for easy review.
 
 	Returns:

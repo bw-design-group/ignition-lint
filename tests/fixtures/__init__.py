@@ -1,6 +1,6 @@
 # tests/fixtures/__init__.py
 """
-Test fixtures and utilities for ignition-lint tests.
+Test fixtures and utilities for ign-lint tests.
 """
 
 from .base_test import BaseRuleTest, BaseIntegrationTest

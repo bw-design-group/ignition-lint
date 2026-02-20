@@ -2,7 +2,7 @@
 
 > 📚 **Navigation:** [Documentation Index](README.md) | [Tutorial](tutorial-creating-your-first-rule.md) | [API Reference](api-reference-rule-registration.md) | [Troubleshooting](troubleshooting-rule-development.md)
 
-This guide shows developers how to create and register custom linting rules for ignition-lint using the extensible rule registration system.
+This guide shows developers how to create and register custom linting rules for ign-lint using the extensible rule registration system.
 
 > 💡 **First time creating rules?** Start with the [hands-on tutorial](tutorial-creating-your-first-rule.md) for step-by-step guidance.
 
@@ -62,7 +62,7 @@ That's it! Your rule is automatically discovered and registered.
 
 ### Node Types and Visitor Pattern
 
-ignition-lint uses the **visitor pattern** to process different types of nodes in Ignition view files:
+ign-lint uses the **visitor pattern** to process different types of nodes in Ignition view files:
 
 - **`NodeType.COMPONENT`** - UI components (buttons, labels, containers, etc.)
 - **`NodeType.EXPRESSION_BINDING`** - Expression-based bindings

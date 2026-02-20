@@ -1,5 +1,5 @@
 """
-Performance timing utilities for profiling ignition-lint operations.
+Performance timing utilities for profiling ign-lint operations.
 """
 
 import time

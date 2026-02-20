@@ -1,6 +1,6 @@
 # Developer Testing Guide - Test Driven Development
 
-This guide will walk you through setting up and using the testing infrastructure for the `ignition-lint` project. **Start here before writing any code** - we practice Test Driven Development (TDD), which means tests come first!
+This guide will walk you through setting up and using the testing infrastructure for the `ign-lint` project. **Start here before writing any code** - we practice Test Driven Development (TDD), which means tests come first!
 
 ## Table of Contents
 1. [Quick Start](#quick-start)
@@ -41,9 +41,9 @@ If all tests pass ✅, you're ready to start developing!
 
 ## Understanding the Project
 
-### What is ignition-lint?
+### What is ign-lint?
 
-`ignition-lint` is a linting tool for Ignition Perspective views (JSON files). It validates:
+`ign-lint` is a linting tool for Ignition Perspective views (JSON files). It validates:
 - **Component naming conventions** (PascalCase, camelCase, snake_case, etc.)
 - **Polling intervals** in expression bindings
 - **Script quality** using pylint
@@ -831,7 +831,7 @@ repos:
   - repo: local
     hooks:
       - id: run-tests
-        name: Run ignition-lint tests
+        name: Run ign-lint tests
         entry: python tests/test_runner.py --run-unit --quiet
         language: system
         pass_filenames: false

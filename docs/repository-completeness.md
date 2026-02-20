@@ -86,7 +86,7 @@ Modified test base classes to combine `LintResults.warnings` and `LintResults.er
 **TDD Steps:**
 - [x] 🔴 **RED**: Test current action locally - confirmed `src/ignition_lint.py` doesn't exist
 - [x] 🟢 **GREEN**: Updated `action.yml` to use correct module path
-  - [x] Changed to use `poetry run ignition-lint` (more reliable than direct python module)
+  - [x] Changed to use `poetry run ign-lint` (more reliable than direct python module)
   - [x] Updated input parameters to match actual CLI (files, config, verbose)
   - [x] Added proper Poetry-based dependency installation
 - [x] 🔵 **REFACTOR**: Improved action documentation and examples
@@ -99,7 +99,7 @@ Modified test base classes to combine `LintResults.warnings` and `LintResults.er
 - `test-action-workflow.yml` - Sample workflow for users
 
 **Acceptance Criteria:**
-- [x] Action runs without import errors using `poetry run ignition-lint`
+- [x] Action runs without import errors using `poetry run ign-lint`
 - [x] Input parameters work correctly (files, config, verbose)
 - [x] Sample workflow demonstrates proper usage patterns
 - [x] Poetry-based dependency management ensures reliable execution

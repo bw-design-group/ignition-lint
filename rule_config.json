@@ -7,8 +7,8 @@
       "pylintrc": null,
       "_debug_comment": "Optional: Set debug: true to save script files even when there are no errors. Debug files are ALWAYS saved automatically when pylint finds errors, and are cleaned up at the start of each run.",
       "debug": false,
-      "_debug_dir_comment": "Optional: Specify custom debug directory. Defaults to .ignition-lint/debug/ (or tests/debug/ in ignition-lint repo). Can be absolute or relative path.",
-      "debug_dir": ".ignition-lint/debug/",
+      "_debug_dir_comment": "Optional: Specify custom debug directory. Defaults to .ign-lint/debug/ (or tests/debug/ in ign-lint repo). Can be absolute or relative path.",
+      "debug_dir": ".ign-lint/debug/",
       "_batch_mode_comment": "Optional: Set batch_mode: true to process all files together (faster but harder to review). Default: false (process files individually for clearer per-file reporting).",
       "batch_mode": false,
       "_category_mapping_comment": "Optional: Map pylint message categories to severity levels. Default: F/E → error, W/C/R → warning. Categories: F=Fatal, E=Error, W=Warning, C=Convention, R=Refactor.",
@@ -119,7 +119,7 @@
     "PylintScriptRule_config": {
       "pylintrc": "Path to custom pylintrc file. Defaults to .config/ignition.pylintrc if not specified.",
       "example_pylintrc": "\"pylintrc\": \"/path/to/custom.pylintrc\" or \"pylintrc\": \"relative/path/.pylintrc\"",
-      "category_mapping": "Maps pylint message categories (F/E/W/C/R) to ignition-lint severity levels (error/warning). Violations are grouped by category in output.",
+      "category_mapping": "Maps pylint message categories (F/E/W/C/R) to ign-lint severity levels (error/warning). Violations are grouped by category in output.",
       "category_mapping_default": {
         "F": "error (Fatal errors like import failures)",
         "E": "error (Errors like undefined variables)",
@@ -128,7 +128,7 @@
         "R": "warning (Refactor suggestions like complexity)"
       },
       "example_strict": "To treat all violations as errors: {\"F\": \"error\", \"E\": \"error\", \"W\": \"error\", \"C\": \"error\", \"R\": \"error\"}",
-      "debug_dir": "Directory for pylint debug files. Defaults to .ignition-lint/debug/ in user repos, tests/debug/ in ignition-lint repo. Files are cleaned up at start of each run.",
+      "debug_dir": "Directory for pylint debug files. Defaults to .ign-lint/debug/ in user repos, tests/debug/ in ign-lint repo. Files are cleaned up at start of each run.",
       "debug": "When true, always saves debug files. When false, only saves when violations found. Debug files help troubleshoot pylint issues."
     },
     "NamePatternRule_config": {

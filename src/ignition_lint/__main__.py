@@ -1,5 +1,5 @@
 """
-Entry point for running ignition-lint as a module: python -m ignition_lint
+Entry point for running ign-lint as a module: python -m ignition_lint
 """
 # pylint: disable=wrong-import-position
 import sys

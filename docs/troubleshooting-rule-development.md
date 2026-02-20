@@ -2,7 +2,7 @@
 
 > 📚 **Navigation:** [Documentation Index](README.md) | [Tutorial](tutorial-creating-your-first-rule.md) | [Developer Guide](developer-guide-rule-creation.md) | [API Reference](api-reference-rule-registration.md)
 
-This comprehensive troubleshooting guide covers common issues developers encounter when creating custom linting rules for ignition-lint.
+This comprehensive troubleshooting guide covers common issues developers encounter when creating custom linting rules for ign-lint.
 
 > 💡 **Quick solutions:** Use the table of contents to jump directly to your specific issue. For learning, see the [Tutorial](tutorial-creating-your-first-rule.md) or [Developer Guide](developer-guide-rule-creation.md).
 
@@ -715,4 +715,4 @@ class GoodRule(LintingRule):
             self.errors.append(f"{component.path}: Error message")  # Proper error reporting
 ```
 
-This troubleshooting guide should help you resolve most issues you'll encounter while developing custom linting rules for ignition-lint.
+This troubleshooting guide should help you resolve most issues you'll encounter while developing custom linting rules for ign-lint.

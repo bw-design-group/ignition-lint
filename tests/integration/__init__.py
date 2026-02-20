@@ -1,3 +1,3 @@
 """
-Integration tests package for ignition-lint.
+Integration tests package for ign-lint.
 """

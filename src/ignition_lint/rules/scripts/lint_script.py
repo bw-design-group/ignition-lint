@@ -50,7 +50,7 @@ class PylintScriptRule(ScriptRule):
 		self.current_source_file = None  # Track current file being processed
 		self.pylintrc = self._resolve_pylintrc_path(pylintrc)
 
-		# Category mapping: maps pylint categories (E, W, C, R, F) to ignition-lint severity (error, warning)
+		# Category mapping: maps pylint categories (E, W, C, R, F) to ign-lint severity (error, warning)
 		# Default: Fatal and Error → error, Warning/Convention/Refactor → warning
 		self.category_mapping = category_mapping or {
 			'F': 'error',  # Fatal
@@ -309,7 +309,7 @@ class PylintScriptRule(ScriptRule):
 		# Add placeholder violations for counting purposes (won't be displayed due to custom formatting)
 		# This ensures file counts are correct
 		for violation in self.pylint_violations:
-			# Map pylint category to ignition-lint severity
+			# Map pylint category to ign-lint severity
 			severity = self.category_mapping.get(violation.category, self.severity)
 			# Add empty placeholder - format_violations_grouped() will provide actual display
 			self.add_violation("", severity=severity)
@@ -386,8 +386,8 @@ class PylintScriptRule(ScriptRule):
 				return os.path.join(current_path, "tests", "debug")
 			current_path = os.path.dirname(current_path)
 
-		# Priority 3: Use .ignition-lint/debug as standard location for user repos
-		return os.path.join(cwd, ".ignition-lint", "debug")
+		# Priority 3: Use .ign-lint/debug as standard location for user repos
+		return os.path.join(cwd, ".ign-lint", "debug")
 
 	def _combine_scripts(self, scripts: Dict[str, ScriptNode]) -> Tuple[str, Dict[int, str]]:
 		"""Combine all scripts into a single string with line mapping."""
