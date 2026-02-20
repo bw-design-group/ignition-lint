@@ -8,9 +8,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Changed
+- Rename PyPI package from `ignition-lint` to `ign-lint` (CLI command is now `ign-lint`) [fef2808]
 - Switch PyPI publishing to OIDC trusted publisher (no API tokens needed) [47ce126]
 - Split publish workflow into build and publish jobs with GitHub environment approval gates [47ce126]
-- Add manual tag selection input for choosing which release to publish [47ce126]
+- Trigger publish workflow from tag push; derive package version from git tag [d284d2d]
+- Gate Test PyPI publishing on RC tags and Prod PyPI on stable tags [d284d2d]
+- Use `pipx install poetry` for GitHub runner compatibility [7c71154]
 
 ## [0.4.0] - 2026-02-15
 
