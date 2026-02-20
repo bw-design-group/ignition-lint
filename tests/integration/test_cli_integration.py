@@ -38,7 +38,7 @@ class TestCLIIntegration(BaseIntegrationTest):
 		if self.cli_path is None:
 			# Try to see if we can run via poetry
 			try:
-				result = subprocess.run(["poetry", "run", "ignition-lint", "--help"],
+				result = subprocess.run(["poetry", "run", "ign-lint", "--help"],
 							capture_output=True, timeout=10, check=False,
 							cwd=Path(__file__).parent.parent.parent)
 				if result.returncode == 0:
@@ -57,7 +57,7 @@ class TestCLIIntegration(BaseIntegrationTest):
 	def _run_cli_command(self, args, timeout=30):
 		"""Run a CLI command using the best available method."""
 		if self.use_poetry:
-			cmd = ["poetry", "run", "ignition-lint"] + args
+			cmd = ["poetry", "run", "ign-lint"] + args
 			cwd = Path(__file__).parent.parent.parent
 		elif self.use_module:
 			cmd = [sys.executable, "-m", "ignition_lint"] + args

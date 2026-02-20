@@ -1,7 +1,7 @@
-- id: ignition-lint
+- id: ign-lint
   name: Ignition Lint
   description: "Lints Ignition Perspective JSON files for style consistency and common issues"
-  entry: ignition-lint
+  entry: ign-lint
   language: python
   types: [json]
   files: view\.json$
