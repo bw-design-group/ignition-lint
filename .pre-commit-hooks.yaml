@@ -5,7 +5,7 @@
   language: python
   types: [json]
   files: view\.json$
-  args: ['--config=.ign-lint-precommit.json', '--files']
+  args: ['--config=.ignition-lint-precommit.json', '--files']
   pass_filenames: true
   minimum_pre_commit_version: '2.9.0'
   additional_dependencies: []

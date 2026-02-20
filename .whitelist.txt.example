@@ -21,7 +21,7 @@
 #     rev: v1.0.0
 #     hooks:
 #       - id: ign-lint
-#         args: ['--config=.ign-lint-precommit.json', '--whitelist=.whitelist.txt', '--files']
+#         args: ['--config=.ignition-lint-precommit.json', '--whitelist=.whitelist.txt', '--files']
 
 # Legacy views - scheduled for refactor Q2 2026 (JIRA-1234)
 views/legacy/OldDashboard/view.json

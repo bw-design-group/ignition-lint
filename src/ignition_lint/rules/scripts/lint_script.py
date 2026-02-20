@@ -386,8 +386,8 @@ class PylintScriptRule(ScriptRule):
 				return os.path.join(current_path, "tests", "debug")
 			current_path = os.path.dirname(current_path)
 
-		# Priority 3: Use .ign-lint/debug as standard location for user repos
-		return os.path.join(cwd, ".ign-lint", "debug")
+		# Priority 3: Use .ignition-lint/debug as standard location for user repos
+		return os.path.join(cwd, ".ignition-lint", "debug")
 
 	def _combine_scripts(self, scripts: Dict[str, ScriptNode]) -> Tuple[str, Dict[int, str]]:
 		"""Combine all scripts into a single string with line mapping."""

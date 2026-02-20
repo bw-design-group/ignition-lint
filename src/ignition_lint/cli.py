@@ -98,9 +98,9 @@ def cleanup_debug_files() -> None:
 			break
 		current_path = os.path.dirname(current_path)
 
-	# Fallback to .ign-lint/debug
+	# Fallback to .ignition-lint/debug
 	if not debug_dir:
-		debug_dir = os.path.join(cwd, ".ign-lint", "debug")
+		debug_dir = os.path.join(cwd, ".ignition-lint", "debug")
 
 	# Only clean if directory exists
 	if not os.path.exists(debug_dir):

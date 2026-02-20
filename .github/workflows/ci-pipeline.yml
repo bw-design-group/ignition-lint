@@ -67,7 +67,7 @@ jobs:
       - name: Test CLI functionality
         run: |
           poetry run python -m ignition_lint --help
-          poetry run python -m ignition_lint --config .github/workflows/.ign-lint-ci.json --files tests/cases/PascalCase/view.json --ignore-warnings
+          poetry run python -m ignition_lint --config .github/workflows/.ignition-lint-ci.json --files tests/cases/PascalCase/view.json --ignore-warnings
 
   build:
     runs-on: ubuntu-latest

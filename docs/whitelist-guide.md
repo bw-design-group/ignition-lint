@@ -56,7 +56,7 @@ repos:
     rev: v1.0.0
     hooks:
       - id: ign-lint
-        args: ['--config=.ign-lint-precommit.json', '--whitelist=.whitelist.txt', '--files']
+        args: ['--config=.ignition-lint-precommit.json', '--whitelist=.whitelist.txt', '--files']
 ```
 
 ## Whitelist File Format
@@ -213,7 +213,7 @@ repos:
     hooks:
       - id: ign-lint
         # Add whitelist argument (opt-in)
-        args: ['--config=.ign-lint-precommit.json', '--whitelist=.whitelist.txt', '--files']
+        args: ['--config=.ignition-lint-precommit.json', '--whitelist=.whitelist.txt', '--files']
         # Exclude test files that intentionally contain violations
         exclude: '^tests/.*|.*test.*\.json$'
 ```
@@ -497,7 +497,7 @@ repos:
     hooks:
       - id: ign-lint
         # IMPORTANT: Add whitelist argument explicitly
-        args: ['--config=.ign-lint-precommit.json', '--whitelist=.whitelist.txt', '--files']
+        args: ['--config=.ignition-lint-precommit.json', '--whitelist=.whitelist.txt', '--files']
 ```
 
 ### Whitelist File Not Found

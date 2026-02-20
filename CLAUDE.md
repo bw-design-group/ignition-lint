@@ -284,7 +284,7 @@ repos:
     hooks:
       - id: ign-lint
         # Add whitelist argument to use project-specific whitelist
-        args: ['--config=.ign-lint-precommit.json', '--whitelist=.whitelist.txt', '--files']
+        args: ['--config=.ignition-lint-precommit.json', '--whitelist=.whitelist.txt', '--files']
 ```
 
 **Important:** By default, ign-lint does NOT use a whitelist unless you explicitly specify `--whitelist <path>`.
@@ -794,7 +794,7 @@ repos:
         entry: poetry run python -m ignition_lint
         language: system
         args:
-          - "--config=.ign-lint.json"
+          - "--config=.ignition-lint.json"
           - "--files"
         files: '.*view\.json$'
         types: [json]
@@ -803,10 +803,10 @@ repos:
 
 **Configuration for Remote Repository Usage:**
 
-The remote repository includes a default configuration (`.ign-lint-precommit.json`) optimized for pre-commit use. You can override this by creating your own configuration file:
+The remote repository includes a default configuration (`.ignition-lint-precommit.json`) optimized for pre-commit use. You can override this by creating your own configuration file:
 
 **Option A: Use default configuration (no additional setup required)**
-- The hook automatically uses the included `.ign-lint-precommit.json`
+- The hook automatically uses the included `.ignition-lint-precommit.json`
 - Focuses on warnings to avoid blocking commits
 - Includes basic naming and performance rules
 

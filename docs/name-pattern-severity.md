@@ -313,10 +313,10 @@ repos:
     rev: v1.0.0
     hooks:
       - id: ign-lint
-        args: ['--config=.ign-lint.json', '--files']
+        args: ['--config=.ignition-lint.json', '--files']
 ```
 
-With `.ign-lint.json`:
+With `.ignition-lint.json`:
 ```json
 {
   "NamePatternRule": {

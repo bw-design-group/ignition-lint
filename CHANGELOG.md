@@ -229,7 +229,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Deprecated stage name warnings in pre-commit configuration
 
 ### Removed
-- Redundant .ign-lint-precommit.json file
+- Redundant .ignition-lint-precommit.json file
 - --pylintrc CLI argument (all configuration now via rule_config.json)
 - Unnecessary target_node_types from rule_config.json (auto-derived)
 
