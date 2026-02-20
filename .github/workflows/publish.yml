@@ -1,17 +1,9 @@
 name: Publish to PyPI
 
 on:
-  workflow_dispatch:
-    inputs:
-      tag:
-        description: 'Git tag to publish (e.g. v0.1.0)'
-        required: true
-        type: string
-      test_pypi:
-        description: 'Publish to Test PyPI instead of production'
-        required: false
-        type: boolean
-        default: false
+  push:
+    tags:
+      - 'v*'
 
 permissions:
   contents: read
@@ -23,8 +15,15 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-        with:
-          ref: ${{ inputs.tag }}
+
+      - name: Extract version from tag
+        id: version
+        run: |
+          TAG="${GITHUB_REF#refs/tags/}"
+          # Strip 'v' prefix and any -RC suffix for the package version
+          VERSION="${TAG#v}"
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "📦 Building version: $VERSION"
 
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -33,6 +32,9 @@ jobs:
 
       - name: Install Poetry
         run: pipx install poetry
+
+      - name: Set package version from tag
+        run: poetry version "${{ steps.version.outputs.version }}"
 
       - name: Build package
         run: poetry build
@@ -45,7 +47,7 @@ jobs:
 
   publish-test-pypi:
     needs: build
-    if: github.event.inputs.test_pypi == 'true'
+    if: contains(github.ref, '-RC')
     runs-on: ubuntu-latest
     environment: Test PyPI
     permissions:
@@ -64,7 +66,7 @@ jobs:
 
   publish-pypi:
     needs: build
-    if: github.event.inputs.test_pypi != 'true'
+    if: "!contains(github.ref, '-RC')"
     runs-on: ubuntu-latest
     environment: Prod PyPI
     permissions:
