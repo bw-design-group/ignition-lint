@@ -8,9 +8,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Changed
+- Rename PyPI package from `ignition-lint` to `ign-lint` (CLI command, pre-commit hook id, config file names updated) [07eaec0]
 - Switch PyPI publishing to OIDC trusted publisher (no API tokens needed) [47ce126]
 - Split publish workflow into build and publish jobs with GitHub environment approval gates [47ce126]
 - Add manual tag selection input for choosing which release to publish [47ce126]
+
+### Fixed
+- Use pipx for Poetry install in CI for better GitHub runner compatibility [7c71154]
 
 ## [0.4.0] - 2026-02-15
 

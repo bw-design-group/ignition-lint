@@ -1,17 +1,9 @@
 name: Publish to PyPI
 
 on:
-  workflow_dispatch:
-    inputs:
-      tag:
-        description: 'Git tag to publish (e.g. v0.1.0)'
-        required: true
-        type: string
-      test_pypi:
-        description: 'Publish to Test PyPI instead of production'
-        required: false
-        type: boolean
-        default: false
+  push:
+    tags:
+      - 'v*'
 
 permissions:
   contents: read
@@ -23,8 +15,6 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-        with:
-          ref: ${{ inputs.tag }}
 
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -45,7 +35,6 @@ jobs:
 
   publish-test-pypi:
     needs: build
-    if: github.event.inputs.test_pypi == 'true'
     runs-on: ubuntu-latest
     environment: Test PyPI
     permissions:
@@ -64,7 +53,6 @@ jobs:
 
   publish-pypi:
     needs: build
-    if: github.event.inputs.test_pypi != 'true'
     runs-on: ubuntu-latest
     environment: Prod PyPI
     permissions:
