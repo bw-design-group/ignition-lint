@@ -114,6 +114,10 @@ class RuleRegistry:
 						obj.__module__ == module_name
 					):
 
+						if self.is_registered(name):
+							discovered_rules.append(name)
+							continue
+
 						try:
 							rule_name = self.register_rule(obj)
 							discovered_rules.append(rule_name)
