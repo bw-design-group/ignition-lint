@@ -30,7 +30,7 @@
     "expression_binding": 9,
     "expression_struct_binding": 4,
     "message_handler": 1,
-    "property": 120,
+    "property": 135,
     "property_binding": 22,
     "tag_binding": 5,
     "transform": 9
@@ -58,31 +58,8 @@
         "transform"
       ]
     },
-    "ExampleBindingCountRule": {
-      "applicable_node_count": 59,
-      "target_types": [
-        "component",
-        "expression_binding",
-        "expression_struct_binding",
-        "property_binding",
-        "query_binding",
-        "tag_binding"
-      ]
-    },
-    "ExampleMixedSeverityRule": {
-      "applicable_node_count": 19,
-      "target_types": [
-        "component"
-      ]
-    },
-    "ExampleNameLengthRule": {
-      "applicable_node_count": 19,
-      "target_types": [
-        "component"
-      ]
-    },
     "ExcessiveContextDataRule": {
-      "applicable_node_count": 200,
+      "applicable_node_count": 215,
       "target_types": [
         "all"
       ]
@@ -113,7 +90,7 @@
       ]
     },
     "UnusedCustomPropertiesRule": {
-      "applicable_node_count": 196,
+      "applicable_node_count": 211,
       "target_types": [
         "component",
         "custom_method",
@@ -127,5 +104,5 @@
       ]
     }
   },
-  "total_nodes": 200
+  "total_nodes": 215
 }

@@ -78,7 +78,7 @@
     "nodes": []
   },
   "properties": {
-    "count": 35,
+    "count": 36,
     "nodes": [
       {
         "name": "PrettyBigIssue",
@@ -329,6 +329,14 @@
         "path": "root.root.props.direction",
         "value": "column",
         "value_type": "str"
+      },
+      {
+        "name": "goodKey",
+        "node_type": "property",
+        "path": "custom.goodKey",
+        "persistent": true,
+        "value": null,
+        "value_type": "NoneType"
       }
     ]
   },

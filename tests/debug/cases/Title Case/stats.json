@@ -20,7 +20,7 @@
   ],
   "node_type_counts": {
     "component": 2,
-    "property": 3
+    "property": 4
   },
   "rule_coverage": {
     "BadComponentReferenceRule": {
@@ -45,31 +45,8 @@
         "transform"
       ]
     },
-    "ExampleBindingCountRule": {
-      "applicable_node_count": 2,
-      "target_types": [
-        "component",
-        "expression_binding",
-        "expression_struct_binding",
-        "property_binding",
-        "query_binding",
-        "tag_binding"
-      ]
-    },
-    "ExampleMixedSeverityRule": {
-      "applicable_node_count": 2,
-      "target_types": [
-        "component"
-      ]
-    },
-    "ExampleNameLengthRule": {
-      "applicable_node_count": 2,
-      "target_types": [
-        "component"
-      ]
-    },
     "ExcessiveContextDataRule": {
-      "applicable_node_count": 5,
+      "applicable_node_count": 6,
       "target_types": [
         "all"
       ]
@@ -100,7 +77,7 @@
       ]
     },
     "UnusedCustomPropertiesRule": {
-      "applicable_node_count": 5,
+      "applicable_node_count": 6,
       "target_types": [
         "component",
         "custom_method",
@@ -114,5 +91,5 @@
       ]
     }
   },
-  "total_nodes": 5
+  "total_nodes": 6
 }

@@ -601,11 +601,17 @@ class TestStandardNamingConventions(BaseRuleTest):
 			error_patterns=["doesn't follow PascalCase", "component"]
 		)
 
-		# Should have no warnings since properties are already camelCase
-		# The camelCase view has camelCase properties, so they should pass the camelCase rule
-		results = self.run_lint_on_file(view_file, rule_config)
-		rule_warnings = results.warnings.get("NamePatternRule", [])
-		self.assertEqual(len(rule_warnings), 0)
+		# Should warn on the snake_case-named custom/param properties that live only in
+		# propConfig (custom.snake_case_test_custom and params.snake_case_test_param) —
+		# those don't follow camelCase even though every property with a concrete value
+		# in the custom tree does.
+		self.assert_rule_warnings(
+			view_file,
+			rule_config,
+			"NamePatternRule",
+			expected_warning_count=2,
+			warning_patterns=["snake_case_test_custom", "snake_case_test_param"],
+		)
 
 	def test_auto_derived_target_node_types(self):
 		"""Test that target_node_types can be auto-derived from node_type_specific_rules."""

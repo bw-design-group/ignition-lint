@@ -89,7 +89,7 @@
     ]
   },
   "properties": {
-    "count": 1,
+    "count": 2,
     "nodes": [
       {
         "name": "direction",
@@ -97,6 +97,13 @@
         "path": "root.root.props.direction",
         "value": "column",
         "value_type": "str"
+      },
+      {
+        "name": "status",
+        "node_type": "property",
+        "path": "custom.status",
+        "value": null,
+        "value_type": "NoneType"
       }
     ]
   },
