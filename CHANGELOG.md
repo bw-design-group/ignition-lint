@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.5.2] - 2026-06-02
+
 ### Fixed
 - `ViewModelBuilder` now collects view-level custom and param properties that are defined only via a `propConfig` binding (e.g. non-persistent bound props, or persistent props whose parent object in the custom tree is empty). Previously these properties were silently invisible to property-scoped rules; `NamePatternRule` and `UnusedCustomPropertiesRule` now see them. [ef24bf6][05b558c]
 
@@ -306,7 +308,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Initial tracked release
 
-[Unreleased]: https://github.com/bw-design-group/ignition-lint/compare/v0.5.1...HEAD
+[Unreleased]: https://github.com/bw-design-group/ignition-lint/compare/v0.5.2...HEAD
+[0.5.2]: https://github.com/bw-design-group/ignition-lint/compare/v0.5.1...v0.5.2
 [0.5.1]: https://github.com/bw-design-group/ignition-lint/compare/v0.5.0-rc1...v0.5.1
 [0.4.1]: https://github.com/bw-design-group/ignition-lint/compare/v0.4.0...v0.4.1
 [0.4.0]: https://github.com/bw-design-group/ignition-lint/compare/v0.3.6...v0.4.0
