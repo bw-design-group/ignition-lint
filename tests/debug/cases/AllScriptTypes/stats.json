@@ -50,29 +50,6 @@
         "transform"
       ]
     },
-    "ExampleBindingCountRule": {
-      "applicable_node_count": 6,
-      "target_types": [
-        "component",
-        "expression_binding",
-        "expression_struct_binding",
-        "property_binding",
-        "query_binding",
-        "tag_binding"
-      ]
-    },
-    "ExampleMixedSeverityRule": {
-      "applicable_node_count": 3,
-      "target_types": [
-        "component"
-      ]
-    },
-    "ExampleNameLengthRule": {
-      "applicable_node_count": 3,
-      "target_types": [
-        "component"
-      ]
-    },
     "ExcessiveContextDataRule": {
       "applicable_node_count": 19,
       "target_types": [

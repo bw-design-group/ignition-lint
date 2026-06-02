@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+- `ViewModelBuilder` now collects view-level custom and param properties that are defined only via a `propConfig` binding (e.g. non-persistent bound props, or persistent props whose parent object in the custom tree is empty). Previously these properties were silently invisible to property-scoped rules; `NamePatternRule` and `UnusedCustomPropertiesRule` now see them. [ef24bf6][05b558c]
+
 ## [0.5.1] - 2026-05-12
 
 ### Added
