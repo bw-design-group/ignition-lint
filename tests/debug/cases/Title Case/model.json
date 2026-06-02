@@ -43,7 +43,7 @@
     "nodes": []
   },
   "properties": {
-    "count": 3,
+    "count": 4,
     "nodes": [
       {
         "name": "basis",
@@ -65,6 +65,14 @@
         "path": "root.root.props.direction",
         "value": "column",
         "value_type": "str"
+      },
+      {
+        "name": "ViewParam",
+        "node_type": "property",
+        "path": "params.ViewParam",
+        "persistent": true,
+        "value": null,
+        "value_type": "NoneType"
       }
     ]
   },

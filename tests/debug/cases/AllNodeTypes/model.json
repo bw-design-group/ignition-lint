@@ -192,7 +192,7 @@
     "nodes": []
   },
   "properties": {
-    "count": 19,
+    "count": 22,
     "nodes": [
       {
         "name": "expr",
@@ -340,6 +340,30 @@
         "path": "root.root.props.direction",
         "value": "column",
         "value_type": "str"
+      },
+      {
+        "name": "valDate",
+        "node_type": "property",
+        "path": "params.valDate",
+        "persistent": true,
+        "value": null,
+        "value_type": "NoneType"
+      },
+      {
+        "name": "exprStruct",
+        "node_type": "property",
+        "path": "custom.exprStruct",
+        "persistent": true,
+        "value": null,
+        "value_type": "NoneType"
+      },
+      {
+        "name": "valObj",
+        "node_type": "property",
+        "path": "params.valObj",
+        "persistent": true,
+        "value": null,
+        "value_type": "NoneType"
       }
     ]
   },

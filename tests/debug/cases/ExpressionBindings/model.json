@@ -210,7 +210,7 @@
     "nodes": []
   },
   "properties": {
-    "count": 16,
+    "count": 19,
     "nodes": [
       {
         "name": "test",
@@ -332,6 +332,31 @@
         "path": "root.root.props.direction",
         "value": "column",
         "value_type": "str"
+      },
+      {
+        "name": "transformPolling",
+        "node_type": "property",
+        "path": "custom.transformPolling",
+        "persistent": false,
+        "value": null,
+        "value_type": "NoneType"
+      },
+      {
+        "name": "expressionStructurePolling",
+        "node_type": "property",
+        "path": "custom.expressionStructurePolling",
+        "persistent": false,
+        "value": null,
+        "value_type": "NoneType"
+      },
+      {
+        "name": "expressionPolling",
+        "node_type": "property",
+        "path": "custom.expressionPolling",
+        "persistent": false,
+        "private_access": true,
+        "value": null,
+        "value_type": "NoneType"
       }
     ]
   },

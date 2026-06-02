@@ -243,7 +243,7 @@
     "nodes": []
   },
   "properties": {
-    "count": 147,
+    "count": 149,
     "nodes": [
       {
         "name": "label",
@@ -1276,6 +1276,22 @@
         "path": "root.root.props.style.classes",
         "value": "gap-6 rounded-tl-lg border-t border-l border-(--border-subtle)",
         "value_type": "str"
+      },
+      {
+        "name": "filteredData",
+        "node_type": "property",
+        "path": "custom.filteredData",
+        "persistent": true,
+        "value": null,
+        "value_type": "NoneType"
+      },
+      {
+        "name": "dropdownData",
+        "node_type": "property",
+        "path": "custom.dropdownData",
+        "persistent": true,
+        "value": null,
+        "value_type": "NoneType"
       }
     ]
   },

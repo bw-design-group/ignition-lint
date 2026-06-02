@@ -43,7 +43,7 @@
     "nodes": []
   },
   "properties": {
-    "count": 7,
+    "count": 9,
     "nodes": [
       {
         "name": "customViewParam",
@@ -95,6 +95,22 @@
         "path": "root.root.props.direction",
         "value": "column",
         "value_type": "str"
+      },
+      {
+        "name": "snake_case_test_custom",
+        "node_type": "property",
+        "path": "custom.snake_case_test_custom",
+        "persistent": false,
+        "value": null,
+        "value_type": "NoneType"
+      },
+      {
+        "name": "snake_case_test_param",
+        "node_type": "property",
+        "path": "params.snake_case_test_param",
+        "persistent": false,
+        "value": null,
+        "value_type": "NoneType"
       }
     ]
   },

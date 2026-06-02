@@ -206,23 +206,39 @@ class ViewModelBuilder:
 				config[key] = value
 		return config
 
+	# Known direct sub-keys of a propConfig property entry. Anything after one of these
+	# segments belongs to the configuration, not the property path itself.
+	_PROPCONFIG_ATTR_SEGMENTS = frozenset({'binding', 'persistent', 'paramDirection', 'access'})
+
 	def _build_propconfig_cache(self):
 		"""
 		Build cache of propConfig property paths for fast lookup.
 
 		Extracts all property paths that have propConfig entries to avoid O(n) iteration
 		for every property check. Converts O(n²) behavior to O(n) with O(1) lookups.
+
+		Property paths are derived by trimming the leading 'propConfig.' and everything
+		from the first known configuration segment (binding/persistent/paramDirection/access)
+		onward. e.g.:
+		  propConfig.custom.foo.binding.config.path  -> custom.foo
+		  propConfig.params.bar.persistent           -> params.bar
 		"""
 		self._propconfig_cache = set()
 		prefix = "propConfig."
 		for path in self.flattened_json.keys():
-			if path.startswith(prefix):
-				# Extract property path: propConfig.custom.foo.persistent → custom.foo
-				prop_path = path[len(prefix):]
-				# Strip the configuration key (persistent, type, etc.)
-				if '.' in prop_path:
-					prop_path = prop_path.rsplit('.', 1)[0]
-					self._propconfig_cache.add(prop_path)
+			if not path.startswith(prefix):
+				continue
+			rest = path[len(prefix):]
+			segments = rest.split('.')
+			# Walk segments and stop at the first known configuration attribute.
+			# Position 0 is always part of the property path (e.g. 'custom', 'params').
+			for i in range(1, len(segments)):
+				# Strip any array-index suffix before matching: 'transforms[0]' would never
+				# match anyway, but this keeps the comparison robust for property segments.
+				segment = re.sub(r'\[\d+\]$', '', segments[i])
+				if segment in self._PROPCONFIG_ATTR_SEGMENTS:
+					self._propconfig_cache.add('.'.join(segments[:i]))
+					break
 
 	def _is_property_persistent(self, property_path: str) -> bool:
 		"""
@@ -567,6 +583,36 @@ class ViewModelBuilder:
 				# Add the property to the component
 				if component_path in self.model['components']:
 					self.model['components'][component_path].properties[property_name] = value
+
+		self._collect_propconfig_only_view_properties(processed_properties)
+
+	def _collect_propconfig_only_view_properties(self, processed_properties: set):
+		"""
+		Emit Property nodes for view-level custom/param properties that live only in
+		propConfig (e.g. non-persistent bound props, or persistent props whose parent
+		object in the custom tree is empty). These never produce a leaf in the
+		flattened JSON under custom.*/params.* so the main loop in _collect_properties
+		misses them.
+		"""
+		if self._propconfig_cache is None:
+			self._build_propconfig_cache()
+
+		for prop_path in self._propconfig_cache:
+			if not (prop_path.startswith('custom.') or prop_path.startswith('params.')):
+				continue
+
+			base_path = re.sub(r'\[\d+\]', '', prop_path)
+			if base_path in processed_properties:
+				continue
+			processed_properties.add(base_path)
+
+			persistent = self._get_property_persistence(prop_path)
+			private_access = self._get_property_access_mode(prop_path)
+			prop = Property(
+				base_path, self._extract_property_name(base_path), None, persistent=persistent,
+				private_access=private_access
+			)
+			self.model['properties'].append(prop)
 
 	def get_view_model(self) -> Dict[str, List[ViewNode]]:
 		"""Return the structured view model."""
