@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+- Documentation site now publishes a working `llms.txt` / `llms-full.txt` index for LLM consumption. Links in `llms.txt` were previously root-rooted (e.g. `/getting-started/installation.md`) and 404'd under the `/ignition-lint/` GitHub Pages base path; they are now emitted as fully-qualified URLs via the plugin's `relativePaths: false` option. The search page is also excluded from the index. [33d2524]
+
 ## [0.5.2] - 2026-06-02
 
 ### Fixed
