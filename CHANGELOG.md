@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+- `UnusedCustomPropertiesRule` no longer reports a false positive on a parent object/container custom property (e.g. `custom.network`) when only its nested children (`custom.network.nat1`/`nat2`) are bound or referenced. A property is now credited as used when any descendant path is bound or referenced. Reference detection is also made location-independent — references in scripts that are not modeled as their own nodes (e.g. property-change `onChange` scripts) are now detected the same as in transforms/event handlers — while preserving the component-vs-view namespace distinction (a bare `self.custom.X` does not credit a view-level property; only a nested `self.custom.X.child` does). [063379e]
+
 ## [0.5.2] - 2026-06-02
 
 ### Fixed
