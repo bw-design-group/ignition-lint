@@ -194,18 +194,21 @@ class UnusedCustomPropertiesRule(LintingRule):
 				property_path = property_path.split(suffix)[0]
 				break
 
-		# Mark the property as used based on its type
-		if property_path.startswith('custom.') and '.' not in property_path[7:]:
-			# View-level custom property: custom.propName
-			prop_name = property_path[7:]
+		# Mark the property as used based on its type. We keep the full (possibly nested)
+		# property path so that a parent/container property can be credited when only its
+		# nested children are bound (e.g. custom.network.nat1 credits custom.network). See
+		# the descendant check in finalize().
+		if property_path.startswith('custom.'):
+			# View-level custom property: custom.propName (or custom.parent.child)
+			prop_name = property_path[len('custom.'):]
 			self.used_properties.add(f"view.custom.{prop_name}")
-		elif property_path.startswith('params.') and '.' not in property_path[7:]:
-			# View-level param: params.paramName
-			param_name = property_path[7:]
+		elif property_path.startswith('params.'):
+			# View-level param: params.paramName (or params.parent.child)
+			param_name = property_path[len('params.'):]
 			self.used_properties.add(f"view.params.{param_name}")
 		elif '.custom.' in property_path:
-			# Component custom property: something.custom.propName
-			custom_match = re.search(r'([^.]+)\.custom\.([^.]+)$', property_path)
+			# Component custom property: something.custom.propName (or .custom.parent.child)
+			custom_match = re.search(r'([^.]+)\.custom\.(.+)$', property_path)
 			if custom_match:
 				component_name = custom_match.group(1)
 				prop_name = custom_match.group(2)
@@ -239,11 +242,14 @@ class UnusedCustomPropertiesRule(LintingRule):
 			return
 
 		# Look for patterns like self.view.custom.propName, self.view.params.paramName, etc.
+		# The capture group greedily includes nested children (e.g. network.nat1) so that
+		# accessing a child of an object property credits the parent. See _is_property_used.
+		nested = r'([a-zA-Z_][a-zA-Z0-9_]*(?:\.[a-zA-Z_][a-zA-Z0-9_]*)*)'
 		patterns = [
-			r'self\.view\.custom\.([a-zA-Z_][a-zA-Z0-9_]*)',  # self.view.custom.propName
-			r'self\.view\.params\.([a-zA-Z_][a-zA-Z0-9_]*)',  # self.view.params.paramName
-			r'self\.custom\.([a-zA-Z_][a-zA-Z0-9_]*)',  # self.custom.propName (component)
-			r'self\.params\.([a-zA-Z_][a-zA-Z0-9_]*)',  # self.params.propName (component)
+			rf'self\.view\.custom\.{nested}',  # self.view.custom.propName
+			rf'self\.view\.params\.{nested}',  # self.view.params.paramName
+			rf'self\.custom\.{nested}',  # self.custom.propName (component)
+			rf'self\.params\.{nested}',  # self.params.propName (component)
 		]
 
 		for pattern in patterns:
@@ -273,22 +279,8 @@ class UnusedCustomPropertiesRule(LintingRule):
 		unused_properties = []
 
 		for prop_path, definition_location in self.defined_properties.items():
-			# Check if this property is used
-			is_used = prop_path in self.used_properties
-			if is_used:
+			if self._is_property_used(prop_path):
 				continue
-
-			# For component custom properties, also check wildcard usage
-			if '.custom.' in prop_path and not prop_path.startswith('view.'):
-				# Extract just the property name for wildcard matching
-				prop_name = prop_path.split('.custom.')[-1]
-				if f"*.custom.{prop_name}" in self.used_properties:
-					continue
-
-			if prop_path.startswith('view.params.'):
-				prop_name = prop_path.split('view.params.')[-1]
-				if f"*.params.{prop_name}" in self.used_properties:
-					continue
 
 			# If we reach here, the property is unused
 			unused_properties.append((prop_path, definition_location))
@@ -299,6 +291,54 @@ class UnusedCustomPropertiesRule(LintingRule):
 			self.add_violation(
 				f"{definition_location}: {prop_type} '{prop_path.split('.')[-1]}' is defined but never referenced"
 			)
+
+	def _is_property_used(self, prop_path: str) -> bool:
+		"""
+		Determine whether a defined property is used.
+
+		A property is considered used if it is referenced/bound directly, OR if any of its
+		descendant paths are referenced/bound. The latter handles object/container properties
+		(e.g. custom.network) whose nested children (custom.network.nat1) are the things that
+		actually have bindings and references - the parent cannot be unused if its children are.
+		"""
+		# Direct usage
+		if prop_path in self.used_properties:
+			return True
+
+		# Descendant usage credits the parent (e.g. view.custom.network.nat1 -> view.custom.network)
+		descendant_prefix = f"{prop_path}."
+		if any(used.startswith(descendant_prefix) for used in self.used_properties):
+			return True
+
+		# Component custom properties are also tracked via wildcard keys (*.custom.propName)
+		if '.custom.' in prop_path and not prop_path.startswith('view.'):
+			prop_name = prop_path.split('.custom.')[-1]
+			if f"*.custom.{prop_name}" in self.used_properties:
+				return True
+			wildcard_prefix = f"*.custom.{prop_name}."
+			if any(used.startswith(wildcard_prefix) for used in self.used_properties):
+				return True
+
+		# A view-level object custom property may have its children accessed via the
+		# component-relative self.custom.X.child form in scripts (recorded as *.custom.X.child).
+		# We only credit on a nested child access (not a bare *.custom.X) to preserve the
+		# strict view-level behavior for plain self.custom.X references.
+		if prop_path.startswith('view.custom.'):
+			prop_name = prop_path.split('view.custom.')[-1]
+			wildcard_prefix = f"*.custom.{prop_name}."
+			if any(used.startswith(wildcard_prefix) for used in self.used_properties):
+				return True
+
+		# View params may be referenced via component-relative self.params (*.params.paramName)
+		if prop_path.startswith('view.params.'):
+			prop_name = prop_path.split('view.params.')[-1]
+			if f"*.params.{prop_name}" in self.used_properties:
+				return True
+			wildcard_prefix = f"*.params.{prop_name}."
+			if any(used.startswith(wildcard_prefix) for used in self.used_properties):
+				return True
+
+		return False
 
 	def _search_flattened_json_for_references(self):
 		"""Search the entire flattened JSON for any references to defined properties."""
@@ -346,6 +386,14 @@ class UnusedCustomPropertiesRule(LintingRule):
 				if pattern in json_value:
 					# Mark the corresponding property as used
 					self._mark_property_used_from_pattern(pattern)
+
+			# Apply the full reference detectors to every string value so that detection is
+			# location-independent. This catches references (notably the component-relative
+			# self.custom.X / self.params.X form) inside scripts that are not modeled as their
+			# own nodes - e.g. property-change (onChange) scripts - which would otherwise only
+			# be matched by the narrower substring patterns above.
+			self._check_script_for_references(json_value)
+			self._check_expression_for_references(json_value)
 
 	def _mark_property_used_from_pattern(self, pattern: str):
 		"""Mark a property as used based on a found pattern."""
