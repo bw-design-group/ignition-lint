@@ -57,6 +57,35 @@ Whitelisting lets you exclude specific files from linting — useful for legacy 
 
 See [Whitelist guide](./whitelist.md) for details.
 
+### Auto-fix
+
+Rules that support it can rewrite the view to resolve violations (e.g. [NamePatternRule](../rules/naming/name-pattern.md) renames components). Pick **one** mode:
+
+| Flag | Description |
+| --- | --- |
+| `--fix` | Apply **safe** fixes — isolated edits with no ripple effects |
+| `--fix-unsafe` | Apply **all** fixes, including unsafe ones that rewrite references (binding/script mentions of a renamed component). Enables fix mode on its own — do not also pass `--fix` |
+| `--fix-dry-run` | **Preview** what would be fixed without modifying any file |
+| `--fix-rules <names>` | Comma-separated list of rules whose fixes to apply (default: all fixable rules) |
+
+The three modes are mutually exclusive choices: `--fix` for safe-only, `--fix-unsafe` to include reference rewrites, `--fix-dry-run` to preview. After fixes are applied, the rules are re-evaluated once on the fixed view so the reported results reflect the post-fix state, not the violations that were just fixed.
+
+```bash
+# Apply safe fixes
+ign-lint --config rule_config.json --files "**/view.json" --fix
+
+# Apply safe + unsafe fixes (rewrites references too)
+ign-lint --config rule_config.json --files "**/view.json" --fix-unsafe
+
+# Preview without writing
+ign-lint --config rule_config.json --files "**/view.json" --fix-dry-run
+
+# Only apply fixes from specific rules
+ign-lint --config rule_config.json --files "**/view.json" --fix --fix-rules NamePatternRule
+```
+
+See [NamePatternRule → What `--fix` does](../rules/naming/name-pattern.md#what---fix-does) for how safe vs. unsafe fixes are classified.
+
 ### Output and severity
 
 | Flag | Description |

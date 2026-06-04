@@ -161,8 +161,8 @@ NamePatternRule (warning):
 
 When run in fix mode, NamePatternRule rewrites component names to match the configured convention.
 
-- **Safe fixes** (applied automatically with `--fix`): when nothing references the component by name, the rule changes only `meta.name`. Single, isolated edit.
-- **Unsafe fixes** (require `--fix --include-unsafe`): when other expressions, property bindings, or scripts reference the component name (e.g. `{Button1.props.text}`, `self.getSibling('Button1')`), the rule bundles the rename together with rewrites of every reference. The fix is marked unsafe because the references may have meaning the rule can't infer (e.g. they could be intentionally bound to a name that's about to be deleted).
+- **Safe fixes** (applied with `--fix`): when nothing references the component by name, the rule changes only `meta.name`. Single, isolated edit.
+- **Unsafe fixes** (applied with `--fix-unsafe`): when other expressions, property bindings, or scripts reference the component name (e.g. `{Button1.props.text}`, `self.getSibling('Button1')`), the rule bundles the rename together with rewrites of every reference. The fix is marked unsafe because the references may have meaning the rule can't infer (e.g. they could be intentionally bound to a name that's about to be deleted). `--fix-unsafe` applies both safe and unsafe fixes, so use it on its own — you don't also pass `--fix`.
 
 The rule fixes only **component** violations. Property, custom-method, and message-handler renames are reported but not auto-fixed — those renames are riskier and the rule defers to a human.
 
