@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.5.3] - 2026-06-04
+
 ### Added
 - Property-change (`onChange`) scripts defined under `propConfig.<property>.onChange.script` (view-level and component-level) are now modeled as first-class `PropertyChangeScript` nodes. Previously they were not built into any script node, so script-oriented rules such as `PylintScriptRule` silently skipped their bodies; those scripts are now linted and counted in model statistics. New `NodeType.PROPERTY_CHANGE_SCRIPT` and `property_change_scripts` model collection. (#99)
 
@@ -317,7 +319,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Initial tracked release
 
-[Unreleased]: https://github.com/bw-design-group/ignition-lint/compare/v0.5.2...HEAD
+[Unreleased]: https://github.com/bw-design-group/ignition-lint/compare/v0.5.3...HEAD
+[0.5.3]: https://github.com/bw-design-group/ignition-lint/compare/v0.5.2...v0.5.3
 [0.5.2]: https://github.com/bw-design-group/ignition-lint/compare/v0.5.1...v0.5.2
 [0.5.1]: https://github.com/bw-design-group/ignition-lint/compare/v0.5.0-rc1...v0.5.1
 [0.4.1]: https://github.com/bw-design-group/ignition-lint/compare/v0.4.0...v0.4.1
