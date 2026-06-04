@@ -634,6 +634,19 @@ def print_file_results(lint_results, lint_engine=None) -> tuple[int, int]:
 	return warning_count, error_count
 
 
+def report_file_results(lint_results, lint_engine=None) -> tuple[int, int]:
+	"""
+	Print a file's warnings/errors plus a clean-result message, and return counts.
+
+	Thin wrapper over print_file_results that also emits the "No issues found"
+	message when a file is clean, so callers don't repeat that branch.
+	"""
+	warning_count, error_count = print_file_results(lint_results, lint_engine)
+	if error_count == 0 and warning_count == 0:
+		print("✅ No issues found")
+	return warning_count, error_count
+
+
 def print_statistics(file_path: Path, stats: Dict[str, Any], verbose: bool = False):
 	"""Print model statistics for a file."""
 	if verbose:
@@ -784,8 +797,15 @@ def process_single_file(
 	# Run linting (unless stats-only mode)
 	file_timings = None
 	if not args.stats_only:
-		# Set up fix context if fix mode is active
-		fix_mode = getattr(args, 'fix', False) or getattr(args, 'fix_dry_run', False)
+		# Set up fix context if fix mode is active. --fix-unsafe (and
+		# --fix-dry-run) imply fix mode on their own, so the flags act as a
+		# choice between "safe only" (--fix) and "include unsafe" (--fix-unsafe)
+		# rather than requiring --fix to be passed alongside.
+		fix_mode = (
+			getattr(args, 'fix', False) or getattr(args, 'fix_unsafe', False) or
+			getattr(args, 'fix_dry_run', False)
+		)
+		dry_run = getattr(args, 'fix_dry_run', False)
 		path_translator = None
 		if fix_mode:
 			path_translator = PathTranslator(json_data)
@@ -800,12 +820,13 @@ def process_single_file(
 		if file_timer:
 			rule_exec_ms = timer.stop()
 
-		file_warnings, file_errors = print_file_results(lint_results, lint_engine)
+		# Preserve the first-pass rule timings; any post-fix re-evaluation runs
+		# without timing so it would otherwise clobber the profiling record.
+		rule_timings = lint_results.rule_timings
 
-		if file_errors == 0 and file_warnings == 0:
-			print(f"✅ No issues found")
-
-		# Handle fixes if fix mode is active and there are fixes
+		# Handle fixes if fix mode is active and there are fixes. Fixes are
+		# applied BEFORE reporting so the reported results reflect the post-fix
+		# state rather than the violations we just fixed (see issue #94).
 		if fix_mode and lint_results.fixes:
 			fix_engine = FixEngine(path_translator)
 			safe_only = not getattr(args, 'fix_unsafe', False)
@@ -813,18 +834,31 @@ def process_single_file(
 			if getattr(args, 'fix_rules', None):
 				rule_filter = [r.strip() for r in args.fix_rules.split(',')]
 
-			if getattr(args, 'fix_dry_run', False):
-				# Dry run: preview without modifying
-				fix_result = fix_engine.dry_run(
-					lint_results.fixes, safe_only=safe_only, rule_filter=rule_filter
-				)
+			if dry_run:
+				# Dry run: nothing is mutated, so the pre-fix results stand.
+				# Report them first, then preview what would be fixed.
+				file_warnings, file_errors = report_file_results(lint_results, lint_engine)
 				print_fix_dry_run(lint_results.fixes, file_path, safe_only, rule_filter)
 			else:
-				# Apply fixes
+				# Apply fixes, then re-evaluate ONCE on the fixed view to produce
+				# accurate output. The re-evaluation collects no fixes
+				# (json_data=None) and never calls apply_fixes again, so there is
+				# no multi-pass fix loop.
 				fix_result = fix_engine.apply_fixes(
 					lint_results.fixes, safe_only=safe_only, rule_filter=rule_filter
 				)
 				apply_and_report_fixes(fix_result, json_data, file_path)
+
+				if fix_result.applied_count > 0:
+					flattened_json = flatten_json(json_data)
+					lint_results = lint_engine.process(
+						flattened_json, source_file_path=str(file_path), enable_timing=False,
+						json_data=None, path_translator=None
+					)
+
+				file_warnings, file_errors = report_file_results(lint_results, lint_engine)
+		else:
+			file_warnings, file_errors = report_file_results(lint_results, lint_engine)
 
 		# Create timing record if profiling
 		if file_timer:
@@ -832,7 +866,7 @@ def process_single_file(
 			file_timings = FileTimings(
 				file_path=str(file_path), total_duration_ms=total_duration, file_read_ms=file_read_ms,
 				json_flatten_ms=flatten_ms, model_build_ms=model_build_ms,
-				rule_execution_ms=rule_exec_ms, rule_timings=lint_results.rule_timings
+				rule_execution_ms=rule_exec_ms, rule_timings=rule_timings
 			)
 
 		return file_warnings, file_errors, file_timings, lint_results
@@ -1365,7 +1399,7 @@ def main():
 	parser.add_argument(
 		"--fix-unsafe",
 		action="store_true",
-		help="Also apply fixes that update references (use with --fix)",
+		help="Apply fixes, including unsafe ones that update references",
 	)
 	parser.add_argument(
 		"--fix-dry-run",
