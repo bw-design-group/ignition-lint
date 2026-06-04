@@ -307,6 +307,9 @@ class ScriptRule(LintingRule):
 	def visit_event_handler(self, node: ViewNode):
 		self._collect_script(node)
 
+	def visit_property_change_script(self, node: ViewNode):
+		self._collect_script(node)
+
 	def _collect_script(self, node: ViewNode):
 		"""Collect script for batch processing."""
 		if isinstance(node, ScriptNode):

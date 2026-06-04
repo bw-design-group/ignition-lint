@@ -18,6 +18,7 @@
     "tag_bindings",
     "query_bindings",
     "script_transforms",
+    "property_change_scripts",
     "properties"
   ],
   "node_type_counts": {
@@ -27,16 +28,18 @@
     "expression_binding": 8,
     "expression_struct_binding": 1,
     "property": 19,
-    "property_binding": 2
+    "property_binding": 2,
+    "property_change_script": 1
   },
   "rule_coverage": {
     "BadComponentReferenceRule": {
-      "applicable_node_count": 10,
+      "applicable_node_count": 11,
       "target_types": [
         "custom_method",
         "event_handler",
         "expression_binding",
         "message_handler",
+        "property_change_script",
         "transform"
       ]
     },
@@ -53,7 +56,7 @@
       ]
     },
     "ExcessiveContextDataRule": {
-      "applicable_node_count": 36,
+      "applicable_node_count": 37,
       "target_types": [
         "all"
       ]
@@ -75,11 +78,12 @@
       ]
     },
     "PylintScriptRule": {
-      "applicable_node_count": 2,
+      "applicable_node_count": 3,
       "target_types": [
         "custom_method",
         "event_handler",
         "message_handler",
+        "property_change_script",
         "transform"
       ]
     },
@@ -98,5 +102,5 @@
       ]
     }
   },
-  "total_nodes": 36
+  "total_nodes": 37
 }
