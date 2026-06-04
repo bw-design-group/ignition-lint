@@ -39,6 +39,16 @@ const config: Config = {
         depth: 2,
         content: {
           enableLlmsFullTxt: true,
+          // The site is served under baseUrl '/ignition-lint/'. With the
+          // default relativePaths: true, the plugin writes root-rooted links
+          // like '/getting-started/installation.md' that 404 on GitHub Pages.
+          // relativePaths: false makes it emit baseUrl-prefixed links
+          // ('/ignition-lint/getting-started/installation.md') that resolve.
+          relativePaths: false,
+          // The search page is not useful content for an LLM index.
+          // Patterns match the full route path, which includes the baseUrl
+          // (e.g. '/ignition-lint/search'), so use a baseUrl-independent glob.
+          excludeRoutes: ['**/search'],
         },
       },
     ],
