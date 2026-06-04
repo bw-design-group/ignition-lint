@@ -19,6 +19,7 @@
     "tag_bindings",
     "query_bindings",
     "script_transforms",
+    "property_change_scripts",
     "properties"
   ],
   "node_type_counts": {
@@ -38,6 +39,7 @@
         "event_handler",
         "expression_binding",
         "message_handler",
+        "property_change_script",
         "transform"
       ]
     },
@@ -81,6 +83,7 @@
         "custom_method",
         "event_handler",
         "message_handler",
+        "property_change_script",
         "transform"
       ]
     },

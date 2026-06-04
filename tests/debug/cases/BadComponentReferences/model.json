@@ -949,6 +949,10 @@
       }
     ]
   },
+  "property_change_scripts": {
+    "count": 0,
+    "nodes": []
+  },
   "query_bindings": {
     "count": 0,
     "nodes": []
