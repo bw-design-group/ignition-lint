@@ -7,6 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.5.3] - 2026-06-04
+
+### Added
+- Property-change (`onChange`) scripts defined under `propConfig.<property>.onChange.script` (view-level and component-level) are now modeled as first-class `PropertyChangeScript` nodes. Previously they were not built into any script node, so script-oriented rules such as `PylintScriptRule` silently skipped their bodies; those scripts are now linted and counted in model statistics. New `NodeType.PROPERTY_CHANGE_SCRIPT` and `property_change_scripts` model collection. (#99)
+
+### Fixed
+- `--fix-unsafe` now enables fix mode on its own instead of being a silent no-op unless `--fix` was also passed. The three fix flags are now mutually exclusive choices: `--fix` (safe fixes only), `--fix-unsafe` (also rewrite references), and `--fix-dry-run` (preview). Help text for `--fix-unsafe` no longer says "use with --fix". (#93)
+- When fixes are applied, ignition-lint now re-evaluates the rules once on the fixed view and reports those post-fix results, instead of printing (and counting in the exit status) the pre-fix violations it just resolved. The re-evaluation collects no fixes and never re-applies, so there is no multi-pass fix loop; `--fix-dry-run` mutates nothing and still reports the pre-fix state. (#94)
+- `UnusedCustomPropertiesRule` no longer reports a false positive on a parent object/container custom property (e.g. `custom.network`) when only its nested children (`custom.network.nat1`/`nat2`) are bound or referenced. A property is now credited as used when any descendant path is bound or referenced. Reference detection is also made location-independent — references in scripts that are not modeled as their own nodes (e.g. property-change `onChange` scripts) are now detected the same as in transforms/event handlers — while preserving the component-vs-view namespace distinction (a bare `self.custom.X` does not credit a view-level property; only a nested `self.custom.X.child` does). [063379e]
+- Documentation site now publishes a working `llms.txt` / `llms-full.txt` index for LLM consumption. Links in `llms.txt` were previously root-rooted (e.g. `/getting-started/installation.md`) and 404'd under the `/ignition-lint/` GitHub Pages base path; they are now emitted as fully-qualified URLs via the plugin's `relativePaths: false` option. The search page is also excluded from the index. [33d2524]
+
 ## [0.5.2] - 2026-06-02
 
 ### Fixed
@@ -308,7 +319,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Initial tracked release
 
-[Unreleased]: https://github.com/bw-design-group/ignition-lint/compare/v0.5.2...HEAD
+[Unreleased]: https://github.com/bw-design-group/ignition-lint/compare/v0.5.3...HEAD
+[0.5.3]: https://github.com/bw-design-group/ignition-lint/compare/v0.5.2...v0.5.3
 [0.5.2]: https://github.com/bw-design-group/ignition-lint/compare/v0.5.1...v0.5.2
 [0.5.1]: https://github.com/bw-design-group/ignition-lint/compare/v0.5.0-rc1...v0.5.1
 [0.4.1]: https://github.com/bw-design-group/ignition-lint/compare/v0.4.0...v0.4.1

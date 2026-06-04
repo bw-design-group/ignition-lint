@@ -202,7 +202,9 @@ class PylintScriptRule(FixableMixin, ScriptRule):
 			suffix_candidates = ['.code']
 		elif node.node_type == NodeType.EVENT_HANDLER:
 			suffix_candidates = ['.config.script', '.script']
-		elif node.node_type in (NodeType.MESSAGE_HANDLER, NodeType.CUSTOM_METHOD):
+		elif node.node_type in (
+			NodeType.MESSAGE_HANDLER, NodeType.CUSTOM_METHOD, NodeType.PROPERTY_CHANGE_SCRIPT
+		):
 			suffix_candidates = ['.script']
 
 		for suffix in suffix_candidates:

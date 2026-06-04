@@ -1518,18 +1518,18 @@
         "value_type": "str"
       },
       {
-        "name": "start_date",
+        "name": "mode_name",
         "node_type": "property",
-        "path": "custom.start_date",
+        "path": "custom.mode_name",
         "persistent": false,
         "private_access": true,
         "value": null,
         "value_type": "NoneType"
       },
       {
-        "name": "end_date",
+        "name": "start_date",
         "node_type": "property",
-        "path": "custom.end_date",
+        "path": "custom.start_date",
         "persistent": false,
         "private_access": true,
         "value": null,
@@ -1553,15 +1553,6 @@
         "value_type": "NoneType"
       },
       {
-        "name": "eq_path",
-        "node_type": "property",
-        "path": "custom.eq_path",
-        "persistent": false,
-        "private_access": true,
-        "value": null,
-        "value_type": "NoneType"
-      },
-      {
         "name": "update",
         "node_type": "property",
         "path": "custom.update",
@@ -1571,9 +1562,9 @@
         "value_type": "NoneType"
       },
       {
-        "name": "is_nav_expanded",
+        "name": "eq_path",
         "node_type": "property",
-        "path": "custom.is_nav_expanded",
+        "path": "custom.eq_path",
         "persistent": false,
         "private_access": true,
         "value": null,
@@ -1589,6 +1580,24 @@
         "value_type": "NoneType"
       },
       {
+        "name": "kpiTargets",
+        "node_type": "property",
+        "path": "custom.kpiTargets",
+        "persistent": false,
+        "private_access": true,
+        "value": null,
+        "value_type": "NoneType"
+      },
+      {
+        "name": "end_date",
+        "node_type": "property",
+        "path": "custom.end_date",
+        "persistent": false,
+        "private_access": true,
+        "value": null,
+        "value_type": "NoneType"
+      },
+      {
         "name": "state_type",
         "node_type": "property",
         "path": "custom.state_type",
@@ -1598,9 +1607,9 @@
         "value_type": "NoneType"
       },
       {
-        "name": "mode_name",
+        "name": "adjusted_time",
         "node_type": "property",
-        "path": "custom.mode_name",
+        "path": "custom.adjusted_time",
         "persistent": false,
         "private_access": true,
         "value": null,
@@ -1610,15 +1619,6 @@
         "name": "state_name",
         "node_type": "property",
         "path": "custom.state_name",
-        "persistent": false,
-        "private_access": true,
-        "value": null,
-        "value_type": "NoneType"
-      },
-      {
-        "name": "kpiTargets",
-        "node_type": "property",
-        "path": "custom.kpiTargets",
         "persistent": false,
         "private_access": true,
         "value": null,
@@ -1643,9 +1643,9 @@
         "value_type": "NoneType"
       },
       {
-        "name": "adjusted_time",
+        "name": "is_nav_expanded",
         "node_type": "property",
-        "path": "custom.adjusted_time",
+        "path": "custom.is_nav_expanded",
         "persistent": false,
         "private_access": true,
         "value": null,
@@ -1789,6 +1789,10 @@
         "target_path": "view.custom.time"
       }
     ]
+  },
+  "property_change_scripts": {
+    "count": 0,
+    "nodes": []
   },
   "query_bindings": {
     "count": 0,
