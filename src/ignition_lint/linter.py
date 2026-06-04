@@ -71,7 +71,7 @@ class LintEngine:
 		specific_collections = [
 			'components', 'message_handlers', 'custom_methods', 'expression_bindings',
 			'expression_struct_bindings', 'property_bindings', 'tag_bindings', 'query_bindings',
-			'script_transforms', 'event_handlers', 'properties'
+			'script_transforms', 'event_handlers', 'property_change_scripts', 'properties'
 		]
 		all_nodes = []
 		for collection_name in specific_collections:
@@ -225,7 +225,7 @@ class LintEngine:
 		specific_collections = [
 			'components', 'message_handlers', 'custom_methods', 'expression_bindings',
 			'expression_struct_bindings', 'property_bindings', 'tag_bindings', 'query_bindings',
-			'script_transforms', 'event_handlers', 'properties'
+			'script_transforms', 'event_handlers', 'property_change_scripts', 'properties'
 		]
 		all_nodes = []
 		for collection_name in specific_collections:

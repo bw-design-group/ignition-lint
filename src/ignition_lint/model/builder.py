@@ -18,6 +18,7 @@ from .node_types import (
 	CustomMethodScript,
 	TransformScript,
 	EventHandlerScript,
+	PropertyChangeScript,
 	Property,
 )
 
@@ -40,6 +41,7 @@ class ViewModelBuilder:
 			'tag_bindings': [],
 			'query_bindings': [],
 			'script_transforms': [],
+			'property_change_scripts': [],
 			'properties': []
 		}
 		self._propconfig_cache = None  # Cache for propConfig paths (performance optimization)
@@ -507,6 +509,36 @@ class ViewModelBuilder:
 					self.model['event_handlers'].append(handler)
 					self.model['scripts'].append(handler)
 
+	def _collect_property_change_scripts(self):
+		"""Collect property-change (onChange) scripts defined under propConfig.
+
+		These live at ``[<component>.]propConfig.<property>.onChange.script`` for both
+		view-level (e.g. ``propConfig.custom.total.onChange.script``) and component-level
+		properties. They are not under ``.events.`` so the event-handler collector misses
+		them; without this they become no script node of any kind and script-oriented
+		rules (e.g. PylintScriptRule) never see their bodies.
+		"""
+		suffix = '.onChange.script'
+		for path, script in self.flattened_json.items():
+			if not path.endswith(suffix):
+				continue
+			# Only propConfig-scoped onChange handlers are property-change scripts.
+			if not (path.startswith('propConfig.') or '.propConfig.' in path):
+				continue
+
+			# Node path is the onChange object path (drop the trailing '.script').
+			node_path = path[:-len('.script')]
+
+			# Property path is everything between the 'propConfig.' marker and '.onChange'.
+			prop_segment = path[:-len(suffix)]
+			marker = 'propConfig.'
+			marker_index = prop_segment.rfind(marker)
+			property_path = prop_segment[marker_index + len(marker):]
+
+			handler = PropertyChangeScript(node_path, script, property_path)
+			self.model['property_change_scripts'].append(handler)
+			self.model['scripts'].append(handler)
+
 	def _collect_properties(self):
 		# Track processed properties to avoid duplicates from array elements
 		# Key format: "base_path.property_name" (without array indices)
@@ -642,6 +674,7 @@ class ViewModelBuilder:
 			'tag_bindings': [],
 			'query_bindings': [],
 			'script_transforms': [],
+			'property_change_scripts': [],
 			'properties': []
 		}
 
@@ -659,6 +692,9 @@ class ViewModelBuilder:
 
 		# Process event handlers
 		self._collect_event_handlers()
+
+		# Process property-change (onChange) scripts
+		self._collect_property_change_scripts()
 
 		# Process regular properties
 		self._collect_properties()

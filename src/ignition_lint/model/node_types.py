@@ -22,6 +22,7 @@ class NodeType(Enum):
 	CUSTOM_METHOD = "custom_method"
 	TRANSFORM = "transform"
 	EVENT_HANDLER = "event_handler"
+	PROPERTY_CHANGE_SCRIPT = "property_change_script"
 	PROPERTY = "property"
 
 
@@ -30,7 +31,10 @@ ALL_BINDINGS = {
 	NodeType.EXPRESSION_BINDING, NodeType.EXPRESSION_STRUCT_BINDING, NodeType.PROPERTY_BINDING,
 	NodeType.TAG_BINDING, NodeType.QUERY_BINDING
 }
-ALL_SCRIPTS = {NodeType.MESSAGE_HANDLER, NodeType.CUSTOM_METHOD, NodeType.TRANSFORM, NodeType.EVENT_HANDLER}
+ALL_SCRIPTS = {
+	NodeType.MESSAGE_HANDLER, NodeType.CUSTOM_METHOD, NodeType.TRANSFORM, NodeType.EVENT_HANDLER,
+	NodeType.PROPERTY_CHANGE_SCRIPT
+}
 
 
 class ViewNode(ABC):
@@ -297,6 +301,25 @@ class EventHandlerScript(ScriptNode):
 			'event_type': self.event_type,
 			'scope': self.scope
 		})
+		return base_attrs
+
+
+class PropertyChangeScript(ScriptNode):
+	"""Represents a property-change (onChange) script defined under propConfig.
+
+	These scripts run when a custom/params property's value changes. In Ignition
+	Perspective they receive the previous and current values along with change
+	metadata, so the generated function signature mirrors that contract.
+	"""
+
+	def __init__(self, path: str, script: str, property_path: str):
+		super().__init__(path, NodeType.PROPERTY_CHANGE_SCRIPT, script)
+		self.property_path = property_path
+		self.function_def = "def valueChanged(self, previousValue, currentValue, origin, missedEvents):"
+
+	def _get_serializable_attrs(self) -> Dict[str, Any]:
+		base_attrs = super()._get_serializable_attrs()
+		base_attrs.update({'property_path': self.property_path})
 		return base_attrs
 
 
