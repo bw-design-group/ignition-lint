@@ -9,10 +9,9 @@ SUPPORTED FEATURES:
 - ✅ Detects view parameters (params.*)
 - ✅ Detects component-level custom properties (*.custom.*)
 - ✅ Detects when properties are used in expression bindings
+- ✅ Detects when properties are referenced in scripts (location-independent string scan)
+- ✅ Credits parent/container object properties when their nested children are bound or referenced
 - ✅ Correctly handles persistent vs non-persistent properties
-
-REMAINING LIMITATIONS:
-- Does not detect when properties are used in scripts (scripts not processed by model builder)
 """
 
 import json
@@ -324,7 +323,8 @@ class TestUnusedCustomPropertiesRule(BaseRuleTest):  # pylint: disable=too-many-
 							},
 							"transforms": [{
 								"type": "script",
-								"code": "# Access root param via self.params\nreturn self.params.rootParam"
+								"code":
+									"# Access root param via self.params\nreturn self.params.rootParam"
 							}],
 							"type": "expr"
 						}
@@ -372,7 +372,8 @@ class TestUnusedCustomPropertiesRule(BaseRuleTest):  # pylint: disable=too-many-
 						"component": {
 							"onActionPerformed": {
 								"config": {
-									"script": "logger.info(self.params.usedInEventHandler)"
+									"script":
+										"logger.info(self.params.usedInEventHandler)"
 								},
 								"scope": "G",
 								"type": "script"
@@ -482,7 +483,8 @@ class TestUnusedCustomPropertiesRule(BaseRuleTest):  # pylint: disable=too-many-
 					"scripts": {
 						"customMethods": [{
 							"name": "myMethod",
-							"script": "return self.view.custom.methodValue + str(self.custom.myProp)"
+							"script":
+								"return self.view.custom.methodValue + str(self.custom.myProp)"
 						}]
 					}
 				}],
@@ -555,7 +557,8 @@ class TestUnusedCustomPropertiesRule(BaseRuleTest):  # pylint: disable=too-many-
 							"binding": {
 								"type": "expression",
 								"config": {
-									"expression": "{self.view.custom.selfViewProp} + {self.view.params.selfViewParam}"
+									"expression":
+										"{self.view.custom.selfViewProp} + {self.view.params.selfViewParam}"
 								}
 							}
 						}
@@ -855,3 +858,317 @@ class TestUnusedCustomPropertiesRule(BaseRuleTest):  # pylint: disable=too-many-
 			mock_view, rule_config, "UnusedCustomPropertiesRule", expected_error_count=3,
 			error_patterns=["unusedInput", "unusedCustom", "outputWithoutBinding"]
 		)
+
+	def test_object_custom_property_with_bound_children(self):
+		"""Parent object custom property is used when its children have bindings (issue #97)."""
+		# custom.network is an object whose nested children (nat1, nat2) have tag bindings
+		# and are referenced in an onChange script. The parent must be considered used.
+		view_data = {
+			"custom": {
+				"network": {}
+			},
+			"propConfig": {
+				"custom.network": {
+					"onChange": {
+						"enabled": None,
+						"script":
+							"\tif self.custom.network.nat1 == \"0.0.0.0\" and "
+							"self.custom.network.nat2 == \"0.0.0.0\":\n\t\tpass"
+					},
+					"persistent": True
+				},
+				"custom.network.nat1": {
+					"binding": {
+						"config": {
+							"mode": "indirect",
+							"tagPath": "[default]Path/IPAddressNat1"
+						},
+						"type": "tag"
+					}
+				},
+				"custom.network.nat2": {
+					"binding": {
+						"config": {
+							"mode": "indirect",
+							"tagPath": "[default]Path/IPAddressNat2"
+						},
+						"type": "tag"
+					}
+				}
+			},
+			"root": {
+				"meta": {
+					"name": "root"
+				},
+				"type": "ia.container.coord"
+			}
+		}
+		mock_view_content = json.dumps(view_data, indent=2)
+		mock_view = create_temp_view_file(mock_view_content)
+
+		rule_config = get_test_config("UnusedCustomPropertiesRule")
+
+		# Parent custom.network should NOT be flagged - its children are bound and referenced
+		self.assert_rule_errors(mock_view, rule_config, "UnusedCustomPropertiesRule", expected_error_count=0)
+
+	def test_object_custom_property_with_referenced_child_only(self):
+		"""Parent object custom property is used when a nested child is referenced in a script."""
+		view_data = {
+			"custom": {
+				"settings": {
+					"timeout": 5000
+				}
+			},
+			"root": {
+				"children": [{
+					"meta": {
+						"name": "TestButton"
+					},
+					"type": "ia.input.button",
+					"events": {
+						"onClick": {
+							"script": "logger.info(self.view.custom.settings.timeout)"
+						}
+					}
+				}],
+				"meta": {
+					"name": "root"
+				}
+			}
+		}
+		mock_view_content = json.dumps(view_data, indent=2)
+		mock_view = create_temp_view_file(mock_view_content)
+
+		rule_config = get_test_config("UnusedCustomPropertiesRule")
+
+		# Parent custom.settings should NOT be flagged - its child .timeout is referenced
+		self.assert_rule_errors(mock_view, rule_config, "UnusedCustomPropertiesRule", expected_error_count=0)
+
+	def test_object_component_custom_property_with_referenced_child(self):
+		"""Parent object component custom property is used when a nested child is referenced."""
+		view_data = {
+			"root": {
+				"children": [{
+					"meta": {
+						"name": "TestLabel"
+					},
+					"type": "ia.display.label",
+					"custom": {
+						"config": {
+							"color": "red"
+						}
+					},
+					"props": {
+						"text": {
+							"binding": {
+								"type": "expression",
+								"config": {
+									"expression": "{this.custom.config.color}"
+								}
+							}
+						}
+					}
+				}],
+				"meta": {
+					"name": "root"
+				}
+			}
+		}
+		mock_view_content = json.dumps(view_data, indent=2)
+		mock_view = create_temp_view_file(mock_view_content)
+
+		rule_config = get_test_config("UnusedCustomPropertiesRule")
+
+		# Parent component custom.config should NOT be flagged - its child .color is referenced
+		self.assert_rule_errors(mock_view, rule_config, "UnusedCustomPropertiesRule", expected_error_count=0)
+
+	def test_unused_object_custom_property_still_flagged(self):
+		"""An object custom property with no referenced/bound children is still flagged as unused."""
+		# Parent object is defined (via propConfig) and has a child (nat1) that is neither
+		# bound nor referenced anywhere, so the parent must still be reported as unused.
+		view_data = {
+			"custom": {
+				"unusedNetwork": {}
+			},
+			"propConfig": {
+				"custom.unusedNetwork": {
+					"persistent": True
+				},
+				"custom.unusedNetwork.nat1": {
+					"persistent": True
+				}
+			},
+			"root": {
+				"meta": {
+					"name": "root"
+				},
+				"type": "ia.container.coord"
+			}
+		}
+		mock_view_content = json.dumps(view_data, indent=2)
+		mock_view = create_temp_view_file(mock_view_content)
+
+		rule_config = get_test_config("UnusedCustomPropertiesRule")
+
+		# No children are referenced or bound, so the object property is unused
+		self.assert_rule_errors(
+			mock_view, rule_config, "UnusedCustomPropertiesRule", expected_error_count=1,
+			error_patterns=["unusedNetwork", "never referenced"]
+		)
+
+	def test_object_child_binding_does_not_credit_sibling_prefix(self):
+		"""Crediting a parent for child usage must not leak to a name-prefix sibling."""
+		# custom.net and custom.network share a name prefix. Only network has a bound child,
+		# so custom.net must still be flagged (the trailing-dot guard prevents false crediting).
+		view_data = {
+			"custom": {
+				"net": "x",
+				"network": {}
+			},
+			"propConfig": {
+				"custom.network": {
+					"persistent": True
+				},
+				"custom.network.nat1": {
+					"binding": {
+						"config": {
+							"tagPath": "[default]Path/Nat1"
+						},
+						"type": "tag"
+					}
+				}
+			},
+			"root": {
+				"meta": {
+					"name": "root"
+				}
+			}
+		}
+		mock_view_content = json.dumps(view_data, indent=2)
+		mock_view = create_temp_view_file(mock_view_content)
+
+		rule_config = get_test_config("UnusedCustomPropertiesRule")
+
+		# Only custom.net should be flagged; custom.network is credited by its bound child.
+		self.assert_rule_errors(
+			mock_view, rule_config, "UnusedCustomPropertiesRule", expected_error_count=1,
+			error_patterns=["net", "never referenced"]
+		)
+
+	def test_view_object_custom_nested_child_in_event_script(self):
+		"""A view object custom prop is used when a nested child is read via self.custom in a script."""
+		view_data = {
+			"custom": {
+				"network": {}
+			},
+			"propConfig": {
+				"custom.network": {
+					"persistent": True
+				}
+			},
+			"root": {
+				"meta": {
+					"name": "root"
+				},
+				"children": [{
+					"meta": {
+						"name": "Btn"
+					},
+					"type": "ia.input.button",
+					"events": {
+						"component": {
+							"onActionPerformed": {
+								"config": {
+									"script": "x = self.custom.network.nat1"
+								},
+								"type": "script"
+							}
+						}
+					}
+				}]
+			}
+		}
+		mock_view_content = json.dumps(view_data, indent=2)
+		mock_view = create_temp_view_file(mock_view_content)
+
+		rule_config = get_test_config("UnusedCustomPropertiesRule")
+
+		# The nested child access credits the parent object property.
+		self.assert_rule_errors(mock_view, rule_config, "UnusedCustomPropertiesRule", expected_error_count=0)
+
+	def test_plain_self_custom_does_not_credit_view_level_scalar(self):
+		"""A bare self.custom.X (no nested child) must not credit a view-level property."""
+		# self.custom is component-relative; without a nested child access it should not
+		# silently mark an unrelated view-level custom property as used.
+		view_data = {
+			"custom": {
+				"network": "scalar"
+			},
+			"root": {
+				"meta": {
+					"name": "root"
+				},
+				"children": [{
+					"meta": {
+						"name": "Btn"
+					},
+					"type": "ia.input.button",
+					"events": {
+						"component": {
+							"onActionPerformed": {
+								"config": {
+									"script": "x = self.custom.network"
+								},
+								"type": "script"
+							}
+						}
+					}
+				}]
+			}
+		}
+		mock_view_content = json.dumps(view_data, indent=2)
+		mock_view = create_temp_view_file(mock_view_content)
+
+		rule_config = get_test_config("UnusedCustomPropertiesRule")
+
+		# view.custom.network is a scalar referenced only via component-relative self.custom,
+		# so it remains unused (strict view-level behavior is preserved).
+		self.assert_rule_errors(
+			mock_view, rule_config, "UnusedCustomPropertiesRule", expected_error_count=1,
+			error_patterns=["network", "never referenced"]
+		)
+
+	def test_object_child_referenced_in_unmodeled_onchange_script(self):
+		"""Reference detection is location-independent: a nested child read in an onChange script counts.
+
+		Property-change (onChange) scripts are not modeled as their own script nodes, but their
+		text is still scanned, so a self.custom.X.child reference there must credit the parent
+		object property the same way it would in a transform or event handler.
+		"""
+		view_data = {
+			"custom": {
+				"network": {}
+			},
+			"propConfig": {
+				"custom.network": {
+					"onChange": {
+						"enabled": None,
+						"script": "\tif self.custom.network.nat1 == \"0.0.0.0\":\n\t\tpass"
+					},
+					"persistent": True
+				}
+			},
+			"root": {
+				"meta": {
+					"name": "root"
+				},
+				"type": "ia.container.coord"
+			}
+		}
+		mock_view_content = json.dumps(view_data, indent=2)
+		mock_view = create_temp_view_file(mock_view_content)
+
+		rule_config = get_test_config("UnusedCustomPropertiesRule")
+
+		# The nested child access in the onChange script credits the parent object property.
+		self.assert_rule_errors(mock_view, rule_config, "UnusedCustomPropertiesRule", expected_error_count=0)
