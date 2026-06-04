@@ -801,11 +801,8 @@ def process_single_file(
 		# --fix-dry-run) imply fix mode on their own, so the flags act as a
 		# choice between "safe only" (--fix) and "include unsafe" (--fix-unsafe)
 		# rather than requiring --fix to be passed alongside.
-		fix_mode = (
-			getattr(args, 'fix', False) or getattr(args, 'fix_unsafe', False) or
-			getattr(args, 'fix_dry_run', False)
-		)
 		dry_run = getattr(args, 'fix_dry_run', False)
+		fix_mode = dry_run or getattr(args, 'fix', False) or getattr(args, 'fix_unsafe', False)
 		path_translator = None
 		if fix_mode:
 			path_translator = PathTranslator(json_data)
