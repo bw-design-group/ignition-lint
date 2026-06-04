@@ -342,19 +342,19 @@
         "value_type": "NoneType"
       },
       {
-        "name": "expressionStructurePolling",
-        "node_type": "property",
-        "path": "custom.expressionStructurePolling",
-        "persistent": false,
-        "value": null,
-        "value_type": "NoneType"
-      },
-      {
         "name": "expressionPolling",
         "node_type": "property",
         "path": "custom.expressionPolling",
         "persistent": false,
         "private_access": true,
+        "value": null,
+        "value_type": "NoneType"
+      },
+      {
+        "name": "expressionStructurePolling",
+        "node_type": "property",
+        "path": "custom.expressionStructurePolling",
+        "persistent": false,
         "value": null,
         "value_type": "NoneType"
       }
@@ -377,6 +377,18 @@
       }
     ]
   },
+  "property_change_scripts": {
+    "count": 1,
+    "nodes": [
+      {
+        "node_type": "property_change_script",
+        "path": "propConfig.custom.test.onChange",
+        "property_path": "custom.test",
+        "script_length": 48,
+        "script_preview": "\treturn previousValue.value * currentValue.value"
+      }
+    ]
+  },
   "query_bindings": {
     "count": 0,
     "nodes": []
@@ -386,7 +398,7 @@
     "nodes": []
   },
   "scripts": {
-    "count": 2,
+    "count": 3,
     "nodes": [
       {
         "name": "custom_binding_refresh",
@@ -407,6 +419,13 @@
         "scope": "G",
         "script_length": 13,
         "script_preview": "\treturn event"
+      },
+      {
+        "node_type": "property_change_script",
+        "path": "propConfig.custom.test.onChange",
+        "property_path": "custom.test",
+        "script_length": 48,
+        "script_preview": "\treturn previousValue.value * currentValue.value"
       }
     ]
   },
