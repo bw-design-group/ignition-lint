@@ -283,8 +283,9 @@ repos:
     rev: v1.0.0
     hooks:
       - id: ignition-lint
-        # Add whitelist argument to use project-specific whitelist
-        args: ['--config=.ignition-lint-precommit.json', '--whitelist=.whitelist.txt', '--files']
+        # Add whitelist argument to use project-specific whitelist.
+        # No --files: pre-commit passes staged files positionally (pass_filenames).
+        args: ['--config=.ignition-lint-precommit.json', '--whitelist=.whitelist.txt']
 ```
 
 **Important:** By default, ignition-lint does NOT use a whitelist unless you explicitly specify `--whitelist <path>`.
@@ -793,9 +794,9 @@ repos:
         name: ignition-lint
         entry: poetry run python -m ignition_lint
         language: system
+        # No --files: pre-commit passes staged files positionally (pass_filenames).
         args:
           - "--config=.ignition-lint.json"
-          - "--files"
         files: '.*view\.json$'
         types: [json]
         exclude: '^tests/.*|.*test.*\.json$'  # Exclude test files
@@ -818,7 +819,7 @@ repos:
     rev: v1.0.0
     hooks:
       - id: ignition-lint
-        args: ['--config=my-custom-config.json', '--files']
+        args: ['--config=my-custom-config.json']
         exclude: '^tests/.*|.*test.*\.json$'
 ```
 
