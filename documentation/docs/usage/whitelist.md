@@ -107,7 +107,7 @@ repos:
     rev: v0.2.4
     hooks:
       - id: ign-lint
-        args: ['--config=rule_config.json', '--whitelist=.whitelist.txt', '--files']
+        args: ['--config=rule_config.json', '--whitelist=.whitelist.txt']
 ```
 
 The full workflow:

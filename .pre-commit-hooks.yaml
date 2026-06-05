@@ -5,7 +5,9 @@
   language: python
   types: [json]
   files: view\.json$
-  args: ['--config=.ignition-lint-precommit.json', '--files']
+  # No --files here: pre-commit appends the staged view.json paths as positional arguments
+  # (pass_filenames). --files is for glob mode (standalone runs), not an explicit file list.
+  args: ['--config=.ignition-lint-precommit.json']
   pass_filenames: true
   minimum_pre_commit_version: '2.9.0'
   additional_dependencies: []

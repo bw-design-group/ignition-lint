@@ -191,6 +191,61 @@ class TestCLIIntegration(BaseIntegrationTest):
 		except Exception as e:
 			self.fail(f"CLI is not executable: {e}")
 
+	def test_cli_files_processes_all_paths_passed_after_flag(self):
+		"""All paths after --files are processed (regression: the first one was dropped at N>=2).
+
+		Pre-commit invokes the hook as `--files PATH1 PATH2 ...`. argparse binds PATH1 to the
+		single-value --files option and the rest to the variadic `filenames` positional; the
+		old dispatch treated them as either/or and silently dropped PATH1. Parameterized over
+		N to guard both the N=1 (works) and N>=2 (previously broken) cases.
+		"""
+		minimal_view = '{ "root": { "type": "ia.container.flex", "props": {}, "children": [] } }'
+		for count in (1, 2, 3, 5):
+			with tempfile.TemporaryDirectory() as tmp:
+				tmp_path = Path(tmp)
+				view_paths = []
+				for i in range(count):
+					view_dir = tmp_path / f"view_{i}"
+					view_dir.mkdir()
+					view_file = view_dir / "view.json"
+					view_file.write_text(minimal_view, encoding="utf-8")
+					view_paths.append(str(view_file))
+
+				try:
+					# --stats-only collects/processes files without needing a rule config.
+					result = self._run_cli_command(["--stats-only", "--files", *view_paths])
+				except (subprocess.TimeoutExpired, FileNotFoundError) as e:
+					self.skipTest(f"CLI test skipped: {e}")
+				except unittest.SkipTest:
+					raise
+
+				self.assertIn(
+					f"Files processed: {count}", result.stdout,
+					f"Expected all {count} files processed when passed via --files. "
+					f"STDOUT: {result.stdout}\nSTDERR: {result.stderr}"
+				)
+				# Every supplied view must appear in the output, not just N-1 of them. Match on the
+				# unique per-view directory name to avoid macOS /private symlink path differences.
+				for i in range(count):
+					self.assertIn(
+						f"view_{i}", result.stdout,
+						f"View dir view_{i} missing from output for N={count}. STDOUT: {result.stdout}"
+					)
+
+				# The ambiguous multi-path-after---files form is deprecated and must warn, but
+				# only when it actually occurs (N>=2 binds extra paths to the positional).
+				combined_output = result.stdout + result.stderr
+				if count >= 2:
+					self.assertIn(
+						"Deprecation", combined_output,
+						f"Expected a --files deprecation warning for N={count}. Output: {combined_output}"
+					)
+				else:
+					self.assertNotIn(
+						"Deprecation", combined_output,
+						f"Single --files path is unambiguous and must not warn. Output: {combined_output}"
+					)
+
 
 class TestCLIDiscovery(BaseIntegrationTest):
 	"""Test CLI discovery and basic functionality."""
