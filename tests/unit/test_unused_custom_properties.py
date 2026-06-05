@@ -1172,3 +1172,161 @@ class TestUnusedCustomPropertiesRule(BaseRuleTest):  # pylint: disable=too-many-
 
 		# The nested child access in the onChange script credits the parent object property.
 		self.assert_rule_errors(mock_view, rule_config, "UnusedCustomPropertiesRule", expected_error_count=0)
+
+	def test_view_custom_referenced_via_self_custom_in_view_scope_onchange(self):
+		"""A view-level custom read via bare self.custom.X in a view-scoped onChange is used.
+
+		The onChange script lives on the view's own custom property (top-level propConfig.custom.*),
+		so at runtime `self` IS the view and `self.custom.supervisor` is identical to
+		`self.view.custom.supervisor`. The property must therefore be credited even though it is
+		never written with the longer self.view.custom form. Regression test for the
+		self.custom.X view-scope false positive.
+		"""
+		view_data = {
+			"custom": {
+				"supervisor": 0,
+				"devices": []
+			},
+			"propConfig": {
+				"custom.supervisor": {
+					"onChange": {
+						"enabled": None,
+						"script":
+							"\tfor i, device in enumerate(self.custom.devices):\n"
+							"\t\tdevice['supervisor'] = (i == self.custom.supervisor)"
+					},
+					"persistent": True
+				}
+			},
+			"root": {
+				"meta": {
+					"name": "root"
+				},
+				"type": "ia.container.coord"
+			}
+		}
+		mock_view_content = json.dumps(view_data, indent=2)
+		mock_view = create_temp_view_file(mock_view_content)
+
+		rule_config = get_test_config("UnusedCustomPropertiesRule")
+
+		# Both supervisor (read via self.custom.supervisor) and devices (read via self.custom.devices)
+		# are referenced from a view-scoped script, so neither should be flagged.
+		self.assert_rule_errors(mock_view, rule_config, "UnusedCustomPropertiesRule", expected_error_count=0)
+
+	def test_view_param_referenced_via_self_params_in_view_scope_script(self):
+		"""A view-level param read via bare self.params.X in a view-scoped script is used."""
+		view_data = {
+			"params": {
+				"threshold": 10
+			},
+			"custom": {
+				"derived": 0
+			},
+			"propConfig": {
+				"custom.derived": {
+					"binding": {
+						"type": "expr",
+						"config": {
+							"expression": "now()"
+						},
+						"transforms": [{
+							"type": "script",
+							"code":
+								"\tif self.params.threshold > 0:\n\t\treturn value\n\treturn None"
+						}]
+					}
+				},
+				"params.threshold": {
+					"paramDirection": "input",
+					"persistent": True
+				}
+			},
+			"root": {
+				"meta": {
+					"name": "root"
+				},
+				"type": "ia.container.coord"
+			}
+		}
+		mock_view_content = json.dumps(view_data, indent=2)
+		mock_view = create_temp_view_file(mock_view_content)
+
+		rule_config = get_test_config("UnusedCustomPropertiesRule")
+
+		# custom.derived is credited as a binding owner; view.params.threshold is read via
+		# self.params.threshold in that binding's view-scoped transform script.
+		self.assert_rule_errors(mock_view, rule_config, "UnusedCustomPropertiesRule", expected_error_count=0)
+
+	def test_view_custom_referenced_via_self_custom_in_view_event_handler(self):
+		"""A view-level custom read via self.custom.X in a top-level (view) event handler is used.
+
+		Top-level events.* are the view's own event handlers, where `self` is the view.
+		"""
+		view_data = {
+			"custom": {
+				"startupFlag": False
+			},
+			"events": {
+				"system": {
+					"onStartup": {
+						"config": {
+							"script": "\tif self.custom.startupFlag:\n\t\tpass"
+						},
+						"scope": "G",
+						"type": "script"
+					}
+				}
+			},
+			"root": {
+				"meta": {
+					"name": "root"
+				},
+				"type": "ia.container.coord"
+			}
+		}
+		mock_view_content = json.dumps(view_data, indent=2)
+		mock_view = create_temp_view_file(mock_view_content)
+
+		rule_config = get_test_config("UnusedCustomPropertiesRule")
+
+		# view.custom.startupFlag is read via self.custom.startupFlag in a view event handler.
+		self.assert_rule_errors(mock_view, rule_config, "UnusedCustomPropertiesRule", expected_error_count=0)
+
+	def test_truly_unused_view_custom_still_flagged_with_view_scope_fix(self):
+		"""Guard against over-correcting: a truly-unused view custom is still flagged.
+
+		One view custom (used) is read via self.custom in a view-scoped script; another (unused)
+		is never referenced anywhere. Only the unused one should be reported.
+		"""
+		view_data = {
+			"custom": {
+				"used": 1,
+				"trulyUnused": 2
+			},
+			"propConfig": {
+				"custom.used": {
+					"onChange": {
+						"enabled": None,
+						"script": "\tx = self.custom.used"
+					},
+					"persistent": True
+				}
+			},
+			"root": {
+				"meta": {
+					"name": "root"
+				},
+				"type": "ia.container.coord"
+			}
+		}
+		mock_view_content = json.dumps(view_data, indent=2)
+		mock_view = create_temp_view_file(mock_view_content)
+
+		rule_config = get_test_config("UnusedCustomPropertiesRule")
+
+		# Only trulyUnused should be flagged; the view-scope fix must not blanket-credit customs.
+		self.assert_rule_errors(
+			mock_view, rule_config, "UnusedCustomPropertiesRule", expected_error_count=1,
+			error_patterns=["trulyUnused", "never referenced"]
+		)
