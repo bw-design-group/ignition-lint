@@ -509,46 +509,62 @@ def collect_files(args, whitelist: set) -> tuple[List[Path], List[Path]]:
 	"""
 	files_to_process = []
 	files_ignored = []
+	seen: set = set()
 
-	# If filenames are provided directly (e.g., from pre-commit), use them
-	if args.filenames:
-		for filename in args.filenames:
+	def record(file_path: Path):
+		"""Whitelist-check and de-duplicate a resolved file, recording it appropriately."""
+		abs_path = file_path.resolve()
+		if abs_path in seen:
+			return
+		seen.add(abs_path)
+		if abs_path in whitelist:
+			files_ignored.append(file_path)
+			# Always print when a file is skipped (not just verbose mode)
+			print(f"🔒 Skipped (whitelisted): {file_path}")
+			return
+		files_to_process.append(file_path)
+
+	# Explicit file paths arrive via two argparse destinations that MUST be merged, not
+	# treated as either/or. When pre-commit invokes `--files PATH1 PATH2 PATH3`, argparse
+	# binds PATH1 to the single-value --files option and PATH2.. to the variadic `filenames`
+	# positional. The old `if filenames: ... elif files: ...` dispatch discarded PATH1
+	# whenever filenames was non-empty (i.e. for every multi-file commit). args.files is the
+	# default glob sentinel (None) only on a bare run; any other value is an explicit path
+	# argparse peeled off the --files list.
+	explicit_paths = list(args.filenames)
+	if args.filenames and args.files:
+		# `--files A B C`: argparse bound A to the single-value --files option and B.. to the
+		# positional. We still lint all of them, but the space-separated multi-file form is
+		# ambiguous - warn and point users at the supported invocations.
+		print(
+			"⚠️  Deprecation: '--files' takes a single value (a glob or comma-separated list), so "
+			"passing multiple space-separated paths after it is ambiguous and is deprecated.\n"
+			"   All paths are still linted for now. Prefer one of:\n"
+			"     • positional arguments:     ignition-lint FILE1 FILE2 ...\n"
+			"     • a single --files value:   --files \"FILE1,FILE2\"   (or a glob, e.g. --files \"**/view.json\")\n"
+			"   For pre-commit, drop the trailing '--files' from the hook args so staged files are "
+			"passed positionally."
+		)
+		explicit_paths.insert(0, args.files)
+
+	if explicit_paths:
+		for filename in explicit_paths:
 			file_path = Path(filename)
 			if not file_path.exists():
 				print(f"Warning: File {filename} does not exist")
 				continue
-
-			# Check if file is whitelisted
-			abs_path = file_path.resolve()
-			if abs_path in whitelist:
-				files_ignored.append(file_path)
-				# Always print when a file is skipped (not just verbose mode)
-				print(f"🔒 Skipped (whitelisted): {file_path}")
-				continue
-
-			files_to_process.append(file_path)
-
-	# Otherwise, use glob patterns
-	elif args.files:
-		for file_pattern in args.files.split(","):
+			record(file_path)
+	else:
+		# Glob mode: args.files is a comma-separated list of globs, or the default.
+		patterns = args.files if args.files else "**/view.json"
+		for file_pattern in patterns.split(","):
 			pattern = file_pattern.strip()
-			matching_files = glob.glob(pattern, recursive=True)
-
-			for file_path_str in matching_files:
+			for file_path_str in glob.glob(pattern, recursive=True):
 				file_path = Path(file_path_str)
 				# Only include view.json files specifically
 				if not file_path.exists() or file_path.name != "view.json":
 					continue
-
-				# Check if file is whitelisted
-				abs_path = file_path.resolve()
-				if abs_path in whitelist:
-					files_ignored.append(file_path)
-					# Always print when a file is skipped (not just verbose mode)
-					print(f"🔒 Skipped (whitelisted): {file_path}")
-					continue
-
-				files_to_process.append(file_path)
+				record(file_path)
 
 	# Print summary if verbose mode
 	if files_ignored and args.verbose:
@@ -1311,8 +1327,14 @@ def main():
 	)
 	parser.add_argument(
 		"--files",
-		default="**/view.json",
-		help="Comma-separated list of files or glob patterns to lint",
+		default=None,
+		help=(
+			"A SINGLE value: one file, a glob, or a comma-separated list of them "
+			"(e.g. --files \"**/view.json\" or --files \"a/view.json,b/view.json\"; "
+			"default: **/view.json). To lint several files, prefer positional arguments "
+			"(ignition-lint FILE1 FILE2 ...). Passing multiple space-separated paths after "
+			"--files is deprecated."
+		),
 	)
 	parser.add_argument(
 		"--verbose",

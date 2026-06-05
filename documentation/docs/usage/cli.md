@@ -11,21 +11,55 @@ Complete reference for the `ign-lint` CLI. The CLI is the primary interface — 
 ## Synopsis
 
 ```bash
-ign-lint [<files>...] [--files <pattern>...] [options]
+ign-lint [FILE ...] [--files <pattern>] [options]
 ```
 
-## Common invocations
+## Selecting which files to lint
+
+There are **two distinct ways** to tell ignition-lint which files to check. Pick one — they
+are different input modes, not meant to be combined.
+
+### 1. Explicit file list (positional arguments)
+
+Pass concrete file paths directly. They are used verbatim — no globbing, no `view.json` name
+filtering. This is what pre-commit's `pass_filenames` appends, and what you want when you
+already know the exact files.
 
 ```bash
 # Single file
 ign-lint path/to/view.json
 
-# Glob pattern (quote it!)
+# Several explicit files
+ign-lint views/Home/view.json views/Login/view.json views/Admin/view.json
+```
+
+### 2. Glob mode (`--files`)
+
+`--files` takes a **single value**: one glob (or a comma-separated list of globs). The pattern
+is expanded by ignition-lint's own globber — not the shell — and results are filtered to
+`view.json`. Use this for standalone audits and CI full-repository scans.
+
+```bash
+# One glob (quote it so the shell doesn't expand it!)
 ign-lint --files "**/view.json"
 
-# Multiple patterns
-ign-lint --files "views/**/view.json" --files "components/**/view.json"
+# Multiple globs — comma-separated in ONE value
+ign-lint --files "views/**/view.json,components/**/view.json"
+```
 
+:::warning `--files` is not repeatable
+`--files` holds a single value, so repeating the flag does **not** accumulate — the last one
+wins. Write `--files "a/**/view.json,b/**/view.json"`, not
+`--files "a/**/view.json" --files "b/**/view.json"`. Likewise, passing multiple
+space-separated paths after `--files` (e.g. `--files A.json B.json`) is **deprecated**: the
+first path binds to `--files` and the rest to the positional list. ignition-lint still lints
+them all and prints a deprecation warning, but you should pass an explicit list as positional
+arguments (mode 1) instead.
+:::
+
+## Common invocations
+
+```bash
 # With config
 ign-lint --config rule_config.json --files "**/view.json"
 
@@ -39,7 +73,7 @@ ign-lint --config rule_config.json --files "**/view.json" --verbose
 
 | Flag | Description |
 | --- | --- |
-| `--files <pattern>` | Glob pattern of view files to lint. Repeatable. |
+| `--files <pattern>` | A **single** glob, or a comma-separated list of globs, expanded by ignition-lint's globber and filtered to `view.json` (default: `**/view.json`). **Not repeatable** — a second `--files` overrides the first. For an explicit set of files, pass them as positional arguments instead. See [Selecting which files to lint](#selecting-which-files-to-lint). |
 | `--config <path>` | Path to a `rule_config.json`. If omitted, every registered rule runs with defaults. |
 
 ### Whitelist

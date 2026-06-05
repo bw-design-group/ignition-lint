@@ -236,8 +236,32 @@ class UnusedCustomPropertiesRule(LintingRule):
 				used_prop = handler(match)
 				self.used_properties.add(used_prop)
 
-	def _check_script_for_references(self, script: str):
-		"""Check a script string for custom property references."""
+	@staticmethod
+	def _is_view_scope_script_path(json_path: str) -> bool:
+		"""
+		Determine whether a script/value at the given flattened-JSON path runs at view scope.
+
+		In Perspective, `self` resolves to whatever owns the script. Scripts attached to the
+		view's own custom properties / parameters (top-level ``propConfig.*``) or the view's
+		event handlers (top-level ``events.*``) run with ``self`` == the view, so a bare
+		``self.custom.X`` there is identical to ``self.view.custom.X``. Everything under
+		``root.`` belongs to a component (the root container or a descendant), where ``self``
+		is that component - so a bare ``self.custom.X`` there must NOT credit a view-level
+		property (it would shadow/confuse a component's own custom of the same name).
+		"""
+		return json_path.startswith('propConfig.') or json_path.startswith('events.')
+
+	def _check_script_for_references(self, script: str, view_scope: bool = False):
+		"""
+		Check a script string for custom property references.
+
+		Args:
+			script: The script body to scan.
+			view_scope: True when the script provably runs with ``self`` == the view (see
+				_is_view_scope_script_path). In that case a bare ``self.custom.X`` /
+				``self.params.X`` also credits the view-level property, not just the
+				component wildcard.
+		"""
 		if not script:
 			return
 
@@ -248,8 +272,8 @@ class UnusedCustomPropertiesRule(LintingRule):
 		patterns = [
 			rf'self\.view\.custom\.{nested}',  # self.view.custom.propName
 			rf'self\.view\.params\.{nested}',  # self.view.params.paramName
-			rf'self\.custom\.{nested}',  # self.custom.propName (component)
-			rf'self\.params\.{nested}',  # self.params.propName (component)
+			rf'self\.custom\.{nested}',  # self.custom.propName (component, or view when view-scoped)
+			rf'self\.params\.{nested}',  # self.params.propName (component, or view when view-scoped)
 		]
 
 		for pattern in patterns:
@@ -262,8 +286,14 @@ class UnusedCustomPropertiesRule(LintingRule):
 					self.used_properties.add(f"view.params.{match}")
 				elif r'\.custom\.' in pattern:
 					self.used_properties.add(f"*.custom.{match}")
+					# A view-scoped self.custom.X is equivalent to self.view.custom.X.
+					if view_scope:
+						self.used_properties.add(f"view.custom.{match}")
 				elif r'\.params\.' in pattern:
 					self.used_properties.add(f"*.params.{match}")
+					# A view-scoped self.params.X is equivalent to self.view.params.X.
+					if view_scope:
+						self.used_properties.add(f"view.params.{match}")
 
 	def finalize(self):
 		"""Called after all nodes are visited - check for unused properties."""
@@ -377,9 +407,15 @@ class UnusedCustomPropertiesRule(LintingRule):
 				])
 
 		# Search through all values in the flattened JSON
-		for _, json_value in self.flattened_json.items():
+		for json_path, json_value in self.flattened_json.items():
 			if not isinstance(json_value, str):
 				continue
+
+			# The flattened key tells us whether a bare self.custom.X / self.params.X here runs
+			# at view scope (self == view) or component scope (self == component). See
+			# _is_view_scope_script_path. This is the one place that retains location, so scope
+			# decisions are made here rather than in the location-agnostic modeled-node visitors.
+			view_scope = self._is_view_scope_script_path(json_path)
 
 			# Check if any of our search patterns appear in this value
 			for pattern in search_patterns:
@@ -392,7 +428,7 @@ class UnusedCustomPropertiesRule(LintingRule):
 			# self.custom.X / self.params.X form) inside scripts that are not modeled as their
 			# own nodes - e.g. property-change (onChange) scripts - which would otherwise only
 			# be matched by the narrower substring patterns above.
-			self._check_script_for_references(json_value)
+			self._check_script_for_references(json_value, view_scope)
 			self._check_expression_for_references(json_value)
 
 	def _mark_property_used_from_pattern(self, pattern: str):

@@ -28,6 +28,15 @@ pre-commit install
 
 The hook automatically runs on `view.json` files. It uses ignition-lint's bundled `.ignition-lint-precommit.json` (warnings-favored config) by default.
 
+:::note How files reach the hook
+Pre-commit passes the staged `view.json` paths to the hook as **positional arguments**
+(`pass_filenames: true`). Do **not** add `--files` to the hook's `args` — `--files` is for
+glob mode (a single pattern you run by hand), whereas pre-commit hands the hook an explicit
+list of files. Ending `args` with `--files` makes the first staged file bind to `--files` and
+is deprecated; ignition-lint will warn about it. Just omit `--files` and let `pass_filenames`
+do its job.
+:::
+
 **Pros:** zero setup, version-pinned via `rev:`, consistent across the team
 **Cons:** clones the full repo (~64 MB) into the pre-commit cache
 
@@ -45,7 +54,7 @@ repos:
         language: python
         types: [json]
         files: view\.json$
-        args: ['--config=rule_config.json', '--files']
+        args: ['--config=rule_config.json']
         pass_filenames: true
         additional_dependencies:
           - 'git+https://github.com/bw-design-group/ignition-lint@v0.2.4'
@@ -64,7 +73,7 @@ repos:
     rev: v0.2.4
     hooks:
       - id: ign-lint
-        args: ['--config=rule_config.json', '--files']
+        args: ['--config=rule_config.json']
 ```
 
 A common pattern is one config for pre-commit (warnings-favored, fast) and a separate one for CI (strict, full):
@@ -85,7 +94,7 @@ To allow commits with warnings (block only on errors):
 ```yaml
 hooks:
   - id: ign-lint
-    args: ['--config=rule_config.json', '--files', '--ignore-warnings']
+    args: ['--config=rule_config.json', '--ignore-warnings']
 ```
 
 This is useful when rolling out a new rule — set it to warning, let teams adapt, then promote to error.
@@ -100,7 +109,6 @@ hooks:
     args:
       - '--config=rule_config.json'
       - '--whitelist=.whitelist.txt'
-      - '--files'
 ```
 
 Generate the whitelist once and commit it:
