@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.6.0] - 2026-06-05
+
+### Fixed
+- `--files` no longer silently drops the first file when two or more paths are passed (e.g. `--files A B C`, exactly how pre-commit invoked the bundled hook). `--files` is a single-value option, so argparse bound the first path to it and the rest to the variadic positional `filenames`; `collect_files` then treated the two sources as mutually exclusive (`if filenames: ... elif files: ...`) and discarded the path bound to `--files`. The two sources are now merged and de-duplicated, so every supplied file is linted.
+- `UnusedCustomPropertiesRule` no longer reports a false positive on a view-level custom property or parameter that is read via the bare `self.custom.X` / `self.params.X` idiom from a **view-scoped** script. Scope is now inferred from the flattened-JSON location: scripts on the view's own custom properties/params (top-level `propConfig.*`) or the view's event handlers (top-level `events.*`) run with `self` == the view, so a bare `self.custom.X` there is credited to `view.custom.X`. Component-scoped scripts (anything under `root.*`) keep the strict behavior — a bare `self.custom.X` refers to that component's own custom and does not credit a view-level property of the same name.
+
+### Changed
+- The space-separated multi-file form after `--files` (e.g. `--files A B C`) is deprecated. It is still linted, but ignition-lint now prints a deprecation warning pointing at the supported invocations: an explicit list as positional arguments, or a single comma-separated/glob value for `--files`.
+- The bundled pre-commit hook (`.pre-commit-hooks.yaml`) no longer appends `--files`; it relies on `pass_filenames` to pass staged files as positional arguments. The pre-commit, whitelist, and CLI docs are updated to document the two distinct file-selection modes (explicit positional list vs single `--files` glob) and to stop recommending the deprecated `--files`-last pattern.
+
 ## [0.5.3] - 2026-06-04
 
 ### Added
