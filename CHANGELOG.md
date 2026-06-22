@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.6.1] - 2026-06-22
+
 ### Changed
 - The two complementary component-reference rules — `BadComponentReferenceRule` ("you are doing a bad practice": brittle traversal) and `ComponentReferenceValidationRule` ("something is broken": reference does not resolve) — now inspect the **same expanded set of nodes** so neither has a blind spot the other silently covers. A new shared `COMPONENT_REFERENCE_NODES` constant defines that set: expression bindings, **expression-struct bindings**, **property bindings**, and all script types (message handler, custom method, transform, event handler, and **`onChange` property-change**). Previously `BadComponentReferenceRule` only visited scripts and plain expression bindings (it ignored property bindings and expression-struct bindings entirely), `ComponentReferenceValidationRule` skipped expression-struct bindings, and neither rule actually scanned `onChange` property-change scripts even though they were nominally in scope. [94def42][2bcc0d1][e2d470e]
 
@@ -337,7 +339,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Initial tracked release
 
-[Unreleased]: https://github.com/bw-design-group/ignition-lint/compare/v0.6.0...HEAD
+[Unreleased]: https://github.com/bw-design-group/ignition-lint/compare/v0.6.1...HEAD
+[0.6.1]: https://github.com/bw-design-group/ignition-lint/compare/v0.6.0...v0.6.1
 [0.6.0]: https://github.com/bw-design-group/ignition-lint/compare/v0.5.3...v0.6.0
 [0.5.3]: https://github.com/bw-design-group/ignition-lint/compare/v0.5.2...v0.5.3
 [0.5.2]: https://github.com/bw-design-group/ignition-lint/compare/v0.5.1...v0.5.2
