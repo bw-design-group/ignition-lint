@@ -270,7 +270,7 @@ class TestComponentDescriptionRule(BaseRuleTest):
                 "type": "@root",
                 "children": [
                     {
-                        "type": "ia.display.button",
+                        "type": "ia.input.button",
                         "name": "TestButton"
                         # No description property
                     }
@@ -289,7 +289,7 @@ class TestComponentDescriptionRule(BaseRuleTest):
                 "type": "@root",
                 "children": [
                     {
-                        "type": "ia.display.button",
+                        "type": "ia.input.button",
                         "name": "TestButton",
                         "meta": {
                             "description": ""
@@ -310,7 +310,7 @@ class TestComponentDescriptionRule(BaseRuleTest):
                 "type": "@root",
                 "children": [
                     {
-                        "type": "ia.display.button",
+                        "type": "ia.input.button",
                         "name": "TestButton",
                         "meta": {
                             "description": "Short"  # Only 5 characters
@@ -331,7 +331,7 @@ class TestComponentDescriptionRule(BaseRuleTest):
                 "type": "@root",
                 "children": [
                     {
-                        "type": "ia.display.button",
+                        "type": "ia.input.button",
                         "name": "TestButton",
                         "meta": {
                             "description": "This button triggers the main workflow process"
@@ -354,7 +354,7 @@ class TestComponentDescriptionRule(BaseRuleTest):
                 "type": "@root",
                 "children": [
                     {
-                        "type": "ia.display.button",
+                        "type": "ia.input.button",
                         "name": "TestButton",
                         "meta": {
                             "description": "TODO: Add proper description here"

@@ -6,7 +6,7 @@ description: Validates that component references in bindings and scripts resolve
 
 # ComponentReferenceValidationRule
 
-Walks your component tree and verifies that every relative reference — `{../Component.props.value}` expressions, dotted property binding paths, and `self.getSibling()` / `self.getChild()` script chains — actually points at a component that exists. Where [BadComponentReferenceRule](./bad-component-reference.md) flags the *pattern* as bad practice, this rule flags references that are also *broken*.
+Walks your component tree and verifies that every relative reference — `{./Child.props.value}` / `{../Component.props.value}` expressions (including expression-struct members), dotted property binding paths, and `self.getSibling()` / `self.getChild()` script chains (in event/message/custom/transform **and `onChange`** scripts) — actually points at a component that exists. Where [BadComponentReferenceRule](./bad-component-reference.md) flags the *pattern* as bad practice, this rule flags references that are also *broken*.
 
 **Severity:** `error` by default — a reference that doesn't resolve will fail at runtime, often silently (a binding produces `null`, a script raises a `NoneType` attribute error). Promote to `warning` if your team is still cleaning up legacy references and you don't want CI to fail.
 
@@ -134,10 +134,11 @@ ComponentReferenceValidationRule (error):
 
 ## Path semantics
 
-Relative reference syntax follows Ignition's binding rules — and they're not obvious. **Each dot beyond the first means one level up the tree**:
+Relative reference syntax follows Ignition's binding rules — and they're not obvious. **Each dot beyond the first means one level up the tree** (so a single dot stays put):
 
 | Reference | Levels up | Meaning |
 | --- | --- | --- |
+| `.` | 0 | Stay on me — `/` then drills into my own child (e.g. `./Button` on a container) |
 | `..` | 1 | Go to my parent |
 | `...` | 2 | Go to my grandparent |
 | `....` | 3 | Go up 3 levels |

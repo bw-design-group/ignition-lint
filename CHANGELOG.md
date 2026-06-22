@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+- The two complementary component-reference rules — `BadComponentReferenceRule` ("you are doing a bad practice": brittle traversal) and `ComponentReferenceValidationRule` ("something is broken": reference does not resolve) — now inspect the **same expanded set of nodes** so neither has a blind spot the other silently covers. A new shared `COMPONENT_REFERENCE_NODES` constant defines that set: expression bindings, **expression-struct bindings**, **property bindings**, and all script types (message handler, custom method, transform, event handler, and **`onChange` property-change**). Previously `BadComponentReferenceRule` only visited scripts and plain expression bindings (it ignored property bindings and expression-struct bindings entirely), `ComponentReferenceValidationRule` skipped expression-struct bindings, and neither rule actually scanned `onChange` property-change scripts even though they were nominally in scope. [94def42][2bcc0d1][e2d470e]
+
+### Fixed
+- `BadComponentReferenceRule` now flags brittle relative traversal (`./Foo`, `../Bar`) in **property binding** paths and **expression-struct** bindings, not just in scripts and plain expression bindings. A broken/brittle reference written as a property binding path previously sailed through this rule completely. [94def42]
+- `ComponentReferenceValidationRule` now validates **single-dot** relative references (`./Child` — the current-container "drill into a child" idiom) in both expressions and property bindings. Previously the rule required two or more leading dots, so a broken `./MissingChild` reference (common in pipe/coordinate-container bindings) resolved to nothing and was never reported. The rule also now validates references inside **expression-struct** bindings. [2bcc0d1]
+- Both reference rules now actually scan `onChange` property-change scripts. The shared node set already targeted them, but neither rule implemented the visitor, so a brittle or broken `getSibling`/`getChild`/relative reference inside an `onChange` script was silently skipped. [e2d470e]
+
 ## [0.6.0] - 2026-06-05
 
 ### Fixed

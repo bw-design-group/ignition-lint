@@ -23,14 +23,22 @@ The rule walks the component tree and verifies that every relative reference —
 
 | Reference type | Visit method | Pattern |
 | --- | --- | --- |
-| Expression bindings | `visit_expression_binding` | `{../path}`, `{.../Container/Child.props.value}` |
-| Property bindings | `visit_property_binding` | `../sibling.props.x`, `.../Parent/Child.position.display` |
+| Expression bindings | `visit_expression_binding` | `{./Child.props.value}`, `{../path}`, `{.../Container/Child.props.value}` |
+| Expression-struct bindings | `visit_expression_struct_binding` | each struct member expression, same patterns as expression bindings |
+| Property bindings | `visit_property_binding` | `./child.props.x`, `../sibling.props.x`, `.../Parent/Child.position.display` |
 | Event handler scripts | `visit_event_handler` | `self.getSibling('Name')`, chains starting with `self` |
 | Message handler scripts | `visit_message_handler` | same as event handlers |
 | Custom method scripts | `visit_custom_method` | same as event handlers |
 | Transform scripts | `visit_transform` | same as event handlers |
+| Property-change scripts | `visit_property_change_script` | `onChange` scripts, same as event handlers |
 
 In all script contexts the rule recognizes both simple `self.getSibling('Name')` calls and chained navigation such as `self.parent.getChild('A').getSibling('B')`.
+
+The target set is `{NodeType.COMPONENT} | COMPONENT_REFERENCE_NODES` — the `COMPONENT` nodes build the lookup index, and the rest is the same reference-bearing set [`BadComponentReferenceRule`](./bad-component-reference.md) inspects, so the two rules never disagree on which nodes to examine.
+
+:::note[Expanded in release v0.6.1]
+Earlier versions did not validate **expression-struct** bindings or **`onChange`** property-change scripts, and the relative-path matcher required *two or more* leading dots — so a broken **single-dot** reference (`./MissingChild`, the current-container "drill into a child" idiom common in pipe/coordinate-container bindings) was never validated. All are now covered. See [How references are resolved](#how-references-are-resolved) and the [changelog](../../changelog.md).
+:::
 
 ## Why it matters
 Relative references are positional — they encode "go up two levels, then down into `Container/Button`". When a developer renames `Button`, deletes `Container`, or moves the binding to a different component, the reference silently breaks. Ignition does not validate these paths at design time; the broken reference compiles and saves cleanly, and only fails when a user opens the view in the gateway. This rule catches those failures at lint time, before they ship. It complements `BadComponentReferenceRule` (which discourages the pattern entirely) by ensuring that any references that *do* exist are at least functionally correct.
@@ -70,15 +78,18 @@ Default severity for emitted violations. Unlike `NamePatternRule`, this rule def
 ## How references are resolved
 
 ### Dot-counting (Ignition path semantics)
-A reference begins with one or more dots. Each dot **beyond the first** moves one level up the tree:
+A reference begins with one or more dots. Each dot **beyond the first** moves one level up the tree — so a single dot stays at the current component:
 
-| Reference | `levels_up` |
-| --- | --- |
-| `..`  | 1 |
-| `...` | 2 |
-| `....` | 3 |
+| Reference | `levels_up` | Meaning |
+| --- | --- | --- |
+| `.`   | 0 | The current component — `/` then drills into its own child |
+| `..`  | 1 | Parent |
+| `...` | 2 | Grandparent |
+| `....` | 3 | Up 3 levels |
 
-Internally the rule computes `levels_up = len(dots) - 1`. After climbing, slashes navigate down. `.../Parent/Child.props.value` means: go up 2 levels, find a child named `Parent`, then find `Child` as `Parent`'s child, then access `props.value`.
+Internally the rule computes `levels_up = len(dots) - 1`. After climbing, slashes navigate down. `./Child.props.value` means: stay at the current component, find a child named `Child`, then access `props.value`. `.../Parent/Child.props.value` means: go up 2 levels, find a child named `Parent`, then find `Child` as `Parent`'s child, then access `props.value`.
+
+The matcher accepts **one or more** leading dots (`\.+`). The single-dot form is matched the same as multi-dot forms; an earlier version required two or more dots, which silently skipped single-dot references.
 
 This matches the [official Ignition binding property path reference](https://www.docs.inductiveautomation.com/docs/8.1/ignition-modules/perspective/working-with-perspective-components/bindings-in-perspective/binding-property-path-reference).
 

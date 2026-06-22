@@ -342,6 +342,14 @@
         "value_type": "str"
       },
       {
+        "name": "valObj",
+        "node_type": "property",
+        "path": "params.valObj",
+        "persistent": true,
+        "value": null,
+        "value_type": "NoneType"
+      },
+      {
         "name": "valDate",
         "node_type": "property",
         "path": "params.valDate",
@@ -353,14 +361,6 @@
         "name": "exprStruct",
         "node_type": "property",
         "path": "custom.exprStruct",
-        "persistent": true,
-        "value": null,
-        "value_type": "NoneType"
-      },
-      {
-        "name": "valObj",
-        "node_type": "property",
-        "path": "params.valObj",
         "persistent": true,
         "value": null,
         "value_type": "NoneType"

@@ -8,181 +8,160 @@
         "meta": {
           "name": "PascalCaseButton"
         },
-        "type": "ia.display.button",
-        "position": {
-          "x": 0,
-          "y": 0
-        }
+        "type": "ia.input.button"
       },
       {
         "meta": {
           "name": "SCREAMING_SNAKE_CASE_LABEL"
         },
-        "type": "ia.display.label",
         "position": {
-          "x": 0,
           "y": 50
-        }
+        },
+        "type": "ia.display.label"
       },
       {
         "meta": {
           "name": "DAT_02_TT_123_A"
         },
-        "type": "ia.display.label",
         "position": {
-          "x": 0,
           "y": 100
-        }
+        },
+        "type": "ia.display.label"
       },
       {
         "meta": {
           "name": "MyComponentWithNumbers123"
         },
-        "type": "ia.display.label",
         "position": {
-          "x": 0,
           "y": 150
-        }
+        },
+        "type": "ia.display.label"
       },
       {
         "meta": {
           "name": "UPPER_WITH_NUMBERS_456"
         },
-        "type": "ia.display.label",
         "position": {
-          "x": 0,
           "y": 200
-        }
+        },
+        "type": "ia.display.label"
       },
       {
         "meta": {
           "name": "camelCaseInvalid"
         },
-        "type": "ia.display.label",
         "position": {
-          "x": 0,
           "y": 250
-        }
+        },
+        "type": "ia.display.label"
       },
       {
         "meta": {
           "name": "snake_case_invalid"
         },
-        "type": "ia.display.label",
         "position": {
-          "x": 0,
           "y": 300
-        }
+        },
+        "type": "ia.display.label"
       },
       {
         "meta": {
           "name": "kebab-case-invalid"
         },
-        "type": "ia.display.label",
         "position": {
-          "x": 0,
           "y": 350
-        }
+        },
+        "type": "ia.display.label"
       },
       {
         "meta": {
           "name": "Mixed_PascalCase_Invalid"
         },
-        "type": "ia.display.label",
         "position": {
-          "x": 0,
           "y": 400
-        }
+        },
+        "type": "ia.display.label"
       },
       {
         "meta": {
           "name": "APIClient"
         },
-        "type": "ia.display.label",
         "position": {
-          "x": 0,
           "y": 450
-        }
+        },
+        "type": "ia.display.label"
       },
       {
         "meta": {
           "name": "HTTPSConnection"
         },
-        "type": "ia.display.label",
         "position": {
-          "x": 0,
           "y": 500
-        }
+        },
+        "type": "ia.display.label"
       },
       {
         "meta": {
           "name": "MyAPIHandler"
         },
-        "type": "ia.display.label",
         "position": {
-          "x": 0,
           "y": 550
-        }
+        },
+        "type": "ia.display.label"
       },
       {
         "meta": {
           "name": "XMLHTTPRequest"
         },
-        "type": "ia.display.label",
         "position": {
-          "x": 0,
           "y": 600
-        }
+        },
+        "type": "ia.display.label"
       },
       {
         "meta": {
           "name": "API_CLIENT_HTTP"
         },
-        "type": "ia.display.label",
         "position": {
-          "x": 0,
           "y": 650
-        }
+        },
+        "type": "ia.display.label"
       },
       {
         "meta": {
           "name": "HTTP_API_URL"
         },
-        "type": "ia.display.label",
         "position": {
-          "x": 0,
           "y": 700
-        }
+        },
+        "type": "ia.display.label"
       },
       {
         "meta": {
           "name": "TT_DAT_API_123"
         },
-        "type": "ia.display.label",
         "position": {
-          "x": 0,
           "y": 750
-        }
+        },
+        "type": "ia.display.label"
       },
       {
         "meta": {
           "name": "IOModuleController"
         },
-        "type": "ia.display.label",
         "position": {
-          "x": 0,
           "y": 800
-        }
+        },
+        "type": "ia.display.label"
       },
       {
         "meta": {
           "name": "CPU_GPU_MONITOR"
         },
-        "type": "ia.display.label",
         "position": {
-          "x": 0,
           "y": 850
-        }
+        },
+        "type": "ia.display.label"
       }
     ],
     "meta": {

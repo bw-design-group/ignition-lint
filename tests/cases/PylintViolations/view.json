@@ -5,11 +5,11 @@
     "custom.status": {
       "binding": {
         "config": {
-          "expression": "'Status'"
+          "expression": "\u0027Status\u0027"
         },
         "transforms": [
           {
-            "code": "\t# Transform with violations\n\timport os\n\timport datetime\n\t\n\t# W0611: Unused imports\n\t# E0602: Undefined variable\n\tvalue = value + missing_var\n\t\n\treturn value",
+            "code": "\t# Transform with violations\n\timport os\n\timport datetime\n\t\n\t# W0611: Unused imports\n\t# E0602: Undefined variable\n\tvalue \u003d value + missing_var\n\t\n\treturn value",
             "type": "script"
           }
         ],
@@ -25,7 +25,7 @@
           "component": {
             "onActionPerformed": {
               "config": {
-                "script": "\t# This script has multiple pylint violations\n\timport json\n\timport sys\n\t\n\t# E0602: Undefined variable\n\tprint(undefined_variable)\n\t\n\t# W0611: Unused import (json, sys above)\n\t# E1101: No member error\n\tresult = some_object.nonexistent_method()\n\t\n\t# C0114: Missing docstring\n\tdef helper_function():\n\t\tpass"
+                "script": "\t# This script has multiple pylint violations\n\timport json\n\timport sys\n\t\n\t# E0602: Undefined variable\n\tprint(undefined_variable)\n\t\n\t# W0611: Unused import (json, sys above)\n\t# E1101: No member error\n\tresult \u003d some_object.nonexistent_method()\n\t\n\t# C0114: Missing docstring\n\tdef helper_function():\n\t\tpass"
               },
               "scope": "G",
               "type": "script"
@@ -35,7 +35,6 @@
         "meta": {
           "name": "SubmitButton"
         },
-        "type": "ia.input.button",
         "scripts": {
           "customMethods": [
             {
@@ -44,16 +43,18 @@
               "script": "\t# Custom method with fatal error\n\t# F0401: Unable to import\n\timport nonexistent_module\n\t\n\t# R0913: Too many arguments (simulated)\n\tdef complex_function(a, b, c, d, e, f, g):\n\t\treturn a + b + c"
             }
           ],
+          "extensionFunctions": null,
           "messageHandlers": [
             {
               "messageType": "test-message",
               "pageScope": true,
-              "script": "\t# Message handler with convention violations\n\t# C0103: Invalid name\n\tMyBadVariable = 123\n\t\n\t# C0114: Missing module docstring\n\tdef process():\n\t\tpass",
+              "script": "\t# Message handler with convention violations\n\t# C0103: Invalid name\n\tMyBadVariable \u003d 123\n\t\n\t# C0114: Missing module docstring\n\tdef process():\n\t\tpass",
               "sessionScope": false,
               "viewScope": false
             }
           ]
-        }
+        },
+        "type": "ia.input.button"
       }
     ],
     "meta": {

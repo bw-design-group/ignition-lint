@@ -991,7 +991,7 @@ class TestNamePatternPositionProperties(BaseRuleTest):
 						"width": 150,
 						"height": 50
 					},
-					"type": "ia.display.button"
+					"type": "ia.input.button"
 				}, {
 					"meta": {
 						"name": "Label"
@@ -1101,7 +1101,7 @@ class TestNamePatternPerNodeTypeSeverity(BaseRuleTest):
 					"meta": {
 						"name": "badComponent"  # camelCase - should fail
 					},
-					"type": "ia.display.button"
+					"type": "ia.input.button"
 				}],
 				"meta": {
 					"name": "root"
@@ -1206,7 +1206,7 @@ class TestNamePatternPerNodeTypeSeverity(BaseRuleTest):
 					"meta": {
 						"name": "badComponent"  # camelCase - should be error
 					},
-					"type": "ia.display.button"
+					"type": "ia.input.button"
 				}],
 				"meta": {
 					"name": "root"

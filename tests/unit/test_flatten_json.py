@@ -85,10 +85,10 @@ class TestFlattenJson(unittest.TestCase):
 
 	def test_flatten_with_component_name(self):
 		"""Test flattening with component names that affect path structure."""
-		data = {"meta": {"name": "MyButton"}, "type": "ia.display.button", "props": {"text": "Click me"}}
+		data = {"meta": {"name": "MyButton"}, "type": "ia.input.button", "props": {"text": "Click me"}}
 
 		result = flatten_json(data)
-		expected = OrderedDict([("MyButton.meta.name", "MyButton"), ("MyButton.type", "ia.display.button"),
+		expected = OrderedDict([("MyButton.meta.name", "MyButton"), ("MyButton.type", "ia.input.button"),
 					("MyButton.props.text", "Click me")])
 
 		self.assertEqual(result, expected)
@@ -119,7 +119,7 @@ class TestFlattenJson(unittest.TestCase):
 				"meta": {
 					"name": "Button_0"
 				},
-				"type": "ia.display.button",
+				"type": "ia.input.button",
 				"props": {
 					"text": "Submit",
 					"events": {

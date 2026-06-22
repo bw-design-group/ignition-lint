@@ -1,0 +1,346 @@
+{
+  "custom": {
+    "enabled": false,
+    "pipeA": true
+  },
+  "params": {
+    "color": "blue",
+    "unusedRef": false,
+    "usedRef": false
+  },
+  "propConfig": {
+    "custom.enabled": {
+      "persistent": true
+    },
+    "custom.pipeA": {
+      "persistent": true
+    },
+    "params.color": {
+      "paramDirection": "input",
+      "persistent": true
+    },
+    "params.unusedRef": {
+      "paramDirection": "input",
+      "persistent": true
+    },
+    "params.usedRef": {
+      "paramDirection": "input",
+      "persistent": true
+    }
+  },
+  "props": {},
+  "root": {
+    "children": [
+      {
+        "events": {
+          "component": {
+            "onActionPerformed": {
+              "config": {
+                "script": "\tself.view.custom.pipeA \u003d not self.view.custom.pipeA"
+              },
+              "scope": "G",
+              "type": "script"
+            }
+          }
+        },
+        "meta": {
+          "name": "Button"
+        },
+        "position": {
+          "height": 37,
+          "rotate": {
+            "anchor": "50% 39%"
+          },
+          "width": 149,
+          "x": 159,
+          "y": 48
+        },
+        "propConfig": {
+          "props.enabled": {
+            "binding": {
+              "config": {
+                "path": "view.custom.enabled"
+              },
+              "type": "property"
+            }
+          },
+          "props.text": {
+            "binding": {
+              "config": {
+                "expression": "if({view.custom.pipeA}, \"Set Invisible\", \"Set Visible\")"
+              },
+              "type": "expr"
+            }
+          }
+        },
+        "type": "ia.input.button"
+      }
+    ],
+    "meta": {
+      "name": "root"
+    },
+    "propConfig": {
+      "props.pipes[0].fill": {
+        "binding": {
+          "config": {
+            "path": "view.params.color"
+          },
+          "type": "property"
+        }
+      },
+      "props.pipes[0].visible": {
+        "binding": {
+          "config": {
+            "path": "view.custom.pipeA"
+          },
+          "type": "property"
+        }
+      },
+      "props.pipes[1].fill": {
+        "binding": {
+          "config": {
+            "expression": "{view.params.color}"
+          },
+          "type": "expr"
+        }
+      },
+      "props.pipes[1].visible": {
+        "binding": {
+          "config": {
+            "path": "./Button.props.enabled"
+          },
+          "type": "property"
+        }
+      },
+      "props.pipes[2].fill": {
+        "binding": {
+          "config": {
+            "struct": {
+              "color": "{view.params.color}"
+            },
+            "waitOnAll": true
+          },
+          "transforms": [
+            {
+              "code": "\treturn value.color",
+              "type": "script"
+            }
+          ],
+          "type": "expr-struct"
+        }
+      },
+      "props.pipes[2].visible": {
+        "binding": {
+          "config": {
+            "path": "./Button1.props.enabled"
+          },
+          "type": "property"
+        }
+      },
+      "props.pipes[3].fill": {
+        "binding": {
+          "config": {
+            "struct": {
+              "color": "{view.params.color}"
+            },
+            "waitOnAll": true
+          },
+          "transforms": [
+            {
+              "code": "\treturn value[\u0027color\u0027]",
+              "type": "script"
+            }
+          ],
+          "type": "expr-struct"
+        }
+      },
+      "props.pipes[3].visible": {
+        "binding": {
+          "config": {
+            "expression": "{./Button1.props.enabled}"
+          },
+          "type": "expr"
+        }
+      },
+      "props.pipes[4].fill": {
+        "binding": {
+          "config": {
+            "expression": "None"
+          },
+          "transforms": [
+            {
+              "code": "\treturn self.view.params.color",
+              "type": "script"
+            }
+          ],
+          "type": "expr"
+        }
+      },
+      "props.pipes[4].visible": {
+        "binding": {
+          "config": {
+            "expression": "None"
+          },
+          "transforms": [
+            {
+              "code": "\treturn self.getChild(\"Button1\").props.enabled",
+              "type": "script"
+            }
+          ],
+          "type": "expr"
+        }
+      },
+      "props.pipes[5].start": {
+        "binding": {
+          "config": {
+            "expression": "if({view.params.usedRef}, \u0027none\u0027, \u0027arrowInward\u0027)"
+          },
+          "type": "expr"
+        }
+      },
+      "props.pipes[5].visible": {
+        "binding": {
+          "config": {
+            "expression": "{./Button2.props.enabled}"
+          },
+          "type": "expr"
+        }
+      }
+    },
+    "props": {
+      "pipes": [
+        {
+          "appearance": "auto",
+          "end": "none",
+          "flanges": true,
+          "lineVariant": "solid",
+          "name": "pipe_0",
+          "origin": {
+            "connections": [
+              {
+                "connections": [
+                  {
+                    "x": 158,
+                    "y": 114
+                  },
+                  {
+                    "x": 439,
+                    "y": 45
+                  }
+                ],
+                "x": 439,
+                "y": 114
+              }
+            ],
+            "x": 553,
+            "y": 114
+          },
+          "start": "none",
+          "stroke": "",
+          "width": 10
+        },
+        {
+          "appearance": "auto",
+          "end": "none",
+          "flanges": true,
+          "lineVariant": "solid",
+          "name": "pipe_1",
+          "origin": {
+            "connections": [
+              {
+                "x": 158,
+                "y": 152
+              }
+            ],
+            "x": 534,
+            "y": 152
+          },
+          "start": "none",
+          "stroke": "",
+          "width": 10
+        },
+        {
+          "appearance": "auto",
+          "end": "none",
+          "flanges": true,
+          "lineVariant": "solid",
+          "name": "another pipe",
+          "origin": {
+            "connections": [
+              {
+                "connections": [
+                  {
+                    "x": 351,
+                    "y": 201
+                  }
+                ],
+                "x": 229,
+                "y": 201
+              }
+            ],
+            "x": 148,
+            "y": 201
+          },
+          "start": "none",
+          "stroke": "",
+          "width": 10
+        },
+        {
+          "appearance": "auto",
+          "end": "none",
+          "flanges": true,
+          "lineVariant": "solid",
+          "name": "short_pipe",
+          "origin": {
+            "connections": [
+              {
+                "x": 277,
+                "y": 234
+              }
+            ],
+            "x": 177,
+            "y": 234
+          },
+          "start": "none",
+          "stroke": "",
+          "width": 10
+        },
+        {
+          "appearance": "auto",
+          "end": "none",
+          "flanges": true,
+          "lineVariant": "solid",
+          "name": "pipe2",
+          "origin": {
+            "connections": [
+              {
+                "x": 191,
+                "y": 282
+              }
+            ],
+            "x": 405,
+            "y": 282
+          },
+          "start": "none",
+          "stroke": "",
+          "width": 10
+        },
+        {
+          "appearance": "auto",
+          "end": "none",
+          "fill": "",
+          "flanges": true,
+          "lineVariant": "solid",
+          "name": "pipe",
+          "origin": {
+            "x": 238,
+            "y": 62
+          },
+          "stroke": "",
+          "width": 10
+        }
+      ]
+    },
+    "type": "ia.container.coord"
+  }
+}

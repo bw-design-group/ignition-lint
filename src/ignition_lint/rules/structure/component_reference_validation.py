@@ -30,7 +30,7 @@ import re
 from typing import Dict, List, Optional, Tuple
 from ..common import LintingRule
 from ..registry import register_rule
-from ...model.node_types import NodeType
+from ...model.node_types import NodeType, COMPONENT_REFERENCE_NODES
 
 
 @register_rule
@@ -60,16 +60,11 @@ class ComponentReferenceValidationRule(LintingRule):
 			validate_property_bindings: Enable property binding validation
 			validate_scripts: Enable script reference validation
 		"""
-		# Target all relevant node types
-		target_types = {
-			NodeType.COMPONENT,  # Build component index
-			NodeType.EXPRESSION_BINDING,  # Check {../references}
-			NodeType.PROPERTY_BINDING,  # Check ../references
-			NodeType.EVENT_HANDLER,  # Check scripts
-			NodeType.MESSAGE_HANDLER,
-			NodeType.CUSTOM_METHOD,
-			NodeType.TRANSFORM
-		}
+		# Build the component index from COMPONENT nodes, then inspect every
+		# reference-bearing node. This is the same set BadComponentReferenceRule
+		# checks (plus COMPONENT for indexing), so the two rules never disagree on
+		# which references to look at.
+		target_types = {NodeType.COMPONENT} | COMPONENT_REFERENCE_NODES
 		super().__init__(target_types, severity)
 
 		# Configuration
@@ -156,18 +151,32 @@ class ComponentReferenceValidationRule(LintingRule):
 		if not self.validate_expressions:
 			return
 
-		expression = node.expression
+		self._validate_expression_string(node.path, node.expression)
+
+	def visit_expression_struct_binding(self, node):
+		"""Check each expression in an expression-struct binding for component references."""
+		if not self.validate_expressions:
+			return
+
+		for expression in node.get_expressions():
+			self._validate_expression_string(node.path, expression)
+
+	def _validate_expression_string(self, source_path: str, expression: str):
+		"""Validate the relative component references inside a single expression string."""
 		if not expression:
 			return
 
-		# Match {../path} or {.../path} patterns
-		pattern = r'\{(\.\.+)/([^}]+)\}'
+		# Match {./path}, {../path} or {.../path} patterns.
+		# A single leading dot = the current component (0 levels up); each additional
+		# dot = one more level up. We accept one-or-more dots so single-dot './' refs
+		# are validated too, not just multi-dot ones.
+		pattern = r'\{(\.+)/([^}]+)\}'
 
 		for match in re.finditer(pattern, expression):
-			dots = match.group(1)  # .. or ... or ....
+			dots = match.group(1)  # . or .. or ... etc.
 			ref_path = match.group(2)  # Component.props.value or Path/To/Component.props.value
 
-			# CRITICAL: Each dot beyond the first = one level up
+			# CRITICAL: Each dot beyond the first = one level up (single dot = 0 levels up)
 			levels_up = len(dots) - 1
 
 			# Extract component path (before .props or .position)
@@ -175,7 +184,7 @@ class ComponentReferenceValidationRule(LintingRule):
 
 			# Validate
 			self._validate_relative_reference(
-				node.path, component_ref, levels_up, full_ref=expression, ref_type="expression"
+				source_path, component_ref, levels_up, full_ref=expression, ref_type="expression"
 			)
 
 	def visit_property_binding(self, node):
@@ -187,8 +196,10 @@ class ComponentReferenceValidationRule(LintingRule):
 		if not target_path or not target_path.startswith('.'):
 			return  # Not a relative path
 
-		# Match ../path or .../path patterns
-		match = re.match(r'^(\.\.+)/(.+)$', target_path)
+		# Match ./path, ../path or .../path patterns. A single leading dot is the
+		# current component (0 levels up); each extra dot is one level up. Accepting
+		# one-or-more dots ensures single-dot './' bindings are validated.
+		match = re.match(r'^(\.+)/(.+)$', target_path)
 		if not match:
 			return
 
@@ -234,6 +245,10 @@ class ComponentReferenceValidationRule(LintingRule):
 
 	def visit_transform(self, node):
 		"""Check transform scripts for component references."""
+		self._validate_script_references(node)
+
+	def visit_property_change_script(self, node):
+		"""Check property-change (onChange) scripts for component references."""
 		self._validate_script_references(node)
 
 	def _validate_script_references(self, script_node):
