@@ -117,7 +117,7 @@ view_content = create_mock_view({
         "type": "@root",
         "children": [
             {
-                "type": "ia.display.button",
+                "type": "ia.input.button",
                 "name": "TestButton",
                 "props": {"text": "Click Me"},
             }
