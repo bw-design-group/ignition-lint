@@ -33,7 +33,7 @@ The rule visits every node type that can carry a component reference (`target_ty
 - `ExpressionStructBinding` (each struct member expression is scanned)
 - `PropertyBinding` (the binding's `path` is scanned)
 
-:::note[Expanded in a recent release]
+:::note[Expanded in release v0.6.1]
 Earlier versions visited only scripts and plain expression bindings (`ALL_SCRIPTS | {EXPRESSION_BINDING}`). Brittle traversal hidden in a **property binding path** (e.g. `path: ./Sibling.props.x`) or an **expression-struct** member was not flagged. Both are now covered. See the [changelog](../../changelog.md).
 :::
 

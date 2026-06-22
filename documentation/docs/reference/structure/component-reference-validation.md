@@ -36,7 +36,7 @@ In all script contexts the rule recognizes both simple `self.getSibling('Name')`
 
 The target set is `{NodeType.COMPONENT} | COMPONENT_REFERENCE_NODES` — the `COMPONENT` nodes build the lookup index, and the rest is the same reference-bearing set [`BadComponentReferenceRule`](./bad-component-reference.md) inspects, so the two rules never disagree on which nodes to examine.
 
-:::note[Expanded in a recent release]
+:::note[Expanded in release v0.6.1]
 Earlier versions did not validate **expression-struct** bindings or **`onChange`** property-change scripts, and the relative-path matcher required *two or more* leading dots — so a broken **single-dot** reference (`./MissingChild`, the current-container "drill into a child" idiom common in pipe/coordinate-container bindings) was never validated. All are now covered. See [How references are resolved](#how-references-are-resolved) and the [changelog](../../changelog.md).
 :::
 
