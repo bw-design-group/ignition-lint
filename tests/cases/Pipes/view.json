@@ -4,7 +4,9 @@
     "pipeA": true
   },
   "params": {
-    "color": "blue"
+    "color": "blue",
+    "unusedRef": false,
+    "usedRef": false
   },
   "propConfig": {
     "custom.enabled": {
@@ -14,6 +16,14 @@
       "persistent": true
     },
     "params.color": {
+      "paramDirection": "input",
+      "persistent": true
+    },
+    "params.unusedRef": {
+      "paramDirection": "input",
+      "persistent": true
+    },
+    "params.usedRef": {
       "paramDirection": "input",
       "persistent": true
     }
@@ -144,6 +154,14 @@
           "type": "expr-struct"
         }
       },
+      "props.pipes[3].visible": {
+        "binding": {
+          "config": {
+            "expression": "{./Button1.props.enabled}"
+          },
+          "type": "expr"
+        }
+      },
       "props.pipes[4].fill": {
         "binding": {
           "config": {
@@ -155,6 +173,36 @@
               "type": "script"
             }
           ],
+          "type": "expr"
+        }
+      },
+      "props.pipes[4].visible": {
+        "binding": {
+          "config": {
+            "expression": "None"
+          },
+          "transforms": [
+            {
+              "code": "\treturn self.getChild(\"Button1\").props.enabled",
+              "type": "script"
+            }
+          ],
+          "type": "expr"
+        }
+      },
+      "props.pipes[5].start": {
+        "binding": {
+          "config": {
+            "expression": "if({view.params.usedRef}, \u0027none\u0027, \u0027arrowInward\u0027)"
+          },
+          "type": "expr"
+        }
+      },
+      "props.pipes[5].visible": {
+        "binding": {
+          "config": {
+            "expression": "{./Button2.props.enabled}"
+          },
           "type": "expr"
         }
       }
@@ -220,7 +268,13 @@
           "origin": {
             "connections": [
               {
-                "x": 351,
+                "connections": [
+                  {
+                    "x": 351,
+                    "y": 201
+                  }
+                ],
+                "x": 229,
                 "y": 201
               }
             ],
@@ -249,7 +303,6 @@
           },
           "start": "none",
           "stroke": "",
-          "visible": true,
           "width": 10
         },
         {
@@ -270,7 +323,6 @@
           },
           "start": "none",
           "stroke": "",
-          "visible": true,
           "width": 10
         },
         {
@@ -284,9 +336,7 @@
             "x": 238,
             "y": 62
           },
-          "start": "none",
           "stroke": "",
-          "visible": true,
           "width": 10
         }
       ]

@@ -22,38 +22,42 @@
   "node_type_counts": {
     "component": 2,
     "event_handler": 1,
-    "expression_binding": 3,
+    "expression_binding": 7,
     "expression_struct_binding": 2,
-    "property": 24,
+    "property": 25,
     "property_binding": 5,
-    "transform": 3
+    "transform": 4
   },
   "rule_coverage": {
     "BadComponentReferenceRule": {
-      "applicable_node_count": 7,
+      "applicable_node_count": 19,
       "target_types": [
         "custom_method",
         "event_handler",
         "expression_binding",
+        "expression_struct_binding",
         "message_handler",
+        "property_binding",
         "property_change_script",
         "transform"
       ]
     },
     "ComponentReferenceValidationRule": {
-      "applicable_node_count": 14,
+      "applicable_node_count": 21,
       "target_types": [
         "component",
         "custom_method",
         "event_handler",
         "expression_binding",
+        "expression_struct_binding",
         "message_handler",
         "property_binding",
+        "property_change_script",
         "transform"
       ]
     },
     "ExcessiveContextDataRule": {
-      "applicable_node_count": 40,
+      "applicable_node_count": 46,
       "target_types": [
         "all"
       ]
@@ -65,7 +69,7 @@
       ]
     },
     "PollingIntervalRule": {
-      "applicable_node_count": 10,
+      "applicable_node_count": 14,
       "target_types": [
         "expression_binding",
         "expression_struct_binding",
@@ -75,7 +79,7 @@
       ]
     },
     "PylintScriptRule": {
-      "applicable_node_count": 4,
+      "applicable_node_count": 5,
       "target_types": [
         "custom_method",
         "event_handler",
@@ -85,7 +89,7 @@
       ]
     },
     "UnusedCustomPropertiesRule": {
-      "applicable_node_count": 38,
+      "applicable_node_count": 44,
       "target_types": [
         "component",
         "custom_method",
@@ -99,5 +103,5 @@
       ]
     }
   },
-  "total_nodes": 40
+  "total_nodes": 46
 }

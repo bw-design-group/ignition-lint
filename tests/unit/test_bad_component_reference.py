@@ -399,6 +399,45 @@ class TestBadComponentReferenceBindingNodes(BaseRuleTest):
 			f"view-scoped expr-struct binding should not be flagged. Errors: {rule_errors}"
 		)
 
+	def test_flags_parent_traversal_in_expression_binding(self):
+		"""Expression binding with '../' traversal is brittle and must be flagged."""
+		propconfig = {
+			"props.text": {
+				"binding": {
+					"config": {
+						"expression": "{../OtherButton.props.text}"
+					},
+					"type": "expr"
+				}
+			}
+		}
+		mock_view = _view_with_root_propconfig(propconfig)
+		self.run_lint_on_mock_view(mock_view, self.rule_config)
+
+		rule_errors = self.get_errors_for_rule("BadComponentReferenceRule")
+		self.assertEqual(len(rule_errors), 1, f"Should flag '../' in expression. Errors: {rule_errors}")
+
+	def test_ignores_view_scoped_expression_binding(self):
+		"""Expression binding referencing only view.* is not traversal - must NOT be flagged."""
+		propconfig = {
+			"props.fill": {
+				"binding": {
+					"config": {
+						"expression": "{view.params.color}"
+					},
+					"type": "expr"
+				}
+			}
+		}
+		mock_view = _view_with_root_propconfig(propconfig)
+		self.run_lint_on_mock_view(mock_view, self.rule_config)
+
+		rule_errors = self.get_errors_for_rule("BadComponentReferenceRule")
+		self.assertEqual(
+			len(rule_errors), 0,
+			f"view-scoped expression binding should not be flagged. Errors: {rule_errors}"
+		)
+
 
 if __name__ == "__main__":
 	unittest.main()

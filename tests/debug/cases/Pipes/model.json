@@ -1,6 +1,6 @@
 {
   "bindings": {
-    "count": 10,
+    "count": 14,
     "nodes": [
       {
         "config": {},
@@ -66,9 +66,33 @@
       },
       {
         "config": {},
+        "expression": "{./Button1.props.enabled}",
+        "node_type": "expression_binding",
+        "path": "root.root.propConfig.props.pipes[3].visible"
+      },
+      {
+        "config": {},
         "expression": "None",
         "node_type": "expression_binding",
         "path": "root.root.propConfig.props.pipes[4].fill"
+      },
+      {
+        "config": {},
+        "expression": "None",
+        "node_type": "expression_binding",
+        "path": "root.root.propConfig.props.pipes[4].visible"
+      },
+      {
+        "config": {},
+        "expression": "if({view.params.usedRef}, 'none', 'arrowInward')",
+        "node_type": "expression_binding",
+        "path": "root.root.propConfig.props.pipes[5].start"
+      },
+      {
+        "config": {},
+        "expression": "{./Button2.props.enabled}",
+        "node_type": "expression_binding",
+        "path": "root.root.propConfig.props.pipes[5].visible"
       }
     ]
   },
@@ -110,7 +134,7 @@
     ]
   },
   "expression_bindings": {
-    "count": 3,
+    "count": 7,
     "nodes": [
       {
         "config": {},
@@ -126,9 +150,33 @@
       },
       {
         "config": {},
+        "expression": "{./Button1.props.enabled}",
+        "node_type": "expression_binding",
+        "path": "root.root.propConfig.props.pipes[3].visible"
+      },
+      {
+        "config": {},
         "expression": "None",
         "node_type": "expression_binding",
         "path": "root.root.propConfig.props.pipes[4].fill"
+      },
+      {
+        "config": {},
+        "expression": "None",
+        "node_type": "expression_binding",
+        "path": "root.root.propConfig.props.pipes[4].visible"
+      },
+      {
+        "config": {},
+        "expression": "if({view.params.usedRef}, 'none', 'arrowInward')",
+        "node_type": "expression_binding",
+        "path": "root.root.propConfig.props.pipes[5].start"
+      },
+      {
+        "config": {},
+        "expression": "{./Button2.props.enabled}",
+        "node_type": "expression_binding",
+        "path": "root.root.propConfig.props.pipes[5].visible"
       }
     ]
   },
@@ -162,7 +210,7 @@
     "nodes": []
   },
   "properties": {
-    "count": 24,
+    "count": 25,
     "nodes": [
       {
         "name": "enabled",
@@ -187,6 +235,22 @@
         "persistent": true,
         "value": "blue",
         "value_type": "str"
+      },
+      {
+        "name": "unusedRef",
+        "node_type": "property",
+        "path": "params.unusedRef",
+        "persistent": true,
+        "value": false,
+        "value_type": "bool"
+      },
+      {
+        "name": "usedRef",
+        "node_type": "property",
+        "path": "params.usedRef",
+        "persistent": true,
+        "value": false,
+        "value_type": "bool"
       },
       {
         "name": "height",
@@ -322,13 +386,6 @@
         "value_type": "int"
       },
       {
-        "name": "visible",
-        "node_type": "property",
-        "path": "root.root.props.pipes.visible",
-        "value": true,
-        "value_type": "bool"
-      },
-      {
         "name": "fill",
         "node_type": "property",
         "path": "root.root.props.pipes.fill",
@@ -381,32 +438,6 @@
     "nodes": []
   },
   "script_transforms": {
-    "count": 3,
-    "nodes": [
-      {
-        "binding_path": "root.root.propConfig.props.pipes[2].fill",
-        "node_type": "transform",
-        "path": "root.root.propConfig.props.pipes[2].fill.binding.transforms[0]",
-        "script_length": 19,
-        "script_preview": "\treturn value.color"
-      },
-      {
-        "binding_path": "root.root.propConfig.props.pipes[3].fill",
-        "node_type": "transform",
-        "path": "root.root.propConfig.props.pipes[3].fill.binding.transforms[0]",
-        "script_length": 22,
-        "script_preview": "\treturn value['color']"
-      },
-      {
-        "binding_path": "root.root.propConfig.props.pipes[4].fill",
-        "node_type": "transform",
-        "path": "root.root.propConfig.props.pipes[4].fill.binding.transforms[0]",
-        "script_length": 30,
-        "script_preview": "\treturn self.view.params.color"
-      }
-    ]
-  },
-  "scripts": {
     "count": 4,
     "nodes": [
       {
@@ -429,6 +460,46 @@
         "path": "root.root.propConfig.props.pipes[4].fill.binding.transforms[0]",
         "script_length": 30,
         "script_preview": "\treturn self.view.params.color"
+      },
+      {
+        "binding_path": "root.root.propConfig.props.pipes[4].visible",
+        "node_type": "transform",
+        "path": "root.root.propConfig.props.pipes[4].visible.binding.transforms[0]",
+        "script_length": 46,
+        "script_preview": "\treturn self.getChild(\"Button1\").props.enabled"
+      }
+    ]
+  },
+  "scripts": {
+    "count": 5,
+    "nodes": [
+      {
+        "binding_path": "root.root.propConfig.props.pipes[2].fill",
+        "node_type": "transform",
+        "path": "root.root.propConfig.props.pipes[2].fill.binding.transforms[0]",
+        "script_length": 19,
+        "script_preview": "\treturn value.color"
+      },
+      {
+        "binding_path": "root.root.propConfig.props.pipes[3].fill",
+        "node_type": "transform",
+        "path": "root.root.propConfig.props.pipes[3].fill.binding.transforms[0]",
+        "script_length": 22,
+        "script_preview": "\treturn value['color']"
+      },
+      {
+        "binding_path": "root.root.propConfig.props.pipes[4].fill",
+        "node_type": "transform",
+        "path": "root.root.propConfig.props.pipes[4].fill.binding.transforms[0]",
+        "script_length": 30,
+        "script_preview": "\treturn self.view.params.color"
+      },
+      {
+        "binding_path": "root.root.propConfig.props.pipes[4].visible",
+        "node_type": "transform",
+        "path": "root.root.propConfig.props.pipes[4].visible.binding.transforms[0]",
+        "script_length": 46,
+        "script_preview": "\treturn self.getChild(\"Button1\").props.enabled"
       },
       {
         "event_domain": "component",
