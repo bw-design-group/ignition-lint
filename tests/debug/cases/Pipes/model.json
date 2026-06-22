@@ -1,0 +1,448 @@
+{
+  "bindings": {
+    "count": 10,
+    "nodes": [
+      {
+        "config": {},
+        "node_type": "property_binding",
+        "path": "root.root.children[0].Button.propConfig.props.enabled",
+        "target_path": "view.custom.enabled"
+      },
+      {
+        "config": {},
+        "expression": "if({view.custom.pipeA}, \"Set Invisible\", \"Set Visible\")",
+        "node_type": "expression_binding",
+        "path": "root.root.children[0].Button.propConfig.props.text"
+      },
+      {
+        "config": {},
+        "node_type": "property_binding",
+        "path": "root.root.propConfig.props.pipes[0].fill",
+        "target_path": "view.params.color"
+      },
+      {
+        "config": {},
+        "node_type": "property_binding",
+        "path": "root.root.propConfig.props.pipes[0].visible",
+        "target_path": "view.custom.pipeA"
+      },
+      {
+        "config": {},
+        "expression": "{view.params.color}",
+        "node_type": "expression_binding",
+        "path": "root.root.propConfig.props.pipes[1].fill"
+      },
+      {
+        "config": {},
+        "node_type": "property_binding",
+        "path": "root.root.propConfig.props.pipes[1].visible",
+        "target_path": "./Button.props.enabled"
+      },
+      {
+        "config": {
+          "waitOnAll": true
+        },
+        "node_type": "expression_struct_binding",
+        "path": "root.root.propConfig.props.pipes[2].fill",
+        "struct": {
+          "color": "{view.params.color}"
+        }
+      },
+      {
+        "config": {},
+        "node_type": "property_binding",
+        "path": "root.root.propConfig.props.pipes[2].visible",
+        "target_path": "./Button1.props.enabled"
+      },
+      {
+        "config": {
+          "waitOnAll": true
+        },
+        "node_type": "expression_struct_binding",
+        "path": "root.root.propConfig.props.pipes[3].fill",
+        "struct": {
+          "color": "{view.params.color}"
+        }
+      },
+      {
+        "config": {},
+        "expression": "None",
+        "node_type": "expression_binding",
+        "path": "root.root.propConfig.props.pipes[4].fill"
+      }
+    ]
+  },
+  "components": {
+    "count": 2,
+    "nodes": [
+      {
+        "name": "Button",
+        "node_type": "component",
+        "path": "root.root.children[0].Button",
+        "properties_count": 0,
+        "type": "ia.input.button"
+      },
+      {
+        "name": "root",
+        "node_type": "component",
+        "path": "root.root",
+        "properties_count": 0,
+        "type": "ia.container.coord"
+      }
+    ]
+  },
+  "custom_methods": {
+    "count": 0,
+    "nodes": []
+  },
+  "event_handlers": {
+    "count": 1,
+    "nodes": [
+      {
+        "event_domain": "component",
+        "event_type": "onActionPerformed",
+        "node_type": "event_handler",
+        "path": "root.root.children[0].Button.events.component.onActionPerformed",
+        "scope": "G",
+        "script_length": 52,
+        "script_preview": "\tself.view.custom.pipeA = not self.view.custom.pipeA"
+      }
+    ]
+  },
+  "expression_bindings": {
+    "count": 3,
+    "nodes": [
+      {
+        "config": {},
+        "expression": "if({view.custom.pipeA}, \"Set Invisible\", \"Set Visible\")",
+        "node_type": "expression_binding",
+        "path": "root.root.children[0].Button.propConfig.props.text"
+      },
+      {
+        "config": {},
+        "expression": "{view.params.color}",
+        "node_type": "expression_binding",
+        "path": "root.root.propConfig.props.pipes[1].fill"
+      },
+      {
+        "config": {},
+        "expression": "None",
+        "node_type": "expression_binding",
+        "path": "root.root.propConfig.props.pipes[4].fill"
+      }
+    ]
+  },
+  "expression_struct_bindings": {
+    "count": 2,
+    "nodes": [
+      {
+        "config": {
+          "waitOnAll": true
+        },
+        "node_type": "expression_struct_binding",
+        "path": "root.root.propConfig.props.pipes[2].fill",
+        "struct": {
+          "color": "{view.params.color}"
+        }
+      },
+      {
+        "config": {
+          "waitOnAll": true
+        },
+        "node_type": "expression_struct_binding",
+        "path": "root.root.propConfig.props.pipes[3].fill",
+        "struct": {
+          "color": "{view.params.color}"
+        }
+      }
+    ]
+  },
+  "message_handlers": {
+    "count": 0,
+    "nodes": []
+  },
+  "properties": {
+    "count": 24,
+    "nodes": [
+      {
+        "name": "enabled",
+        "node_type": "property",
+        "path": "custom.enabled",
+        "persistent": true,
+        "value": false,
+        "value_type": "bool"
+      },
+      {
+        "name": "pipeA",
+        "node_type": "property",
+        "path": "custom.pipeA",
+        "persistent": true,
+        "value": true,
+        "value_type": "bool"
+      },
+      {
+        "name": "color",
+        "node_type": "property",
+        "path": "params.color",
+        "persistent": true,
+        "value": "blue",
+        "value_type": "str"
+      },
+      {
+        "name": "height",
+        "node_type": "property",
+        "path": "root.root.children.Button.position.height",
+        "value": 37,
+        "value_type": "int"
+      },
+      {
+        "name": "anchor",
+        "node_type": "property",
+        "path": "root.root.children.Button.position.rotate.anchor",
+        "value": "50% 39%",
+        "value_type": "str"
+      },
+      {
+        "name": "width",
+        "node_type": "property",
+        "path": "root.root.children.Button.position.width",
+        "value": 149,
+        "value_type": "int"
+      },
+      {
+        "name": "x",
+        "node_type": "property",
+        "path": "root.root.children.Button.position.x",
+        "value": 159,
+        "value_type": "int"
+      },
+      {
+        "name": "y",
+        "node_type": "property",
+        "path": "root.root.children.Button.position.y",
+        "value": 48,
+        "value_type": "int"
+      },
+      {
+        "name": "appearance",
+        "node_type": "property",
+        "path": "root.root.props.pipes.appearance",
+        "value": "auto",
+        "value_type": "str"
+      },
+      {
+        "name": "end",
+        "node_type": "property",
+        "path": "root.root.props.pipes.end",
+        "value": "none",
+        "value_type": "str"
+      },
+      {
+        "name": "flanges",
+        "node_type": "property",
+        "path": "root.root.props.pipes.flanges",
+        "value": true,
+        "value_type": "bool"
+      },
+      {
+        "name": "lineVariant",
+        "node_type": "property",
+        "path": "root.root.props.pipes.lineVariant",
+        "value": "solid",
+        "value_type": "str"
+      },
+      {
+        "name": "name",
+        "node_type": "property",
+        "path": "root.root.props.pipes.name",
+        "value": "pipe_0",
+        "value_type": "str"
+      },
+      {
+        "name": "x",
+        "node_type": "property",
+        "path": "root.root.props.pipes.origin.connections.connections.x",
+        "value": 158,
+        "value_type": "int"
+      },
+      {
+        "name": "y",
+        "node_type": "property",
+        "path": "root.root.props.pipes.origin.connections.connections.y",
+        "value": 114,
+        "value_type": "int"
+      },
+      {
+        "name": "x",
+        "node_type": "property",
+        "path": "root.root.props.pipes.origin.connections.x",
+        "value": 439,
+        "value_type": "int"
+      },
+      {
+        "name": "y",
+        "node_type": "property",
+        "path": "root.root.props.pipes.origin.connections.y",
+        "value": 114,
+        "value_type": "int"
+      },
+      {
+        "name": "x",
+        "node_type": "property",
+        "path": "root.root.props.pipes.origin.x",
+        "value": 553,
+        "value_type": "int"
+      },
+      {
+        "name": "y",
+        "node_type": "property",
+        "path": "root.root.props.pipes.origin.y",
+        "value": 114,
+        "value_type": "int"
+      },
+      {
+        "name": "start",
+        "node_type": "property",
+        "path": "root.root.props.pipes.start",
+        "value": "none",
+        "value_type": "str"
+      },
+      {
+        "name": "stroke",
+        "node_type": "property",
+        "path": "root.root.props.pipes.stroke",
+        "value": "",
+        "value_type": "str"
+      },
+      {
+        "name": "width",
+        "node_type": "property",
+        "path": "root.root.props.pipes.width",
+        "value": 10,
+        "value_type": "int"
+      },
+      {
+        "name": "visible",
+        "node_type": "property",
+        "path": "root.root.props.pipes.visible",
+        "value": true,
+        "value_type": "bool"
+      },
+      {
+        "name": "fill",
+        "node_type": "property",
+        "path": "root.root.props.pipes.fill",
+        "value": "",
+        "value_type": "str"
+      }
+    ]
+  },
+  "property_bindings": {
+    "count": 5,
+    "nodes": [
+      {
+        "config": {},
+        "node_type": "property_binding",
+        "path": "root.root.children[0].Button.propConfig.props.enabled",
+        "target_path": "view.custom.enabled"
+      },
+      {
+        "config": {},
+        "node_type": "property_binding",
+        "path": "root.root.propConfig.props.pipes[0].fill",
+        "target_path": "view.params.color"
+      },
+      {
+        "config": {},
+        "node_type": "property_binding",
+        "path": "root.root.propConfig.props.pipes[0].visible",
+        "target_path": "view.custom.pipeA"
+      },
+      {
+        "config": {},
+        "node_type": "property_binding",
+        "path": "root.root.propConfig.props.pipes[1].visible",
+        "target_path": "./Button.props.enabled"
+      },
+      {
+        "config": {},
+        "node_type": "property_binding",
+        "path": "root.root.propConfig.props.pipes[2].visible",
+        "target_path": "./Button1.props.enabled"
+      }
+    ]
+  },
+  "property_change_scripts": {
+    "count": 0,
+    "nodes": []
+  },
+  "query_bindings": {
+    "count": 0,
+    "nodes": []
+  },
+  "script_transforms": {
+    "count": 3,
+    "nodes": [
+      {
+        "binding_path": "root.root.propConfig.props.pipes[2].fill",
+        "node_type": "transform",
+        "path": "root.root.propConfig.props.pipes[2].fill.binding.transforms[0]",
+        "script_length": 19,
+        "script_preview": "\treturn value.color"
+      },
+      {
+        "binding_path": "root.root.propConfig.props.pipes[3].fill",
+        "node_type": "transform",
+        "path": "root.root.propConfig.props.pipes[3].fill.binding.transforms[0]",
+        "script_length": 22,
+        "script_preview": "\treturn value['color']"
+      },
+      {
+        "binding_path": "root.root.propConfig.props.pipes[4].fill",
+        "node_type": "transform",
+        "path": "root.root.propConfig.props.pipes[4].fill.binding.transforms[0]",
+        "script_length": 30,
+        "script_preview": "\treturn self.view.params.color"
+      }
+    ]
+  },
+  "scripts": {
+    "count": 4,
+    "nodes": [
+      {
+        "binding_path": "root.root.propConfig.props.pipes[2].fill",
+        "node_type": "transform",
+        "path": "root.root.propConfig.props.pipes[2].fill.binding.transforms[0]",
+        "script_length": 19,
+        "script_preview": "\treturn value.color"
+      },
+      {
+        "binding_path": "root.root.propConfig.props.pipes[3].fill",
+        "node_type": "transform",
+        "path": "root.root.propConfig.props.pipes[3].fill.binding.transforms[0]",
+        "script_length": 22,
+        "script_preview": "\treturn value['color']"
+      },
+      {
+        "binding_path": "root.root.propConfig.props.pipes[4].fill",
+        "node_type": "transform",
+        "path": "root.root.propConfig.props.pipes[4].fill.binding.transforms[0]",
+        "script_length": 30,
+        "script_preview": "\treturn self.view.params.color"
+      },
+      {
+        "event_domain": "component",
+        "event_type": "onActionPerformed",
+        "node_type": "event_handler",
+        "path": "root.root.children[0].Button.events.component.onActionPerformed",
+        "scope": "G",
+        "script_length": 52,
+        "script_preview": "\tself.view.custom.pipeA = not self.view.custom.pipeA"
+      }
+    ]
+  },
+  "tag_bindings": {
+    "count": 0,
+    "nodes": []
+  }
+}
