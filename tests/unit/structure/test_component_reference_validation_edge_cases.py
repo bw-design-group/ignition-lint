@@ -206,6 +206,9 @@ class TestComponentReferenceValidationEdgeCases(BaseRuleTest):
 	def _expr_binding(self, expression: str, prop: str = "props.style") -> Dict:
 		return {prop: {"binding": {"config": {"expression": expression}, "type": "expr"}}}
 
+	def _onchange(self, script: str, prop: str = "custom.total") -> Dict:
+		return {prop: {"onChange": {"script": script}}}
+
 	def _event_script(self, script: str) -> Dict:
 		return {
 			"component": {
@@ -324,6 +327,24 @@ class TestComponentReferenceValidationEdgeCases(BaseRuleTest):
 		errors = self._errors()
 		self.assertEqual(len(errors), 1, f"Broken nested './' leaf should be caught. Errors: {errors}")
 		self.assertIn("SubContainer/Missing", errors[0])
+
+	def test_property_change_script_broken_reference_detected(self):
+		"""A getChild('Missing') in a property-change (onChange) script is validated and flagged."""
+		view = self._container_view(propconfig=self._onchange("value = self.getChild('Missing')"))
+		self.run_lint_on_mock_view(view, self.rule_config)
+
+		errors = self._errors()
+		self.assertEqual(len(errors), 1, f"Broken onChange reference should be caught. Errors: {errors}")
+		self.assertIn("Missing", errors[0])
+
+	def test_property_change_script_valid_reference_passes(self):
+		"""A getChild('InnerButton') in a property-change script resolves - no error."""
+		view = self._container_view(propconfig=self._onchange("value = self.getChild('InnerButton')"))
+		self.run_lint_on_mock_view(view, self.rule_config)
+
+		self.assertEqual(
+			len(self._errors()), 0, f"Valid onChange reference should pass. Errors: {self._errors()}"
+		)
 
 	def test_view_scoped_bindings_never_flagged(self):
 		"""view.custom / view.params references are not component references - never flagged."""

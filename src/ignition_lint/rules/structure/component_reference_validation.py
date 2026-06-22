@@ -247,6 +247,10 @@ class ComponentReferenceValidationRule(LintingRule):
 		"""Check transform scripts for component references."""
 		self._validate_script_references(node)
 
+	def visit_property_change_script(self, node):
+		"""Check property-change (onChange) scripts for component references."""
+		self._validate_script_references(node)
+
 	def _validate_script_references(self, script_node):
 		"""Validate component references in scripts."""
 		if not self.validate_scripts:

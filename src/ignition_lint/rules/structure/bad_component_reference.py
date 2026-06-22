@@ -79,6 +79,10 @@ class BadComponentReferenceRule(LintingRule):
 		"""Check event handler scripts for bad component references."""
 		self._check_content(node.script, node.path, "script")
 
+	def visit_property_change_script(self, node):
+		"""Check property-change (onChange) scripts for bad component references."""
+		self._check_content(node.script, node.path, "script")
+
 	def visit_expression_binding(self, node):
 		"""Check expression bindings for bad component references."""
 		if hasattr(node, 'expression') and node.expression:

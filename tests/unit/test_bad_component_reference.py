@@ -438,6 +438,24 @@ class TestBadComponentReferenceBindingNodes(BaseRuleTest):
 			f"view-scoped expression binding should not be flagged. Errors: {rule_errors}"
 		)
 
+	def test_flags_traversal_in_property_change_script(self):
+		"""Property-change (onChange) scripts are scanned for brittle traversal too."""
+		propconfig = {
+			"custom.total": {
+				"onChange": {
+					"script": "value = self.getSibling('StatusLabel').props.text"
+				}
+			}
+		}
+		mock_view = _view_with_root_propconfig(propconfig)
+		self.run_lint_on_mock_view(mock_view, self.rule_config)
+
+		rule_errors = self.get_errors_for_rule("BadComponentReferenceRule")
+		self.assertEqual(
+			len(rule_errors), 1, f"Should flag traversal in onChange script. Errors: {rule_errors}"
+		)
+		self.assertIn(".getSibling(", rule_errors[0])
+
 
 if __name__ == "__main__":
 	unittest.main()
