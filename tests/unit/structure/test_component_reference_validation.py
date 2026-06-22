@@ -840,6 +840,149 @@ class TestComponentReferenceValidationRule(BaseRuleTest):
 			f"Valid nested custom property reference should pass. Errors: {rule_errors}"
 		)
 
+	def _container_with_binding(self, binding_config: Dict, binding_type: str, prop: str = "props.style") -> Dict:
+		"""
+		Build a root holding a Container1 that owns a binding plus a child InnerButton.
+
+		The binding lives on Container1, so a single-dot './InnerButton' reference
+		(current container, drill down into its own child) resolves correctly.
+		"""
+		return {
+			"children": [{
+				"meta": {
+					"name": "Container1"
+				},
+				"type": "ia.container.flex",
+				"propConfig": {
+					prop: {
+						"binding": {
+							"config": binding_config,
+							"type": binding_type
+						}
+					}
+				},
+				"children": [{
+					"meta": {
+						"name": "InnerButton"
+					},
+					"type": "ia.input.button",
+					"props": {
+						"text": "Inner"
+					}
+				}]
+			}],
+			"meta": {
+				"name": "root"
+			},
+			"type": "ia.container.coord"
+		}
+
+	def test_valid_current_container_reference_in_expression(self):
+		"""Single-dot './Child' expression that resolves to an existing child should pass."""
+		components = self._container_with_binding({"expression": "{./InnerButton.props.text}"}, "expr")
+		mock_view = self._create_mock_view_with_components(components)
+		self.run_lint_on_mock_view(mock_view, self.rule_config)
+
+		rule_errors = self.get_errors_for_rule("ComponentReferenceValidationRule")
+		self.assertEqual(len(rule_errors), 0, f"Valid './' expression should pass. Errors: {rule_errors}")
+
+	def test_invalid_current_container_reference_in_expression(self):
+		"""Single-dot './Child' expression to a non-existent child must be detected."""
+		components = self._container_with_binding({"expression": "{./MissingButton.props.text}"}, "expr")
+		mock_view = self._create_mock_view_with_components(components)
+		self.run_lint_on_mock_view(mock_view, self.rule_config)
+
+		rule_errors = self.get_errors_for_rule("ComponentReferenceValidationRule")
+		self.assertEqual(len(rule_errors), 1, f"Broken './' expression should be caught. Errors: {rule_errors}")
+		self.assertIn("MissingButton", rule_errors[0])
+
+	def test_valid_current_container_reference_in_property_binding(self):
+		"""Single-dot './Child' property binding that resolves should pass."""
+		components = self._container_with_binding({"path": "./InnerButton.props.text"}, "property")
+		mock_view = self._create_mock_view_with_components(components)
+		self.run_lint_on_mock_view(mock_view, self.rule_config)
+
+		rule_errors = self.get_errors_for_rule("ComponentReferenceValidationRule")
+		self.assertEqual(len(rule_errors), 0, f"Valid './' property binding should pass. Errors: {rule_errors}")
+
+	def test_invalid_current_container_reference_in_property_binding(self):
+		"""Single-dot './Child' property binding to a non-existent child must be detected.
+
+		This is the exact gap behind the Pipes test case: a broken reference written as a
+		single-dot property binding path previously sailed through undetected.
+		"""
+		components = self._container_with_binding({"path": "./MissingButton.props.text"}, "property")
+		mock_view = self._create_mock_view_with_components(components)
+		self.run_lint_on_mock_view(mock_view, self.rule_config)
+
+		rule_errors = self.get_errors_for_rule("ComponentReferenceValidationRule")
+		self.assertEqual(
+			len(rule_errors), 1, f"Broken './' property binding should be caught. Errors: {rule_errors}"
+		)
+		self.assertIn("MissingButton", rule_errors[0])
+		self.assertIn("property binding", rule_errors[0].lower())
+
+	def test_valid_reference_in_expression_struct_binding(self):
+		"""Expression-struct binding referencing an existing child should pass."""
+		components = self._container_with_binding({
+			"struct": {
+				"label": "{./InnerButton.props.text}"
+			},
+			"waitOnAll": True
+		}, "expr-struct", prop="props.data")
+		mock_view = self._create_mock_view_with_components(components)
+		self.run_lint_on_mock_view(mock_view, self.rule_config)
+
+		rule_errors = self.get_errors_for_rule("ComponentReferenceValidationRule")
+		self.assertEqual(len(rule_errors), 0, f"Valid expr-struct reference should pass. Errors: {rule_errors}")
+
+	def test_invalid_reference_in_expression_struct_binding(self):
+		"""Expression-struct binding referencing a non-existent component must be detected."""
+		components = self._container_with_binding({
+			"struct": {
+				"label": "{./MissingButton.props.text}"
+			},
+			"waitOnAll": True
+		}, "expr-struct", prop="props.data")
+		mock_view = self._create_mock_view_with_components(components)
+		self.run_lint_on_mock_view(mock_view, self.rule_config)
+
+		rule_errors = self.get_errors_for_rule("ComponentReferenceValidationRule")
+		self.assertEqual(
+			len(rule_errors), 1, f"Broken expr-struct reference should be caught. Errors: {rule_errors}"
+		)
+		self.assertIn("MissingButton", rule_errors[0])
+
+
+class TestReferenceRulesNodeAlignment(unittest.TestCase):
+	"""
+	The two complementary reference rules must inspect the SAME nodes.
+
+	BadComponentReferenceRule says "you are doing a bad job" (brittle pattern);
+	ComponentReferenceValidationRule says "something is broken" (does not resolve).
+	If they disagree on which nodes to inspect, one rule has a blind spot the other
+	silently covers - exactly the bug that let a './' property binding through.
+	"""
+
+	def test_both_rules_cover_same_reference_nodes(self):
+		"""Both rules target the shared reference-bearing node set."""
+		# pylint: disable=import-error
+		from ignition_lint.rules.structure.bad_component_reference import BadComponentReferenceRule
+		from ignition_lint.rules.structure.component_reference_validation import (
+			ComponentReferenceValidationRule
+		)
+		from ignition_lint.model.node_types import COMPONENT_REFERENCE_NODES, NodeType
+
+		bad_rule = BadComponentReferenceRule()
+		validation_rule = ComponentReferenceValidationRule()
+
+		# BadComponentReferenceRule targets exactly the reference-bearing nodes.
+		self.assertEqual(bad_rule.target_node_types, COMPONENT_REFERENCE_NODES)
+
+		# ComponentReferenceValidationRule needs COMPONENT too (to build its index),
+		# but otherwise covers the identical set.
+		self.assertEqual(validation_rule.target_node_types - {NodeType.COMPONENT}, COMPONENT_REFERENCE_NODES)
+
 
 if __name__ == '__main__':
 	unittest.main()
