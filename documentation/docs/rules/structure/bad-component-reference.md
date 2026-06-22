@@ -6,7 +6,7 @@ description: Flags brittle component traversal patterns (.getSibling, .getParent
 
 # BadComponentReferenceRule
 
-Flags object-traversal patterns like `.getSibling()`, `.getParent()`, `self.parent.`, and relative paths (`../`, `./`) in scripts and expression bindings. These patterns reach across the component tree by name or position, so any rename or reparent silently breaks them at runtime.
+Flags object-traversal patterns like `.getSibling()`, `.getParent()`, `self.parent.`, and relative paths (`../`, `./`) in scripts and bindings. These patterns reach across the component tree by name or position, so any rename or reparent silently breaks them at runtime. The rule scans every reference-bearing node — scripts (including `onChange` property-change scripts), expression bindings, expression-struct bindings, and property binding paths.
 
 **Severity:** `error` by default — every traversal pattern is a known source of runtime breakage when view structure changes. Configurable via `severity`.
 
@@ -24,7 +24,7 @@ The simplest setup — enable the rule with all defaults:
 }
 ```
 
-That's it. The rule scans every script and expression binding in the view, flags any of the 16 default traversal patterns, and fails the lint run on the first match.
+That's it. The rule scans every script and binding in the view (scripts, expression bindings, expression-struct bindings, and property binding paths), flags any of the 16 default traversal patterns, and fails the lint run on the first match.
 
 ## Common configurations
 
