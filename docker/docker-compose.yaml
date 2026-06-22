@@ -13,6 +13,7 @@ services:
     labels:
       traefik.enable: "true"
       traefik.hostname: "ignition-lint"
+      dev.orbstack.http-port: "8088"
     command: >
       -n ignition-lint-gateway
       -r /restore.gwbk
