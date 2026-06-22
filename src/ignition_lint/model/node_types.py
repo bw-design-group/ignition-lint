@@ -35,6 +35,14 @@ ALL_SCRIPTS = {
 	NodeType.MESSAGE_HANDLER, NodeType.CUSTOM_METHOD, NodeType.TRANSFORM, NodeType.EVENT_HANDLER,
 	NodeType.PROPERTY_CHANGE_SCRIPT
 }
+# Node types that can carry component references - relative paths ('./Foo', '../Bar'),
+# nested paths ('.../Parent/Child') and script traversal (getSibling/getChild/.parent).
+# The two complementary reference rules MUST inspect the same set so neither has a blind
+# spot: BadComponentReferenceRule flags brittle usage ("you are doing a bad job") while
+# ComponentReferenceValidationRule flags references that do not resolve ("something is broken").
+COMPONENT_REFERENCE_NODES = {
+	NodeType.EXPRESSION_BINDING, NodeType.EXPRESSION_STRUCT_BINDING, NodeType.PROPERTY_BINDING
+} | ALL_SCRIPTS
 
 
 class ViewNode(ABC):

@@ -8,7 +8,7 @@ should be avoided in favor of view.custom properties or message handling.
 """
 
 from ..common import LintingRule
-from ...model.node_types import NodeType, ALL_SCRIPTS
+from ...model.node_types import COMPONENT_REFERENCE_NODES
 
 
 class BadComponentReferenceRule(LintingRule):
@@ -25,10 +25,11 @@ class BadComponentReferenceRule(LintingRule):
 	"""
 
 	def __init__(self, forbidden_patterns=None, case_sensitive=True, severity="error"):
-		"""Initialize the rule targeting scripts and expression bindings."""
-		# Target both script types and expression bindings
-		target_types = ALL_SCRIPTS | {NodeType.EXPRESSION_BINDING}
-		super().__init__(target_types, severity)
+		"""Initialize the rule targeting every node type that can carry a component reference."""
+		# Inspect the same nodes as ComponentReferenceValidationRule: all scripts plus
+		# expression, expression-struct and property bindings. Brittle traversal can hide
+		# in a property binding path just as easily as in a script or expression.
+		super().__init__(COMPONENT_REFERENCE_NODES, severity)
 		# Configure patterns to detect (methods and properties)
 		self.forbidden_patterns = forbidden_patterns or [
 			# Method calls (with parentheses)
@@ -82,6 +83,17 @@ class BadComponentReferenceRule(LintingRule):
 		"""Check expression bindings for bad component references."""
 		if hasattr(node, 'expression') and node.expression:
 			self._check_content(node.expression, node.path, "expression")
+
+	def visit_expression_struct_binding(self, node):
+		"""Check expression-struct bindings for bad component references."""
+		if hasattr(node, 'get_expressions'):
+			# Check all struct expressions together so the binding is reported at most once.
+			self._check_content("\n".join(node.get_expressions()), node.path, "expression")
+
+	def visit_property_binding(self, node):
+		"""Check property binding paths for bad component references."""
+		if hasattr(node, 'target_path') and node.target_path:
+			self._check_content(node.target_path, node.path, "property binding")
 
 	def _check_content(self, content, path, content_type):
 		"""Check content for forbidden component reference patterns."""
