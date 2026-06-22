@@ -5,10 +5,33 @@ Tests detection of bad component reference patterns.
 """
 
 import unittest
+import json
 from typing import Dict, Any
 
 from fixtures.base_test import BaseRuleTest
 from fixtures.test_helpers import get_test_config, create_mock_script, load_test_view
+
+
+def _view_with_root_propconfig(propconfig: Dict[str, Any], children=None) -> str:
+	"""
+	Build a mock view whose root coordinate container carries the given propConfig.
+
+	This lets tests place bindings (property bindings, expression bindings,
+	expression-struct bindings) directly on the root container - the same shape
+	the Pipes test case uses for its pipe-array bindings.
+	"""
+	root: Dict[str, Any] = {
+		"meta": {
+			"name": "root"
+		},
+		"type": "ia.container.coord",
+		"propConfig": propconfig,
+		"props": {}
+	}
+	if children is not None:
+		root["children"] = children
+	view = {"custom": {}, "params": {}, "propConfig": {}, "props": {}, "root": root}
+	return json.dumps(view, indent=2)
 
 
 class TestBadComponentReferenceRule(BaseRuleTest):
@@ -246,6 +269,192 @@ class TestBadComponentReferenceEdgeCases(BaseRuleTest):
 		# This will currently flag string literals too, which is acceptable
 		# for a simple string-based check
 		self.assertEqual(len(rule_errors), 1)
+
+
+class TestBadComponentReferenceBindingNodes(BaseRuleTest):
+	"""
+	Tests that BadComponentReferenceRule inspects ALL reference-bearing nodes.
+
+	The rule must flag brittle relative traversal (./ and ../) in property
+	bindings and expression-struct bindings, not just scripts and plain
+	expression bindings. Otherwise a broken reference written as a property
+	binding sails through the "you are doing a bad job" rule entirely.
+	"""
+	rule_config: Dict[str, Dict[str, Any]]  # Override base class to make non-optional
+
+	def setUp(self):  # pylint: disable=invalid-name
+		super().setUp()
+		self.rule_config = get_test_config("BadComponentReferenceRule")
+
+	def test_flags_parent_traversal_in_property_binding(self):
+		"""Property binding path '../Sibling...' is brittle and must be flagged."""
+		propconfig = {
+			"props.text": {
+				"binding": {
+					"config": {
+						"path": "../OtherButton.props.text"
+					},
+					"type": "property"
+				}
+			}
+		}
+		mock_view = _view_with_root_propconfig(propconfig)
+		self.run_lint_on_mock_view(mock_view, self.rule_config)
+
+		rule_errors = self.get_errors_for_rule("BadComponentReferenceRule")
+		self.assertEqual(len(rule_errors), 1, f"Should flag '../' in property binding. Errors: {rule_errors}")
+		self.assertIn("Property Binding", rule_errors[0])
+
+	def test_flags_current_container_traversal_in_property_binding(self):
+		"""Property binding path './Child...' is brittle and must be flagged."""
+		propconfig = {
+			"props.text": {
+				"binding": {
+					"config": {
+						"path": "./ChildButton.props.text"
+					},
+					"type": "property"
+				}
+			}
+		}
+		mock_view = _view_with_root_propconfig(propconfig)
+		self.run_lint_on_mock_view(mock_view, self.rule_config)
+
+		rule_errors = self.get_errors_for_rule("BadComponentReferenceRule")
+		self.assertEqual(len(rule_errors), 1, f"Should flag './' in property binding. Errors: {rule_errors}")
+
+	def test_ignores_view_scoped_property_binding(self):
+		"""Property binding to view.custom/view.params is not traversal - must NOT be flagged."""
+		propconfig = {
+			"props.enabled": {
+				"binding": {
+					"config": {
+						"path": "view.custom.enabled"
+					},
+					"type": "property"
+				}
+			},
+			"props.fill": {
+				"binding": {
+					"config": {
+						"path": "view.params.color"
+					},
+					"type": "property"
+				}
+			}
+		}
+		mock_view = _view_with_root_propconfig(propconfig)
+		self.run_lint_on_mock_view(mock_view, self.rule_config)
+
+		rule_errors = self.get_errors_for_rule("BadComponentReferenceRule")
+		self.assertEqual(
+			len(rule_errors), 0,
+			f"view-scoped property bindings should not be flagged. Errors: {rule_errors}"
+		)
+
+	def test_flags_traversal_in_expression_struct_binding(self):
+		"""Expression-struct binding with a relative traversal expression must be flagged."""
+		propconfig = {
+			"props.fill": {
+				"binding": {
+					"config": {
+						"struct": {
+							"color": "{./ChildButton.props.fill}"
+						},
+						"waitOnAll": True
+					},
+					"type": "expr-struct"
+				}
+			}
+		}
+		mock_view = _view_with_root_propconfig(propconfig)
+		self.run_lint_on_mock_view(mock_view, self.rule_config)
+
+		rule_errors = self.get_errors_for_rule("BadComponentReferenceRule")
+		self.assertEqual(
+			len(rule_errors), 1, f"Should flag traversal in expr-struct binding. Errors: {rule_errors}"
+		)
+
+	def test_ignores_view_scoped_expression_struct_binding(self):
+		"""Expression-struct binding referencing only view.* is not traversal - must NOT be flagged."""
+		propconfig = {
+			"props.fill": {
+				"binding": {
+					"config": {
+						"struct": {
+							"color": "{view.params.color}"
+						},
+						"waitOnAll": True
+					},
+					"type": "expr-struct"
+				}
+			}
+		}
+		mock_view = _view_with_root_propconfig(propconfig)
+		self.run_lint_on_mock_view(mock_view, self.rule_config)
+
+		rule_errors = self.get_errors_for_rule("BadComponentReferenceRule")
+		self.assertEqual(
+			len(rule_errors), 0,
+			f"view-scoped expr-struct binding should not be flagged. Errors: {rule_errors}"
+		)
+
+	def test_flags_parent_traversal_in_expression_binding(self):
+		"""Expression binding with '../' traversal is brittle and must be flagged."""
+		propconfig = {
+			"props.text": {
+				"binding": {
+					"config": {
+						"expression": "{../OtherButton.props.text}"
+					},
+					"type": "expr"
+				}
+			}
+		}
+		mock_view = _view_with_root_propconfig(propconfig)
+		self.run_lint_on_mock_view(mock_view, self.rule_config)
+
+		rule_errors = self.get_errors_for_rule("BadComponentReferenceRule")
+		self.assertEqual(len(rule_errors), 1, f"Should flag '../' in expression. Errors: {rule_errors}")
+
+	def test_ignores_view_scoped_expression_binding(self):
+		"""Expression binding referencing only view.* is not traversal - must NOT be flagged."""
+		propconfig = {
+			"props.fill": {
+				"binding": {
+					"config": {
+						"expression": "{view.params.color}"
+					},
+					"type": "expr"
+				}
+			}
+		}
+		mock_view = _view_with_root_propconfig(propconfig)
+		self.run_lint_on_mock_view(mock_view, self.rule_config)
+
+		rule_errors = self.get_errors_for_rule("BadComponentReferenceRule")
+		self.assertEqual(
+			len(rule_errors), 0,
+			f"view-scoped expression binding should not be flagged. Errors: {rule_errors}"
+		)
+
+	def test_flags_traversal_in_property_change_script(self):
+		"""Property-change (onChange) scripts are scanned for brittle traversal too."""
+		propconfig = {
+			"custom.total": {
+				"onChange": {
+					"script": "value = self.getSibling('StatusLabel').props.text"
+				}
+			}
+		}
+		mock_view = _view_with_root_propconfig(propconfig)
+		self.run_lint_on_mock_view(mock_view, self.rule_config)
+
+		rule_errors = self.get_errors_for_rule("BadComponentReferenceRule")
+		self.assertEqual(
+			len(rule_errors), 1, f"Should flag traversal in onChange script. Errors: {rule_errors}"
+		)
+		self.assertIn(".getSibling(", rule_errors[0])
 
 
 if __name__ == "__main__":

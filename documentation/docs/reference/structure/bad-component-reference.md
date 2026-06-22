@@ -14,21 +14,28 @@ See the [user guide](../../rules/structure/bad-component-reference.md). This pag
 :::
 
 ## Purpose
-Flags object-traversal patterns in scripts and expression bindings that create tight coupling to the view's structural layout. These patterns reach across the component tree by name or position, so any rename or reparent silently breaks them at runtime.
+Flags object-traversal patterns in scripts and bindings that create tight coupling to the view's structural layout. These patterns reach across the component tree by name or position, so any rename or reparent silently breaks them at runtime.
 
 ## Severity
 `error` by default — these patterns reliably cause runtime breakage when view structure changes, so the rule fails the lint run unless explicitly downgraded. Configurable via the `severity` option.
 
 ## What it checks
-The rule scans script and expression text for substrings from a `forbidden_patterns` list. Matching is plain Python `in`-substring containment (no AST analysis). When a match is found, the rule emits one violation per content unit, reporting the first pattern that matched plus a count of any additional matches.
+The rule scans script, expression, and binding-path text for substrings from a `forbidden_patterns` list. Matching is plain Python `in`-substring containment (no AST analysis). When a match is found, the rule emits one violation per content unit, reporting the first pattern that matched plus a count of any additional matches.
 
-The rule visits the following node types (`target_types = ALL_SCRIPTS | {NodeType.EXPRESSION_BINDING}`):
+The rule visits every node type that can carry a component reference (`target_types = COMPONENT_REFERENCE_NODES` — the same set [`ComponentReferenceValidationRule`](./component-reference-validation.md) inspects, so the "is this brittle?" and "is this broken?" checks never disagree on which nodes to look at):
 
 - `MessageHandlerScript`
 - `CustomMethodScript`
 - `TransformScript`
 - `EventHandlerScript`
+- `PropertyChangeScript` (`onChange` scripts)
 - `ExpressionBinding`
+- `ExpressionStructBinding` (each struct member expression is scanned)
+- `PropertyBinding` (the binding's `path` is scanned)
+
+:::note[Expanded in release v0.6.1]
+Earlier versions visited only scripts and plain expression bindings (`ALL_SCRIPTS | {EXPRESSION_BINDING}`). Brittle traversal hidden in a **property binding path** (e.g. `path: ./Sibling.props.x`) or an **expression-struct** member was not flagged. Both are now covered. See the [changelog](../../changelog.md).
+:::
 
 ### Default `forbidden_patterns`
 
@@ -124,7 +131,7 @@ parent.props.style.backgroundColor = 'red'
 <path>: <Content_type> contains '<pattern>' which creates brittle view structure dependencies. Consider using view.custom properties or message handling for component communication instead.
 ```
 
-Where `<Content_type>` is `"Script"` or `"Expression"` depending on the node type. When more than one pattern matches in the same content unit, the message lists the count: `'<first>' and <N> other object traversal pattern(s)`.
+Where `<Content_type>` is `"Script"`, `"Expression"`, or `"Property Binding"` depending on the node type. When more than one pattern matches in the same content unit, the message lists the count: `'<first>' and <N> other object traversal pattern(s)`.
 
 ### Problematic code: custom method with multiple traversal patterns
 

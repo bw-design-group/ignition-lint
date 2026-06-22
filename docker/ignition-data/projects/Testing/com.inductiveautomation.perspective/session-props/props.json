@@ -1,6 +1,9 @@
 {
   "custom": {},
   "propConfig": {
+    "props.address": {
+      "persistent": false
+    },
     "props.auth": {
       "access": "PRIVATE",
       "persistent": false
@@ -51,7 +54,6 @@
     }
   },
   "props": {
-    "address": "192.168.147.1",
     "device": {},
     "geolocation": {},
     "locale": "en-US",

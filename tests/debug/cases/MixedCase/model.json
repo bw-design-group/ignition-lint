@@ -11,7 +11,7 @@
         "node_type": "component",
         "path": "root.root.children[0].PascalCaseButton",
         "properties_count": 0,
-        "type": "ia.display.button"
+        "type": "ia.input.button"
       },
       {
         "name": "SCREAMING_SNAKE_CASE_LABEL",
@@ -162,41 +162,13 @@
     "nodes": []
   },
   "properties": {
-    "count": 36,
+    "count": 17,
     "nodes": [
-      {
-        "name": "x",
-        "node_type": "property",
-        "path": "root.root.children.PascalCaseButton.position.x",
-        "value": 0,
-        "value_type": "int"
-      },
-      {
-        "name": "y",
-        "node_type": "property",
-        "path": "root.root.children.PascalCaseButton.position.y",
-        "value": 0,
-        "value_type": "int"
-      },
-      {
-        "name": "x",
-        "node_type": "property",
-        "path": "root.root.children.SCREAMING_SNAKE_CASE_LABEL.position.x",
-        "value": 0,
-        "value_type": "int"
-      },
       {
         "name": "y",
         "node_type": "property",
         "path": "root.root.children.SCREAMING_SNAKE_CASE_LABEL.position.y",
         "value": 50,
-        "value_type": "int"
-      },
-      {
-        "name": "x",
-        "node_type": "property",
-        "path": "root.root.children.DAT_02_TT_123_A.position.x",
-        "value": 0,
         "value_type": "int"
       },
       {
@@ -207,24 +179,10 @@
         "value_type": "int"
       },
       {
-        "name": "x",
-        "node_type": "property",
-        "path": "root.root.children.MyComponentWithNumbers123.position.x",
-        "value": 0,
-        "value_type": "int"
-      },
-      {
         "name": "y",
         "node_type": "property",
         "path": "root.root.children.MyComponentWithNumbers123.position.y",
         "value": 150,
-        "value_type": "int"
-      },
-      {
-        "name": "x",
-        "node_type": "property",
-        "path": "root.root.children.UPPER_WITH_NUMBERS_456.position.x",
-        "value": 0,
         "value_type": "int"
       },
       {
@@ -235,24 +193,10 @@
         "value_type": "int"
       },
       {
-        "name": "x",
-        "node_type": "property",
-        "path": "root.root.children.camelCaseInvalid.position.x",
-        "value": 0,
-        "value_type": "int"
-      },
-      {
         "name": "y",
         "node_type": "property",
         "path": "root.root.children.camelCaseInvalid.position.y",
         "value": 250,
-        "value_type": "int"
-      },
-      {
-        "name": "x",
-        "node_type": "property",
-        "path": "root.root.children.snake_case_invalid.position.x",
-        "value": 0,
         "value_type": "int"
       },
       {
@@ -263,24 +207,10 @@
         "value_type": "int"
       },
       {
-        "name": "x",
-        "node_type": "property",
-        "path": "root.root.children.kebab-case-invalid.position.x",
-        "value": 0,
-        "value_type": "int"
-      },
-      {
         "name": "y",
         "node_type": "property",
         "path": "root.root.children.kebab-case-invalid.position.y",
         "value": 350,
-        "value_type": "int"
-      },
-      {
-        "name": "x",
-        "node_type": "property",
-        "path": "root.root.children.Mixed_PascalCase_Invalid.position.x",
-        "value": 0,
         "value_type": "int"
       },
       {
@@ -291,24 +221,10 @@
         "value_type": "int"
       },
       {
-        "name": "x",
-        "node_type": "property",
-        "path": "root.root.children.APIClient.position.x",
-        "value": 0,
-        "value_type": "int"
-      },
-      {
         "name": "y",
         "node_type": "property",
         "path": "root.root.children.APIClient.position.y",
         "value": 450,
-        "value_type": "int"
-      },
-      {
-        "name": "x",
-        "node_type": "property",
-        "path": "root.root.children.HTTPSConnection.position.x",
-        "value": 0,
         "value_type": "int"
       },
       {
@@ -319,24 +235,10 @@
         "value_type": "int"
       },
       {
-        "name": "x",
-        "node_type": "property",
-        "path": "root.root.children.MyAPIHandler.position.x",
-        "value": 0,
-        "value_type": "int"
-      },
-      {
         "name": "y",
         "node_type": "property",
         "path": "root.root.children.MyAPIHandler.position.y",
         "value": 550,
-        "value_type": "int"
-      },
-      {
-        "name": "x",
-        "node_type": "property",
-        "path": "root.root.children.XMLHTTPRequest.position.x",
-        "value": 0,
         "value_type": "int"
       },
       {
@@ -347,24 +249,10 @@
         "value_type": "int"
       },
       {
-        "name": "x",
-        "node_type": "property",
-        "path": "root.root.children.API_CLIENT_HTTP.position.x",
-        "value": 0,
-        "value_type": "int"
-      },
-      {
         "name": "y",
         "node_type": "property",
         "path": "root.root.children.API_CLIENT_HTTP.position.y",
         "value": 650,
-        "value_type": "int"
-      },
-      {
-        "name": "x",
-        "node_type": "property",
-        "path": "root.root.children.HTTP_API_URL.position.x",
-        "value": 0,
         "value_type": "int"
       },
       {
@@ -375,13 +263,6 @@
         "value_type": "int"
       },
       {
-        "name": "x",
-        "node_type": "property",
-        "path": "root.root.children.TT_DAT_API_123.position.x",
-        "value": 0,
-        "value_type": "int"
-      },
-      {
         "name": "y",
         "node_type": "property",
         "path": "root.root.children.TT_DAT_API_123.position.y",
@@ -389,24 +270,10 @@
         "value_type": "int"
       },
       {
-        "name": "x",
-        "node_type": "property",
-        "path": "root.root.children.IOModuleController.position.x",
-        "value": 0,
-        "value_type": "int"
-      },
-      {
         "name": "y",
         "node_type": "property",
         "path": "root.root.children.IOModuleController.position.y",
         "value": 800,
-        "value_type": "int"
-      },
-      {
-        "name": "x",
-        "node_type": "property",
-        "path": "root.root.children.CPU_GPU_MONITOR.position.x",
-        "value": 0,
         "value_type": "int"
       },
       {

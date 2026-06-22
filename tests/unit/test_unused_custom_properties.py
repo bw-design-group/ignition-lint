@@ -1330,3 +1330,311 @@ class TestUnusedCustomPropertiesRule(BaseRuleTest):  # pylint: disable=too-many-
 			mock_view, rule_config, "UnusedCustomPropertiesRule", expected_error_count=1,
 			error_patterns=["trulyUnused", "never referenced"]
 		)
+
+	def test_whole_object_view_params_forwarding_credits_all(self):
+		"""Whole-object self.view.params forwarding credits every view param.
+
+		A button forwards the entire params object via sendMessage(payload=self.view.params);
+		a different view consumes individual members via payload.get(...). The defining view
+		never references any param by name, so name-based detection alone would falsely flag
+		them. The whole-object sentinel must credit all params at view scope.
+		"""
+		view_data = {
+			"params": {
+				"sectionUuid": "abc",
+				"rowIndex": 0,
+				"tagPath": "[default]X"
+			},
+			"root": {
+				"children": [{
+					"meta": {
+						"name": "MoveUpButton"
+					},
+					"type": "ia.input.button",
+					"events": {
+						"component": {
+							"onActionPerformed": {
+								"config": {
+									"script":
+										"system.perspective.sendMessage('onMoveUp', scope='page', payload=self.view.params)"
+								},
+								"scope": "G",
+								"type": "script"
+							}
+						}
+					}
+				}],
+				"meta": {
+					"name": "root"
+				}
+			}
+		}
+		mock_view_content = json.dumps(view_data, indent=2)
+		mock_view = create_temp_view_file(mock_view_content)
+
+		rule_config = get_test_config("UnusedCustomPropertiesRule")
+
+		# All three params are credited via whole-object forwarding -> no unused reports.
+		self.assert_rule_errors(mock_view, rule_config, "UnusedCustomPropertiesRule", expected_error_count=0)
+
+	def test_whole_object_view_custom_forwarding_credits_all(self):
+		"""Whole-object self.view.custom forwarding credits every view custom property."""
+		view_data = {
+			"custom": {
+				"alpha": 1,
+				"beta": 2
+			},
+			"root": {
+				"children": [{
+					"meta": {
+						"name": "ForwardButton"
+					},
+					"type": "ia.input.button",
+					"events": {
+						"component": {
+							"onActionPerformed": {
+								"config": {
+									"script":
+										"system.perspective.sendMessage('snapshot', payload=self.view.custom)"
+								},
+								"scope": "G",
+								"type": "script"
+							}
+						}
+					}
+				}],
+				"meta": {
+					"name": "root"
+				}
+			}
+		}
+		mock_view_content = json.dumps(view_data, indent=2)
+		mock_view = create_temp_view_file(mock_view_content)
+
+		rule_config = get_test_config("UnusedCustomPropertiesRule")
+
+		# Both customs are credited via whole-object forwarding -> no unused reports.
+		self.assert_rule_errors(mock_view, rule_config, "UnusedCustomPropertiesRule", expected_error_count=0)
+
+	def test_subscript_view_params_access_credits_only_that_member(self):
+		"""Subscript access self.view.params['name'] credits only that param."""
+		view_data = {
+			"params": {
+				"sectionUuid": "abc",
+				"rowIndex": 0
+			},
+			"root": {
+				"children": [{
+					"meta": {
+						"name": "ReadButton"
+					},
+					"type": "ia.input.button",
+					"events": {
+						"component": {
+							"onActionPerformed": {
+								"config": {
+									"script":
+										"uuid = self.view.params['sectionUuid']"
+								},
+								"scope": "G",
+								"type": "script"
+							}
+						}
+					}
+				}],
+				"meta": {
+					"name": "root"
+				}
+			}
+		}
+		mock_view_content = json.dumps(view_data, indent=2)
+		mock_view = create_temp_view_file(mock_view_content)
+
+		rule_config = get_test_config("UnusedCustomPropertiesRule")
+
+		# Literal subscript access is a single-member read; rowIndex should still be flagged.
+		self.assert_rule_errors(
+			mock_view, rule_config, "UnusedCustomPropertiesRule", expected_error_count=1,
+			error_patterns=["rowIndex", "never referenced"]
+		)
+
+	def test_single_member_access_still_credits_only_that_member(self):
+		"""Regression guard: self.view.params.onlyThis credits only that param, not its siblings.
+
+		The whole-object sentinel must not over-credit when a real member access is present;
+		a sibling param that is never referenced must still be flagged.
+		"""
+		view_data = {
+			"params": {
+				"onlyThis": 1,
+				"sibling": 2
+			},
+			"root": {
+				"children": [{
+					"meta": {
+						"name": "ReadButton"
+					},
+					"type": "ia.input.button",
+					"events": {
+						"component": {
+							"onActionPerformed": {
+								"config": {
+									"script": "value = self.view.params.onlyThis"
+								},
+								"scope": "G",
+								"type": "script"
+							}
+						}
+					}
+				}],
+				"meta": {
+					"name": "root"
+				}
+			}
+		}
+		mock_view_content = json.dumps(view_data, indent=2)
+		mock_view = create_temp_view_file(mock_view_content)
+
+		rule_config = get_test_config("UnusedCustomPropertiesRule")
+
+		# Only the unreferenced sibling should be flagged; onlyThis is credited by name.
+		self.assert_rule_errors(
+			mock_view, rule_config, "UnusedCustomPropertiesRule", expected_error_count=1,
+			error_patterns=["sibling", "never referenced"]
+		)
+
+	def test_bare_self_params_at_component_scope_not_credited(self):
+		"""Bare self.params (no `view`) at component scope does NOT credit view params.
+
+		Only the explicit self.view.* whole-object forms are handled. A component-scope bare
+		self.params reference is intentionally not treated as whole-object view-param use, so a
+		view param referenced only this way is still flagged. This documents the deliberate
+		scope boundary of the fix.
+		"""
+		view_data = {
+			"params": {
+				"forwarded": 1
+			},
+			"root": {
+				"children": [{
+					"meta": {
+						"name": "ComponentButton"
+					},
+					"type": "ia.input.button",
+					"events": {
+						"component": {
+							"onActionPerformed": {
+								"config": {
+									"script":
+										"system.perspective.sendMessage('m', payload=self.params)"
+								},
+								"scope": "G",
+								"type": "script"
+							}
+						}
+					}
+				}],
+				"meta": {
+					"name": "root"
+				}
+			}
+		}
+		mock_view_content = json.dumps(view_data, indent=2)
+		mock_view = create_temp_view_file(mock_view_content)
+
+		rule_config = get_test_config("UnusedCustomPropertiesRule")
+
+		# Bare self.params at component scope is not handled -> param remains flagged.
+		self.assert_rule_errors(
+			mock_view, rule_config, "UnusedCustomPropertiesRule", expected_error_count=1,
+			error_patterns=["forwarded", "never referenced"]
+		)
+
+	def test_subscript_view_params_access_with_whitespace_credits_only_that_member(self):
+		"""self.view.params [ 'name' ] with surrounding whitespace credits only that member.
+
+		Guards the whitespace handling in the literal-subscript detector and the sentinel
+		lookahead. If this regresses, the wildcard may over-credit siblings.
+		"""
+		view_data = {
+			"params": {
+				"sectionUuid": "abc",
+				"rowIndex": 0
+			},
+			"root": {
+				"children": [{
+					"meta": {
+						"name": "ReadButton"
+					},
+					"type": "ia.input.button",
+					"events": {
+						"component": {
+							"onActionPerformed": {
+								"config": {
+									"script":
+										"uuid = self.view.params [ 'sectionUuid' ]"
+								},
+								"scope": "G",
+								"type": "script"
+							}
+						}
+					}
+				}],
+				"meta": {
+					"name": "root"
+				}
+			}
+		}
+		mock_view_content = json.dumps(view_data, indent=2)
+		mock_view = create_temp_view_file(mock_view_content)
+
+		rule_config = get_test_config("UnusedCustomPropertiesRule")
+
+		# Literal subscript with whitespace is still a single-member read; rowIndex still flagged.
+		self.assert_rule_errors(
+			mock_view, rule_config, "UnusedCustomPropertiesRule", expected_error_count=1,
+			error_patterns=["rowIndex", "never referenced"]
+		)
+
+	def test_dynamic_subscript_view_params_access_credits_all(self):
+		"""Dynamic subscript self.view.params[key] credits all params conservatively.
+
+		The key is not statically knowable, so the whole-object wildcard sentinel fires
+		rather than crediting nothing.
+		"""
+		view_data = {
+			"params": {
+				"alpha": 1,
+				"beta": 2
+			},
+			"root": {
+				"children": [{
+					"meta": {
+						"name": "ReadButton"
+					},
+					"type": "ia.input.button",
+					"events": {
+						"component": {
+							"onActionPerformed": {
+								"config": {
+									"script":
+										"key = 'alpha'\nvalue = self.view.params[key]"
+								},
+								"scope": "G",
+								"type": "script"
+							}
+						}
+					}
+				}],
+				"meta": {
+					"name": "root"
+				}
+			}
+		}
+		mock_view_content = json.dumps(view_data, indent=2)
+		mock_view = create_temp_view_file(mock_view_content)
+
+		rule_config = get_test_config("UnusedCustomPropertiesRule")
+
+		# Dynamic key -> conservative wildcard -> no params flagged.
+		self.assert_rule_errors(mock_view, rule_config, "UnusedCustomPropertiesRule", expected_error_count=0)

@@ -295,6 +295,24 @@ class UnusedCustomPropertiesRule(LintingRule):
 					if view_scope:
 						self.used_properties.add(f"view.params.{match}")
 
+		# Quoted subscript access reads one known member, not the whole params/custom object.
+		subscript_patterns = [
+			(r'self\.view\.params\s*\[\s*[\'\"]([a-zA-Z_][a-zA-Z0-9_]*)[\'\"]\s*\]', "view.params.{}"),
+			(r'self\.view\.custom\s*\[\s*[\'\"]([a-zA-Z_][a-zA-Z0-9_]*)[\'\"]\s*\]', "view.custom.{}"),
+		]
+		for pattern, used_property_template in subscript_patterns:
+			matches = re.findall(pattern, script)
+			for match in matches:
+				self.used_properties.add(used_property_template.format(match))
+
+		# A bare self.view.params/custom reference may pass the full object to another consumer.
+		# Since we can't know which members are read later, mark the full scope as used.
+		# Dot access and quoted subscripts are handled above as specific member reads.
+		if re.search(r'self\.view\.params\b(?!\s*(?:\.|\[\s*[\'\"]))', script):
+			self.used_properties.add('view.params.*')
+		if re.search(r'self\.view\.custom\b(?!\s*(?:\.|\[\s*[\'\"]))', script):
+			self.used_properties.add('view.custom.*')
+
 	def finalize(self):
 		"""Called after all nodes are visited - check for unused properties."""
 		# Skip if already called during process_nodes (prevents duplicates)
@@ -333,6 +351,12 @@ class UnusedCustomPropertiesRule(LintingRule):
 		"""
 		# Direct usage
 		if prop_path in self.used_properties:
+			return True
+
+		# A whole-object reference credits every property under that view scope.
+		if prop_path.startswith('view.params.') and 'view.params.*' in self.used_properties:
+			return True
+		if prop_path.startswith('view.custom.') and 'view.custom.*' in self.used_properties:
 			return True
 
 		# Descendant usage credits the parent (e.g. view.custom.network.nat1 -> view.custom.network)
