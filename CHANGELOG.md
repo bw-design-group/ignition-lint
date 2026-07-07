@@ -7,6 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+- The component-rename auto-fixer no longer silently breaks bindings it cannot see (#114). Its reference detection previously required two or more leading dots, so a component referenced only via single-dot `./Child` or absolute `/root/Container/Component` paths was misclassified as safe to rename — plain `--fix` renamed it and left every such binding dangling (hit in production: 9 broken bindings across 5 views). Detection and rewriting now share one reference-grammar parser with the validation rules, covering `./`, `../`, `.../`, and `/root/...` forms in expressions, property-binding paths, and expression-struct values.
+- Rename reference rewriting no longer corrupts unrelated text (#115). Rewrites previously used a whole-value `str.replace()` of the bare component name, which mangled overlapping sibling names (renaming `data label` rewrote part of `{../data label 2...}`, leaving a dangling reference), mutated display literals (`'pump status: '` became `'PumpStatus: '`), and edited comments and `sendMessage()` payloads inside scripts. Operations now replace the full reference text only — scripts are tokenized so real `getSibling`/`getChild` calls are distinguished from the same text in comments or unrelated string literals — and fix-conflict detection is operation-aware, so two components referenced in one expression both rename cleanly.
+- The rename fixer no longer creates duplicate sibling names (#116). A suggestion that collides with an existing sibling (e.g. `My Button` → `MyButton` beside an existing `MyButton`), or with another pending rename converging on the same name, is skipped and the violation message says why (`suggestion 'MyButton' already in use by a sibling; rename manually`). Previously plain `--fix` produced two identically-named siblings — invalid in the Designer and ambiguous for references.
+- `ComponentReferenceValidationRule` now validates absolute `/root/...` references in expressions, property bindings, and expression-struct bindings (#114). Previously these were silently skipped, so a broken absolute reference was never reported.
+- Defense in depth for renames: a component name found in a context the fixer cannot safely rewrite (an untokenizable script, a `runScript()` expression payload, or a navigation-call pattern in a non-script value) now blocks fix generation entirely instead of being renamed around — under both `--fix` and `--fix-unsafe`.
+
+### Added
+- `common/reference_parser.py` — single shared owner of Ignition's component-reference grammar (relative/absolute binding paths, brace-wrapped expression references, tokenize-based script navigation calls), consumed by both the validation rules and the rename fixer so the two can no longer drift apart.
+- `tests/cases/ExtensionFunctions` — real Designer export of an Alarm Status Table with populated `filterAlarm`/`filterShelvedAlarm` extension functions, capturing the baseline for modeling them as first-class script nodes (#117).
+- `references/perspective-view-schema.unofficial.json` — Paul Griffith's unofficial Perspective view.json schema with provenance notes and a gap analysis against the current object model.
+
 ## [0.6.1] - 2026-06-22
 
 ### Changed
