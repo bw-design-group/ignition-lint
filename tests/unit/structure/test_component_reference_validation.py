@@ -921,6 +921,70 @@ class TestComponentReferenceValidationRule(BaseRuleTest):
 		)
 		self.assertIn("Missing Dropdown", rule_errors[0])
 
+	def _view_scoped_onchange_view(self, script):
+		"""A view with a param onChange script (self == the view at runtime)."""
+		view_data = {
+			"custom": {},
+			"params": {
+				"wing": ""
+			},
+			"propConfig": {
+				"params.wing": {
+					"onChange": {
+						"enabled": None,
+						"script": script
+					},
+					"paramDirection": "input",
+					"persistent": True
+				}
+			},
+			"props": {},
+			"root": {
+				"children": [{
+					"children": [{
+						"meta": {
+							"name": "Wing Dropdown"
+						},
+						"type": "ia.input.dropdown"
+					},],
+					"meta": {
+						"name": "Filters"
+					},
+					"type": "ia.container.flex"
+				},],
+				"meta": {
+					"name": "root"
+				},
+				"type": "ia.container.flex"
+			}
+		}
+		return json.dumps(view_data, indent=2)
+
+	def test_view_scoped_chain_resolving_through_root_passes(self):
+		"""On a view-scoped onChange, self is the view: getChild('root') is valid."""
+		mock_view = self._view_scoped_onchange_view(
+			'\tself.getChild("root").getChild("Filters").getChild("Wing Dropdown")'
+			'.props.value = [currentValue]'
+		)
+		self.run_lint_on_mock_view(mock_view, self.rule_config)
+
+		rule_errors = self.get_errors_for_rule("ComponentReferenceValidationRule")
+		self.assertEqual(
+			len(rule_errors), 0, f"View-scoped getChild('root') chain must resolve. Errors: {rule_errors}"
+		)
+
+	def test_view_scoped_chain_flags_the_actually_missing_link(self):
+		"""A broken view-scoped chain is flagged at the missing link, not at 'root'."""
+		mock_view = self._view_scoped_onchange_view(
+			'\tself.getChild("root").getChild("Data").getChild("Filters")'
+			'.getChild("Wing Dropdown").props.value = [currentValue]'
+		)
+		self.run_lint_on_mock_view(mock_view, self.rule_config)
+
+		rule_errors = self.get_errors_for_rule("ComponentReferenceValidationRule")
+		self.assertEqual(len(rule_errors), 1, f"Broken chain must be flagged. Errors: {rule_errors}")
+		self.assertIn("'Data'", rule_errors[0])
+
 	def test_valid_absolute_property_binding_path(self):
 		"""Absolute /root/... property binding paths that resolve must pass."""
 		components = self._absolute_ref_components('{view.custom.unrelated}')

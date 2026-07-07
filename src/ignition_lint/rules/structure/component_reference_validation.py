@@ -245,8 +245,24 @@ class ComponentReferenceValidationRule(LintingRule):
 		# Pattern 2: .getChild('ComponentName') - includes chained calls
 		self._validate_chained_navigation(script_node.path, script)
 
+	@staticmethod
+	def _is_view_scoped_source(source_path: str) -> bool:
+		"""
+		Whether a script runs with self == the view rather than a component.
+
+		Scripts on the view's own propConfig entries (param/custom property
+		onChange) or the view's events live at top-level 'propConfig.*' /
+		'events.*' flattened keys. At runtime their self is the view, so
+		self.getChild('root') resolves to the root container. Same scope
+		inference as UnusedCustomPropertiesRule.
+		"""
+		return source_path.startswith(('propConfig.', 'events.'))
+
 	def _validate_sibling_reference(self, script_path: str, sibling_name: str, _script: str):
 		"""Validate a simple getSibling() reference."""
+		if self._is_view_scoped_source(script_path):
+			return  # self is the view; it has no siblings we can model
+
 		component_path = self._get_component_path_from_source(script_path)
 		resolved = self._find_sibling(component_path, sibling_name)
 
@@ -260,6 +276,7 @@ class ComponentReferenceValidationRule(LintingRule):
 		"""Parse and validate chained navigation calls."""
 		# Match chains starting with self
 		chain_pattern = r'(self(?:\.parent)*(?:\.[a-zA-Z]+\([^)]*\))+)'
+		view_scoped = self._is_view_scoped_source(script_path)
 
 		for match in re.finditer(chain_pattern, script):
 			chain = match.group(1)
@@ -267,50 +284,72 @@ class ComponentReferenceValidationRule(LintingRule):
 			# Count parent references
 			parent_count = chain.count('.parent')
 
-			# Remove parent references to get method calls
-			chain_without_parents = chain.replace('.parent', '')
-
-			# Parse method calls
+			# Parse method calls (parent references removed first)
 			method_pattern = r'\.([a-zA-Z]+)\(["\']([^"\']+)["\']\)'
-			methods = list(re.finditer(method_pattern, chain_without_parents))
-
+			methods = list(re.finditer(method_pattern, chain.replace('.parent', '')))
 			if not methods:
 				continue
 
-			# Start navigation
-			component_path = self._get_component_path_from_source(script_path)
-			current_path = component_path
+			if view_scoped:
+				# self == the view: no parent to navigate, and the first
+				# getChild resolves against the view's top-level components
+				# (self.getChild('root') -> the root container).
+				if parent_count:
+					continue  # self.parent from view scope is not modelable
+				start_path = None
+			else:
+				start_path = self._navigate_to_chain_start(script_path, chain, parent_count)
+				if not start_path:
+					continue
 
-			# Navigate up for each .parent
-			for _ in range(parent_count):
-				current_path = self.parent_map.get(current_path)
-				if not current_path:
-					self.add_violation(f"{script_path}: Navigation chain goes beyond root: {chain}")
-					break
+			self._walk_chain(script_path, chain, methods, current_path=start_path, view_scoped=view_scoped)
 
+	def _navigate_to_chain_start(self, script_path: str, chain: str, parent_count: int) -> Optional[str]:
+		"""Resolve the component a chain starts from, applying .parent hops."""
+		current_path = self._get_component_path_from_source(script_path)
+		for _ in range(parent_count):
+			current_path = self.parent_map.get(current_path)
 			if not current_path:
+				self.add_violation(f"{script_path}: Navigation chain goes beyond root: {chain}")
+				return None
+		return current_path
+
+	def _walk_chain(
+		self, script_path: str, chain: str, methods: list, *, current_path: Optional[str], view_scoped: bool
+	):
+		"""Validate each navigation link of a chain from its starting point."""
+		for method_match in methods:
+			method = method_match.group(1)
+			arg = method_match.group(2)
+
+			if view_scoped and current_path is None:
+				# First link of a view-scoped chain: only getChild is
+				# modelable (the view has no siblings).
+				if method != 'getChild':
+					return
+				current_path = self._find_top_level_component(arg)
+				if not current_path:
+					self.add_violation(
+						f"{script_path}: Component '{arg}' not found as child in: {chain}"
+					)
+					return
 				continue
 
-			# Process method calls
-			for method_match in methods:
-				method = method_match.group(1)
-				arg = method_match.group(2)
+			if method == 'getSibling':
+				current_path = self._find_sibling(current_path, arg)
+				if not current_path:
+					self.add_violation(
+						f"{script_path}: Component '{arg}' not found as sibling in: {chain}"
+					)
+					return
 
-				if method == 'getSibling':
-					current_path = self._find_sibling(current_path, arg)
-					if not current_path:
-						self.add_violation(
-							f"{script_path}: Component '{arg}' not found as sibling in: {chain}"
-						)
-						break
-
-				elif method == 'getChild':
-					current_path = self._find_child(current_path, arg)
-					if not current_path:
-						self.add_violation(
-							f"{script_path}: Component '{arg}' not found as child in: {chain}"
-						)
-						break
+			elif method == 'getChild':
+				current_path = self._find_child(current_path, arg)
+				if not current_path:
+					self.add_violation(
+						f"{script_path}: Component '{arg}' not found as child in: {chain}"
+					)
+					return
 
 	def _validate_relative_reference(
 		self, source_path: str, component_ref: str, levels_up: int, *, full_ref: str, ref_type: str
