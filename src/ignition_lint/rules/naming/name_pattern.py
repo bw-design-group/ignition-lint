@@ -199,6 +199,10 @@ class NamePatternRule(FixableMixin, LintingRule):
 		# Flattened JSON data (set by LintEngine via set_flattened_json)
 		self.flattened_json = {}
 
+		# Rename targets already claimed by pending fixes, per parent container path.
+		# Prevents two same-container renames converging on one name (issue #116).
+		self._pending_rename_targets = {}
+
 		# Advanced configurations
 		self.node_type_specific_rules = node_type_specific_rules or {}
 		self.name_extractors = name_extractors or self._get_default_name_extractors()
@@ -232,6 +236,7 @@ class NamePatternRule(FixableMixin, LintingRule):
 	def process_nodes(self, nodes):
 		"""Override to reset fixes before processing."""
 		self.reset_fixes()
+		self._pending_rename_targets = {}
 		super().process_nodes(nodes)
 
 	# Properties for backward compatibility
@@ -438,11 +443,47 @@ class NamePatternRule(FixableMixin, LintingRule):
 			):
 				suggestion = self._suggest_name(name, node_type)
 				if suggestion:
-					error_msg += f" (suggestion: '{suggestion}')"
+					if (
+						node.node_type == NodeType.COMPONENT and
+						self._suggestion_taken_by_sibling(node.path, suggestion)
+					):
+						error_msg += (
+							f" (suggestion '{suggestion}' already in use by a sibling;"
+							f" rename manually)"
+						)
+					else:
+						error_msg += f" (suggestion: '{suggestion}')"
 
 			errors.append(error_msg)
 
 		return errors
+
+	@staticmethod
+	def _component_parent_path(component_path: str) -> Optional[str]:
+		"""
+		Extract the parent container path from a component model path.
+
+		Example: root.root.children[0].Panel.children[1].My Button -> root.root.children[0].Panel
+		Returns None for the root component (no container parent).
+		"""
+		match = re.match(r'^(.*)\.children\[\d+\]\.[^.]+$', component_path)
+		return match.group(1) if match else None
+
+	def _sibling_names(self, component_path: str) -> set:
+		"""Collect the names of all components sharing this component's parent container."""
+		parent_path = self._component_parent_path(component_path)
+		if parent_path is None:
+			return set()
+
+		sibling_name_key = re.compile(re.escape(parent_path) + r'\.children\[\d+\]\.[^.]+\.meta\.name$')
+		return {
+			value for key, value in self.flattened_json.items()
+			if isinstance(value, str) and sibling_name_key.match(key)
+		}
+
+	def _suggestion_taken_by_sibling(self, component_path: str, suggested_name: str) -> bool:
+		"""Check whether a suggested rename collides with an existing sibling name."""
+		return suggested_name in self._sibling_names(component_path)
 
 	@property
 	def error_message(self) -> str:
@@ -499,6 +540,18 @@ class NamePatternRule(FixableMixin, LintingRule):
 		name_path = self._path_translator.get_component_name_path(node.path)
 		if not name_path:
 			return
+
+		# Uniqueness guard (issue #116): never emit a rename that would duplicate a
+		# sibling name. Applies to both an existing sibling holding the suggested
+		# name and another pending rename in the same container converging on it.
+		# The violation message (see _validate_name) tells the user why no fix ran.
+		if self._suggestion_taken_by_sibling(node.path, suggested_name):
+			return
+		parent_path = self._component_parent_path(node.path)
+		claimed_targets = self._pending_rename_targets.setdefault(parent_path, set())
+		if suggested_name in claimed_targets:
+			return
+		claimed_targets.add(suggested_name)
 
 		# Create the primary rename operation
 		rename_op = FixOperation(

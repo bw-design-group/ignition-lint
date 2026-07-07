@@ -819,5 +819,113 @@ class TestEndToEndFixApplication(unittest.TestCase):
 		self.assertEqual(json_data['root']['children'][0]['meta']['name'], 'badButton')
 
 
+# =============================================================================
+# Test rename uniqueness guard (issue #116)
+# =============================================================================
+class TestRenameUniquenessGuard(unittest.TestCase):
+	"""Rename fixes must never create duplicate sibling names (issue #116)."""
+
+	def _process(self, json_data):
+		"""Run NamePatternRule (PascalCase, components) with fix context."""
+		rule_class = RULES_MAP['NamePatternRule']
+		rule = rule_class.create_from_config({
+			'convention': 'PascalCase',
+			'target_node_types': ['component'],
+			'severity': 'warning',
+		})
+		engine = LintEngine([rule])
+		translator = PathTranslator(json_data)
+		flattened = flatten_json(json_data)
+		return engine.process(flattened, json_data=json_data, path_translator=translator)
+
+	def test_no_fix_when_suggestion_collides_with_existing_sibling(self):
+		"""'My Button' -> 'MyButton' must not be fixed when a sibling 'MyButton' exists."""
+		json_data = make_view_json(
+			children=[
+				make_component('My Button', 'ia.input.button'),
+				make_component('MyButton', 'ia.input.button'),
+			]
+		)
+		results = self._process(json_data)
+
+		# 'MyButton' is valid, so the only fix candidate is the colliding rename.
+		self.assertEqual(
+			len(results.fixes), 0,
+			f"Colliding rename must not generate a fix. Got: {[f.description for f in results.fixes]}"
+		)
+
+	def test_violation_message_reports_collision(self):
+		"""The violation should explain why no auto-fix is offered."""
+		json_data = make_view_json(
+			children=[
+				make_component('My Button', 'ia.input.button'),
+				make_component('MyButton', 'ia.input.button'),
+			]
+		)
+		results = self._process(json_data)
+
+		messages = [msg for msgs in results.warnings.values() for msg in msgs]
+		collision_msgs = [m for m in messages if 'My Button' in m]
+		self.assertTrue(collision_msgs, f"Expected a violation for 'My Button'. Got: {messages}")
+		self.assertTrue(
+			any('already in use by a sibling' in m for m in collision_msgs),
+			f"Violation should report the sibling collision. Got: {collision_msgs}"
+		)
+
+	def test_convergent_suggestions_generate_only_one_fix(self):
+		"""Two siblings both suggesting 'MyButton' must yield at most one rename fix."""
+		json_data = make_view_json(
+			children=[
+				make_component('my button', 'ia.input.button'),
+				make_component('My Button', 'ia.input.button'),
+			]
+		)
+		results = self._process(json_data)
+
+		rename_targets = [
+			op.new_value
+			for f in results.fixes
+			for op in f.operations
+			if op.operation == FixOperationType.SET_VALUE
+		]
+		self.assertEqual(
+			rename_targets.count('MyButton'), 1,
+			f"Convergent renames must apply at most one fix. Rename targets: {rename_targets}"
+		)
+
+	def test_fix_generated_when_no_collision(self):
+		"""Control: the guard must not block a non-colliding rename."""
+		json_data = make_view_json(
+			children=[
+				make_component('My Button', 'ia.input.button'),
+				make_component('OtherButton', 'ia.input.button'),
+			]
+		)
+		results = self._process(json_data)
+
+		self.assertEqual(len(results.fixes), 1)
+		self.assertEqual(results.fixes[0].operations[0].new_value, 'MyButton')
+
+	def test_collision_in_nested_container_scope(self):
+		"""Uniqueness is per-container: same name in a different container is not a collision."""
+		json_data = make_view_json(
+			children=[
+				make_component(
+					'Panel', 'ia.container.flex',
+					children=[make_component('My Button', 'ia.input.button')]
+				),
+				make_component('MyButton', 'ia.input.button'),
+			]
+		)
+		results = self._process(json_data)
+
+		# 'My Button' lives inside Panel; the top-level 'MyButton' is not its sibling.
+		rename_fixes = [f for f in results.fixes if 'My Button' in f.description]
+		self.assertEqual(
+			len(rename_fixes), 1,
+			f"Non-sibling name reuse must not block the rename. Fixes: {[f.description for f in results.fixes]}"
+		)
+
+
 if __name__ == '__main__':
 	unittest.main()
