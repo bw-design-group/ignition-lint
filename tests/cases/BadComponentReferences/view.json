@@ -598,6 +598,154 @@
           "direction": "column"
         },
         "type": "ia.container.flex"
+      },
+      {
+        "children": [
+          {
+            "children": [
+              {
+                "meta": {
+                  "name": "Zone Dropdown"
+                },
+                "position": {
+                  "shrink": 0
+                },
+                "type": "ia.input.dropdown"
+              }
+            ],
+            "meta": {
+              "name": "Zone"
+            },
+            "position": {
+              "shrink": 0
+            },
+            "type": "ia.container.flex"
+          },
+          {
+            "children": [
+              {
+                "meta": {
+                  "name": "Region Dropdown"
+                },
+                "position": {
+                  "shrink": 0
+                },
+                "type": "ia.input.dropdown"
+              }
+            ],
+            "meta": {
+              "name": "Region"
+            },
+            "position": {
+              "shrink": 0
+            },
+            "type": "ia.container.flex"
+          }
+        ],
+        "meta": {
+          "name": "Filters"
+        },
+        "position": {
+          "shrink": 0
+        },
+        "type": "ia.container.flex"
+      },
+      {
+        "children": [
+          {
+            "meta": {
+              "name": "Detail"
+            },
+            "position": {
+              "shrink": 0
+            },
+            "props": {
+              "text": "detail"
+            },
+            "type": "ia.display.label"
+          }
+        ],
+        "meta": {
+          "name": "Centered Container"
+        },
+        "position": {
+          "shrink": 0
+        },
+        "type": "ia.container.flex"
+      },
+      {
+        "meta": {
+          "name": "AbsoluteRefConsumer"
+        },
+        "position": {
+          "shrink": 0
+        },
+        "propConfig": {
+          "custom.filter": {
+            "binding": {
+              "config": {
+                "struct": {
+                  "missing": "{/root/Filters/Missing/Missing Dropdown.props.value}",
+                  "region": "{/root/Filters/Region/Region Dropdown.props.value}",
+                  "valid": "{view.custom.paths}",
+                  "zone": "{/root/Filters/Zone/Zone Dropdown.props.value}"
+                },
+                "waitOnAll": true
+              },
+              "type": "expr-struct"
+            }
+          },
+          "props.text": {
+            "binding": {
+              "config": {
+                "path": "/root/Centered Container/Detail.props.text"
+              },
+              "type": "property"
+            }
+          }
+        },
+        "type": "ia.display.label"
+      },
+      {
+        "children": [
+          {
+            "meta": {
+              "name": "Inner Panel"
+            },
+            "position": {
+              "shrink": 0
+            },
+            "props": {
+              "text": "inner"
+            },
+            "type": "ia.display.label"
+          }
+        ],
+        "meta": {
+          "name": "SelfRefContainer"
+        },
+        "position": {
+          "grow": 1
+        },
+        "propConfig": {
+          "meta.tooltip.text": {
+            "binding": {
+              "config": {
+                "path": "./Inner Panel.props.text"
+              },
+              "type": "property"
+            }
+          },
+          "props.style.classes": {
+            "binding": {
+              "config": {
+                "expression": "{./Inner Panel.props.text}"
+              },
+              "type": "expr"
+            }
+          }
+        },
+        "type": "ia.container.flex"
       }
     ],
     "meta": {

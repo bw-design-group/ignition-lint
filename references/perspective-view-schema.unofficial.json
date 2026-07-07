@@ -1,0 +1,347 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "ViewConfig",
+  "description": "Perspective view configuration, as serialized by the standard (design-time) GSON adapters.",
+  "type": "object",
+  "required": ["root"],
+  "additionalProperties": false,
+  "properties": {
+    "root": {
+      "$ref": "#/$defs/ComponentConfig"
+    },
+    "props": {
+      "type": "object",
+      "description": "View-level properties."
+    },
+    "custom": {
+      "type": "object",
+      "description": "View-level custom properties."
+    },
+    "params": {
+      "type": "object",
+      "description": "View parameters."
+    },
+    "events": {
+      "$ref": "#/$defs/EventConfig"
+    },
+    "permissions": {
+      "$ref": "#/$defs/PermissionsConfig"
+    },
+    "propConfig": {
+      "$ref": "#/$defs/PropertyConfigCollection"
+    }
+  },
+  "$defs": {
+    "ComponentConfig": {
+      "type": "object",
+      "description": "Configuration for a single Perspective component.",
+      "required": ["type"],
+      "additionalProperties": false,
+      "properties": {
+        "type": {
+          "type": "string",
+          "description": "The component type identifier."
+        },
+        "version": {
+          "type": "integer",
+          "description": "Component schema version. Omitted when 0.",
+          "minimum": 1
+        },
+        "props": {
+          "type": "object",
+          "description": "Component properties."
+        },
+        "meta": {
+          "type": "object",
+          "description": "Component metadata."
+        },
+        "position": {
+          "type": "object",
+          "description": "Component position/layout properties."
+        },
+        "custom": {
+          "type": "object",
+          "description": "Custom properties."
+        },
+        "propConfig": {
+          "$ref": "#/$defs/PropertyConfigCollection"
+        },
+        "events": {
+          "$ref": "#/$defs/EventConfig"
+        },
+        "scripts": {
+          "$ref": "#/$defs/ScriptConfig"
+        },
+        "children": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/ComponentConfig"
+          }
+        }
+      }
+    },
+    "EventConfig": {
+      "type": "object",
+      "description": "Event configuration. Keys are event group names (e.g. 'dom', 'component', 'system'), values are objects mapping event names to actions.",
+      "additionalProperties": {
+        "type": "object",
+        "description": "An event group. Keys are event names (e.g. 'onClick', 'onStartup'), values are a single action or an array of actions.",
+        "additionalProperties": {
+          "oneOf": [
+            {
+              "$ref": "#/$defs/ActionConfig"
+            },
+            {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/ActionConfig"
+              }
+            }
+          ]
+        }
+      }
+    },
+    "ActionConfig": {
+      "type": "object",
+      "description": "Configuration for a single event action.",
+      "required": ["type", "scope"],
+      "properties": {
+        "type": {
+          "type": "string",
+          "description": "The action type identifier."
+        },
+        "scope": {
+          "type": "string",
+          "enum": ["G", "C"],
+          "description": "Action execution scope. G = Gateway, C = Client."
+        },
+        "config": {
+          "type": "object",
+          "description": "Action-specific configuration."
+        },
+        "enabled": {
+          "type": "boolean",
+          "description": "Only serialized when false (disabled). Absence implies true.",
+          "const": false
+        },
+        "preventDefault": {
+          "type": "boolean",
+          "description": "Only serialized when true. Absence implies false.",
+          "const": true
+        },
+        "stopPropagation": {
+          "type": "boolean",
+          "description": "Only serialized when true. Absence implies false.",
+          "const": true
+        },
+        "permissions": {
+          "$ref": "#/$defs/PermissionsConfig"
+        }
+      },
+      "additionalProperties": false
+    },
+    "PropertyConfigCollection": {
+      "type": "object",
+      "description": "A map of property path strings to their property configurations.",
+      "additionalProperties": {
+        "$ref": "#/$defs/PropertyConfig"
+      }
+    },
+    "PropertyConfig": {
+      "type": "object",
+      "description": "Configuration for a single property (binding, persistence, access, etc.).",
+      "additionalProperties": false,
+      "properties": {
+        "binding": {
+          "$ref": "#/$defs/BindingConfig"
+        },
+        "persistent": {
+          "type": "boolean",
+          "description": "Whether the property value is persisted."
+        },
+        "paramDirection": {
+          "type": "string",
+          "enum": ["input", "output", "inout"],
+          "description": "View parameter direction."
+        },
+        "onChange": {
+          "$ref": "#/$defs/PropertyChangeScriptConfig"
+        },
+        "access": {
+          "type": "string",
+          "enum": ["PUBLIC", "PRIVATE", "PROTECTED", "SYSTEM"],
+          "description": "Property access level."
+        }
+      }
+    },
+    "BindingConfig": {
+      "type": "object",
+      "description": "Configuration for a property binding.",
+      "required": ["type"],
+      "additionalProperties": false,
+      "properties": {
+        "type": {
+          "type": "string",
+          "description": "The binding type identifier."
+        },
+        "enabled": {
+          "type": "boolean",
+          "description": "Whether the binding is enabled. Null/absent implies true."
+        },
+        "overlayOptOut": {
+          "type": "boolean",
+          "description": "Whether the binding opts out of overlay behavior. Null/absent implies false."
+        },
+        "previewEnabled": {
+          "type": "boolean",
+          "description": "Whether the binding is active in preview mode. Null/absent implies true."
+        },
+        "config": {
+          "type": "object",
+          "description": "Binding-type-specific configuration."
+        },
+        "transforms": {
+          "type": "array",
+          "description": "Ordered list of transform configurations applied to the binding output.",
+          "items": {
+            "type": "object"
+          }
+        }
+      }
+    },
+    "ScriptConfig": {
+      "type": "object",
+      "description": "Script configuration for a component. Serialized with serializeNulls, so all fields are present.",
+      "additionalProperties": false,
+      "properties": {
+        "customMethods": {
+          "type": ["array", "null"],
+          "items": {
+            "$ref": "#/$defs/CustomMethodConfig"
+          }
+        },
+        "messageHandlers": {
+          "type": ["array", "null"],
+          "items": {
+            "$ref": "#/$defs/MessageHandlerConfig"
+          }
+        },
+        "extensionFunctions": {
+          "type": ["array", "null"],
+          "items": {
+            "$ref": "#/$defs/ExtensionFunctionConfig"
+          }
+        }
+      }
+    },
+    "CustomMethodConfig": {
+      "type": "object",
+      "description": "A user-defined scripting method on a component. Serialized with serializeNulls.",
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "type": ["string", "null"]
+        },
+        "params": {
+          "type": ["array", "null"],
+          "items": {
+            "type": "string"
+          }
+        },
+        "script": {
+          "type": ["string", "null"]
+        }
+      }
+    },
+    "MessageHandlerConfig": {
+      "type": "object",
+      "description": "Configuration for a message handler script. Serialized with serializeNulls.",
+      "additionalProperties": false,
+      "properties": {
+        "messageType": {
+          "type": ["string", "null"]
+        },
+        "script": {
+          "type": ["string", "null"]
+        },
+        "sessionScope": {
+          "type": "boolean"
+        },
+        "pageScope": {
+          "type": "boolean"
+        },
+        "viewScope": {
+          "type": "boolean"
+        }
+      }
+    },
+    "ExtensionFunctionConfig": {
+      "type": "object",
+      "description": "Configuration for a component extension function. Serialized with serializeNulls.",
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "type": ["string", "null"]
+        },
+        "script": {
+          "type": ["string", "null"]
+        },
+        "enabled": {
+          "type": "boolean"
+        }
+      }
+    },
+    "PropertyChangeScriptConfig": {
+      "type": "object",
+      "description": "Script that runs when a property value changes. Serialized with serializeNulls.",
+      "additionalProperties": false,
+      "properties": {
+        "script": {
+          "type": ["string", "null"]
+        },
+        "enabled": {
+          "type": ["boolean", "null"],
+          "description": "Null means true (for serialization efficiency)."
+        }
+      }
+    },
+    "PermissionsConfig": {
+      "type": "object",
+      "description": "Security permissions configuration.",
+      "required": ["type", "securityLevels"],
+      "additionalProperties": false,
+      "properties": {
+        "type": {
+          "type": "string",
+          "enum": ["AllOf", "AnyOf"],
+          "description": "How security levels are evaluated."
+        },
+        "securityLevels": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/SecurityLevelConfig"
+          }
+        }
+      }
+    },
+    "SecurityLevelConfig": {
+      "type": "object",
+      "description": "A node in the security level tree. Uses simple mode (no description field).",
+      "required": ["name", "children"],
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "The security level name."
+        },
+        "children": {
+          "type": "array",
+          "description": "Child security levels.",
+          "items": {
+            "$ref": "#/$defs/SecurityLevelConfig"
+          }
+        }
+      }
+    }
+  }
+}

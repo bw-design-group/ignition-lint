@@ -31,8 +31,14 @@ bin/
 # Build artifacts
 dist/
 
+# Poetry project-local runtime state (auto-installed plugins, per-machine config)
+.poetry/
+
 # Jython cache
 **/.jython_cache/
 
 # Ignition specific content
 .resources/
+
+# Local scratch views (may contain client details) — never commit
+_temp/
