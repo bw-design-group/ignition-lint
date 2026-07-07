@@ -1,9 +1,8 @@
 {
   "components_by_type": {
-    "ia.container.flex": 11,
-    "ia.display.label": 6,
-    "ia.input.button": 18,
-    "ia.input.dropdown": 2
+    "ia.container.flex": 1,
+    "ia.display.alarmstatustable": 2,
+    "ia.display.label": 1
   },
   "model_keys": [
     "components",
@@ -22,18 +21,12 @@
     "properties"
   ],
   "node_type_counts": {
-    "component": 37,
-    "custom_method": 2,
-    "event_handler": 8,
-    "expression_binding": 10,
-    "expression_struct_binding": 1,
-    "message_handler": 2,
-    "property": 69,
-    "property_binding": 10
+    "component": 4,
+    "property": 7
   },
   "rule_coverage": {
     "BadComponentReferenceRule": {
-      "applicable_node_count": 33,
+      "applicable_node_count": 0,
       "target_types": [
         "custom_method",
         "event_handler",
@@ -46,7 +39,7 @@
       ]
     },
     "ComponentReferenceValidationRule": {
-      "applicable_node_count": 70,
+      "applicable_node_count": 4,
       "target_types": [
         "component",
         "custom_method",
@@ -60,19 +53,19 @@
       ]
     },
     "ExcessiveContextDataRule": {
-      "applicable_node_count": 139,
+      "applicable_node_count": 11,
       "target_types": [
         "all"
       ]
     },
     "NamePatternRule": {
-      "applicable_node_count": 37,
+      "applicable_node_count": 4,
       "target_types": [
         "component"
       ]
     },
     "PollingIntervalRule": {
-      "applicable_node_count": 21,
+      "applicable_node_count": 0,
       "target_types": [
         "expression_binding",
         "expression_struct_binding",
@@ -82,7 +75,7 @@
       ]
     },
     "PylintScriptRule": {
-      "applicable_node_count": 12,
+      "applicable_node_count": 0,
       "target_types": [
         "custom_method",
         "event_handler",
@@ -92,7 +85,7 @@
       ]
     },
     "UnusedCustomPropertiesRule": {
-      "applicable_node_count": 138,
+      "applicable_node_count": 11,
       "target_types": [
         "component",
         "custom_method",
@@ -106,5 +99,5 @@
       ]
     }
   },
-  "total_nodes": 139
+  "total_nodes": 11
 }

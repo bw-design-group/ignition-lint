@@ -1,0 +1,139 @@
+{
+  "bindings": {
+    "count": 0,
+    "nodes": []
+  },
+  "components": {
+    "count": 4,
+    "nodes": [
+      {
+        "name": "AlarmStatusTable",
+        "node_type": "component",
+        "path": "root.root.children[0].AlarmStatusTable",
+        "properties_count": 0,
+        "type": "ia.display.alarmstatustable"
+      },
+      {
+        "name": "ShelvedAlarmTable",
+        "node_type": "component",
+        "path": "root.root.children[1].ShelvedAlarmTable",
+        "properties_count": 0,
+        "type": "ia.display.alarmstatustable"
+      },
+      {
+        "name": "Status Label",
+        "node_type": "component",
+        "path": "root.root.children[2].Status Label",
+        "properties_count": 0,
+        "type": "ia.display.label"
+      },
+      {
+        "name": "root",
+        "node_type": "component",
+        "path": "root.root",
+        "properties_count": 0,
+        "type": "ia.container.flex"
+      }
+    ]
+  },
+  "custom_methods": {
+    "count": 0,
+    "nodes": []
+  },
+  "event_handlers": {
+    "count": 0,
+    "nodes": []
+  },
+  "expression_bindings": {
+    "count": 0,
+    "nodes": []
+  },
+  "expression_struct_bindings": {
+    "count": 0,
+    "nodes": []
+  },
+  "message_handlers": {
+    "count": 0,
+    "nodes": []
+  },
+  "properties": {
+    "count": 7,
+    "nodes": [
+      {
+        "name": "unusedProp",
+        "node_type": "property",
+        "path": "custom.unusedProp",
+        "persistent": true,
+        "value": true,
+        "value_type": "bool"
+      },
+      {
+        "name": "usedProp",
+        "node_type": "property",
+        "path": "custom.usedProp",
+        "persistent": true,
+        "value": true,
+        "value_type": "bool"
+      },
+      {
+        "name": "grow",
+        "node_type": "property",
+        "path": "root.root.children.AlarmStatusTable.position.grow",
+        "value": 1,
+        "value_type": "int"
+      },
+      {
+        "name": "grow",
+        "node_type": "property",
+        "path": "root.root.children.ShelvedAlarmTable.position.grow",
+        "value": 1,
+        "value_type": "int"
+      },
+      {
+        "name": "shrink",
+        "node_type": "property",
+        "path": "root.root.children.Status Label.position.shrink",
+        "value": 0,
+        "value_type": "int"
+      },
+      {
+        "name": "text",
+        "node_type": "property",
+        "path": "root.root.children.Status Label.props.text",
+        "value": "status",
+        "value_type": "str"
+      },
+      {
+        "name": "direction",
+        "node_type": "property",
+        "path": "root.root.props.direction",
+        "value": "column",
+        "value_type": "str"
+      }
+    ]
+  },
+  "property_bindings": {
+    "count": 0,
+    "nodes": []
+  },
+  "property_change_scripts": {
+    "count": 0,
+    "nodes": []
+  },
+  "query_bindings": {
+    "count": 0,
+    "nodes": []
+  },
+  "script_transforms": {
+    "count": 0,
+    "nodes": []
+  },
+  "scripts": {
+    "count": 0,
+    "nodes": []
+  },
+  "tag_bindings": {
+    "count": 0,
+    "nodes": []
+  }
+}

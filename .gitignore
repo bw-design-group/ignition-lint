@@ -39,3 +39,6 @@ dist/
 
 # Ignition specific content
 .resources/
+
+# Local scratch views (may contain client details) — never commit
+_temp/
