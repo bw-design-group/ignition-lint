@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.6.2] - 2026-07-07
+
 ### Fixed
 - The component-rename auto-fixer no longer silently breaks bindings it cannot see (#114). Its reference detection previously required two or more leading dots, so a component referenced only via single-dot `./Child` or absolute `/root/Container/Component` paths was misclassified as safe to rename — plain `--fix` renamed it and left every such binding dangling (hit in production: 9 broken bindings across 5 views). Detection and rewriting now share one reference-grammar parser with the validation rules, covering `./`, `../`, `.../`, and `/root/...` forms in expressions, property-binding paths, and expression-struct values.
 - Rename reference rewriting no longer corrupts unrelated text (#115). Rewrites previously used a whole-value `str.replace()` of the bare component name, which mangled overlapping sibling names (renaming `data label` rewrote part of `{../data label 2...}`, leaving a dangling reference), mutated display literals (`'pump status: '` became `'PumpStatus: '`), and edited comments and `sendMessage()` payloads inside scripts. Operations now replace the full reference text only — scripts are tokenized so real `getSibling`/`getChild` calls are distinguished from the same text in comments or unrelated string literals — and fix-conflict detection is operation-aware, so two components referenced in one expression both rename cleanly.
@@ -360,7 +362,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Initial tracked release
 
-[Unreleased]: https://github.com/bw-design-group/ignition-lint/compare/v0.6.1...HEAD
+[Unreleased]: https://github.com/bw-design-group/ignition-lint/compare/v0.6.2...HEAD
+[0.6.2]: https://github.com/bw-design-group/ignition-lint/compare/v0.6.1...v0.6.2
 [0.6.1]: https://github.com/bw-design-group/ignition-lint/compare/v0.6.0...v0.6.1
 [0.6.0]: https://github.com/bw-design-group/ignition-lint/compare/v0.5.3...v0.6.0
 [0.5.3]: https://github.com/bw-design-group/ignition-lint/compare/v0.5.2...v0.5.3
