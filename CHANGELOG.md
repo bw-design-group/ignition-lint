@@ -20,6 +20,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `tests/cases/ExtensionFunctions` — real Designer export of an Alarm Status Table with populated `filterAlarm`/`filterShelvedAlarm` extension functions, capturing the baseline for modeling them as first-class script nodes (#117).
 - `references/perspective-view-schema.unofficial.json` — Paul Griffith's unofficial Perspective view.json schema with provenance notes and a gap analysis against the current object model.
 
+### Changed
+- Renamed the Docusaurus documentation source directory from `documentation/` to `docs/`, updating the docs deploy workflow, `docusaurus.config.ts`, and `CLAUDE.md` references accordingly. [dc216c9]
+- Added an explicit `.poetry/` entry to the root `.gitignore` to keep Poetry's project-local runtime state (auto-installed plugins, per-machine config) out of version control. [c3cc77d]
+
+### Removed
+- Removed the legacy flat-file `docs/` folder (PRD notes, standalone rule/tutorial guides, whitelist and troubleshooting docs) superseded by the Docusaurus documentation site. [2ef6a30]
+- Removed the orphaned `images/test-failure.png` asset that was no longer referenced. [ab94b9b]
+
 ## [0.6.1] - 2026-06-22
 
 ### Changed

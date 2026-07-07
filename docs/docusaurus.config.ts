@@ -62,7 +62,7 @@ const config: Config = {
           sidebarPath: './sidebars.ts',
           routeBasePath: '/',
           editUrl:
-            'https://github.com/bw-design-group/ignition-lint/tree/main/documentation/',
+            'https://github.com/bw-design-group/ignition-lint/tree/main/docs/',
         },
         blog: false,
         theme: {

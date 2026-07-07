@@ -1,6 +1,6 @@
 name: Deploy documentation
 
-# Builds the Docusaurus site under documentation/ and publishes it to
+# Builds the Docusaurus site under docs/ and publishes it to
 # GitHub Pages. Triggered on every push to main that touches the docs
 # (or the CHANGELOG, which the docs site mirrors), and runnable on
 # demand via the Actions tab.
@@ -15,7 +15,7 @@ on:
   push:
     branches: [main]
     paths:
-      - 'documentation/**'
+      - 'docs/**'
       - 'CHANGELOG.md'
       - '.github/workflows/deploy-docs.yml'
   workflow_dispatch:
@@ -37,7 +37,7 @@ jobs:
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: documentation
+        working-directory: docs
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -47,7 +47,7 @@ jobs:
         with:
           node-version: '20'
           cache: 'npm'
-          cache-dependency-path: documentation/package-lock.json
+          cache-dependency-path: docs/package-lock.json
 
       - name: Install dependencies
         run: npm ci
@@ -64,7 +64,7 @@ jobs:
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: documentation/build
+          path: docs/build
 
   deploy:
     name: Deploy to GitHub Pages

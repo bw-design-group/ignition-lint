@@ -290,7 +290,7 @@ repos:
 
 **Important:** By default, ignition-lint does NOT use a whitelist unless you explicitly specify `--whitelist <path>`.
 
-**For detailed documentation**, see [docs/whitelist-guide.md](docs/whitelist-guide.md).
+**For detailed documentation**, see [docs/docs/usage/whitelist.md](docs/docs/usage/whitelist.md).
 
 ## Debugging and Analysis
 
@@ -519,7 +519,7 @@ The `PylintScriptRule` supports configurable category mapping to control how Pyl
       • root.Label.transform: Line 2: Unused import 'json' (W0611)
 ```
 
-**For detailed examples and best practices**, see [docs/pylint-category-mapping-examples.md](docs/pylint-category-mapping-examples.md).
+**For detailed examples and best practices**, see [docs/docs/reference/scripts/pylint-script.md](docs/docs/reference/scripts/pylint-script.md).
 
 ## Adding New Rules
 
@@ -553,13 +553,13 @@ class MyCustomRule(LintingRule):
 
 ### Developer Resources
 
-📚 **[Complete Documentation Index](docs/README.md)** - Organized guide to all documentation
+📚 **[Hosted Documentation](https://bw-design-group.github.io/ignition-lint/)** - Full docs site (source in `docs/docs/`)
 
 **Quick Access:**
-- **New Developer?** → [Tutorial: Creating Your First Rule](docs/tutorial-creating-your-first-rule.md)
-- **Need Reference?** → [Developer Guide](docs/developer-guide-rule-creation.md)
-- **API Questions?** → [API Reference](docs/api-reference-rule-registration.md)
-- **Having Issues?** → [Troubleshooting Guide](docs/troubleshooting-rule-development.md)
+- **New Developer?** → [Creating Rules](docs/docs/developing/creating-rules.md)
+- **Architecture?** → [Architecture](docs/docs/developing/architecture.md)
+- **API Questions?** → [API Reference](docs/docs/developing/api-reference.md)
+- **Having Issues?** → [Troubleshooting Guide](docs/docs/developing/troubleshooting.md)
 
 **Additional Resources:**
 - **Example Rules**: `src/ignition_lint/rules/_examples/example_rule.py` - Working examples (excluded from auto-discovery; import explicitly when using)
