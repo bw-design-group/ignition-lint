@@ -394,11 +394,49 @@ class TestReferenceFinder(unittest.TestCase):
 
 	def test_find_script_reference(self):
 		"""Should find component name in script getSibling calls."""
+		script_comp = make_component('ScriptComp', 'ia.input.button')
+		script_comp['events'] = OrderedDict([
+			(
+				'component',
+				OrderedDict([
+					(
+						'onActionPerformed',
+						OrderedDict([
+							(
+								'config',
+								OrderedDict([(
+									'script',
+									"\tself.getSibling('TargetButton').props.text"
+								)])
+							),
+							('scope', 'G'),
+							('type', 'script'),
+						])
+					),
+				])
+			),
+		])
+		json_data = make_view_json(children=[
+			make_component('TargetButton', 'ia.input.button'),
+			script_comp,
+		])
+		translator = PathTranslator(json_data)
+		flattened = flatten_json(json_data)
+		finder = ComponentReferenceFinder(flattened, translator)
+
+		refs = finder.find_references('TargetButton')
+		self.assertGreater(len(refs), 0)
+		self.assertEqual(refs[0].ref_type, 'script')
+		self.assertTrue(refs[0].rewritable)
+		self.assertEqual(refs[0].old_text, "getSibling('TargetButton')")
+
+	def test_navigation_call_outside_script_key_is_safety_only(self):
+		"""A getSibling pattern in a non-script value must count for safety but never rewrite."""
 		json_data = make_view_json(
 			children=[
 				make_component('TargetButton', 'ia.input.button'),
 				make_component(
-					'ScriptComp', 'ia.display.label',
+					'DocLabel', 'ia.display.label',
 					props=OrderedDict([('text', "self.getSibling('TargetButton').props.text")])
 				),
 			]
@@ -409,7 +447,10 @@ class TestReferenceFinder(unittest.TestCase):
 
 		refs = finder.find_references('TargetButton')
 		self.assertGreater(len(refs), 0)
-		self.assertEqual(refs[0].ref_type, 'script')
+		self.assertEqual(refs[0].ref_type, 'free_text')
+		self.assertFalse(refs[0].rewritable)
+		operations = finder.build_rename_operations('TargetButton', 'NewButton', refs)
+		self.assertEqual(operations, [])
 
 	def test_no_references_for_unreferenced_component(self):
 		"""Should return empty list for components not referenced anywhere."""
@@ -509,8 +550,10 @@ class TestReferenceFinder(unittest.TestCase):
 
 		self.assertGreater(len(operations), 0)
 		self.assertEqual(operations[0].operation, FixOperationType.STRING_REPLACE)
-		self.assertEqual(operations[0].old_substring, 'MyButton')
-		self.assertEqual(operations[0].new_substring, 'NewButton')
+		# Maximal-context replacement (issue #115): the operation replaces the
+		# full reference text, never the bare component name.
+		self.assertEqual(operations[0].old_substring, '{../MyButton.props.text}')
+		self.assertEqual(operations[0].new_substring, '{../NewButton.props.text}')
 
 
 # =============================================================================
@@ -925,6 +968,210 @@ class TestRenameUniquenessGuard(unittest.TestCase):
 			len(rename_fixes), 1,
 			f"Non-sibling name reuse must not block the rename. Fixes: {[f.description for f in results.fixes]}"
 		)
+
+
+# =============================================================================
+# Test reference grammar coverage (issue #114)
+# =============================================================================
+class TestReferenceGrammarCoverage(unittest.TestCase):
+	"""The finder must detect every documented reference form (issue #114)."""
+
+	def _finder_for(self, prop_config_value, binding_type='expr', config_key='expression'):
+		"""Build a finder over a view with one binding-carrying component."""
+		json_data = make_view_json(
+			children=[
+				make_component('Target Component', 'ia.input.button'),
+				make_component(
+					'Consumer', 'ia.display.label', propConfig=OrderedDict([
+						(
+							'props.text',
+							OrderedDict([
+								(
+									'binding',
+									OrderedDict([
+										(
+											'config',
+											OrderedDict([(
+												config_key,
+												prop_config_value
+											)])
+										),
+										('type', binding_type),
+									])
+								),
+							])
+						),
+					])
+				),
+			]
+		)
+		translator = PathTranslator(json_data)
+		flattened = flatten_json(json_data)
+		return ComponentReferenceFinder(flattened, translator)
+
+	def test_detects_absolute_root_expression(self):
+		"""{/root/...} absolute expression references must be detected."""
+		finder = self._finder_for('{/root/Target Component.props.value}')
+		refs = finder.find_references('Target Component')
+		self.assertEqual(len(refs), 1)
+		self.assertTrue(refs[0].rewritable)
+
+	def test_detects_absolute_root_property_path(self):
+		"""/root/... absolute property binding paths must be detected."""
+		finder = self._finder_for(
+			'/root/Target Component.props.value', binding_type='property', config_key='path'
+		)
+		refs = finder.find_references('Target Component')
+		self.assertEqual(len(refs), 1)
+
+	def test_detects_single_dot_expression(self):
+		"""{./...} container-self expression references must be detected."""
+		finder = self._finder_for('{./Target Component.props.value}')
+		refs = finder.find_references('Target Component')
+		self.assertEqual(len(refs), 1)
+
+	def test_detects_single_dot_property_path(self):
+		"""./... container-self property binding paths must be detected."""
+		finder = self._finder_for('./Target Component.props.value', binding_type='property', config_key='path')
+		refs = finder.find_references('Target Component')
+		self.assertEqual(len(refs), 1)
+
+	def test_absolute_rewrite_preserves_path_structure(self):
+		"""Renaming through an absolute path only touches the matching segment."""
+		finder = self._finder_for('{/root/Target Component/Detail.props.text}')
+		refs = finder.find_references('Target Component')
+		operations = finder.build_rename_operations('Target Component', 'TargetComponent', refs)
+		self.assertEqual(len(operations), 1)
+		self.assertEqual(operations[0].new_substring, '{/root/TargetComponent/Detail.props.text}')
+
+	def test_view_keyword_reference_is_not_a_component_reference(self):
+		"""{view.custom.x} keyword references must never be detected as components."""
+		finder = self._finder_for('{view.custom.paths}')
+		self.assertEqual(finder.find_references('view'), [])
+		self.assertEqual(finder.find_references('paths'), [])
+
+	def test_runscript_expression_blocks_rewrite(self):
+		"""A name inside runScript(...) makes the rename unsafe but non-rewritable."""
+		finder = self._finder_for('runScript("shared.nav.focus(\'Target Component\')")')
+		refs = finder.find_references('Target Component')
+		self.assertEqual(len(refs), 1)
+		self.assertFalse(refs[0].rewritable)
+
+
+# =============================================================================
+# Test rewrite corruption scenarios (issue #115)
+# =============================================================================
+class TestRewriteCorruptionScenarios(unittest.TestCase):
+	"""Empirically confirmed corruption modes that must stay fixed (issue #115)."""
+
+	def _process_with_rule(self, json_data):
+		rule_class = RULES_MAP['NamePatternRule']
+		rule = rule_class.create_from_config({
+			'convention': 'PascalCase',
+			'target_node_types': ['component'],
+			'severity': 'warning',
+		})
+		engine = LintEngine([rule])
+		translator = PathTranslator(json_data)
+		flattened = flatten_json(json_data)
+		results = engine.process(flattened, json_data=json_data, path_translator=translator)
+		return results, translator
+
+	def _expression_component(self, expression):
+		return make_component(
+			'Combined', 'ia.display.label', propConfig=OrderedDict([
+				(
+					'props.text',
+					OrderedDict([
+						(
+							'binding',
+							OrderedDict([
+								('config', OrderedDict([('expression', expression)])),
+								('type', 'expr'),
+							])
+						),
+					])
+				),
+			])
+		)
+
+	def test_scenario_a_overlapping_names_both_renamed_and_rewritten(self):
+		"""Substring-overlapping siblings: both rename, both references update."""
+		json_data = make_view_json(
+			children=[
+				make_component('data label', 'ia.display.label'),
+				make_component('data label 2', 'ia.display.label'),
+				self._expression_component('{../data label.props.text} + {../data label 2.props.text}'),
+			]
+		)
+		results, translator = self._process_with_rule(json_data)
+		fix_engine = FixEngine(translator)
+		fix_result = fix_engine.apply_fixes(results.fixes, safe_only=False)
+
+		self.assertEqual(fix_result.applied_count, 2, f"conflicts: {fix_result.conflicts}")
+		names = [c['meta']['name'] for c in json_data['root']['children'][:2]]
+		self.assertEqual(names, ['DataLabel', 'DataLabel2'])
+		expression = (
+			json_data['root']['children'][2]['propConfig']['props.text']['binding']['config']['expression']
+		)
+		self.assertEqual(expression, '{../DataLabel.props.text} + {../DataLabel2.props.text}')
+
+	def test_scenario_b_literal_text_preserved(self):
+		"""A display literal containing the component name must not be rewritten."""
+		json_data = make_view_json(
+			children=[
+				make_component('pump status', 'ia.display.label'),
+				self._expression_component("'pump status: ' + {../pump status.props.text}"),
+			]
+		)
+		results, translator = self._process_with_rule(json_data)
+		fix_engine = FixEngine(translator)
+		fix_result = fix_engine.apply_fixes(results.fixes, safe_only=False)
+
+		self.assertEqual(fix_result.applied_count, 1)
+		expression = (
+			json_data['root']['children'][1]['propConfig']['props.text']['binding']['config']['expression']
+		)
+		self.assertEqual(expression, "'pump status: ' + {../PumpStatus.props.text}")
+
+	def test_scenario_c_script_comments_and_literals_preserved(self):
+		"""Script rewrites must touch only the navigation call, never comments or payloads."""
+		script = (
+			"\t# update the data label widget\n"
+			"\tlabel = self.getSibling('data label')\n"
+			"\tsystem.perspective.sendMessage('data label')\n"
+		)
+		script_comp = make_component('Trigger', 'ia.input.button')
+		script_comp['events'] = OrderedDict([
+			(
+				'component',
+				OrderedDict([
+					(
+						'onActionPerformed',
+						OrderedDict([
+							('config', OrderedDict([('script', script)])),
+							('scope', 'G'),
+							('type', 'script'),
+						])
+					),
+				])
+			),
+		])
+		json_data = make_view_json(children=[
+			make_component('data label', 'ia.display.label'),
+			script_comp,
+		])
+		results, translator = self._process_with_rule(json_data)
+		fix_engine = FixEngine(translator)
+		fix_result = fix_engine.apply_fixes(results.fixes, safe_only=False)
+
+		self.assertEqual(fix_result.applied_count, 1)
+		updated = (
+			json_data['root']['children'][1]['events']['component']['onActionPerformed']['config']['script']
+		)
+		self.assertIn("self.getSibling('DataLabel')", updated)
+		self.assertIn('# update the data label widget', updated)
+		self.assertIn("sendMessage('data label')", updated)
 
 
 if __name__ == '__main__':

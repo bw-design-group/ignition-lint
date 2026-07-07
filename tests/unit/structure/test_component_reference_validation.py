@@ -840,6 +840,106 @@ class TestComponentReferenceValidationRule(BaseRuleTest):
 			f"Valid nested custom property reference should pass. Errors: {rule_errors}"
 		)
 
+	def _absolute_ref_components(self, expression):
+		"""Root structure with Filters/Zone Dropdown and a consumer expression."""
+		return {
+			"children": [
+				{
+					"children": [{
+						"meta": {
+							"name": "Zone Dropdown"
+						},
+						"type": "ia.input.dropdown"
+					},],
+					"meta": {
+						"name": "Filters"
+					},
+					"type": "ia.container.flex"
+				},
+				{
+					"meta": {
+						"name": "Consumer"
+					},
+					"propConfig": {
+						"props.text": {
+							"binding": {
+								"config": {
+									"expression": expression
+								},
+								"type": "expr"
+							}
+						}
+					},
+					"type": "ia.display.label"
+				},
+			],
+			"meta": {
+				"name": "root"
+			},
+			"type": "ia.container.flex"
+		}
+
+	def test_valid_absolute_reference_in_expression(self):
+		"""Absolute {/root/...} references that resolve must pass (issue #114)."""
+		components = self._absolute_ref_components('{/root/Filters/Zone Dropdown.props.value}')
+		mock_view = self._create_mock_view_with_components(components)
+		self.run_lint_on_mock_view(mock_view, self.rule_config)
+
+		rule_errors = self.get_errors_for_rule("ComponentReferenceValidationRule")
+		self.assertEqual(len(rule_errors), 0, f"Valid absolute reference should pass. Errors: {rule_errors}")
+
+	def test_broken_absolute_reference_in_expression(self):
+		"""Absolute {/root/...} references to missing components must be flagged (issue #114)."""
+		components = self._absolute_ref_components('{/root/Filters/Missing Dropdown.props.value}')
+		mock_view = self._create_mock_view_with_components(components)
+		self.run_lint_on_mock_view(mock_view, self.rule_config)
+
+		rule_errors = self.get_errors_for_rule("ComponentReferenceValidationRule")
+		self.assertEqual(
+			len(rule_errors), 1, f"Broken absolute reference should be flagged. Errors: {rule_errors}"
+		)
+		self.assertIn("Missing Dropdown", rule_errors[0])
+
+	def test_broken_absolute_property_binding_path(self):
+		"""Absolute /root/... property binding paths to missing components must be flagged."""
+		components = self._absolute_ref_components('{view.custom.unrelated}')
+		components["children"][1]["propConfig"]["props.style.classes"] = {
+			"binding": {
+				"config": {
+					"path": "/root/Filters/Missing Dropdown.props.value"
+				},
+				"type": "property"
+			}
+		}
+		mock_view = self._create_mock_view_with_components(components)
+		self.run_lint_on_mock_view(mock_view, self.rule_config)
+
+		rule_errors = self.get_errors_for_rule("ComponentReferenceValidationRule")
+		self.assertEqual(
+			len(rule_errors), 1,
+			f"Broken absolute property binding should be flagged. Errors: {rule_errors}"
+		)
+		self.assertIn("Missing Dropdown", rule_errors[0])
+
+	def test_valid_absolute_property_binding_path(self):
+		"""Absolute /root/... property binding paths that resolve must pass."""
+		components = self._absolute_ref_components('{view.custom.unrelated}')
+		components["children"][1]["propConfig"]["props.style.classes"] = {
+			"binding": {
+				"config": {
+					"path": "/root/Filters/Zone Dropdown.props.value"
+				},
+				"type": "property"
+			}
+		}
+		mock_view = self._create_mock_view_with_components(components)
+		self.run_lint_on_mock_view(mock_view, self.rule_config)
+
+		rule_errors = self.get_errors_for_rule("ComponentReferenceValidationRule")
+		self.assertEqual(
+			len(rule_errors), 0, f"Valid absolute property binding should pass. Errors: {rule_errors}"
+		)
+
 
 if __name__ == '__main__':
 	unittest.main()

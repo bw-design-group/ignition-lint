@@ -139,31 +139,64 @@ class FixEngine:
 
 	def detect_conflicts(self, fixes: List[Fix]) -> List[FixConflict]:
 		"""
-		Find conflicting fixes (e.g., two operations targeting the same path).
+		Find conflicting fixes: two operations targeting the same path in
+		ways that cannot compose. First fix wins, second is flagged.
 
-		First fix wins, second is flagged as conflicting.
+		STRING_REPLACE operations with disjoint contexts on the same value
+		are NOT conflicts: renaming two different components referenced in
+		one expression must update both references (issue #115). They only
+		conflict when their contexts interact (identical old text with
+		different replacements, or one context containing the other).
 		"""
 		conflicts = []
-		# Track which paths are claimed by which fix
-		claimed_paths: List[Tuple[str, Fix]] = []
+		# Track which (path, operation) pairs are claimed by which fix
+		claimed_ops: List[Tuple[str, object, Fix]] = []
 
 		for fix in fixes:
+			conflicting_with = None
 			for operation in fix.operations:
 				path_key = str(operation.json_path)
-				for existing_path_key, existing_fix in claimed_paths:
-					if path_key == existing_path_key and existing_fix is not fix:
-						conflicts.append(
-							FixConflict(
-								fix_a=existing_fix, fix_b=fix,
-								conflicting_path=operation.json_path, description=
-								f"Both fixes modify path {operation.format_path()}"
-							)
-						)
+				for existing_path_key, existing_op, existing_fix in claimed_ops:
+					if path_key != existing_path_key or existing_fix is fix:
+						continue
+					if self._operations_conflict(existing_op, operation):
+						conflicting_with = (existing_fix, operation)
 						break
-				else:
-					claimed_paths.append((path_key, fix))
+				if conflicting_with:
+					break
+
+			if conflicting_with:
+				existing_fix, operation = conflicting_with
+				conflicts.append(
+					FixConflict(
+						fix_a=existing_fix, fix_b=fix, conflicting_path=operation.json_path,
+						description=f"Both fixes modify path {operation.format_path()}"
+					)
+				)
+			else:
+				for operation in fix.operations:
+					claimed_ops.append((str(operation.json_path), operation, fix))
 
 		return conflicts
+
+	@staticmethod
+	def _operations_conflict(op_a, op_b) -> bool:
+		"""Whether two operations on the same JSON path cannot compose."""
+		if (
+			op_a.operation != FixOperationType.STRING_REPLACE or
+			op_b.operation != FixOperationType.STRING_REPLACE
+		):
+			# SET_VALUE against anything on the same path is a conflict.
+			return True
+
+		old_a, old_b = op_a.old_substring or '', op_b.old_substring or ''
+		if old_a == old_b:
+			# Identical rewrites compose (second is a no-op); different
+			# replacements of the same text cannot both win.
+			return op_a.new_substring != op_b.new_substring
+		# One context containing the other means the outer rewrite would
+		# invalidate the inner one - order-dependent, treat as conflict.
+		return old_a in old_b or old_b in old_a
 
 	def _apply_single_fix(self, fix: Fix):
 		"""Apply all operations in a single fix."""

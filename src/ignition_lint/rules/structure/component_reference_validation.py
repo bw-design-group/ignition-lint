@@ -27,9 +27,10 @@ Official Documentation:
 """
 
 import re
-from typing import Dict, List, Optional, Tuple
+from typing import Dict, List, Optional
 from ..common import LintingRule
 from ..registry import register_rule
+from ...common.reference_parser import parse_expression_references, parse_property_path
 from ...model.node_types import NodeType, COMPONENT_REFERENCE_NODES
 
 
@@ -162,30 +163,26 @@ class ComponentReferenceValidationRule(LintingRule):
 			self._validate_expression_string(node.path, expression)
 
 	def _validate_expression_string(self, source_path: str, expression: str):
-		"""Validate the relative component references inside a single expression string."""
+		"""
+		Validate the component references inside a single expression string.
+
+		Extraction is delegated to the shared reference parser (the same
+		grammar the rename fixer uses, issue #114): relative {./x}, {../x},
+		{.../x} references and absolute {/root/...} references.
+		"""
 		if not expression:
 			return
 
-		# Match {./path}, {../path} or {.../path} patterns.
-		# A single leading dot = the current component (0 levels up); each additional
-		# dot = one more level up. We accept one-or-more dots so single-dot './' refs
-		# are validated too, not just multi-dot ones.
-		pattern = r'\{(\.+)/([^}]+)\}'
-
-		for match in re.finditer(pattern, expression):
-			dots = match.group(1)  # . or .. or ... etc.
-			ref_path = match.group(2)  # Component.props.value or Path/To/Component.props.value
-
-			# CRITICAL: Each dot beyond the first = one level up (single dot = 0 levels up)
-			levels_up = len(dots) - 1
-
-			# Extract component path (before .props or .position)
-			component_ref = self._extract_component_reference(ref_path)
-
-			# Validate
-			self._validate_relative_reference(
-				source_path, component_ref, levels_up, full_ref=expression, ref_type="expression"
-			)
+		for reference in parse_expression_references(expression):
+			if reference.absolute:
+				self._validate_absolute_reference(
+					source_path, reference.segments, full_ref=expression, ref_type="expression"
+				)
+			else:
+				self._validate_relative_reference(
+					source_path, '/'.join(reference.segments), reference.levels_up,
+					full_ref=expression, ref_type="expression"
+				)
 
 	def visit_property_binding(self, node):
 		"""Check property bindings for component references."""
@@ -193,43 +190,22 @@ class ComponentReferenceValidationRule(LintingRule):
 			return
 
 		target_path = node.target_path
-		if not target_path or not target_path.startswith('.'):
-			return  # Not a relative path
-
-		# Match ./path, ../path or .../path patterns. A single leading dot is the
-		# current component (0 levels up); each extra dot is one level up. Accepting
-		# one-or-more dots ensures single-dot './' bindings are validated.
-		match = re.match(r'^(\.+)/(.+)$', target_path)
-		if not match:
+		if not target_path:
 			return
 
-		dots = match.group(1)
-		ref_path = match.group(2)
+		reference = parse_property_path(target_path)
+		if not reference:
+			return  # Not a component path (e.g. view/session keyword reference)
 
-		# CRITICAL: Each dot beyond the first = one level up
-		levels_up = len(dots) - 1
-		component_ref = self._extract_component_reference(ref_path)
-
-		self._validate_relative_reference(
-			node.path, component_ref, levels_up, full_ref=target_path, ref_type="property binding"
-		)
-
-	def _extract_component_reference(self, ref_path: str) -> str:
-		"""
-		Extract component path from reference.
-
-		Examples:
-			Button.props.enabled -> Button
-			Container/Child.props.text -> Container/Child
-			Component.position.display -> Component
-			Switch1.custom.energized -> Switch1
-		"""
-		# Remove property access suffix
-		for suffix in ['.props.', '.position.', '.meta.', '.custom.']:
-			if suffix in ref_path:
-				return ref_path.split(suffix)[0]
-
-		return ref_path
+		if reference.absolute:
+			self._validate_absolute_reference(
+				node.path, reference.segments, full_ref=target_path, ref_type="property binding"
+			)
+		else:
+			self._validate_relative_reference(
+				node.path, '/'.join(reference.segments), reference.levels_up, full_ref=target_path,
+				ref_type="property binding"
+			)
 
 	def visit_event_handler(self, node):
 		"""Check event handler scripts for component references."""
@@ -336,29 +312,6 @@ class ComponentReferenceValidationRule(LintingRule):
 						)
 						break
 
-	def _parse_chain_steps(self, chain: str) -> List[Tuple[str, Optional[str]]]:
-		"""
-		Parse chain into steps.
-
-		Examples:
-			self.parent.getChild('A') -> [('parent', None), ('getChild', 'A')]
-			self.getSibling('B').getChild('C') -> [('getSibling', 'B'), ('getChild', 'C')]
-		"""
-		steps = []
-
-		# Match .parent
-		parent_count = chain.count('.parent')
-		steps.extend([('parent', None)] * parent_count)
-
-		# Match method calls with arguments
-		method_pattern = r'\.([a-zA-Z]+)\(["\']([^"\']+)["\']\)'
-		for match in re.finditer(method_pattern, chain):
-			method = match.group(1)
-			arg = match.group(2)
-			steps.append((method, arg))
-
-		return steps
-
 	def _validate_relative_reference(
 		self, source_path: str, component_ref: str, levels_up: int, *, full_ref: str, ref_type: str
 	):
@@ -402,6 +355,38 @@ class ComponentReferenceValidationRule(LintingRule):
 				f"{source_path}: {ref_type.title()} references non-existent "
 				f"component '{component_ref}' in: {full_ref}"
 			)
+
+	def _validate_absolute_reference(self, source_path: str, segments: List[str], *, full_ref: str, ref_type: str):
+		"""
+		Validate an absolute component reference (/root/Container/Component).
+
+		A leading slash starts at the top of the view hierarchy: the first
+		segment names the root container, the rest drill down (issue #114).
+		"""
+		if not segments:
+			return
+
+		root_path = self._find_top_level_component(segments[0])
+		if root_path is None:
+			self.add_violation(
+				f"{source_path}: {ref_type.title()} references non-existent "
+				f"component '{'/'.join(segments)}' in: {full_ref}"
+			)
+			return
+
+		resolved = self._navigate_down_path(root_path, segments[1:]) if len(segments) > 1 else root_path
+		if not resolved:
+			self.add_violation(
+				f"{source_path}: {ref_type.title()} references non-existent "
+				f"component '{'/'.join(segments)}' in: {full_ref}"
+			)
+
+	def _find_top_level_component(self, name: str) -> Optional[str]:
+		"""Find the tree-top component (no container parent) with the given name."""
+		for component in self.component_by_name.get(name, []):
+			if component.path not in self.parent_map:
+				return component.path
+		return None
 
 	def _navigate_down_path(self, parent_path: str, segments: List[str]) -> Optional[str]:
 		"""

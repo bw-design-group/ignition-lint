@@ -564,6 +564,13 @@ class NamePatternRule(FixableMixin, LintingRule):
 		references = ref_finder.find_references(current_name)
 		has_self_name_ref = ref_finder.has_self_name_binding(node.path)
 
+		# Defense in depth (issues #114/#115): a reference the finder cannot
+		# rewrite (unparseable script, runScript() payload, free-text hit)
+		# would be left dangling even under --fix-unsafe. Offer no fix at all;
+		# the violation still reports so the user can rename manually.
+		if any(not ref.rewritable for ref in references):
+			return
+
 		if references or has_self_name_ref:
 			# Unsafe fix: references or this.meta.name bindings exist
 			all_operations = [rename_op]
