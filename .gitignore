@@ -31,6 +31,9 @@ bin/
 # Build artifacts
 dist/
 
+# Poetry project-local runtime state (auto-installed plugins, per-machine config)
+.poetry/
+
 # Jython cache
 **/.jython_cache/
 
