@@ -1,0 +1,84 @@
+{
+  "custom": {
+    "unusedProp": true,
+    "usedProp": true
+  },
+  "params": {},
+  "propConfig": {
+    "custom.unusedProp": {
+      "persistent": true
+    },
+    "custom.usedProp": {
+      "persistent": true
+    }
+  },
+  "props": {},
+  "root": {
+    "children": [
+      {
+        "meta": {
+          "name": "AlarmStatusTable"
+        },
+        "position": {
+          "grow": 1
+        },
+        "scripts": {
+          "customMethods": [],
+          "extensionFunctions": [
+            {
+              "enabled": true,
+              "name": "filterAlarm",
+              "script": "\tlabel = self.getSibling('Status Label')\n\tif self.view.custom.usedProp:\n\t\treturn True\n\treturn False"
+            },
+            {
+              "enabled": false,
+              "name": "filterShelvedAlarm",
+              "script": null
+            }
+          ],
+          "messageHandlers": []
+        },
+        "type": "ia.display.alarmstatustable"
+      },
+      {
+        "meta": {
+          "name": "ShelvedAlarmTable"
+        },
+        "position": {
+          "grow": 1
+        },
+        "scripts": {
+          "customMethods": [],
+          "extensionFunctions": [
+            {
+              "enabled": false,
+              "name": "filterAlarm",
+              "script": "\tmissing = self.getSibling('MissingLabel')\n\treturn undefined_threshold < 5"
+            }
+          ],
+          "messageHandlers": []
+        },
+        "type": "ia.display.alarmstatustable"
+      },
+      {
+        "meta": {
+          "name": "Status Label"
+        },
+        "position": {
+          "shrink": 0
+        },
+        "props": {
+          "text": "status"
+        },
+        "type": "ia.display.label"
+      }
+    ],
+    "meta": {
+      "name": "root"
+    },
+    "props": {
+      "direction": "column"
+    },
+    "type": "ia.container.flex"
+  }
+}
