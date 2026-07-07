@@ -1,8 +1,9 @@
 {
   "components_by_type": {
-    "ia.container.flex": 6,
-    "ia.display.label": 3,
-    "ia.input.button": 18
+    "ia.container.flex": 11,
+    "ia.display.label": 6,
+    "ia.input.button": 18,
+    "ia.input.dropdown": 2
   },
   "model_keys": [
     "components",
@@ -21,52 +22,57 @@
     "properties"
   ],
   "node_type_counts": {
-    "component": 27,
+    "component": 37,
     "custom_method": 2,
     "event_handler": 8,
-    "expression_binding": 9,
+    "expression_binding": 10,
+    "expression_struct_binding": 1,
     "message_handler": 2,
-    "property": 57,
-    "property_binding": 8
+    "property": 69,
+    "property_binding": 10
   },
   "rule_coverage": {
     "BadComponentReferenceRule": {
-      "applicable_node_count": 21,
+      "applicable_node_count": 33,
       "target_types": [
         "custom_method",
         "event_handler",
         "expression_binding",
+        "expression_struct_binding",
         "message_handler",
+        "property_binding",
         "property_change_script",
         "transform"
       ]
     },
     "ComponentReferenceValidationRule": {
-      "applicable_node_count": 56,
+      "applicable_node_count": 70,
       "target_types": [
         "component",
         "custom_method",
         "event_handler",
         "expression_binding",
+        "expression_struct_binding",
         "message_handler",
         "property_binding",
+        "property_change_script",
         "transform"
       ]
     },
     "ExcessiveContextDataRule": {
-      "applicable_node_count": 113,
+      "applicable_node_count": 139,
       "target_types": [
         "all"
       ]
     },
     "NamePatternRule": {
-      "applicable_node_count": 27,
+      "applicable_node_count": 37,
       "target_types": [
         "component"
       ]
     },
     "PollingIntervalRule": {
-      "applicable_node_count": 17,
+      "applicable_node_count": 21,
       "target_types": [
         "expression_binding",
         "expression_struct_binding",
@@ -86,7 +92,7 @@
       ]
     },
     "UnusedCustomPropertiesRule": {
-      "applicable_node_count": 113,
+      "applicable_node_count": 138,
       "target_types": [
         "component",
         "custom_method",
@@ -100,5 +106,5 @@
       ]
     }
   },
-  "total_nodes": 113
+  "total_nodes": 139
 }
