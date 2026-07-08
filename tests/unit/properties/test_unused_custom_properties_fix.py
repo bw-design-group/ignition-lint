@@ -370,6 +370,52 @@ class TestUnusedCustomPropertiesFixGeneration(unittest.TestCase):
 			"Normal component props must never be touched by this rule's fixes."
 		)
 
+	def test_embedded_view_pass_on_params_never_deleted(self):
+		"""Params an embedded view passes to its child (static props.params.X or bound
+		propConfig['props.params.X']) are not definitions of this view: no violation,
+		no fix. Only the view's own unused param gets a (param-unsafe) fix."""
+		view = {
+			"params": {
+				"reallyUnused": ""
+			},
+			"root": {
+				"children": [{
+					"meta": {
+						"name": "EmbeddedView"
+					},
+					"type": "ia.display.view",
+					"propConfig": {
+						"props.params.color": {
+							"binding": {
+								"type": "expr",
+								"config": {
+									"expression": "\"red\""
+								}
+							}
+						}
+					},
+					"props": {
+						"params": {
+							"unusedRef": False
+						},
+						"path": "TestCases/Pipes"
+					}
+				}],
+				"meta": {
+					"name": "root"
+				},
+			},
+		}
+		results, json_data, translator = _lint_with_fix_context(view)
+
+		self.assertEqual(len(results.fixes), 1)
+		self.assertEqual(_delete_paths(results.fixes[0]), {('params', 'reallyUnused')})
+
+		FixEngine(translator).apply_fixes(results.fixes, safe_only=False)
+		embedded = json_data['root']['children'][0]
+		self.assertEqual(embedded['props']['params'], {'unusedRef': False})
+		self.assertIn('props.params.color', embedded['propConfig'])
+
 	def test_no_fixes_without_fix_context(self):
 		"""No fixes are generated when fix context is not provided."""
 		view = {

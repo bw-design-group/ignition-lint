@@ -1,6 +1,6 @@
 {
   "bindings": {
-    "count": 21,
+    "count": 22,
     "nodes": [
       {
         "config": {},
@@ -134,11 +134,17 @@
         "expression": "{./Inner Panel.props.text}",
         "node_type": "expression_binding",
         "path": "root.root.children[9].SelfRefContainer.propConfig.props.style.classes"
+      },
+      {
+        "config": {},
+        "expression": "\"red\"",
+        "node_type": "expression_binding",
+        "path": "root.root.children[10].EmbeddedView.propConfig.props.params.color"
       }
     ]
   },
   "components": {
-    "count": 37,
+    "count": 38,
     "nodes": [
       {
         "name": "BadButton",
@@ -393,6 +399,13 @@
         "type": "ia.container.flex"
       },
       {
+        "name": "EmbeddedView",
+        "node_type": "component",
+        "path": "root.root.children[10].EmbeddedView",
+        "properties_count": 0,
+        "type": "ia.display.view"
+      },
+      {
         "name": "root",
         "node_type": "component",
         "path": "root.root",
@@ -502,7 +515,7 @@
     ]
   },
   "expression_bindings": {
-    "count": 10,
+    "count": 11,
     "nodes": [
       {
         "config": {},
@@ -563,6 +576,12 @@
         "expression": "{./Inner Panel.props.text}",
         "node_type": "expression_binding",
         "path": "root.root.children[9].SelfRefContainer.propConfig.props.style.classes"
+      },
+      {
+        "config": {},
+        "expression": "\"red\"",
+        "node_type": "expression_binding",
+        "path": "root.root.children[10].EmbeddedView.propConfig.props.params.color"
       }
     ]
   },
@@ -614,7 +633,7 @@
     ]
   },
   "properties": {
-    "count": 69,
+    "count": 72,
     "nodes": [
       {
         "name": "shrink",
@@ -1077,6 +1096,27 @@
         "path": "root.root.children.SelfRefContainer.position.grow",
         "value": 1,
         "value_type": "int"
+      },
+      {
+        "name": "basis",
+        "node_type": "property",
+        "path": "root.root.children.EmbeddedView.position.basis",
+        "value": "320px",
+        "value_type": "str"
+      },
+      {
+        "name": "unusedRef",
+        "node_type": "property",
+        "path": "root.root.children.EmbeddedView.props.params.unusedRef",
+        "value": false,
+        "value_type": "bool"
+      },
+      {
+        "name": "path",
+        "node_type": "property",
+        "path": "root.root.children.EmbeddedView.props.path",
+        "value": "TestCases/Pipes",
+        "value_type": "str"
       },
       {
         "name": "direction",

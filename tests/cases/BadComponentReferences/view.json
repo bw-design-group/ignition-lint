@@ -722,7 +722,8 @@
           }
         ],
         "meta": {
-          "name": "SelfRefContainer"
+          "name": "SelfRefContainer",
+          "tooltip": {}
         },
         "position": {
           "grow": 1
@@ -745,7 +746,35 @@
             }
           }
         },
+        "props": {
+          "style": {}
+        },
         "type": "ia.container.flex"
+      },
+      {
+        "meta": {
+          "name": "EmbeddedView"
+        },
+        "position": {
+          "basis": "320px"
+        },
+        "propConfig": {
+          "props.params.color": {
+            "binding": {
+              "config": {
+                "expression": "\"red\""
+              },
+              "type": "expr"
+            }
+          }
+        },
+        "props": {
+          "params": {
+            "unusedRef": false
+          },
+          "path": "TestCases/Pipes"
+        },
+        "type": "ia.display.view"
       }
     ],
     "meta": {

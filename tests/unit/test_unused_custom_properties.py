@@ -1847,3 +1847,53 @@ class TestUnusedCustomPropertiesRule(BaseRuleTest):  # pylint: disable=too-many-
 		rule_config = get_test_config("UnusedCustomPropertiesRule")
 
 		self.assert_rule_errors(mock_view, rule_config, "UnusedCustomPropertiesRule", expected_error_count=0)
+
+	def test_embedded_view_pass_on_params_are_not_definitions(self):
+		"""Params an embedded view passes to its child view - statically typed
+		(props.params.X) or bound (propConfig['props.params.X']) - belong to the CHILD
+		view's interface and must never be linted in the containing view. Mirrors the
+		EmbeddedView component in tests/cases/BadComponentReferences/view.json.
+		Only the containing view's own genuinely-unused param may be flagged."""
+		view_data = {
+			"params": {
+				"reallyUnused": ""
+			},
+			"root": {
+				"children": [{
+					"meta": {
+						"name": "EmbeddedView"
+					},
+					"type": "ia.display.view",
+					"propConfig": {
+						"props.params.color": {
+							"binding": {
+								"type": "expr",
+								"config": {
+									"expression": "\"red\""
+								}
+							}
+						}
+					},
+					"props": {
+						"params": {
+							"unusedRef": False
+						},
+						"path": "TestCases/Pipes"
+					}
+				}],
+				"meta": {
+					"name": "root"
+				}
+			}
+		}
+		mock_view_content = json.dumps(view_data, indent=2)
+		mock_view = create_temp_view_file(mock_view_content)
+
+		rule_config = get_test_config("UnusedCustomPropertiesRule")
+
+		# Exactly one violation: the containing view's own unused param.
+		# Neither pass-on param (unusedRef, color) may be flagged.
+		self.assert_rule_errors(
+			mock_view, rule_config, "UnusedCustomPropertiesRule", expected_error_count=1,
+			error_patterns=["reallyUnused"]
+		)
