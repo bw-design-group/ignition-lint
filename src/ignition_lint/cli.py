@@ -1246,6 +1246,8 @@ def print_fix_dry_run(fixes, file_path, safe_only, rule_filter):
 			elif op.operation == FixOperationType.STRING_REPLACE:
 				print(f"      REPLACE in {op.format_path()}:")
 				print(f"              '{op.old_substring}' -> '{op.new_substring}'")
+			elif op.operation == FixOperationType.DELETE_KEY:
+				print(f"      DELETE {op.format_path()}")
 
 	total = safe_count + unsafe_count
 	print(f"\nSummary: {total} fixes ({safe_count} safe, {unsafe_count} unsafe)")

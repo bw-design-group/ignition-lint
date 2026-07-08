@@ -157,9 +157,10 @@ def _is_java_date_object(data):
 		return False
 
 	# First element should be "ts", second and third should be numbers
-	if (dollar_value[0] != "ts" or
-		not isinstance(dollar_value[1], (int, float)) or
-		not isinstance(dollar_value[2], (int, float))):
+	if (
+		dollar_value[0] != "ts" or not isinstance(dollar_value[1], (int, float)) or
+		not isinstance(dollar_value[2], (int, float))
+	):
 		return False
 
 	# "$ts" should be a number (the millis timestamp)
@@ -195,11 +196,19 @@ def _process_dict_item(key, value, path, results):
 			# Store as a single encoded date value
 			timestamp = _extract_java_date_timestamp(value)
 			results[f"{current_path}._JavaDate"] = timestamp
-		else:
+		elif value:
 			# Regular dictionary - flatten recursively
 			flatten_json(value, current_path, results)
+		else:
+			# An empty object is still a value; without a leaf it would be
+			# invisible to the model (e.g. an empty custom property dict).
+			results[current_path] = {}
 	elif isinstance(value, list):
-		_process_list_items(value, current_path, results)
+		if value:
+			_process_list_items(value, current_path, results)
+		else:
+			# An empty array is still a value (see empty-dict note above).
+			results[current_path] = []
 	else:
 		results[current_path] = value
 

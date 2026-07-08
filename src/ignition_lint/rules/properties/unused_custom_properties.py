@@ -33,15 +33,32 @@ is unused because it provides no data to parent views.
 """
 
 import re
-from typing import Set, Dict, Any
-from ..common import LintingRule
+from typing import Set, Dict, Any, Optional
+from ..common import LintingRule, FixableMixin
 from ..registry import register_rule
+from ...common.fix_operations import Fix, FixOperation, FixOperationType
 from ...model.node_types import NodeType
+
+# Sentinel distinguishing "path not present in the JSON" from a legitimate None value.
+_MISSING = object()
+
+# Matches flattened-JSON keys under a binding declaration and captures the property that
+# owns the binding. Works for view-level keys (propConfig.custom.X.binding.type) and
+# component-level keys (root.root.children[0].Btn.propConfig.custom.X.binding.type).
+_BINDING_OWNER_RE = re.compile(r'^(?:(?P<owner>.+)\.)?propConfig\.(?P<prop>(?:custom|params)\..+?)\.binding(?:[.\[]|$)')
 
 
 @register_rule
-class UnusedCustomPropertiesRule(LintingRule):
-	"""Detects custom properties and view parameters that are defined but never referenced."""
+class UnusedCustomPropertiesRule(FixableMixin, LintingRule):
+	"""Detects custom properties and view parameters that are defined but never referenced.
+
+	Supports auto-fix: when fix context is available, generates Fix objects that remove the
+	unused property definition (its value entry and any propConfig entries). Only safe fixes
+	are ever emitted: unused custom properties are internal to the view, so deleting them
+	cannot break anything outside it. View parameters get NO fix (not even unsafe) - they are
+	the view's public interface and callers passing them are invisible to the linter - and
+	neither do properties carrying an onChange script. See _generate_removal_fix.
+	"""
 
 	def __init__(self, severity="error"):
 		# We need to examine all node types to find property definitions and references
@@ -67,6 +84,7 @@ class UnusedCustomPropertiesRule(LintingRule):
 		self.used_properties = set()
 		self.flattened_json = {}
 		self._finalize_complete = False
+		self.reset_fixes()
 
 	def set_flattened_json(self, flattened_json: Dict[str, Any]):
 		"""Set the flattened JSON for comprehensive property reference searching."""
@@ -79,6 +97,7 @@ class UnusedCustomPropertiesRule(LintingRule):
 		self.defined_properties = {}
 		self.used_properties = set()
 		self._finalize_complete = False
+		self.reset_fixes()
 
 		# Call parent process_nodes first to get standard property processing
 		super().process_nodes(nodes)
@@ -92,35 +111,36 @@ class UnusedCustomPropertiesRule(LintingRule):
 		"""Called after all nodes are visited - but we handle this in process_nodes."""
 
 	def visit_property(self, node):
-		"""Visit property nodes to find custom property definitions."""
+		"""Visit property nodes to find custom property definitions.
+
+		Property nodes are built from flattened-JSON leaves, so an object-valued property
+		(custom.obj = {"a": 1}) surfaces only as its nested children (custom.obj.a). The
+		definition is always the TOP-LEVEL property - the first segment after the
+		custom./params. marker - since that is the key the Designer creates and the key a
+		fix must delete. Nested leaves therefore register their parent.
+		"""
 		path = node.path
 
-		# Check for view-level custom properties: custom.propName
-		if path.startswith('custom.') and '.' not in path[7:]:  # Exactly custom.propName
-			prop_name = path[7:]  # Remove 'custom.' prefix
-			full_prop_path = f"view.custom.{prop_name}"
-			self.defined_properties[full_prop_path] = path
+		# Check for view-level custom properties: custom.propName (or a nested leaf
+		# custom.propName.child, which defines its top-level parent)
+		if path.startswith('custom.'):
+			prop_name = path[7:].split('.')[0]  # First segment after 'custom.'
+			self.defined_properties[f"view.custom.{prop_name}"] = f"custom.{prop_name}"
 
-		# Check for view-level parameters: params.paramName
-		elif path.startswith('params.') and '.' not in path[7:]:  # Exactly params.paramName
-			prop_name = path[7:]  # Remove 'params.' prefix
-			full_prop_path = f"view.params.{prop_name}"
-			self.defined_properties[full_prop_path] = path
+		# Check for view-level parameters: params.paramName (or a nested leaf)
+		elif path.startswith('params.'):
+			prop_name = path[7:].split('.')[0]  # First segment after 'params.'
+			self.defined_properties[f"view.params.{prop_name}"] = f"params.{prop_name}"
 
-		# Check for component custom properties: *.custom.propName
+		# Check for component custom properties: *.custom.propName (or a nested leaf)
 		elif '.custom.' in path and not path.startswith('propConfig.'):
-			# Extract the property name (last part after .custom.)
-			custom_match = re.search(r'\.custom\.([^.]+)$', path)
-			if custom_match:
-				prop_name = custom_match.group(1)
+			component_path, remainder = path.split('.custom.', 1)
+			prop_name = remainder.split('.')[0]
+			# Get component name from path (last segment)
+			component_name = component_path.split('.')[-1]
+			full_prop_path = f"{component_name}.custom.{prop_name}"
 
-				# Extract component identifier from path
-				component_path = path.split('.custom.')[0]
-				# Get component name from path (last segment)
-				component_name = component_path.split('.')[-1]
-				full_prop_path = f"{component_name}.custom.{prop_name}"
-
-				self.defined_properties[full_prop_path] = path
+			self.defined_properties[full_prop_path] = f"{component_path}.custom.{prop_name}"
 
 	def visit_expression_binding(self, node):
 		"""Check expression bindings for custom property references."""
@@ -236,6 +256,16 @@ class UnusedCustomPropertiesRule(LintingRule):
 				used_prop = handler(match)
 				self.used_properties.add(used_prop)
 
+		# Whole-object references pass the entire params/custom object to a consumer —
+		# typically an embedded view's props.params, which forwards the params to the
+		# next view. Brace form ({view.params}) appears in expressions; the bare
+		# whole-value form ('view.params') is a property-binding path. Any member may
+		# be read downstream, so credit the full scope.
+		if re.search(r'\{(?:self\.)?view\.params\}', expression) or expression.strip() == 'view.params':
+			self.used_properties.add('view.params.*')
+		if re.search(r'\{(?:self\.)?view\.custom\}', expression) or expression.strip() == 'view.custom':
+			self.used_properties.add('view.custom.*')
+
 	@staticmethod
 	def _is_view_scope_script_path(json_path: str) -> bool:
 		"""
@@ -295,15 +325,7 @@ class UnusedCustomPropertiesRule(LintingRule):
 					if view_scope:
 						self.used_properties.add(f"view.params.{match}")
 
-		# Quoted subscript access reads one known member, not the whole params/custom object.
-		subscript_patterns = [
-			(r'self\.view\.params\s*\[\s*[\'\"]([a-zA-Z_][a-zA-Z0-9_]*)[\'\"]\s*\]', "view.params.{}"),
-			(r'self\.view\.custom\s*\[\s*[\'\"]([a-zA-Z_][a-zA-Z0-9_]*)[\'\"]\s*\]', "view.custom.{}"),
-		]
-		for pattern, used_property_template in subscript_patterns:
-			matches = re.findall(pattern, script)
-			for match in matches:
-				self.used_properties.add(used_property_template.format(match))
+		self._check_component_custom_reads(script, view_scope, nested)
 
 		# A bare self.view.params/custom reference may pass the full object to another consumer.
 		# Since we can't know which members are read later, mark the full scope as used.
@@ -312,6 +334,42 @@ class UnusedCustomPropertiesRule(LintingRule):
 			self.used_properties.add('view.params.*')
 		if re.search(r'self\.view\.custom\b(?!\s*(?:\.|\[\s*[\'\"]))', script):
 			self.used_properties.add('view.custom.*')
+
+	def _check_component_custom_reads(self, script: str, view_scope: bool, nested: str):
+		"""
+		Credit component custom properties read through expressions the self.* patterns
+		cannot see - navigation calls (self.getSibling('Btn').custom.data), variables
+		holding a component (comp.custom.data), and quoted subscripts (self.custom['x'],
+		including non-identifier member names). Over-crediting here only under-reports;
+		under-crediting would let --fix delete a live property.
+		"""
+		# Dotted access through any component-yielding expression.
+		for match in re.findall(rf'[\w\)\]]\.custom\.{nested}', script):
+			self.used_properties.add(f"*.custom.{match}")
+
+		# Quoted subscript access reads one known member, not the whole custom/params
+		# object. Member names are arbitrary strings (spaces, dashes), not identifiers.
+		member = r'[\'\"]([^\'\"]+)[\'\"]'
+		subscript_patterns = [
+			(rf'self\.view\.params\s*\[\s*{member}\s*\]', "view.params.{}"),
+			(rf'self\.view\.custom\s*\[\s*{member}\s*\]', "view.custom.{}"),
+			(rf'[\w\)\]]\.custom\s*\[\s*{member}\s*\]', "*.custom.{}"),
+		]
+		for pattern, used_property_template in subscript_patterns:
+			for match in re.findall(pattern, script):
+				self.used_properties.add(used_property_template.format(match))
+		if view_scope:
+			# A view-scoped self.custom['x'] is equivalent to self.view.custom['x'],
+			# mirroring the dot-form scope handling in _check_script_for_references.
+			for match in re.findall(rf'self\.custom\s*\[\s*{member}\s*\]', script):
+				self.used_properties.add(f"view.custom.{match}")
+
+		# A dynamically-subscripted or bare component-custom object (self.custom[key],
+		# comp.custom passed whole) may read any member of any component's custom scope.
+		if re.search(r'[\w\)\]]\.custom\b(?!\s*(?:\.|\[\s*[\'\"]))', script):
+			self.used_properties.add('*.custom.*')
+			if view_scope and re.search(r'self\.custom\b(?!\s*(?:\.|\[\s*[\'\"]))', script):
+				self.used_properties.add('view.custom.*')
 
 	def finalize(self):
 		"""Called after all nodes are visited - check for unused properties."""
@@ -323,6 +381,7 @@ class UnusedCustomPropertiesRule(LintingRule):
 
 		# Search entire flattened JSON for property references
 		self._search_flattened_json_for_references()
+		self._credit_bound_properties()
 
 		unused_properties = []
 
@@ -336,9 +395,39 @@ class UnusedCustomPropertiesRule(LintingRule):
 		# Report unused properties
 		for prop_path, definition_location in unused_properties:
 			prop_type = "view parameter" if ".params." in prop_path else "custom property"
-			self.add_violation(
+			violation_msg = (
 				f"{definition_location}: {prop_type} '{prop_path.split('.')[-1]}' is defined but never referenced"
 			)
+			self.add_violation(violation_msg)
+
+			if self.has_fix_context:
+				self._generate_removal_fix(prop_path, definition_location, prop_type, violation_msg)
+
+	def _credit_bound_properties(self):
+		"""
+		Credit every property that owns a binding, regardless of binding type.
+
+		The visitor-based crediting in visit_*_binding only covers binding types the model
+		builder turns into nodes (expression, property, tag). Binding types without dedicated
+		nodes (query, expr-struct, http, tag-history, ...) would leave their owner uncredited,
+		flagging a live bound property as unused — and auto-fix would then delete a working
+		binding. Scanning the flattened keys makes "a property with a binding is used" hold
+		for every binding shape, present or future.
+		"""
+		for json_path in self.flattened_json:
+			match = _BINDING_OWNER_RE.match(json_path)
+			if not match:
+				continue
+			prop_path = match.group('prop')
+			owner = match.group('owner')
+			if owner is None:
+				# View-level propConfig: propConfig.custom.X / propConfig.params.X
+				self.used_properties.add(f"view.{prop_path}")
+			else:
+				# Component propConfig: credit under the component's name, matching
+				# the {component_name}.custom.{prop} key format of defined_properties.
+				component_name = owner.split('.')[-1]
+				self.used_properties.add(f"{component_name}.{prop_path}")
 
 	def _is_property_used(self, prop_path: str) -> bool:
 		"""
@@ -364,13 +453,17 @@ class UnusedCustomPropertiesRule(LintingRule):
 		if any(used.startswith(descendant_prefix) for used in self.used_properties):
 			return True
 
-		# Component custom properties are also tracked via wildcard keys (*.custom.propName)
+		# Component custom properties are also tracked via wildcard keys (*.custom.propName).
+		# '*.custom.*' covers dynamic/bare component-custom access (self.custom[key],
+		# comp.custom passed whole), which may read any member of any component's custom.
 		if '.custom.' in prop_path and not prop_path.startswith('view.'):
 			prop_name = prop_path.split('.custom.')[-1]
-			if f"*.custom.{prop_name}" in self.used_properties:
-				return True
 			wildcard_prefix = f"*.custom.{prop_name}."
-			if any(used.startswith(wildcard_prefix) for used in self.used_properties):
+			if (
+				'*.custom.*' in self.used_properties or
+				f"*.custom.{prop_name}" in self.used_properties or
+				any(used.startswith(wildcard_prefix) for used in self.used_properties)
+			):
 				return True
 
 		# A view-level object custom property may have its children accessed via the
@@ -386,10 +479,11 @@ class UnusedCustomPropertiesRule(LintingRule):
 		# View params may be referenced via component-relative self.params (*.params.paramName)
 		if prop_path.startswith('view.params.'):
 			prop_name = prop_path.split('view.params.')[-1]
-			if f"*.params.{prop_name}" in self.used_properties:
-				return True
 			wildcard_prefix = f"*.params.{prop_name}."
-			if any(used.startswith(wildcard_prefix) for used in self.used_properties):
+			if (
+				f"*.params.{prop_name}" in self.used_properties or
+				any(used.startswith(wildcard_prefix) for used in self.used_properties)
+			):
 				return True
 
 		return False
@@ -454,6 +548,137 @@ class UnusedCustomPropertiesRule(LintingRule):
 			# be matched by the narrower substring patterns above.
 			self._check_script_for_references(json_value, view_scope)
 			self._check_expression_for_references(json_value)
+
+	def _generate_removal_fix(self, prop_path: str, definition_location: str, prop_type: str, violation_msg: str):
+		"""
+		Generate a Fix that removes an unused property definition.
+
+		Removal covers both places a property definition can live:
+		- the value entry in the owning custom object
+		- the propConfig entry (or entries, for nested children of an object property)
+
+		This rule emits ONLY safe fixes. No fix is generated - not even an unsafe one - when
+		removal cannot be verified from the analyzed file alone:
+		- View parameters: they are the view's public interface. Parent views, page config,
+		  or navigation actions may pass them, and none of those callers are visible to the
+		  linter. Deleting a param could silently break the project, so it is never automated.
+		- Properties with an onChange property-change script: removal deletes the script and
+		  whatever side effects it carried.
+		- Definitions we cannot locate unambiguously in the JSON.
+		In all of these cases the violation still reports and the user removes the property
+		manually.
+		"""
+		prop_name = prop_path.split('.')[-1]
+
+		if prop_path.startswith('view.params.'):
+			return
+
+		if prop_path.startswith('view.custom.'):
+			owner_json_path: Optional[list] = []
+		else:
+			# Component custom property: definition_location is the (index-stripped)
+			# flattened path ending in .custom.<name>; the prefix is the component.
+			owner_json_path = self._resolve_component_json_path(
+				definition_location[:-len(f'.custom.{prop_name}')]
+			)
+			if owner_json_path is None:
+				return
+
+		operations, removes_onchange = self._build_delete_operations(owner_json_path, 'custom', prop_name)
+		if not operations or removes_onchange:
+			return
+
+		self.add_fix(
+			Fix(
+				rule_name=self.error_key, violation_message=violation_msg,
+				description=f"Remove unused {prop_type} '{prop_name}'", operations=operations,
+				is_safe=True
+			)
+		)
+
+	def _build_delete_operations(self, owner_json_path: list, scope: str, prop_name: str):
+		"""
+		Build DELETE_KEY operations for a property's value entry and propConfig entries.
+
+		Args:
+			owner_json_path: JSON path of the dict owning the property ([] for the view,
+				the component's JSON path for component custom properties).
+			scope: 'custom' or 'params'.
+			prop_name: Bare property name.
+
+		Returns:
+			Tuple of (operations, removes_onchange). removes_onchange is True when any
+			removed propConfig entry contains an onChange property-change script.
+			Returns no operations when a propConfig entry still contains a binding:
+			a flagged property that owns a binding means the rule failed to credit it
+			(a detection blind spot), and deleting it would destroy a live binding.
+		"""
+		operations = []
+		removes_onchange = False
+
+		# Value entry (absent for propConfig-only definitions, e.g. non-persistent props)
+		value_json_path = owner_json_path + [scope, prop_name]
+		value = self._get_json_value(value_json_path)
+		if value is not _MISSING:
+			operations.append(
+				FixOperation(
+					operation=FixOperationType.DELETE_KEY, json_path=value_json_path,
+					old_value=value, description=f"Remove {scope}.{prop_name} value entry"
+				)
+			)
+
+		# propConfig entries: exact key plus nested children of an object/array property
+		# (e.g. "custom.network.nat1" or "custom.myList[0]" alongside "custom.network").
+		prop_config = self._get_json_value(owner_json_path + ['propConfig'])
+		if isinstance(prop_config, dict):
+			exact_key = f"{scope}.{prop_name}"
+			child_prefixes = (f"{exact_key}.", f"{exact_key}[")
+			for key in prop_config:
+				if key != exact_key and not key.startswith(child_prefixes):
+					continue
+				entry = prop_config[key]
+				if isinstance(entry, dict) and 'binding' in entry:
+					return [], False
+				if isinstance(entry, dict) and 'onChange' in entry:
+					removes_onchange = True
+				operations.append(
+					FixOperation(
+						operation=FixOperationType.DELETE_KEY,
+						json_path=owner_json_path + ['propConfig', key], old_value=entry,
+						description=f"Remove propConfig entry '{key}'"
+					)
+				)
+
+		return operations, removes_onchange
+
+	def _resolve_component_json_path(self, component_model_path: str) -> Optional[list]:
+		"""
+		Resolve a component's JSON path from an index-stripped model path.
+
+		Property definition locations come from the model builder, which strips array
+		indices (root.root.children[0].Button -> root.root.children.Button), so an exact
+		PathTranslator lookup can fail. Fall back to matching translator component paths
+		with their indices stripped; sibling names are unique in Perspective, so at most
+		one component should match. Returns None when unresolvable or ambiguous.
+		"""
+		json_path = self._path_translator.model_path_to_json_path(component_model_path)
+		if json_path is not None:
+			return json_path
+
+		matches = [
+			candidate for candidate in self._path_translator.get_all_component_paths()
+			if re.sub(r'\[\d+\]', '', candidate) == component_model_path
+		]
+		if len(matches) != 1:
+			return None
+		return self._path_translator.model_path_to_json_path(matches[0])
+
+	def _get_json_value(self, json_path: list):
+		"""Read a value from the fix-context JSON, returning _MISSING when the path is absent."""
+		try:
+			return self._path_translator.get_value(json_path)
+		except (KeyError, IndexError, TypeError):
+			return _MISSING
 
 	def _mark_property_used_from_pattern(self, pattern: str):
 		"""Mark a property as used based on a found pattern."""

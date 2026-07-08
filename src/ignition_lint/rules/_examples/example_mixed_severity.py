@@ -83,8 +83,7 @@ class ExampleMixedSeverityRule(LintingRule):
 		# WARNING: Style recommendation - missing component type suffix
 		common_types = ['button', 'label', 'input', 'panel', 'container', 'table', 'chart']
 		if (
-			len(node.name) > 5 and
-			not any(comp_type in node.name.lower() for comp_type in common_types) and
+			len(node.name) > 5 and not any(comp_type in node.name.lower() for comp_type in common_types) and
 			not node.name.lower().endswith(('btn', 'lbl', 'txt', 'img', 'icon'))
 		):
 			self.warnings.append(

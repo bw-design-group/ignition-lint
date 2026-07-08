@@ -6,7 +6,6 @@ Tests: fix_operations, path_translator, fix_engine, reference_finder,
 and NamePatternRule fix generation.
 """
 
-import json
 import os
 import sys
 import unittest
@@ -19,7 +18,7 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../.
 
 from ignition_lint.common.fix_operations import Fix, FixOperation, FixOperationType
 from ignition_lint.common.path_translator import PathTranslator
-from ignition_lint.common.fix_engine import FixEngine, FixResult
+from ignition_lint.common.fix_engine import FixEngine
 from ignition_lint.common.reference_finder import ComponentReferenceFinder
 from ignition_lint.common.flatten_json import flatten_json, read_json_file, write_json_file
 from ignition_lint.linter import LintEngine
@@ -190,6 +189,23 @@ class TestPathTranslator(unittest.TestCase):
 								'GoodButton')
 		self.assertFalse(result)
 
+	def test_delete_value(self):
+		"""delete_value should remove a dict key from the JSON data in-place."""
+		self.json_data['custom'] = OrderedDict([('unusedProp', 'value'), ('keptProp', 1)])
+		self.translator.delete_value(['custom', 'unusedProp'])
+		self.assertEqual(self.json_data['custom'], OrderedDict([('keptProp', 1)]))
+
+	def test_delete_value_missing_key(self):
+		"""delete_value should raise KeyError for a key that does not exist."""
+		self.json_data['custom'] = OrderedDict()
+		with self.assertRaises(KeyError):
+			self.translator.delete_value(['custom', 'nope'])
+
+	def test_delete_value_rejects_list_element(self):
+		"""delete_value should refuse to delete list elements (index-shift hazard)."""
+		with self.assertRaises(KeyError):
+			self.translator.delete_value(['root', 'children', 0])
+
 	def test_nested_children_path(self):
 		"""PathTranslator should handle deeply nested components."""
 		json_data = make_view_json(
@@ -288,6 +304,48 @@ class TestFixEngine(unittest.TestCase):
 
 		self.assertEqual(result.applied_count, 1)
 		self.assertEqual(self.json_data['root']['children'][0]['meta']['name'], 'BadButton')
+
+	def test_apply_delete_key_fix(self):
+		"""apply_fixes should apply DELETE_KEY operations and remove the entries."""
+		self.json_data['custom'] = OrderedDict([('unusedProp', 'value')])
+		self.json_data['propConfig'] = OrderedDict([('custom.unusedProp', OrderedDict([('persistent', True)]))])
+		fix = Fix(
+			rule_name='UnusedCustomPropertiesRule',
+			violation_message="custom property 'unusedProp' is defined but never referenced",
+			description="Remove unused custom property 'unusedProp'", operations=[
+				FixOperation(
+					operation=FixOperationType.DELETE_KEY,
+					json_path=['custom', 'unusedProp'],
+					old_value='value',
+				),
+				FixOperation(
+					operation=FixOperationType.DELETE_KEY,
+					json_path=['propConfig', 'custom.unusedProp'],
+				),
+			], is_safe=True
+		)
+		result = self.engine.apply_fixes([fix], safe_only=True)
+
+		self.assertEqual(result.applied_count, 1)
+		self.assertNotIn('unusedProp', self.json_data['custom'])
+		self.assertNotIn('custom.unusedProp', self.json_data['propConfig'])
+
+	def test_delete_key_missing_target_skips_fix(self):
+		"""A DELETE_KEY fix targeting a missing key is skipped with an error reason."""
+		fix = Fix(
+			rule_name='UnusedCustomPropertiesRule', violation_message='v',
+			description='Remove nonexistent property', operations=[
+				FixOperation(
+					operation=FixOperationType.DELETE_KEY,
+					json_path=['custom', 'nope'],
+				),
+			], is_safe=True
+		)
+		result = self.engine.apply_fixes([fix], safe_only=True)
+
+		self.assertEqual(result.applied_count, 0)
+		self.assertEqual(result.skipped_count, 1)
+		self.assertIn('error', result.skipped[0].skip_reason)
 
 	def test_dry_run_does_not_modify(self):
 		"""dry_run should not modify JSON data."""

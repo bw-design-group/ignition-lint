@@ -12,6 +12,7 @@
   "propConfig.params.unusedRef.persistent": true,
   "propConfig.params.usedRef.paramDirection": "input",
   "propConfig.params.usedRef.persistent": true,
+  "props": {},
   "root.root.children[0].Button.events.component.onActionPerformed.config.script": "\tself.view.custom.pipeA = not self.view.custom.pipeA",
   "root.root.children[0].Button.events.component.onActionPerformed.scope": "G",
   "root.root.children[0].Button.events.component.onActionPerformed.type": "script",

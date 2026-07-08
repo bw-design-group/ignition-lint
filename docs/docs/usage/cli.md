@@ -93,7 +93,7 @@ See [Whitelist guide](./whitelist.md) for details.
 
 ### Auto-fix
 
-Rules that support it can rewrite the view to resolve violations (e.g. [NamePatternRule](../rules/naming/name-pattern.md) renames components). Pick **one** mode:
+Rules that support it can rewrite the view to resolve violations (e.g. [NamePatternRule](../rules/naming/name-pattern.md) renames components, [UnusedCustomPropertiesRule](../rules/properties/unused-custom-properties.md) deletes unused property definitions). Pick **one** mode:
 
 | Flag | Description |
 | --- | --- |
@@ -118,7 +118,7 @@ ign-lint --config rule_config.json --files "**/view.json" --fix-dry-run
 ign-lint --config rule_config.json --files "**/view.json" --fix --fix-rules NamePatternRule
 ```
 
-See [NamePatternRule → What `--fix` does](../rules/naming/name-pattern.md#what---fix-does) for how safe vs. unsafe fixes are classified.
+See [NamePatternRule → What `--fix` does](../rules/naming/name-pattern.md#what---fix-does) and [UnusedCustomPropertiesRule → What `--fix` does](../rules/properties/unused-custom-properties.md#what---fix-does) for how safe vs. unsafe fixes are classified.
 
 ### Output and severity
 

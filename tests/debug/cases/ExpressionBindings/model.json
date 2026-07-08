@@ -342,19 +342,19 @@
         "value_type": "NoneType"
       },
       {
-        "name": "expressionStructurePolling",
-        "node_type": "property",
-        "path": "custom.expressionStructurePolling",
-        "persistent": false,
-        "value": null,
-        "value_type": "NoneType"
-      },
-      {
         "name": "expressionPolling",
         "node_type": "property",
         "path": "custom.expressionPolling",
         "persistent": false,
         "private_access": true,
+        "value": null,
+        "value_type": "NoneType"
+      },
+      {
+        "name": "expressionStructurePolling",
+        "node_type": "property",
+        "path": "custom.expressionStructurePolling",
+        "persistent": false,
         "value": null,
         "value_type": "NoneType"
       }

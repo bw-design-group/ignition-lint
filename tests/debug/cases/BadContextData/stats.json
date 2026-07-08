@@ -27,36 +27,40 @@
     "event_handler": 1,
     "expression_binding": 2,
     "expression_struct_binding": 1,
-    "property": 149,
+    "property": 150,
     "property_binding": 10,
     "transform": 2
   },
   "rule_coverage": {
     "BadComponentReferenceRule": {
-      "applicable_node_count": 5,
+      "applicable_node_count": 16,
       "target_types": [
         "custom_method",
         "event_handler",
         "expression_binding",
+        "expression_struct_binding",
         "message_handler",
+        "property_binding",
         "property_change_script",
         "transform"
       ]
     },
     "ComponentReferenceValidationRule": {
-      "applicable_node_count": 28,
+      "applicable_node_count": 29,
       "target_types": [
         "component",
         "custom_method",
         "event_handler",
         "expression_binding",
+        "expression_struct_binding",
         "message_handler",
         "property_binding",
+        "property_change_script",
         "transform"
       ]
     },
     "ExcessiveContextDataRule": {
-      "applicable_node_count": 178,
+      "applicable_node_count": 179,
       "target_types": [
         "all"
       ]
@@ -88,7 +92,7 @@
       ]
     },
     "UnusedCustomPropertiesRule": {
-      "applicable_node_count": 177,
+      "applicable_node_count": 178,
       "target_types": [
         "component",
         "custom_method",
@@ -102,5 +106,5 @@
       ]
     }
   },
-  "total_nodes": 178
+  "total_nodes": 179
 }

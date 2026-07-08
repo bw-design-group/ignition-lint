@@ -4,6 +4,7 @@
   "propConfig.custom.custom_view_param.persistent": true,
   "propConfig.params.view_param.paramDirection": "input",
   "propConfig.params.view_param.persistent": true,
+  "props": {},
   "root.root.children[0].icon_snake_case.custom.component_custom_param": "value",
   "root.root.children[0].icon_snake_case.meta.name": "icon_snake_case",
   "root.root.children[0].icon_snake_case.position.basis": "30px",

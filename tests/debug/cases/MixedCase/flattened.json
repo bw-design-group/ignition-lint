@@ -1,4 +1,7 @@
 {
+  "custom": {},
+  "params": {},
+  "props": {},
   "root.root.children[0].PascalCaseButton.meta.name": "PascalCaseButton",
   "root.root.children[0].PascalCaseButton.type": "ia.input.button",
   "root.root.children[10].HTTPSConnection.meta.name": "HTTPSConnection",
