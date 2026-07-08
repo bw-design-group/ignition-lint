@@ -147,6 +147,7 @@ A property is treated as used when **any** of the following hold:
 - It appears in a property binding's target/source path.
 - It appears in a tag binding's `tagPath` string.
 - It appears in a script (event handler, message handler, custom method, transform), e.g. `self.view.custom.X`, `self.view.params.X`, `self.custom.X`, or `self.params.X`.
+- A component custom is read through **any** component-yielding expression in a script — navigation calls (`self.getSibling('Btn').custom.data`), variables holding a component (`comp.custom.data`), or quoted subscripts (`self.custom['data']`, names with spaces included). A dynamic subscript (`self.custom[key]`) conservatively credits every component custom property, since any member could be read.
 
 A fallback string-scan over every value in the flattened JSON catches references in fields the model builder doesn't surface as dedicated nodes — so most real-world reference patterns get picked up automatically.
 

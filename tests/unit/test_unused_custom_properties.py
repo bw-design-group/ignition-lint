@@ -1897,3 +1897,263 @@ class TestUnusedCustomPropertiesRule(BaseRuleTest):  # pylint: disable=too-many-
 			mock_view, rule_config, "UnusedCustomPropertiesRule", expected_error_count=1,
 			error_patterns=["reallyUnused"]
 		)
+
+	def test_navigation_chain_custom_access_credited(self):
+		"""A component custom read through a navigation call
+		(self.getSibling('Btn').custom.data) credits the property. Before --fix existed
+		this was a cosmetic false positive; with --fix it would delete a live prop."""
+		view_data = {
+			"root": {
+				"children": [{
+					"meta": {
+						"name": "Btn"
+					},
+					"type": "ia.input.button",
+					"custom": {
+						"data": 5
+					},
+					"propConfig": {
+						"custom.data": {
+							"persistent": True
+						}
+					}
+				}, {
+					"meta": {
+						"name": "Lbl"
+					},
+					"type": "ia.display.label",
+					"events": {
+						"component": {
+							"onActionPerformed": {
+								"config": {
+									"script":
+										"value = self.getSibling('Btn').custom.data"
+								},
+								"scope": "G",
+								"type": "script"
+							}
+						}
+					}
+				}],
+				"meta": {
+					"name": "root"
+				}
+			}
+		}
+		mock_view_content = json.dumps(view_data, indent=2)
+		mock_view = create_temp_view_file(mock_view_content)
+
+		rule_config = get_test_config("UnusedCustomPropertiesRule")
+
+		self.assert_rule_errors(mock_view, rule_config, "UnusedCustomPropertiesRule", expected_error_count=0)
+
+	def test_variable_held_component_custom_access_credited(self):
+		"""A component custom read through a variable holding a component
+		(s = self.getSibling('Btn'); s.custom.data) credits the property."""
+		view_data = {
+			"root": {
+				"children": [{
+					"meta": {
+						"name": "Btn"
+					},
+					"type": "ia.input.button",
+					"custom": {
+						"data": 5
+					},
+					"propConfig": {
+						"custom.data": {
+							"persistent": True
+						}
+					}
+				}, {
+					"meta": {
+						"name": "Lbl"
+					},
+					"type": "ia.display.label",
+					"events": {
+						"component": {
+							"onActionPerformed": {
+								"config": {
+									"script":
+										"s = self.getSibling('Btn')\nprint(s.custom.data)"
+								},
+								"scope": "G",
+								"type": "script"
+							}
+						}
+					}
+				}],
+				"meta": {
+					"name": "root"
+				}
+			}
+		}
+		mock_view_content = json.dumps(view_data, indent=2)
+		mock_view = create_temp_view_file(mock_view_content)
+
+		rule_config = get_test_config("UnusedCustomPropertiesRule")
+
+		self.assert_rule_errors(mock_view, rule_config, "UnusedCustomPropertiesRule", expected_error_count=0)
+
+	def test_component_scope_quoted_subscript_custom_credited(self):
+		"""self.custom['data'] (quoted subscript at component scope) credits the
+		component's custom property."""
+		view_data = {
+			"root": {
+				"children": [{
+					"meta": {
+						"name": "Btn"
+					},
+					"type": "ia.input.button",
+					"custom": {
+						"data": 5
+					},
+					"propConfig": {
+						"custom.data": {
+							"persistent": True
+						}
+					},
+					"events": {
+						"component": {
+							"onActionPerformed": {
+								"config": {
+									"script": "print(self.custom['data'])"
+								},
+								"scope": "G",
+								"type": "script"
+							}
+						}
+					}
+				}],
+				"meta": {
+					"name": "root"
+				}
+			}
+		}
+		mock_view_content = json.dumps(view_data, indent=2)
+		mock_view = create_temp_view_file(mock_view_content)
+
+		rule_config = get_test_config("UnusedCustomPropertiesRule")
+
+		self.assert_rule_errors(mock_view, rule_config, "UnusedCustomPropertiesRule", expected_error_count=0)
+
+	def test_component_scope_dynamic_subscript_credits_all_component_customs(self):
+		"""self.custom[key] with a dynamic key may read any member — conservatively
+		credits every component custom property."""
+		view_data = {
+			"root": {
+				"children": [{
+					"meta": {
+						"name": "Btn"
+					},
+					"type": "ia.input.button",
+					"custom": {
+						"data": 5
+					},
+					"propConfig": {
+						"custom.data": {
+							"persistent": True
+						}
+					},
+					"events": {
+						"component": {
+							"onActionPerformed": {
+								"config": {
+									"script":
+										"key = 'data'\nprint(self.custom[key])"
+								},
+								"scope": "G",
+								"type": "script"
+							}
+						}
+					}
+				}],
+				"meta": {
+					"name": "root"
+				}
+			}
+		}
+		mock_view_content = json.dumps(view_data, indent=2)
+		mock_view = create_temp_view_file(mock_view_content)
+
+		rule_config = get_test_config("UnusedCustomPropertiesRule")
+
+		self.assert_rule_errors(mock_view, rule_config, "UnusedCustomPropertiesRule", expected_error_count=0)
+
+	def test_non_identifier_prop_name_subscript_credited(self):
+		"""Custom property names are arbitrary strings; self.view.custom['my prop']
+		(space in the name) credits the view custom property."""
+		view_data = {
+			"custom": {
+				"my prop": 1
+			},
+			"root": {
+				"children": [{
+					"meta": {
+						"name": "Btn"
+					},
+					"type": "ia.input.button",
+					"events": {
+						"component": {
+							"onActionPerformed": {
+								"config": {
+									"script": "print(self.view.custom['my prop'])"
+								},
+								"scope": "G",
+								"type": "script"
+							}
+						}
+					}
+				}],
+				"meta": {
+					"name": "root"
+				}
+			}
+		}
+		mock_view_content = json.dumps(view_data, indent=2)
+		mock_view = create_temp_view_file(mock_view_content)
+
+		rule_config = get_test_config("UnusedCustomPropertiesRule")
+
+		self.assert_rule_errors(mock_view, rule_config, "UnusedCustomPropertiesRule", expected_error_count=0)
+
+	def test_view_custom_not_credited_by_component_scope_dot_reference(self):
+		"""Strict boundary preserved: a view-level custom referenced only via bare
+		self.custom.X at COMPONENT scope stays flagged — at runtime that reads the
+		component's own custom, never the view's."""
+		view_data = {
+			"custom": {
+				"viewOnly": 1
+			},
+			"root": {
+				"children": [{
+					"meta": {
+						"name": "Btn"
+					},
+					"type": "ia.input.button",
+					"events": {
+						"component": {
+							"onActionPerformed": {
+								"config": {
+									"script": "print(self.custom.viewOnly)"
+								},
+								"scope": "G",
+								"type": "script"
+							}
+						}
+					}
+				}],
+				"meta": {
+					"name": "root"
+				}
+			}
+		}
+		mock_view_content = json.dumps(view_data, indent=2)
+		mock_view = create_temp_view_file(mock_view_content)
+
+		rule_config = get_test_config("UnusedCustomPropertiesRule")
+
+		self.assert_rule_errors(
+			mock_view, rule_config, "UnusedCustomPropertiesRule", expected_error_count=1,
+			error_patterns=["viewOnly"]
+		)

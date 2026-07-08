@@ -217,6 +217,8 @@ When walking the flattened JSON, paths under `propConfig.*` are not treated as n
 ### Wildcard component references
 A reference such as `{this.custom.foo}` or `self.custom.foo` cannot be resolved to a specific component, so it is recorded as `*.custom.foo`. During finalization, every defined `<component>.custom.foo` whose name matches the wildcard is considered used. The same wildcard handling applies to `self.params.foo`.
 
+Component customs can also be read through expressions the `self.*` patterns cannot see: navigation calls (`self.getSibling('Btn').custom.data`), variables holding a component (`comp.custom.data`), and quoted subscripts (`self.custom['data']`, including non-identifier names like `custom['my prop']`). Any dotted or quoted-subscript `.custom.<name>` access in a script therefore credits `*.custom.<name>` regardless of what precedes it. A dynamic subscript (`self.custom[key]`) or a bare component-custom object passed whole records `*.custom.*`, crediting every component custom property. Over-crediting here only under-reports; under-crediting would let `--fix` delete a live property.
+
 ## Auto-fix support
 This rule provides auto-fixes for flagged **custom properties only** (view-level and component-level). The fix deletes the definition via `DELETE_KEY` operations — the value entry in the owning `custom` object (when present; non-persistent properties have none) and every `propConfig` entry belonging to the property, including nested-children entries of an object property (`custom.network.nat1` alongside `custom.network`). Every fix this rule emits is **safe**: custom properties are internal to the view, so removal cannot break anything outside it.
 

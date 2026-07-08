@@ -324,15 +324,7 @@ class UnusedCustomPropertiesRule(FixableMixin, LintingRule):
 					if view_scope:
 						self.used_properties.add(f"view.params.{match}")
 
-		# Quoted subscript access reads one known member, not the whole params/custom object.
-		subscript_patterns = [
-			(r'self\.view\.params\s*\[\s*[\'\"]([a-zA-Z_][a-zA-Z0-9_]*)[\'\"]\s*\]', "view.params.{}"),
-			(r'self\.view\.custom\s*\[\s*[\'\"]([a-zA-Z_][a-zA-Z0-9_]*)[\'\"]\s*\]', "view.custom.{}"),
-		]
-		for pattern, used_property_template in subscript_patterns:
-			matches = re.findall(pattern, script)
-			for match in matches:
-				self.used_properties.add(used_property_template.format(match))
+		self._check_component_custom_reads(script, view_scope, nested)
 
 		# A bare self.view.params/custom reference may pass the full object to another consumer.
 		# Since we can't know which members are read later, mark the full scope as used.
@@ -341,6 +333,42 @@ class UnusedCustomPropertiesRule(FixableMixin, LintingRule):
 			self.used_properties.add('view.params.*')
 		if re.search(r'self\.view\.custom\b(?!\s*(?:\.|\[\s*[\'\"]))', script):
 			self.used_properties.add('view.custom.*')
+
+	def _check_component_custom_reads(self, script: str, view_scope: bool, nested: str):
+		"""
+		Credit component custom properties read through expressions the self.* patterns
+		cannot see - navigation calls (self.getSibling('Btn').custom.data), variables
+		holding a component (comp.custom.data), and quoted subscripts (self.custom['x'],
+		including non-identifier member names). Over-crediting here only under-reports;
+		under-crediting would let --fix delete a live property.
+		"""
+		# Dotted access through any component-yielding expression.
+		for match in re.findall(rf'[\w\)\]]\.custom\.{nested}', script):
+			self.used_properties.add(f"*.custom.{match}")
+
+		# Quoted subscript access reads one known member, not the whole custom/params
+		# object. Member names are arbitrary strings (spaces, dashes), not identifiers.
+		member = r'[\'\"]([^\'\"]+)[\'\"]'
+		subscript_patterns = [
+			(rf'self\.view\.params\s*\[\s*{member}\s*\]', "view.params.{}"),
+			(rf'self\.view\.custom\s*\[\s*{member}\s*\]', "view.custom.{}"),
+			(rf'[\w\)\]]\.custom\s*\[\s*{member}\s*\]', "*.custom.{}"),
+		]
+		for pattern, used_property_template in subscript_patterns:
+			for match in re.findall(pattern, script):
+				self.used_properties.add(used_property_template.format(match))
+		if view_scope:
+			# A view-scoped self.custom['x'] is equivalent to self.view.custom['x'],
+			# mirroring the dot-form scope handling in _check_script_for_references.
+			for match in re.findall(rf'self\.custom\s*\[\s*{member}\s*\]', script):
+				self.used_properties.add(f"view.custom.{match}")
+
+		# A dynamically-subscripted or bare component-custom object (self.custom[key],
+		# comp.custom passed whole) may read any member of any component's custom scope.
+		if re.search(r'[\w\)\]]\.custom\b(?!\s*(?:\.|\[\s*[\'\"]))', script):
+			self.used_properties.add('*.custom.*')
+			if view_scope and re.search(r'self\.custom\b(?!\s*(?:\.|\[\s*[\'\"]))', script):
+				self.used_properties.add('view.custom.*')
 
 	def finalize(self):
 		"""Called after all nodes are visited - check for unused properties."""
@@ -424,13 +452,17 @@ class UnusedCustomPropertiesRule(FixableMixin, LintingRule):
 		if any(used.startswith(descendant_prefix) for used in self.used_properties):
 			return True
 
-		# Component custom properties are also tracked via wildcard keys (*.custom.propName)
+		# Component custom properties are also tracked via wildcard keys (*.custom.propName).
+		# '*.custom.*' covers dynamic/bare component-custom access (self.custom[key],
+		# comp.custom passed whole), which may read any member of any component's custom.
 		if '.custom.' in prop_path and not prop_path.startswith('view.'):
 			prop_name = prop_path.split('.custom.')[-1]
-			if f"*.custom.{prop_name}" in self.used_properties:
-				return True
 			wildcard_prefix = f"*.custom.{prop_name}."
-			if any(used.startswith(wildcard_prefix) for used in self.used_properties):
+			if (
+				'*.custom.*' in self.used_properties or
+				f"*.custom.{prop_name}" in self.used_properties or
+				any(used.startswith(wildcard_prefix) for used in self.used_properties)
+			):
 				return True
 
 		# A view-level object custom property may have its children accessed via the
@@ -446,10 +478,11 @@ class UnusedCustomPropertiesRule(FixableMixin, LintingRule):
 		# View params may be referenced via component-relative self.params (*.params.paramName)
 		if prop_path.startswith('view.params.'):
 			prop_name = prop_path.split('view.params.')[-1]
-			if f"*.params.{prop_name}" in self.used_properties:
-				return True
 			wildcard_prefix = f"*.params.{prop_name}."
-			if any(used.startswith(wildcard_prefix) for used in self.used_properties):
+			if (
+				f"*.params.{prop_name}" in self.used_properties or
+				any(used.startswith(wildcard_prefix) for used in self.used_properties)
+			):
 				return True
 
 		return False
