@@ -4,6 +4,7 @@
   "propConfig.custom.CUSTOM_VIEW_PARAM.persistent": true,
   "propConfig.params.VIEW_PARAM.paramDirection": "input",
   "propConfig.params.VIEW_PARAM.persistent": true,
+  "props": {},
   "root.root.children[0].ICON_UPPER_CASE.custom.COMPONENT_CUSTOM_PARAM": "value",
   "root.root.children[0].ICON_UPPER_CASE.meta.name": "ICON_UPPER_CASE",
   "root.root.children[0].ICON_UPPER_CASE.position.basis": "30px",

@@ -97,17 +97,17 @@
         "value_type": "str"
       },
       {
-        "name": "snake_case_test_param",
+        "name": "snake_case_test_custom",
         "node_type": "property",
-        "path": "params.snake_case_test_param",
+        "path": "custom.snake_case_test_custom",
         "persistent": false,
         "value": null,
         "value_type": "NoneType"
       },
       {
-        "name": "snake_case_test_custom",
+        "name": "snake_case_test_param",
         "node_type": "property",
-        "path": "custom.snake_case_test_custom",
+        "path": "params.snake_case_test_param",
         "persistent": false,
         "value": null,
         "value_type": "NoneType"

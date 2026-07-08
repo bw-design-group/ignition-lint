@@ -33,11 +33,7 @@ class ExcessiveContextDataRule(LintingRule):
 	"""Detects excessive context data in custom properties using multiple detection methods."""
 
 	def __init__(
-		self,
-		max_array_size=50,
-		max_sibling_properties=50,
-		max_nesting_depth=5,
-		max_data_points=1000,
+		self, max_array_size=50, max_sibling_properties=50, max_nesting_depth=5, max_data_points=1000,
 		severity="error"
 	):
 		"""
@@ -89,7 +85,7 @@ class ExcessiveContextDataRule(LintingRule):
 			match = array_pattern.match(path)
 			if match:
 				property_path = match.group(1)  # e.g., "custom.filteredData"
-				index = int(match.group(2))     # e.g., 123
+				index = int(match.group(2))  # e.g., 123
 
 				# Track the maximum index seen (array size = max_index + 1)
 				if property_path not in array_sizes:

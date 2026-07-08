@@ -4,6 +4,7 @@
   "propConfig.custom.customViewParam.persistent": true,
   "propConfig.params.viewParam.paramDirection": "input",
   "propConfig.params.viewParam.persistent": true,
+  "props": {},
   "root.root.children[0].IconPascalCase.custom.componentCustomParam": "value",
   "root.root.children[0].IconPascalCase.meta.name": "IconPascalCase",
   "root.root.children[0].IconPascalCase.position.basis": "30px",

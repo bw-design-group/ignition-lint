@@ -342,17 +342,17 @@
         "value_type": "str"
       },
       {
-        "name": "valObj",
+        "name": "valDate",
         "node_type": "property",
-        "path": "params.valObj",
+        "path": "params.valDate",
         "persistent": true,
         "value": null,
         "value_type": "NoneType"
       },
       {
-        "name": "valDate",
+        "name": "valObj",
         "node_type": "property",
-        "path": "params.valDate",
+        "path": "params.valObj",
         "persistent": true,
         "value": null,
         "value_type": "NoneType"

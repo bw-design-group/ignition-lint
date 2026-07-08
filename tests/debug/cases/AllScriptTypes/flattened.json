@@ -1,6 +1,7 @@
 {
   "custom.bad": "Bad Data",
   "custom.good": "Good Data",
+  "params": {},
   "propConfig.custom.bad.binding.config.expression": "'Data'",
   "propConfig.custom.bad.binding.transforms[0].code": "\ttemp_var = 1\n\treturn 'Bad %s' % (value)",
   "propConfig.custom.bad.binding.transforms[0].type": "script",
@@ -11,6 +12,7 @@
   "propConfig.custom.good.binding.transforms[0].type": "script",
   "propConfig.custom.good.binding.type": "expr",
   "propConfig.custom.good.persistent": true,
+  "props": {},
   "root.root.children[0].ActionButton.events.component.onActionPerformed.config.script": "\tsystem.perspective.print('ActionButton Pressed')",
   "root.root.children[0].ActionButton.events.component.onActionPerformed.scope": "G",
   "root.root.children[0].ActionButton.events.component.onActionPerformed.type": "script",

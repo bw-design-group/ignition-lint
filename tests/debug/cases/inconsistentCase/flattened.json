@@ -12,6 +12,7 @@
   "propConfig.custom.this_is_illegal.persistent": true,
   "propConfig.params.VeryBadPractice.paramDirection": "input",
   "propConfig.params.VeryBadPractice.persistent": true,
+  "props": {},
   "root.root.children[0].GoodLabelName.custom.BadLabelCustomProp": "Oops",
   "root.root.children[0].GoodLabelName.custom.key": "value",
   "root.root.children[0].GoodLabelName.custom.labelCustomProperty": "hi",
