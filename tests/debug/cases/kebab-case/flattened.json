@@ -4,6 +4,7 @@
   "propConfig.custom.custom-view-param.persistent": true,
   "propConfig.params.view-param.paramDirection": "input",
   "propConfig.params.view-param.persistent": true,
+  "props": {},
   "root.root.children[0].icon-kebab-case.custom.component-custom-param": "value",
   "root.root.children[0].icon-kebab-case.meta.name": "icon-kebab-case",
   "root.root.children[0].icon-kebab-case.position.basis": "30px",

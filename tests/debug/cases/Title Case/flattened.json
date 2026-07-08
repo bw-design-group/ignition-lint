@@ -1,6 +1,7 @@
 {
   "propConfig.params.ViewParam.paramDirection": "input",
   "propConfig.params.ViewParam.persistent": true,
+  "props": {},
   "root.root.children[0].Icon Title Case.meta.name": "Icon Title Case",
   "root.root.children[0].Icon Title Case.position.basis": "30px",
   "root.root.children[0].Icon Title Case.props.path": "material/insert_emoticon",

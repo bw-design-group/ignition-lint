@@ -87,6 +87,7 @@
   "propConfig.params.valObj.persistent": true,
   "propConfig.params.valString.paramDirection": "input",
   "propConfig.params.valString.persistent": true,
+  "props": {},
   "root.root.meta.name": "root",
   "root.root.props.direction": "column",
   "root.root.type": "ia.container.flex"

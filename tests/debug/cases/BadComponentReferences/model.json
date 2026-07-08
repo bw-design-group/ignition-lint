@@ -633,7 +633,7 @@
     ]
   },
   "properties": {
-    "count": 72,
+    "count": 73,
     "nodes": [
       {
         "name": "shrink",
@@ -1096,6 +1096,13 @@
         "path": "root.root.children.SelfRefContainer.position.grow",
         "value": 1,
         "value_type": "int"
+      },
+      {
+        "name": "style",
+        "node_type": "property",
+        "path": "root.root.children.SelfRefContainer.props.style",
+        "value": {},
+        "value_type": "dict"
       },
       {
         "name": "basis",

@@ -141,12 +141,22 @@ class TestFlattenJson(unittest.TestCase):
 		self.assertIn("Root.children[0].Button_0.props.events.onActionPerformed.script", result)
 
 	def test_flatten_empty_list(self):
-		"""Test flattening empty lists (they should be excluded from results)."""
+		"""Empty lists are preserved as [] leaves so they stay visible to the model."""
 		data = {"items": [], "nested": {"empty": []}}
 
 		result = flatten_json(data)
-		# Empty lists should not appear in flattened results
-		expected = OrderedDict()
+		# An empty array is still a value; dropping it would make properties like an
+		# empty custom list invisible to every rule (and undeletable by --fix).
+		expected = OrderedDict([("items", []), ("nested.empty", [])])
+
+		self.assertEqual(result, expected)
+
+	def test_flatten_empty_nested_dict(self):
+		"""Empty dicts are preserved as {} leaves so they stay visible to the model."""
+		data = {"custom": {"emptyMeta": {}}, "filled": {"a": 1}}
+
+		result = flatten_json(data)
+		expected = OrderedDict([("custom.emptyMeta", {}), ("filled.a", 1)])
 
 		self.assertEqual(result, expected)
 
@@ -177,11 +187,11 @@ class TestFlattenJson(unittest.TestCase):
 class TestFileOperations(unittest.TestCase):
 	"""Test file I/O operations for JSON processing."""
 
-	def setUp(self): # pylint: disable=invalid-name
+	def setUp(self):  # pylint: disable=invalid-name
 		"""Set up temporary files for testing."""
 		self.temp_dir = Path(tempfile.mkdtemp())
 
-	def tearDown(self): # pylint: disable=invalid-name
+	def tearDown(self):  # pylint: disable=invalid-name
 		"""Clean up temporary files."""
 		if self.temp_dir.exists():
 			shutil.rmtree(self.temp_dir)

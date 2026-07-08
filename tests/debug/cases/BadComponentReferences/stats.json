@@ -29,7 +29,7 @@
     "expression_binding": 11,
     "expression_struct_binding": 1,
     "message_handler": 2,
-    "property": 72,
+    "property": 73,
     "property_binding": 10
   },
   "rule_coverage": {
@@ -61,7 +61,7 @@
       ]
     },
     "ExcessiveContextDataRule": {
-      "applicable_node_count": 144,
+      "applicable_node_count": 145,
       "target_types": [
         "all"
       ]
@@ -93,7 +93,7 @@
       ]
     },
     "UnusedCustomPropertiesRule": {
-      "applicable_node_count": 143,
+      "applicable_node_count": 144,
       "target_types": [
         "component",
         "custom_method",
@@ -107,5 +107,5 @@
       ]
     }
   },
-  "total_nodes": 144
+  "total_nodes": 145
 }

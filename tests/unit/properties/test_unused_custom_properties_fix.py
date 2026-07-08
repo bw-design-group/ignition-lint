@@ -272,11 +272,9 @@ class TestUnusedCustomPropertiesFixGeneration(unittest.TestCase):
 		self.assertEqual(len(results.errors.get('UnusedCustomPropertiesRule', [])), 1)
 		self.assertEqual(len(results.fixes), 0)
 
-	def test_no_fix_when_propconfig_entry_still_has_binding(self):
-		"""Defense in depth: a flagged property whose propConfig entry contains a binding
-		gets NO fix — the flag means detection missed the binding, and deleting would
-		destroy live configuration. (An empty binding dict vanishes in flattening, so it
-		is never credited: the one shape that reaches the guard today.)"""
+	def test_empty_binding_dict_credits_property(self):
+		"""An empty binding dict survives flattening as a {} leaf, so the binding-owner
+		scan credits the property: no violation, no fix."""
 		view = {
 			"custom": {
 				"weird": 1
@@ -296,8 +294,44 @@ class TestUnusedCustomPropertiesFixGeneration(unittest.TestCase):
 		}
 		results, _, _ = _lint_with_fix_context(view)
 
-		self.assertEqual(len(results.errors.get('UnusedCustomPropertiesRule', [])), 1)
+		self.assertEqual(results.errors.get('UnusedCustomPropertiesRule', []), [])
 		self.assertEqual(len(results.fixes), 0)
+
+	def test_build_delete_operations_guard_refuses_bound_entries(self):
+		"""Defense-in-depth backstop, exercised directly: _build_delete_operations must
+		return no operations when a propConfig entry still contains a binding key. Every
+		binding shape is credited during detection today, so this guard is unreachable
+		through real JSON — it exists to catch future detection blind spots before they
+		delete live configuration."""
+		view = _load_view({
+			"custom": {
+				"weird": 1
+			},
+			"propConfig": {
+				"custom.weird": {
+					"persistent": True,
+					"binding": {
+						"type": "expr",
+						"config": {
+							"expression": "1"
+						}
+					}
+				}
+			},
+			"root": {
+				"children": [],
+				"meta": {
+					"name": "root"
+				}
+			},
+		})
+		rule = RULES_MAP['UnusedCustomPropertiesRule'].create_from_config({})
+		rule.set_fix_context(view, PathTranslator(view))
+
+		operations, removes_onchange = rule._build_delete_operations([], 'custom', 'weird')  # pylint: disable=protected-access
+
+		self.assertEqual(operations, [])
+		self.assertFalse(removes_onchange)
 
 	def test_bound_properties_get_no_violations_and_no_fixes(self):
 		"""Properties bound by types without model nodes (query, http, tag-history,
@@ -418,6 +452,150 @@ class TestUnusedCustomPropertiesFixGeneration(unittest.TestCase):
 		self.assertEqual(embedded['props']['params'], {'unusedRef': False})
 		self.assertIn('props.params.color', embedded['propConfig'])
 		self.assertIn('reallyUnused', json_data['params'])
+
+	def test_empty_dict_component_custom_flagged_and_fixed(self):
+		"""A component custom property whose value is an EMPTY dict used to vanish in
+		flattening and was invisible to the rule — neither flagged nor deleted."""
+		view = {
+			"root": {
+				"children": [{
+					"meta": {
+						"name": "Toolbar"
+					},
+					"type": "ia.container.flex",
+					"custom": {
+						"emptyMeta": {}
+					}
+				}],
+				"meta": {
+					"name": "root"
+				},
+			},
+		}
+		results, json_data, translator = _lint_with_fix_context(view)
+
+		self.assertEqual(len(results.errors.get('UnusedCustomPropertiesRule', [])), 1)
+		self.assertEqual(len(results.fixes), 1)
+		self.assertEqual(_delete_paths(results.fixes[0]), {('root', 'children', 0, 'custom', 'emptyMeta')})
+
+		FixEngine(translator).apply_fixes(results.fixes, safe_only=True)
+		self.assertEqual(json_data['root']['children'][0]['custom'], {})
+
+	def test_dict_valued_component_custom_flagged_and_fixed(self):
+		"""A component custom property with an object value surfaces only as nested
+		leaves in the flattened JSON; the top-level key is the definition and the
+		whole object is deleted when unused."""
+		view = {
+			"root": {
+				"children": [{
+					"meta": {
+						"name": "Toolbar"
+					},
+					"type": "ia.container.flex",
+					"custom": {
+						"cfg": {
+							"a": 1,
+							"b": {
+								"c": 2
+							}
+						}
+					}
+				}],
+				"meta": {
+					"name": "root"
+				},
+			},
+		}
+		results, json_data, translator = _lint_with_fix_context(view)
+
+		self.assertEqual(len(results.fixes), 1)
+		self.assertEqual(_delete_paths(results.fixes[0]), {('root', 'children', 0, 'custom', 'cfg')})
+
+		FixEngine(translator).apply_fixes(results.fixes, safe_only=True)
+		self.assertEqual(json_data['root']['children'][0]['custom'], {})
+
+	def test_dict_valued_component_custom_with_referenced_child_kept(self):
+		"""An object custom property whose CHILD is read in a script is used — the
+		parent must not be flagged or deleted."""
+		view = {
+			"root": {
+				"children": [{
+					"meta": {
+						"name": "Toolbar"
+					},
+					"type": "ia.container.flex",
+					"custom": {
+						"cfg": {
+							"a": 1
+						}
+					},
+					"events": {
+						"component": {
+							"onActionPerformed": {
+								"type": "script",
+								"scope": "G",
+								"config": {
+									"script": "\tprint(self.custom.cfg.a)"
+								},
+							}
+						}
+					}
+				}],
+				"meta": {
+					"name": "root"
+				},
+			},
+		}
+		results, _, _ = _lint_with_fix_context(view)
+
+		self.assertEqual(results.errors.get('UnusedCustomPropertiesRule', []), [])
+		self.assertEqual(len(results.fixes), 0)
+
+	def test_empty_dict_view_custom_without_propconfig_flagged_and_fixed(self):
+		"""A view-level empty-dict custom with no propConfig entry used to be invisible."""
+		view = {
+			"custom": {
+				"emptyMeta": {}
+			},
+			"root": {
+				"children": [],
+				"meta": {
+					"name": "root"
+				}
+			},
+		}
+		results, json_data, translator = _lint_with_fix_context(view)
+
+		self.assertEqual(len(results.fixes), 1)
+		self.assertEqual(_delete_paths(results.fixes[0]), {('custom', 'emptyMeta')})
+
+		FixEngine(translator).apply_fixes(results.fixes, safe_only=True)
+		self.assertEqual(json_data['custom'], {})
+
+	def test_empty_list_component_custom_flagged_and_fixed(self):
+		"""Empty-array custom properties get the same treatment as empty objects."""
+		view = {
+			"root": {
+				"children": [{
+					"meta": {
+						"name": "Toolbar"
+					},
+					"type": "ia.container.flex",
+					"custom": {
+						"emptyList": []
+					}
+				}],
+				"meta": {
+					"name": "root"
+				},
+			},
+		}
+		results, json_data, translator = _lint_with_fix_context(view)
+
+		self.assertEqual(len(results.fixes), 1)
+
+		FixEngine(translator).apply_fixes(results.fixes, safe_only=True)
+		self.assertEqual(json_data['root']['children'][0]['custom'], {})
 
 	def test_no_fixes_without_fix_context(self):
 		"""No fixes are generated when fix context is not provided."""

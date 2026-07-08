@@ -671,8 +671,16 @@
     ]
   },
   "properties": {
-    "count": 135,
+    "count": 136,
     "nodes": [
+      {
+        "name": "kpiHourlyData",
+        "node_type": "property",
+        "path": "custom.kpiHourlyData",
+        "persistent": true,
+        "value": [],
+        "value_type": "list"
+      },
       {
         "name": "kpiTagData",
         "node_type": "property",
@@ -1490,6 +1498,13 @@
         "value_type": "str"
       },
       {
+        "name": "urlParams",
+        "node_type": "property",
+        "path": "root.root.custom.urlParams",
+        "value": {},
+        "value_type": "dict"
+      },
+      {
         "name": "direction",
         "node_type": "property",
         "path": "root.root.props.direction",
@@ -1518,107 +1533,9 @@
         "value_type": "str"
       },
       {
-        "name": "eq_path",
-        "node_type": "property",
-        "path": "custom.eq_path",
-        "persistent": false,
-        "private_access": true,
-        "value": null,
-        "value_type": "NoneType"
-      },
-      {
-        "name": "end_date",
-        "node_type": "property",
-        "path": "custom.end_date",
-        "persistent": false,
-        "private_access": true,
-        "value": null,
-        "value_type": "NoneType"
-      },
-      {
-        "name": "state_name",
-        "node_type": "property",
-        "path": "custom.state_name",
-        "persistent": false,
-        "private_access": true,
-        "value": null,
-        "value_type": "NoneType"
-      },
-      {
-        "name": "adjusted_time",
-        "node_type": "property",
-        "path": "custom.adjusted_time",
-        "persistent": false,
-        "private_access": true,
-        "value": null,
-        "value_type": "NoneType"
-      },
-      {
-        "name": "update",
-        "node_type": "property",
-        "path": "custom.update",
-        "persistent": false,
-        "private_access": true,
-        "value": null,
-        "value_type": "NoneType"
-      },
-      {
-        "name": "is_nav_expanded",
-        "node_type": "property",
-        "path": "custom.is_nav_expanded",
-        "persistent": false,
-        "private_access": true,
-        "value": null,
-        "value_type": "NoneType"
-      },
-      {
-        "name": "time",
-        "node_type": "property",
-        "path": "custom.time",
-        "persistent": false,
-        "private_access": true,
-        "value": null,
-        "value_type": "NoneType"
-      },
-      {
-        "name": "state_type",
-        "node_type": "property",
-        "path": "custom.state_type",
-        "persistent": false,
-        "private_access": true,
-        "value": null,
-        "value_type": "NoneType"
-      },
-      {
         "name": "start_date",
         "node_type": "property",
         "path": "custom.start_date",
-        "persistent": false,
-        "private_access": true,
-        "value": null,
-        "value_type": "NoneType"
-      },
-      {
-        "name": "kpiTargets",
-        "node_type": "property",
-        "path": "custom.kpiTargets",
-        "persistent": false,
-        "private_access": true,
-        "value": null,
-        "value_type": "NoneType"
-      },
-      {
-        "name": "kpiHourlyData",
-        "node_type": "property",
-        "path": "custom.kpiHourlyData",
-        "persistent": true,
-        "value": null,
-        "value_type": "NoneType"
-      },
-      {
-        "name": "partial_tag_path",
-        "node_type": "property",
-        "path": "custom.partial_tag_path",
         "persistent": false,
         "private_access": true,
         "value": null,
@@ -1634,6 +1551,33 @@
         "value_type": "NoneType"
       },
       {
+        "name": "end_date",
+        "node_type": "property",
+        "path": "custom.end_date",
+        "persistent": false,
+        "private_access": true,
+        "value": null,
+        "value_type": "NoneType"
+      },
+      {
+        "name": "kpiTargets",
+        "node_type": "property",
+        "path": "custom.kpiTargets",
+        "persistent": false,
+        "private_access": true,
+        "value": null,
+        "value_type": "NoneType"
+      },
+      {
+        "name": "state_type",
+        "node_type": "property",
+        "path": "custom.state_type",
+        "persistent": false,
+        "private_access": true,
+        "value": null,
+        "value_type": "NoneType"
+      },
+      {
         "name": "mode_name",
         "node_type": "property",
         "path": "custom.mode_name",
@@ -1643,9 +1587,72 @@
         "value_type": "NoneType"
       },
       {
+        "name": "partial_tag_path",
+        "node_type": "property",
+        "path": "custom.partial_tag_path",
+        "persistent": false,
+        "private_access": true,
+        "value": null,
+        "value_type": "NoneType"
+      },
+      {
         "name": "mode_type",
         "node_type": "property",
         "path": "custom.mode_type",
+        "persistent": false,
+        "private_access": true,
+        "value": null,
+        "value_type": "NoneType"
+      },
+      {
+        "name": "adjusted_time",
+        "node_type": "property",
+        "path": "custom.adjusted_time",
+        "persistent": false,
+        "private_access": true,
+        "value": null,
+        "value_type": "NoneType"
+      },
+      {
+        "name": "time",
+        "node_type": "property",
+        "path": "custom.time",
+        "persistent": false,
+        "private_access": true,
+        "value": null,
+        "value_type": "NoneType"
+      },
+      {
+        "name": "eq_path",
+        "node_type": "property",
+        "path": "custom.eq_path",
+        "persistent": false,
+        "private_access": true,
+        "value": null,
+        "value_type": "NoneType"
+      },
+      {
+        "name": "is_nav_expanded",
+        "node_type": "property",
+        "path": "custom.is_nav_expanded",
+        "persistent": false,
+        "private_access": true,
+        "value": null,
+        "value_type": "NoneType"
+      },
+      {
+        "name": "state_name",
+        "node_type": "property",
+        "path": "custom.state_name",
+        "persistent": false,
+        "private_access": true,
+        "value": null,
+        "value_type": "NoneType"
+      },
+      {
+        "name": "update",
+        "node_type": "property",
+        "path": "custom.update",
         "persistent": false,
         "private_access": true,
         "value": null,

@@ -8,6 +8,7 @@
   "propConfig.params.snake_case_test_param.persistent": false,
   "propConfig.params.viewParam.paramDirection": "input",
   "propConfig.params.viewParam.persistent": true,
+  "props": {},
   "root.root.children[0].iconCamelCase.custom.componentCustomParam": "value",
   "root.root.children[0].iconCamelCase.meta.name": "iconCamelCase",
   "root.root.children[0].iconCamelCase.position.basis": "30px",

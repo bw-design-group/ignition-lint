@@ -111,35 +111,36 @@ class UnusedCustomPropertiesRule(FixableMixin, LintingRule):
 		"""Called after all nodes are visited - but we handle this in process_nodes."""
 
 	def visit_property(self, node):
-		"""Visit property nodes to find custom property definitions."""
+		"""Visit property nodes to find custom property definitions.
+
+		Property nodes are built from flattened-JSON leaves, so an object-valued property
+		(custom.obj = {"a": 1}) surfaces only as its nested children (custom.obj.a). The
+		definition is always the TOP-LEVEL property - the first segment after the
+		custom./params. marker - since that is the key the Designer creates and the key a
+		fix must delete. Nested leaves therefore register their parent.
+		"""
 		path = node.path
 
-		# Check for view-level custom properties: custom.propName
-		if path.startswith('custom.') and '.' not in path[7:]:  # Exactly custom.propName
-			prop_name = path[7:]  # Remove 'custom.' prefix
-			full_prop_path = f"view.custom.{prop_name}"
-			self.defined_properties[full_prop_path] = path
+		# Check for view-level custom properties: custom.propName (or a nested leaf
+		# custom.propName.child, which defines its top-level parent)
+		if path.startswith('custom.'):
+			prop_name = path[7:].split('.')[0]  # First segment after 'custom.'
+			self.defined_properties[f"view.custom.{prop_name}"] = f"custom.{prop_name}"
 
-		# Check for view-level parameters: params.paramName
-		elif path.startswith('params.') and '.' not in path[7:]:  # Exactly params.paramName
-			prop_name = path[7:]  # Remove 'params.' prefix
-			full_prop_path = f"view.params.{prop_name}"
-			self.defined_properties[full_prop_path] = path
+		# Check for view-level parameters: params.paramName (or a nested leaf)
+		elif path.startswith('params.'):
+			prop_name = path[7:].split('.')[0]  # First segment after 'params.'
+			self.defined_properties[f"view.params.{prop_name}"] = f"params.{prop_name}"
 
-		# Check for component custom properties: *.custom.propName
+		# Check for component custom properties: *.custom.propName (or a nested leaf)
 		elif '.custom.' in path and not path.startswith('propConfig.'):
-			# Extract the property name (last part after .custom.)
-			custom_match = re.search(r'\.custom\.([^.]+)$', path)
-			if custom_match:
-				prop_name = custom_match.group(1)
+			component_path, remainder = path.split('.custom.', 1)
+			prop_name = remainder.split('.')[0]
+			# Get component name from path (last segment)
+			component_name = component_path.split('.')[-1]
+			full_prop_path = f"{component_name}.custom.{prop_name}"
 
-				# Extract component identifier from path
-				component_path = path.split('.custom.')[0]
-				# Get component name from path (last segment)
-				component_name = component_path.split('.')[-1]
-				full_prop_path = f"{component_name}.custom.{prop_name}"
-
-				self.defined_properties[full_prop_path] = path
+			self.defined_properties[full_prop_path] = f"{component_path}.custom.{prop_name}"
 
 	def visit_expression_binding(self, node):
 		"""Check expression bindings for custom property references."""

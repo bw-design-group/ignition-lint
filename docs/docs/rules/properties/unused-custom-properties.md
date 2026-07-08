@@ -24,7 +24,7 @@ Enable the rule with defaults — unused props become errors:
 }
 ```
 
-That's it. Every `custom.*`, `params.*`, and `<component>.custom.*` definition in the view is checked, and anything that isn't bound or referenced gets flagged.
+That's it. Every `custom.*`, `params.*`, and `<component>.custom.*` definition in the view is checked, and anything that isn't bound or referenced gets flagged. Values of any shape count as definitions — scalars, arrays, objects, and empty objects/arrays (`"key_1": {}`) alike; for an object property the top-level key is the definition, and it is credited as used whenever any of its nested children is bound or referenced.
 
 ## Common configurations
 
