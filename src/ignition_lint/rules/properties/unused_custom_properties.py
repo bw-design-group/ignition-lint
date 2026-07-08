@@ -42,6 +42,11 @@ from ...model.node_types import NodeType
 # Sentinel distinguishing "path not present in the JSON" from a legitimate None value.
 _MISSING = object()
 
+# Matches flattened-JSON keys under a binding declaration and captures the property that
+# owns the binding. Works for view-level keys (propConfig.custom.X.binding.type) and
+# component-level keys (root.root.children[0].Btn.propConfig.custom.X.binding.type).
+_BINDING_OWNER_RE = re.compile(r'^(?:(?P<owner>.+)\.)?propConfig\.(?P<prop>(?:custom|params)\..+?)\.binding(?:[.\[]|$)')
+
 
 @register_rule
 class UnusedCustomPropertiesRule(FixableMixin, LintingRule):
@@ -248,6 +253,16 @@ class UnusedCustomPropertiesRule(FixableMixin, LintingRule):
 				used_prop = handler(match)
 				self.used_properties.add(used_prop)
 
+		# Whole-object references pass the entire params/custom object to a consumer —
+		# typically an embedded view's props.params, which forwards the params to the
+		# next view. Brace form ({view.params}) appears in expressions; the bare
+		# whole-value form ('view.params') is a property-binding path. Any member may
+		# be read downstream, so credit the full scope.
+		if re.search(r'\{(?:self\.)?view\.params\}', expression) or expression.strip() == 'view.params':
+			self.used_properties.add('view.params.*')
+		if re.search(r'\{(?:self\.)?view\.custom\}', expression) or expression.strip() == 'view.custom':
+			self.used_properties.add('view.custom.*')
+
 	@staticmethod
 	def _is_view_scope_script_path(json_path: str) -> bool:
 		"""
@@ -335,6 +350,7 @@ class UnusedCustomPropertiesRule(FixableMixin, LintingRule):
 
 		# Search entire flattened JSON for property references
 		self._search_flattened_json_for_references()
+		self._credit_bound_properties()
 
 		unused_properties = []
 
@@ -355,6 +371,32 @@ class UnusedCustomPropertiesRule(FixableMixin, LintingRule):
 
 			if self.has_fix_context:
 				self._generate_removal_fix(prop_path, definition_location, prop_type, violation_msg)
+
+	def _credit_bound_properties(self):
+		"""
+		Credit every property that owns a binding, regardless of binding type.
+
+		The visitor-based crediting in visit_*_binding only covers binding types the model
+		builder turns into nodes (expression, property, tag). Binding types without dedicated
+		nodes (query, expr-struct, http, tag-history, ...) would leave their owner uncredited,
+		flagging a live bound property as unused — and auto-fix would then delete a working
+		binding. Scanning the flattened keys makes "a property with a binding is used" hold
+		for every binding shape, present or future.
+		"""
+		for json_path in self.flattened_json:
+			match = _BINDING_OWNER_RE.match(json_path)
+			if not match:
+				continue
+			prop_path = match.group('prop')
+			owner = match.group('owner')
+			if owner is None:
+				# View-level propConfig: propConfig.custom.X / propConfig.params.X
+				self.used_properties.add(f"view.{prop_path}")
+			else:
+				# Component propConfig: credit under the component's name, matching
+				# the {component_name}.custom.{prop} key format of defined_properties.
+				component_name = owner.split('.')[-1]
+				self.used_properties.add(f"{component_name}.{prop_path}")
 
 	def _is_property_used(self, prop_path: str) -> bool:
 		"""
@@ -536,6 +578,9 @@ class UnusedCustomPropertiesRule(FixableMixin, LintingRule):
 		Returns:
 			Tuple of (operations, removes_onchange). removes_onchange is True when any
 			removed propConfig entry contains an onChange property-change script.
+			Returns no operations when a propConfig entry still contains a binding:
+			a flagged property that owns a binding means the rule failed to credit it
+			(a detection blind spot), and deleting it would destroy a live binding.
 		"""
 		operations = []
 		removes_onchange = False
@@ -561,6 +606,8 @@ class UnusedCustomPropertiesRule(FixableMixin, LintingRule):
 				if key != exact_key and not key.startswith(child_prefixes):
 					continue
 				entry = prop_config[key]
+				if isinstance(entry, dict) and 'binding' in entry:
+					return [], False
 				if isinstance(entry, dict) and 'onChange' in entry:
 					removes_onchange = True
 				operations.append(

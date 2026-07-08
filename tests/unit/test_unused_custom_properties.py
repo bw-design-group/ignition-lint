@@ -1638,3 +1638,212 @@ class TestUnusedCustomPropertiesRule(BaseRuleTest):  # pylint: disable=too-many-
 
 		# Dynamic key -> conservative wildcard -> no params flagged.
 		self.assert_rule_errors(mock_view, rule_config, "UnusedCustomPropertiesRule", expected_error_count=0)
+
+	def test_all_binding_types_credit_their_owner(self):
+		"""A property populated by ANY binding type is used - including types without
+		dedicated model nodes (query, expr-struct, http, tag-history)."""
+		view_data = {
+			"propConfig": {
+				"custom.exprBound": {
+					"persistent": False,
+					"binding": {
+						"type": "expr",
+						"config": {
+							"expression": "1+1"
+						}
+					}
+				},
+				"custom.queryBound": {
+					"persistent": False,
+					"binding": {
+						"type": "query",
+						"config": {
+							"queryPath": "GetStuff",
+							"parameters": {}
+						}
+					}
+				},
+				"custom.structBound": {
+					"persistent": False,
+					"binding": {
+						"type": "expr-struct",
+						"config": {
+							"struct": {
+								"a": "1"
+							},
+							"waitOnAll": True
+						}
+					}
+				},
+				"custom.httpBound": {
+					"persistent": False,
+					"binding": {
+						"type": "http",
+						"config": {
+							"url": "http://example/api",
+							"method": "GET"
+						}
+					}
+				},
+				"custom.histBound": {
+					"persistent": False,
+					"binding": {
+						"type": "tag-history",
+						"config": {
+							"tags": ["[default]SomeTag"]
+						}
+					}
+				}
+			},
+			"root": {
+				"children": [],
+				"meta": {
+					"name": "root"
+				}
+			}
+		}
+		mock_view_content = json.dumps(view_data, indent=2)
+		mock_view = create_temp_view_file(mock_view_content)
+
+		rule_config = get_test_config("UnusedCustomPropertiesRule")
+
+		self.assert_rule_errors(mock_view, rule_config, "UnusedCustomPropertiesRule", expected_error_count=0)
+
+	def test_component_custom_with_unmodeled_binding_type_credited(self):
+		"""Component custom properties bound by unmodeled binding types are used too."""
+		view_data = {
+			"root": {
+				"children": [{
+					"meta": {
+						"name": "DataButton"
+					},
+					"type": "ia.input.button",
+					"custom": {
+						"data": None
+					},
+					"propConfig": {
+						"custom.data": {
+							"binding": {
+								"type": "query",
+								"config": {
+									"queryPath": "GetData"
+								}
+							}
+						}
+					}
+				}],
+				"meta": {
+					"name": "root"
+				}
+			}
+		}
+		mock_view_content = json.dumps(view_data, indent=2)
+		mock_view = create_temp_view_file(mock_view_content)
+
+		rule_config = get_test_config("UnusedCustomPropertiesRule")
+
+		self.assert_rule_errors(mock_view, rule_config, "UnusedCustomPropertiesRule", expected_error_count=0)
+
+	def test_whole_params_object_property_binding_credits_all_params(self):
+		"""Params forwarded wholesale to an embedded view via a property binding on
+		'view.params' are used - the next view may read any of them."""
+		view_data = {
+			"params": {
+				"lineId": 1,
+				"areaId": 2
+			},
+			"root": {
+				"children": [{
+					"meta": {
+						"name": "EmbeddedChild"
+					},
+					"type": "ia.display.view",
+					"props": {
+						"path": "Page/Child",
+						"params": {
+							"binding": {
+								"type": "property",
+								"config": {
+									"path": "view.params"
+								}
+							}
+						}
+					}
+				}],
+				"meta": {
+					"name": "root"
+				}
+			}
+		}
+		mock_view_content = json.dumps(view_data, indent=2)
+		mock_view = create_temp_view_file(mock_view_content)
+
+		rule_config = get_test_config("UnusedCustomPropertiesRule")
+
+		self.assert_rule_errors(mock_view, rule_config, "UnusedCustomPropertiesRule", expected_error_count=0)
+
+	def test_whole_params_object_expression_binding_credits_all_params(self):
+		"""Params forwarded wholesale via an expression binding on {view.params} are used."""
+		view_data = {
+			"params": {
+				"lineId": 1,
+				"areaId": 2
+			},
+			"root": {
+				"children": [{
+					"meta": {
+						"name": "EmbeddedChild"
+					},
+					"type": "ia.display.view",
+					"props": {
+						"path": "Page/Child",
+						"params": {
+							"binding": {
+								"type": "expr",
+								"config": {
+									"expression": "{view.params}"
+								}
+							}
+						}
+					}
+				}],
+				"meta": {
+					"name": "root"
+				}
+			}
+		}
+		mock_view_content = json.dumps(view_data, indent=2)
+		mock_view = create_temp_view_file(mock_view_content)
+
+		rule_config = get_test_config("UnusedCustomPropertiesRule")
+
+		self.assert_rule_errors(mock_view, rule_config, "UnusedCustomPropertiesRule", expected_error_count=0)
+
+	def test_static_params_on_embedded_view_component_not_treated_as_definitions(self):
+		"""Statically typed values under an embedded view's props.params belong to the
+		CHILD view's interface - they must never be flagged in the parent."""
+		view_data = {
+			"root": {
+				"children": [{
+					"meta": {
+						"name": "EmbeddedChild"
+					},
+					"type": "ia.display.view",
+					"props": {
+						"path": "Page/Child",
+						"params": {
+							"staticChildParam": "hello"
+						}
+					}
+				}],
+				"meta": {
+					"name": "root"
+				}
+			}
+		}
+		mock_view_content = json.dumps(view_data, indent=2)
+		mock_view = create_temp_view_file(mock_view_content)
+
+		rule_config = get_test_config("UnusedCustomPropertiesRule")
+
+		self.assert_rule_errors(mock_view, rule_config, "UnusedCustomPropertiesRule", expected_error_count=0)

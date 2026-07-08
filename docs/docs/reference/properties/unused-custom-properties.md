@@ -227,6 +227,8 @@ Safety classification:
 
 Component custom properties are located by resolving the (index-stripped) definition path back to the component's real JSON path via the `PathTranslator`; a definition that cannot be resolved unambiguously gets no fix and must be removed manually. Empty `custom`/`params`/`propConfig` containers left behind after the last key is deleted are kept in place.
 
+Defense in depth: if any `propConfig` entry belonging to the flagged property still contains a `binding` key, the fix is withheld entirely. Binding owners are credited as used from the flattened JSON keys (covering every binding type, including query/expr-struct/http/tag-history which have no model nodes), so a flagged-but-bound property indicates a detection blind spot — the violation reports, but nothing is deleted. Deletion paths are only ever constructed inside `custom`, `params`, and `propConfig` containers, so ordinary `props.*` values can never be removed by this rule's fixes.
+
 ## Edge cases & exemptions
 - The reserved key `_JavaDate` and any property name beginning with `_` are skipped during property discovery — handled by `LintingRule._is_private_property` in the base class.
 - Paths under `propConfig.*` are never registered as property definitions; they only contribute binding-owner usage markers.

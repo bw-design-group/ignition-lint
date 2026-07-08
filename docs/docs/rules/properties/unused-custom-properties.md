@@ -141,7 +141,8 @@ UnusedCustomPropertiesRule (error):
 
 A property is treated as used when **any** of the following hold:
 
-- The property has a binding of any type (expression, property, tag, query) — a property being populated by a binding is "used" by definition.
+- The property has a binding of **any** type — including types the object model doesn't represent as nodes (query, expr-struct, http, tag-history). A property being populated by a binding is "used" by definition; binding owners are credited from the flattened JSON keys so no binding shape is missed.
+- The whole `params`/`custom` object is forwarded to a consumer — e.g. an embedded view's `props.params` bound with `{view.params}` (expression) or a property binding on the path `view.params`. Any member may be read by the next view, so every property in that scope is credited. Bare `self.view.params` in scripts already behaved this way.
 - It appears in an expression binding, e.g. `{view.custom.X}`, `{view.params.X}`, `{this.custom.X}`, `{self.view.custom.X}`, or `{self.view.params.X}`.
 - It appears in a property binding's target/source path.
 - It appears in a tag binding's `tagPath` string.
@@ -162,6 +163,11 @@ Fixes are classified by what they can break:
 - **Unsafe fixes** (applied with `--fix-unsafe`): **view parameters**. Params are the view's public interface — a parent view, page configuration, or navigation action may pass the parameter even though nothing inside the view reads it. Deleting it changes that contract, so the rule defers to `--fix-unsafe`. A property with an `onChange` property-change script is also unsafe, because removing the property deletes the script and whatever side effects it carried.
 
 Definitions the rule cannot locate unambiguously in the JSON get no fix — the violation still reports and you remove the property manually.
+
+Two defense-in-depth guards ensure fixes never delete live or unrelated configuration:
+
+- **Binding guard**: if a flagged property's `propConfig` entry still contains a `binding` key, no fix is generated. A bound property should always be credited as used, so a flagged-but-bound property means detection hit a blind spot — deleting it would destroy a working binding.
+- **Scope guard**: deletions only ever target `custom`, `params`, and `propConfig` containers on the view or on a real component (one with `meta.name`). Normal component properties under `props.*` — including subtrees that happen to contain a literal `"custom"` key — are never touched.
 
 Note: removal deletes individual keys only. If the last property in a `custom`/`params`/`propConfig` object is removed, the now-empty `{}` container is left in place (harmless to Ignition; the Designer drops it on next save).
 

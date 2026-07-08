@@ -272,6 +272,104 @@ class TestUnusedCustomPropertiesFixGeneration(unittest.TestCase):
 		self.assertFalse(fix.is_safe)
 		self.assertIn('onChange', fix.safety_notes)
 
+	def test_no_fix_when_propconfig_entry_still_has_binding(self):
+		"""Defense in depth: a flagged property whose propConfig entry contains a binding
+		gets NO fix — the flag means detection missed the binding, and deleting would
+		destroy live configuration. (An empty binding dict vanishes in flattening, so it
+		is never credited: the one shape that reaches the guard today.)"""
+		view = {
+			"custom": {
+				"weird": 1
+			},
+			"propConfig": {
+				"custom.weird": {
+					"persistent": True,
+					"binding": {}
+				}
+			},
+			"root": {
+				"children": [],
+				"meta": {
+					"name": "root"
+				}
+			},
+		}
+		results, _, _ = _lint_with_fix_context(view)
+
+		self.assertEqual(len(results.errors.get('UnusedCustomPropertiesRule', [])), 1)
+		self.assertEqual(len(results.fixes), 0)
+
+	def test_bound_properties_get_no_violations_and_no_fixes(self):
+		"""Properties bound by types without model nodes (query, http, tag-history,
+		expr-struct) are credited as used — no violation, nothing to delete."""
+		view = {
+			"propConfig": {
+				"custom.queryBound": {
+					"persistent": False,
+					"binding": {
+						"type": "query",
+						"config": {
+							"queryPath": "GetStuff"
+						}
+					}
+				},
+				"custom.httpBound": {
+					"persistent": False,
+					"binding": {
+						"type": "http",
+						"config": {
+							"url": "http://example/api"
+						}
+					}
+				},
+			},
+			"root": {
+				"children": [],
+				"meta": {
+					"name": "root"
+				}
+			},
+		}
+		results, _, _ = _lint_with_fix_context(view)
+
+		self.assertEqual(results.errors.get('UnusedCustomPropertiesRule', []), [])
+		self.assertEqual(len(results.fixes), 0)
+
+	def test_props_subtree_with_literal_custom_key_never_fixed(self):
+		"""A normal component property subtree containing a literal 'custom' key must
+		never produce a deletion — it is not a component custom-property container."""
+		view = {
+			"root": {
+				"children": [{
+					"meta": {
+						"name": "Chart"
+					},
+					"type": "ia.chart.xy",
+					"props": {
+						"seriesStyle": {
+							"custom": {
+								"strokeWidth": 2
+							}
+						}
+					}
+				}],
+				"meta": {
+					"name": "root"
+				},
+			},
+		}
+		results, json_data, translator = _lint_with_fix_context(view)
+
+		# The (pre-existing, over-broad) definition regex may still flag it, but the
+		# fixer must not resolve it to a component and must not emit any operations.
+		self.assertEqual(len(results.fixes), 0)
+
+		FixEngine(translator).apply_fixes(results.fixes, safe_only=False)
+		self.assertEqual(
+			json_data['root']['children'][0]['props']['seriesStyle']['custom']['strokeWidth'], 2,
+			"Normal component props must never be touched by this rule's fixes."
+		)
+
 	def test_no_fixes_without_fix_context(self):
 		"""No fixes are generated when fix context is not provided."""
 		view = {
