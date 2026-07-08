@@ -14,6 +14,7 @@ class FixOperationType(Enum):
 	"""Types of fix operations that can be applied to JSON data."""
 	SET_VALUE = "set_value"
 	STRING_REPLACE = "string_replace"
+	DELETE_KEY = "delete_key"
 
 
 @dataclass
@@ -23,6 +24,8 @@ class FixOperation:
 
 	For SET_VALUE: replaces the value at json_path with new_value.
 	For STRING_REPLACE: replaces old_substring with new_substring in the string at json_path.
+	For DELETE_KEY: removes the dict entry at json_path (the last path segment is the
+	key to delete); old_value records the removed value for preview/reporting.
 	"""
 	operation: FixOperationType
 	json_path: list  # e.g., ["root", "children", 0, "meta", "name"]

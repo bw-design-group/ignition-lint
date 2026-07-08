@@ -33,15 +33,25 @@ is unused because it provides no data to parent views.
 """
 
 import re
-from typing import Set, Dict, Any
-from ..common import LintingRule
+from typing import Set, Dict, Any, Optional
+from ..common import LintingRule, FixableMixin
 from ..registry import register_rule
+from ...common.fix_operations import Fix, FixOperation, FixOperationType
 from ...model.node_types import NodeType
+
+# Sentinel distinguishing "path not present in the JSON" from a legitimate None value.
+_MISSING = object()
 
 
 @register_rule
-class UnusedCustomPropertiesRule(LintingRule):
-	"""Detects custom properties and view parameters that are defined but never referenced."""
+class UnusedCustomPropertiesRule(FixableMixin, LintingRule):
+	"""Detects custom properties and view parameters that are defined but never referenced.
+
+	Supports auto-fix: when fix context is available, generates Fix objects that remove the
+	unused property definition (its value entry and any propConfig entries). Removing a custom
+	property is safe; removing a view parameter is unsafe because it changes the view's public
+	interface (parent views passing the parameter are not updated).
+	"""
 
 	def __init__(self, severity="error"):
 		# We need to examine all node types to find property definitions and references
@@ -67,6 +77,7 @@ class UnusedCustomPropertiesRule(LintingRule):
 		self.used_properties = set()
 		self.flattened_json = {}
 		self._finalize_complete = False
+		self.reset_fixes()
 
 	def set_flattened_json(self, flattened_json: Dict[str, Any]):
 		"""Set the flattened JSON for comprehensive property reference searching."""
@@ -79,6 +90,7 @@ class UnusedCustomPropertiesRule(LintingRule):
 		self.defined_properties = {}
 		self.used_properties = set()
 		self._finalize_complete = False
+		self.reset_fixes()
 
 		# Call parent process_nodes first to get standard property processing
 		super().process_nodes(nodes)
@@ -336,9 +348,13 @@ class UnusedCustomPropertiesRule(LintingRule):
 		# Report unused properties
 		for prop_path, definition_location in unused_properties:
 			prop_type = "view parameter" if ".params." in prop_path else "custom property"
-			self.add_violation(
+			violation_msg = (
 				f"{definition_location}: {prop_type} '{prop_path.split('.')[-1]}' is defined but never referenced"
 			)
+			self.add_violation(violation_msg)
+
+			if self.has_fix_context:
+				self._generate_removal_fix(prop_path, definition_location, prop_type, violation_msg)
 
 	def _is_property_used(self, prop_path: str) -> bool:
 		"""
@@ -454,6 +470,137 @@ class UnusedCustomPropertiesRule(LintingRule):
 			# be matched by the narrower substring patterns above.
 			self._check_script_for_references(json_value, view_scope)
 			self._check_expression_for_references(json_value)
+
+	def _generate_removal_fix(self, prop_path: str, definition_location: str, prop_type: str, violation_msg: str):
+		"""
+		Generate a Fix that removes an unused property definition.
+
+		Removal covers both places a property definition can live:
+		- the value entry in the owning custom/params object
+		- the propConfig entry (or entries, for nested children of an object property)
+
+		Only definitions we can locate unambiguously in the JSON get a fix; otherwise the
+		violation still reports and the user removes the property manually.
+		"""
+		prop_name = prop_path.split('.')[-1]
+
+		if prop_path.startswith('view.custom.'):
+			owner_json_path: Optional[list] = []
+			scope = 'custom'
+		elif prop_path.startswith('view.params.'):
+			owner_json_path = []
+			scope = 'params'
+		else:
+			# Component custom property: definition_location is the (index-stripped)
+			# flattened path ending in .custom.<name>; the prefix is the component.
+			owner_json_path = self._resolve_component_json_path(
+				definition_location[:-len(f'.custom.{prop_name}')]
+			)
+			scope = 'custom'
+
+		if owner_json_path is None:
+			return
+
+		operations, removes_onchange = self._build_delete_operations(owner_json_path, scope, prop_name)
+		if not operations:
+			return
+
+		description = f"Remove unused {prop_type} '{prop_name}'"
+		safety_parts = []
+		if scope == 'params':
+			safety_parts.append(
+				f"removing view parameter '{prop_name}' changes the view's public interface; "
+				"parent views passing it are not updated"
+			)
+		if removes_onchange:
+			safety_parts.append("also removes the property's onChange property-change script")
+
+		self.add_fix(
+			Fix(
+				rule_name=self.error_key, violation_message=violation_msg, description=description,
+				operations=operations, is_safe=not safety_parts,
+				safety_notes="; ".join(safety_parts) if safety_parts else None
+			)
+		)
+
+	def _build_delete_operations(self, owner_json_path: list, scope: str, prop_name: str):
+		"""
+		Build DELETE_KEY operations for a property's value entry and propConfig entries.
+
+		Args:
+			owner_json_path: JSON path of the dict owning the property ([] for the view,
+				the component's JSON path for component custom properties).
+			scope: 'custom' or 'params'.
+			prop_name: Bare property name.
+
+		Returns:
+			Tuple of (operations, removes_onchange). removes_onchange is True when any
+			removed propConfig entry contains an onChange property-change script.
+		"""
+		operations = []
+		removes_onchange = False
+
+		# Value entry (absent for propConfig-only definitions, e.g. non-persistent props)
+		value_json_path = owner_json_path + [scope, prop_name]
+		value = self._get_json_value(value_json_path)
+		if value is not _MISSING:
+			operations.append(
+				FixOperation(
+					operation=FixOperationType.DELETE_KEY, json_path=value_json_path,
+					old_value=value, description=f"Remove {scope}.{prop_name} value entry"
+				)
+			)
+
+		# propConfig entries: exact key plus nested children of an object/array property
+		# (e.g. "custom.network.nat1" or "custom.myList[0]" alongside "custom.network").
+		prop_config = self._get_json_value(owner_json_path + ['propConfig'])
+		if isinstance(prop_config, dict):
+			exact_key = f"{scope}.{prop_name}"
+			child_prefixes = (f"{exact_key}.", f"{exact_key}[")
+			for key in prop_config:
+				if key != exact_key and not key.startswith(child_prefixes):
+					continue
+				entry = prop_config[key]
+				if isinstance(entry, dict) and 'onChange' in entry:
+					removes_onchange = True
+				operations.append(
+					FixOperation(
+						operation=FixOperationType.DELETE_KEY,
+						json_path=owner_json_path + ['propConfig', key], old_value=entry,
+						description=f"Remove propConfig entry '{key}'"
+					)
+				)
+
+		return operations, removes_onchange
+
+	def _resolve_component_json_path(self, component_model_path: str) -> Optional[list]:
+		"""
+		Resolve a component's JSON path from an index-stripped model path.
+
+		Property definition locations come from the model builder, which strips array
+		indices (root.root.children[0].Button -> root.root.children.Button), so an exact
+		PathTranslator lookup can fail. Fall back to matching translator component paths
+		with their indices stripped; sibling names are unique in Perspective, so at most
+		one component should match. Returns None when unresolvable or ambiguous.
+		"""
+		json_path = self._path_translator.model_path_to_json_path(component_model_path)
+		if json_path is not None:
+			return json_path
+
+		matches = [
+			candidate for candidate in self._path_translator.get_all_component_paths()
+			if re.sub(r'\[\d+\]', '', candidate) == component_model_path
+		]
+		if len(matches) != 1:
+			return None
+		return self._path_translator.model_path_to_json_path(matches[0])
+
+	def _get_json_value(self, json_path: list):
+		"""Read a value from the fix-context JSON, returning _MISSING when the path is absent."""
+		try:
+			return self._path_translator.get_value(json_path)
+		except (KeyError, IndexError, TypeError):
+			return _MISSING
 
 	def _mark_property_used_from_pattern(self, pattern: str):
 		"""Mark a property as used based on a found pattern."""

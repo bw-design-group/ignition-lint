@@ -122,6 +122,27 @@ class PathTranslator:
 		else:
 			raise KeyError(f"Cannot set value in {type(current)} at path {json_path}")
 
+	def delete_value(self, json_path: list):
+		"""
+		Delete the dict entry at a JSON path from the original dict.
+
+		Only dict keys can be deleted. List elements are intentionally not
+		supported: removing one would shift sibling indices and silently
+		invalidate the json_path of any other pending fix operation.
+		"""
+		current = self.json_data
+		for key in json_path[:-1]:
+			if isinstance(current, (dict, list)):
+				current = current[key]
+			else:
+				raise KeyError(f"Cannot navigate into {type(current)} at path {json_path}")
+		last_key = json_path[-1]
+		if not isinstance(current, dict):
+			raise KeyError(f"Cannot delete key from {type(current)} at path {json_path}")
+		if last_key not in current:
+			raise KeyError(f"Key '{last_key}' not found at path {json_path}")
+		del current[last_key]
+
 	def find_model_paths_by_prefix(self, prefix: str) -> List[str]:
 		"""Find all model paths that start with the given prefix."""
 		return [path for path in self._model_to_json if path.startswith(prefix)]

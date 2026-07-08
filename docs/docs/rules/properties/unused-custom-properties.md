@@ -10,7 +10,7 @@ Flags custom properties and view parameters that are defined in a view but never
 
 **Severity:** `error` by default — unused properties are technical debt that the rule asks you to clean up. Downgrade to `"warning"` while bringing a legacy view into compliance.
 
-**Auto-fix:** No. Removing a property might break an external contract (e.g. a parent view writes to an output param), so the rule defers to a human. Resolve violations by either deleting the definition or wiring up a real reference.
+**Auto-fix:** Yes. The rule emits a fix that deletes the unused definition — the value entry in the owning `custom`/`params` object plus any matching `propConfig` entries. Removing a **custom property** is safe; removing a **view parameter** is unsafe (it changes the view's public interface) and only applies under `--fix-unsafe`. See [What `--fix` does](#what---fix-does).
 
 ## Basic config
 
@@ -148,6 +148,22 @@ A property is treated as used when **any** of the following hold:
 - It appears in a script (event handler, message handler, custom method, transform), e.g. `self.view.custom.X`, `self.view.params.X`, `self.custom.X`, or `self.params.X`.
 
 A fallback string-scan over every value in the flattened JSON catches references in fields the model builder doesn't surface as dedicated nodes — so most real-world reference patterns get picked up automatically.
+
+## What `--fix` does
+
+For every flagged property the rule generates a removal fix consisting of `DELETE` operations:
+
+- the property's value entry in the owning `custom` / `params` object (absent for non-persistent properties, which live only in `propConfig`), and
+- the property's `propConfig` entry, plus `propConfig` entries for any nested children of an object property (e.g. `custom.network.nat1` alongside `custom.network`).
+
+Fixes are classified by what they can break:
+
+- **Safe fixes** (applied with `--fix`): view-level and component-level **custom properties**. These are internal to the view — nothing outside the view can reference them, so deleting an unused one cannot break another resource.
+- **Unsafe fixes** (applied with `--fix-unsafe`): **view parameters**. Params are the view's public interface — a parent view, page configuration, or navigation action may pass the parameter even though nothing inside the view reads it. Deleting it changes that contract, so the rule defers to `--fix-unsafe`. A property with an `onChange` property-change script is also unsafe, because removing the property deletes the script and whatever side effects it carried.
+
+Definitions the rule cannot locate unambiguously in the JSON get no fix — the violation still reports and you remove the property manually.
+
+Note: removal deletes individual keys only. If the last property in a `custom`/`params`/`propConfig` object is removed, the now-empty `{}` container is left in place (harmless to Ignition; the Designer drops it on next save).
 
 ## Caveats
 

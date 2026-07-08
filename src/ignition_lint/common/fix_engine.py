@@ -207,3 +207,5 @@ class FixEngine:
 				self.path_translator.string_replace_at(
 					operation.json_path, operation.old_substring, operation.new_substring
 				)
+			elif operation.operation == FixOperationType.DELETE_KEY:
+				self.path_translator.delete_value(operation.json_path)

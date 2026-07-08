@@ -62,6 +62,15 @@ PASCAL_CASE_CONFIG = {
 	}
 }
 
+UNUSED_PROPS_CONFIG = {
+	"UnusedCustomPropertiesRule": {
+		"enabled": True,
+		"kwargs": {
+			"severity": "error",
+		},
+	}
+}
+
 
 class TestCLIFixMode(unittest.TestCase):
 	"""End-to-end CLI tests for fix-mode flag handling and post-fix reporting."""
@@ -193,6 +202,76 @@ class TestCLIFixMode(unittest.TestCase):
 			len(summary_lines), 1, f"Fixes should be applied exactly once. Found {len(summary_lines)} "
 			f"fix-summary lines.\nSTDOUT:\n{result.stdout}"
 		)
+
+	# ------------------------------------------------------------------
+	# UnusedCustomPropertiesRule fix support
+	# ------------------------------------------------------------------
+	def test_fix_removes_unused_custom_property(self):
+		"""`--fix` should delete an unused custom property (value + propConfig entry)."""
+		view = make_view([make_component("MyLabel")])
+		view["custom"] = {"unusedProp": "value"}
+		view["propConfig"] = {"custom.unusedProp": {"access": "PRIVATE", "persistent": True}}
+		view_path = self._write("view.json", view)
+		config_path = self._write("config.json", UNUSED_PROPS_CONFIG)
+
+		result = self._run(["--config", str(config_path), "--fix", "--files", str(view_path)])
+
+		fixed = self._read(view_path)
+		self.assertNotIn("unusedProp", fixed.get("custom", {}))
+		self.assertNotIn("custom.unusedProp", fixed.get("propConfig", {}))
+		self.assertEqual(
+			result.returncode, 0, f"After --fix removed the only violation, exit code should be 0.\n"
+			f"STDOUT:\n{result.stdout}\nSTDERR:\n{result.stderr}"
+		)
+
+	def test_fix_keeps_unused_parameter_without_fix_unsafe(self):
+		"""Removing a view parameter is unsafe: plain `--fix` must leave it in place."""
+		view = make_view([make_component("MyLabel")])
+		view["params"] = {"unusedParam": ""}
+		view_path = self._write("view.json", view)
+		config_path = self._write("config.json", UNUSED_PROPS_CONFIG)
+
+		result = self._run(["--config", str(config_path), "--fix", "--files", str(view_path)])
+
+		unchanged = self._read(view_path)
+		self.assertIn(
+			"unusedParam", unchanged.get("params", {}),
+			"Plain --fix must not remove view parameters (interface change is unsafe)."
+		)
+		# The violation is still present, so the run should not exit clean.
+		self.assertNotEqual(
+			result.returncode, 0, f"Unsafe fix was skipped, so the violation should still report.\n"
+			f"STDOUT:\n{result.stdout}\nSTDERR:\n{result.stderr}"
+		)
+
+	def test_fix_unsafe_removes_unused_parameter(self):
+		"""`--fix-unsafe` should delete an unused view parameter."""
+		view = make_view([make_component("MyLabel")])
+		view["params"] = {"unusedParam": ""}
+		view_path = self._write("view.json", view)
+		config_path = self._write("config.json", UNUSED_PROPS_CONFIG)
+
+		result = self._run(["--config", str(config_path), "--fix-unsafe", "--files", str(view_path)])
+
+		fixed = self._read(view_path)
+		self.assertNotIn("unusedParam", fixed.get("params", {}))
+		self.assertEqual(
+			result.returncode, 0, f"After --fix-unsafe removed the only violation, exit code should be 0.\n"
+			f"STDOUT:\n{result.stdout}\nSTDERR:\n{result.stderr}"
+		)
+
+	def test_fix_dry_run_previews_property_removal(self):
+		"""`--fix-dry-run` should preview DELETE operations without modifying the file."""
+		view = make_view([make_component("MyLabel")])
+		view["custom"] = {"unusedProp": "value"}
+		view_path = self._write("view.json", view)
+		config_path = self._write("config.json", UNUSED_PROPS_CONFIG)
+
+		result = self._run(["--config", str(config_path), "--fix-dry-run", "--files", str(view_path)])
+
+		unchanged = self._read(view_path)
+		self.assertIn("unusedProp", unchanged.get("custom", {}), "--fix-dry-run must not modify the file.")
+		self.assertIn("DELETE", result.stdout, "Dry run should preview the DELETE operation.")
 
 	def test_fix_dry_run_does_not_reevaluate_or_modify(self):
 		"""`--fix-dry-run` should not mutate the file and should still report the violation."""

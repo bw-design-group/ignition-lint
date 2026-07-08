@@ -218,7 +218,14 @@ When walking the flattened JSON, paths under `propConfig.*` are not treated as n
 A reference such as `{this.custom.foo}` or `self.custom.foo` cannot be resolved to a specific component, so it is recorded as `*.custom.foo`. During finalization, every defined `<component>.custom.foo` whose name matches the wildcard is considered used. The same wildcard handling applies to `self.params.foo`.
 
 ## Auto-fix support
-This rule does **not** provide auto-fixes. Removing a property safely requires understanding its semantic role (e.g., it might be intended for future use, exposed as an API contract for parent views, or wired up from outside the view), and the rule cannot make that judgment automatically. Resolve violations by either deleting the property definition or wiring up a real reference.
+This rule provides auto-fixes: each flagged property gets a fix that deletes its definition via `DELETE_KEY` operations — the value entry in the owning `custom`/`params` object (when present; non-persistent properties have none) and every `propConfig` entry belonging to the property, including nested-children entries of an object property (`custom.network.nat1` alongside `custom.network`).
+
+Safety classification:
+
+- **Safe** (`--fix`): view-level and component-level custom properties. Custom properties are internal to the view, so removal cannot break anything outside it.
+- **Unsafe** (`--fix-unsafe`): view parameters — they are the view's public interface, and parent views passing the parameter are not updated. Also unsafe: any property whose `propConfig` entry contains an `onChange` property-change script, since removal deletes the script and its side effects.
+
+Component custom properties are located by resolving the (index-stripped) definition path back to the component's real JSON path via the `PathTranslator`; a definition that cannot be resolved unambiguously gets no fix and must be removed manually. Empty `custom`/`params`/`propConfig` containers left behind after the last key is deleted are kept in place.
 
 ## Edge cases & exemptions
 - The reserved key `_JavaDate` and any property name beginning with `_` are skipped during property discovery — handled by `LintingRule._is_private_property` in the base class.
