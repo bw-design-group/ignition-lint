@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.6.3] - 2026-07-08
+
 ### Fixed
 - `UnusedCustomPropertiesRule` no longer flags properties bound by binding types without dedicated model nodes (query, expr-struct, http, tag-history). Binding-owner crediting previously ran only from the modeled binding visitors (expression, property, tag), so a property populated by e.g. a query binding was reported as "never referenced" — and would have been deleted by the new auto-fix. Owners are now credited by scanning flattened-JSON keys, covering every binding shape at both view and component level. As a backstop, the fixer withholds any fix whose `propConfig` entry still contains a `binding` key.
 - `UnusedCustomPropertiesRule` now detects (and `--fix` deletes) object-valued custom properties, including empty ones. Previously an empty dict/array custom property (`"custom": {"key_1": {}}`) vanished during JSON flattening and was invisible to the whole pipeline, and a populated object custom only surfaced as its nested children — so the top-level property was never flagged or removed, at both view and component level. Flattening now preserves empty containers as `{}`/`[]` leaves, and the rule registers the top-level property from its nested leaves. When an object property's child is referenced or bound, the parent is still credited as used.
@@ -371,7 +373,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Initial tracked release
 
-[Unreleased]: https://github.com/bw-design-group/ignition-lint/compare/v0.6.2...HEAD
+[Unreleased]: https://github.com/bw-design-group/ignition-lint/compare/v0.6.3...HEAD
+[0.6.3]: https://github.com/bw-design-group/ignition-lint/compare/v0.6.2...v0.6.3
 [0.6.2]: https://github.com/bw-design-group/ignition-lint/compare/v0.6.1...v0.6.2
 [0.6.1]: https://github.com/bw-design-group/ignition-lint/compare/v0.6.0...v0.6.1
 [0.6.0]: https://github.com/bw-design-group/ignition-lint/compare/v0.5.3...v0.6.0
