@@ -3,13 +3,15 @@
 Tests for UnusedCustomPropertiesRule auto-fix generation.
 
 The rule generates Fix objects that remove unused property definitions:
-- the value entry in the owning custom/params object
+- the value entry in the owning custom object
 - the propConfig entry (plus nested-children entries for object properties)
 
-Safety classification:
-- custom properties (view-level and component-level) -> safe
-- view parameters -> unsafe (removal changes the view's public interface)
-- properties with an onChange property-change script -> unsafe
+The rule emits ONLY safe fixes (unused custom properties, view- and component-level).
+No fix is ever generated - not even an unsafe one - for:
+- view parameters (the view's public interface; callers are invisible to the linter)
+- properties with an onChange property-change script (removal deletes its side effects)
+- properties whose propConfig entry still contains a binding (detection blind spot)
+- definitions that cannot be located unambiguously in the JSON
 """
 
 import json
@@ -110,8 +112,10 @@ class TestUnusedCustomPropertiesFixGeneration(unittest.TestCase):
 		self.assertTrue(fix.is_safe)
 		self.assertEqual(_delete_paths(fix), {('propConfig', 'custom.ghostProp')})
 
-	def test_unsafe_fix_for_unused_view_parameter(self):
-		"""Unused view parameter gets an UNSAFE fix (interface change)."""
+	def test_no_fix_for_unused_view_parameter(self):
+		"""Unused view parameters get NO fix, not even an unsafe one: they are the view's
+		public interface, and callers passing them are invisible to the linter. The
+		violation still reports so a human can decide."""
 		view = {
 			"params": {
 				"unusedParam": ""
@@ -125,11 +129,8 @@ class TestUnusedCustomPropertiesFixGeneration(unittest.TestCase):
 		}
 		results, _, _ = _lint_with_fix_context(view)
 
-		self.assertEqual(len(results.fixes), 1)
-		fix = results.fixes[0]
-		self.assertFalse(fix.is_safe)
-		self.assertIn('public interface', fix.safety_notes)
-		self.assertEqual(_delete_paths(fix), {('params', 'unusedParam')})
+		self.assertEqual(len(results.errors.get('UnusedCustomPropertiesRule', [])), 1)
+		self.assertEqual(len(results.fixes), 0)
 
 	def test_fix_for_component_custom_property_resolves_child_index(self):
 		"""Component custom fix targets the component's real JSON path (with list index)."""
@@ -243,8 +244,9 @@ class TestUnusedCustomPropertiesFixGeneration(unittest.TestCase):
 			{('custom', 'propLonger'), ('propConfig', 'custom.propLonger')},
 		)
 
-	def test_unsafe_fix_when_property_has_onchange_script(self):
-		"""Property with an onChange property-change script gets an UNSAFE fix."""
+	def test_no_fix_when_property_has_onchange_script(self):
+		"""Property with an onChange property-change script gets NO fix — removal would
+		delete the script and whatever side effects it carried."""
 		view = {
 			"custom": {
 				"watched": 1
@@ -267,10 +269,8 @@ class TestUnusedCustomPropertiesFixGeneration(unittest.TestCase):
 		}
 		results, _, _ = _lint_with_fix_context(view)
 
-		self.assertEqual(len(results.fixes), 1)
-		fix = results.fixes[0]
-		self.assertFalse(fix.is_safe)
-		self.assertIn('onChange', fix.safety_notes)
+		self.assertEqual(len(results.errors.get('UnusedCustomPropertiesRule', [])), 1)
+		self.assertEqual(len(results.fixes), 0)
 
 	def test_no_fix_when_propconfig_entry_still_has_binding(self):
 		"""Defense in depth: a flagged property whose propConfig entry contains a binding
@@ -408,13 +408,16 @@ class TestUnusedCustomPropertiesFixGeneration(unittest.TestCase):
 		}
 		results, json_data, translator = _lint_with_fix_context(view)
 
-		self.assertEqual(len(results.fixes), 1)
-		self.assertEqual(_delete_paths(results.fixes[0]), {('params', 'reallyUnused')})
+		# The view's own unused param is flagged but gets no fix (params are never
+		# auto-deleted); the pass-on params produce neither violations nor fixes.
+		self.assertEqual(len(results.errors.get('UnusedCustomPropertiesRule', [])), 1)
+		self.assertEqual(len(results.fixes), 0)
 
 		FixEngine(translator).apply_fixes(results.fixes, safe_only=False)
 		embedded = json_data['root']['children'][0]
 		self.assertEqual(embedded['props']['params'], {'unusedRef': False})
 		self.assertIn('props.params.color', embedded['propConfig'])
+		self.assertIn('reallyUnused', json_data['params'])
 
 	def test_no_fixes_without_fix_context(self):
 		"""No fixes are generated when fix context is not provided."""
@@ -529,26 +532,31 @@ class TestUnusedCustomPropertiesFixApplication(unittest.TestCase):
 			},
 		}
 		results, json_data, translator = _lint_with_fix_context(view)
-		self.assertEqual(len(results.fixes), 4)
+		# 3 custom-property fixes; the unused param gets no fix by policy.
+		self.assertEqual(len(results.fixes), 3)
+		self.assertTrue(all(fix.is_safe for fix in results.fixes))
 
 		fix_engine = FixEngine(translator)
-		fix_result = fix_engine.apply_fixes(results.fixes, safe_only=False)
+		fix_result = fix_engine.apply_fixes(results.fixes, safe_only=True)
 
-		self.assertEqual(fix_result.applied_count, 4)
+		self.assertEqual(fix_result.applied_count, 3)
 		self.assertEqual(fix_result.skipped_count, 0)
 		self.assertEqual(len(fix_result.conflicts), 0)
 
 		self.assertNotIn('unusedProp', json_data['custom'])
 		self.assertIn('usedProp', json_data['custom'])
-		self.assertNotIn('unusedParam', json_data['params'])
-		self.assertEqual(json_data['propConfig'], {})
+		self.assertIn('unusedParam', json_data['params'])
+		self.assertEqual(list(json_data['propConfig']), ['params.unusedParam'])
 		self.assertNotIn('compUnused', json_data['root']['children'][0]['custom'])
 
+		# The param violation remains for a human to resolve; everything else is clean.
 		relint = _make_engine().process(flatten_json(json_data))
-		self.assertEqual(relint.errors.get('UnusedCustomPropertiesRule', []), [])
+		remaining = relint.errors.get('UnusedCustomPropertiesRule', [])
+		self.assertEqual(len(remaining), 1)
+		self.assertIn('unusedParam', remaining[0])
 
-	def test_safe_only_skips_parameter_fix(self):
-		"""With safe_only=True the parameter fix is skipped, custom property fix applies."""
+	def test_all_generated_fixes_are_safe(self):
+		"""The rule must never emit an unsafe fix — params and onChange props get none."""
 		view = {
 			"custom": {
 				"unusedProp": "v"
@@ -564,14 +572,15 @@ class TestUnusedCustomPropertiesFixApplication(unittest.TestCase):
 			},
 		}
 		results, json_data, translator = _lint_with_fix_context(view)
-		self.assertEqual(len(results.fixes), 2)
 
-		fix_result = FixEngine(translator).apply_fixes(results.fixes, safe_only=True)
+		self.assertEqual(len(results.fixes), 1)
+		self.assertTrue(results.fixes[0].is_safe)
+
+		fix_result = FixEngine(translator).apply_fixes(results.fixes, safe_only=False)
 
 		self.assertEqual(fix_result.applied_count, 1)
-		self.assertEqual(fix_result.skipped_count, 1)
 		self.assertNotIn('unusedProp', json_data['custom'])
-		self.assertIn('unusedParam', json_data['params'])
+		self.assertIn('unusedParam', json_data['params'], "Params must survive even --fix-unsafe.")
 
 
 if __name__ == '__main__':

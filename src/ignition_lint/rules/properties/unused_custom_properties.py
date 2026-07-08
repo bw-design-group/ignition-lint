@@ -53,9 +53,11 @@ class UnusedCustomPropertiesRule(FixableMixin, LintingRule):
 	"""Detects custom properties and view parameters that are defined but never referenced.
 
 	Supports auto-fix: when fix context is available, generates Fix objects that remove the
-	unused property definition (its value entry and any propConfig entries). Removing a custom
-	property is safe; removing a view parameter is unsafe because it changes the view's public
-	interface (parent views passing the parameter are not updated).
+	unused property definition (its value entry and any propConfig entries). Only safe fixes
+	are ever emitted: unused custom properties are internal to the view, so deleting them
+	cannot break anything outside it. View parameters get NO fix (not even unsafe) - they are
+	the view's public interface and callers passing them are invisible to the linter - and
+	neither do properties carrying an onChange script. See _generate_removal_fix.
 	"""
 
 	def __init__(self, severity="error"):
@@ -518,50 +520,45 @@ class UnusedCustomPropertiesRule(FixableMixin, LintingRule):
 		Generate a Fix that removes an unused property definition.
 
 		Removal covers both places a property definition can live:
-		- the value entry in the owning custom/params object
+		- the value entry in the owning custom object
 		- the propConfig entry (or entries, for nested children of an object property)
 
-		Only definitions we can locate unambiguously in the JSON get a fix; otherwise the
-		violation still reports and the user removes the property manually.
+		This rule emits ONLY safe fixes. No fix is generated - not even an unsafe one - when
+		removal cannot be verified from the analyzed file alone:
+		- View parameters: they are the view's public interface. Parent views, page config,
+		  or navigation actions may pass them, and none of those callers are visible to the
+		  linter. Deleting a param could silently break the project, so it is never automated.
+		- Properties with an onChange property-change script: removal deletes the script and
+		  whatever side effects it carried.
+		- Definitions we cannot locate unambiguously in the JSON.
+		In all of these cases the violation still reports and the user removes the property
+		manually.
 		"""
 		prop_name = prop_path.split('.')[-1]
 
+		if prop_path.startswith('view.params.'):
+			return
+
 		if prop_path.startswith('view.custom.'):
 			owner_json_path: Optional[list] = []
-			scope = 'custom'
-		elif prop_path.startswith('view.params.'):
-			owner_json_path = []
-			scope = 'params'
 		else:
 			# Component custom property: definition_location is the (index-stripped)
 			# flattened path ending in .custom.<name>; the prefix is the component.
 			owner_json_path = self._resolve_component_json_path(
 				definition_location[:-len(f'.custom.{prop_name}')]
 			)
-			scope = 'custom'
+			if owner_json_path is None:
+				return
 
-		if owner_json_path is None:
+		operations, removes_onchange = self._build_delete_operations(owner_json_path, 'custom', prop_name)
+		if not operations or removes_onchange:
 			return
-
-		operations, removes_onchange = self._build_delete_operations(owner_json_path, scope, prop_name)
-		if not operations:
-			return
-
-		description = f"Remove unused {prop_type} '{prop_name}'"
-		safety_parts = []
-		if scope == 'params':
-			safety_parts.append(
-				f"removing view parameter '{prop_name}' changes the view's public interface; "
-				"parent views passing it are not updated"
-			)
-		if removes_onchange:
-			safety_parts.append("also removes the property's onChange property-change script")
 
 		self.add_fix(
 			Fix(
-				rule_name=self.error_key, violation_message=violation_msg, description=description,
-				operations=operations, is_safe=not safety_parts,
-				safety_notes="; ".join(safety_parts) if safety_parts else None
+				rule_name=self.error_key, violation_message=violation_msg,
+				description=f"Remove unused {prop_type} '{prop_name}'", operations=operations,
+				is_safe=True
 			)
 		)
 

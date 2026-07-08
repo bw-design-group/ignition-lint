@@ -10,7 +10,7 @@ Flags custom properties and view parameters that are defined in a view but never
 
 **Severity:** `error` by default — unused properties are technical debt that the rule asks you to clean up. Downgrade to `"warning"` while bringing a legacy view into compliance.
 
-**Auto-fix:** Yes. The rule emits a fix that deletes the unused definition — the value entry in the owning `custom`/`params` object plus any matching `propConfig` entries. Removing a **custom property** is safe; removing a **view parameter** is unsafe (it changes the view's public interface) and only applies under `--fix-unsafe`. See [What `--fix` does](#what---fix-does).
+**Auto-fix:** Yes, for **custom properties only**. The rule emits a safe fix that deletes the unused definition — the value entry in the owning `custom` object plus any matching `propConfig` entries. **View parameters are never auto-deleted**, not even under `--fix-unsafe`: they are the view's public interface, and the callers that pass them (parent views, page config, navigation actions) are invisible to the linter. See [What `--fix` does](#what---fix-does).
 
 ## Basic config
 
@@ -152,22 +152,21 @@ A fallback string-scan over every value in the flattened JSON catches references
 
 ## What `--fix` does
 
-For every flagged property the rule generates a removal fix consisting of `DELETE` operations:
+For flagged **custom properties** (view-level and component-level) the rule generates a removal fix consisting of `DELETE` operations:
 
-- the property's value entry in the owning `custom` / `params` object (absent for non-persistent properties, which live only in `propConfig`), and
+- the property's value entry in the owning `custom` object (absent for non-persistent properties, which live only in `propConfig`), and
 - the property's `propConfig` entry, plus `propConfig` entries for any nested children of an object property (e.g. `custom.network.nat1` alongside `custom.network`).
 
-Fixes are classified by what they can break:
+These fixes are always **safe** (applied with plain `--fix`): custom properties are internal to the view — nothing outside the view can reference them, so deleting an unused one cannot break another resource.
 
-- **Safe fixes** (applied with `--fix`): view-level and component-level **custom properties**. These are internal to the view — nothing outside the view can reference them, so deleting an unused one cannot break another resource.
-- **Unsafe fixes** (applied with `--fix-unsafe`): **view parameters**. Params are the view's public interface — a parent view, page configuration, or navigation action may pass the parameter even though nothing inside the view reads it. Deleting it changes that contract, so the rule defers to `--fix-unsafe`. A property with an `onChange` property-change script is also unsafe, because removing the property deletes the script and whatever side effects it carried.
+This rule never emits unsafe fixes. A violation gets **no fix at all** — not even under `--fix-unsafe` — when removal cannot be verified from the analyzed file alone:
 
-Definitions the rule cannot locate unambiguously in the JSON get no fix — the violation still reports and you remove the property manually.
+- **View parameters.** Params are the view's public interface — a parent view, page configuration, or navigation action may pass the parameter even though nothing inside the view reads it, and none of those callers are visible to the linter. Auto-deleting one could silently break the project, so the violation reports and a human decides.
+- **Properties with an `onChange` property-change script.** Removing the property deletes the script and whatever side effects it carried.
+- **Flagged properties whose `propConfig` entry still contains a `binding`.** A bound property should always be credited as used, so this state means detection hit a blind spot — deleting it would destroy a working binding.
+- **Definitions the rule cannot locate unambiguously in the JSON.**
 
-Two defense-in-depth guards ensure fixes never delete live or unrelated configuration:
-
-- **Binding guard**: if a flagged property's `propConfig` entry still contains a `binding` key, no fix is generated. A bound property should always be credited as used, so a flagged-but-bound property means detection hit a blind spot — deleting it would destroy a working binding.
-- **Scope guard**: deletions only ever target `custom`, `params`, and `propConfig` containers on the view or on a real component (one with `meta.name`). Normal component properties under `props.*` — including subtrees that happen to contain a literal `"custom"` key — are never touched.
+Deletions only ever target `custom` and `propConfig` containers on the view or on a real component (one with `meta.name`). Normal component properties under `props.*` — including subtrees that happen to contain a literal `"custom"` key — are never touched.
 
 Note: removal deletes individual keys only. If the last property in a `custom`/`params`/`propConfig` object is removed, the now-empty `{}` container is left in place (harmless to Ignition; the Designer drops it on next save).
 

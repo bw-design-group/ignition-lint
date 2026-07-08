@@ -98,7 +98,7 @@ Rules that support it can rewrite the view to resolve violations (e.g. [NamePatt
 | Flag | Description |
 | --- | --- |
 | `--fix` | Apply **safe** fixes — isolated edits with no ripple effects |
-| `--fix-unsafe` | Apply **all** fixes, including unsafe ones with effects beyond the violating node (rewriting binding/script references to a renamed component, deleting a view parameter that is part of the view's public interface). Enables fix mode on its own — do not also pass `--fix` |
+| `--fix-unsafe` | Apply **all** fixes, including unsafe ones that rewrite references (binding/script mentions of a renamed component). Enables fix mode on its own — do not also pass `--fix` |
 | `--fix-dry-run` | **Preview** what would be fixed without modifying any file |
 | `--fix-rules <names>` | Comma-separated list of rules whose fixes to apply (default: all fixable rules) |
 

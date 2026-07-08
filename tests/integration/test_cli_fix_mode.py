@@ -224,8 +224,8 @@ class TestCLIFixMode(unittest.TestCase):
 			f"STDOUT:\n{result.stdout}\nSTDERR:\n{result.stderr}"
 		)
 
-	def test_fix_keeps_unused_parameter_without_fix_unsafe(self):
-		"""Removing a view parameter is unsafe: plain `--fix` must leave it in place."""
+	def test_fix_keeps_unused_parameter(self):
+		"""View parameters are never auto-deleted: plain `--fix` must leave them in place."""
 		view = make_view([make_component("MyLabel")])
 		view["params"] = {"unusedParam": ""}
 		view_path = self._write("view.json", view)
@@ -236,16 +236,18 @@ class TestCLIFixMode(unittest.TestCase):
 		unchanged = self._read(view_path)
 		self.assertIn(
 			"unusedParam", unchanged.get("params", {}),
-			"Plain --fix must not remove view parameters (interface change is unsafe)."
+			"--fix must not remove view parameters (callers are invisible to the linter)."
 		)
 		# The violation is still present, so the run should not exit clean.
 		self.assertNotEqual(
-			result.returncode, 0, f"Unsafe fix was skipped, so the violation should still report.\n"
+			result.returncode, 0, f"No fix exists for params, so the violation should still report.\n"
 			f"STDOUT:\n{result.stdout}\nSTDERR:\n{result.stderr}"
 		)
 
-	def test_fix_unsafe_removes_unused_parameter(self):
-		"""`--fix-unsafe` should delete an unused view parameter."""
+	def test_fix_unsafe_also_keeps_unused_parameter(self):
+		"""Even `--fix-unsafe` must not delete a view parameter — the rule emits no fix for
+		params at all, because parent views passing them are outside the analyzed file and
+		removal could silently break the project."""
 		view = make_view([make_component("MyLabel")])
 		view["params"] = {"unusedParam": ""}
 		view_path = self._write("view.json", view)
@@ -253,10 +255,13 @@ class TestCLIFixMode(unittest.TestCase):
 
 		result = self._run(["--config", str(config_path), "--fix-unsafe", "--files", str(view_path)])
 
-		fixed = self._read(view_path)
-		self.assertNotIn("unusedParam", fixed.get("params", {}))
-		self.assertEqual(
-			result.returncode, 0, f"After --fix-unsafe removed the only violation, exit code should be 0.\n"
+		unchanged = self._read(view_path)
+		self.assertIn(
+			"unusedParam", unchanged.get("params", {}),
+			"--fix-unsafe must not remove view parameters either."
+		)
+		self.assertNotEqual(
+			result.returncode, 0, f"The param violation should still report after --fix-unsafe.\n"
 			f"STDOUT:\n{result.stdout}\nSTDERR:\n{result.stderr}"
 		)
 
