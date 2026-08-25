@@ -8,7 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
-- `ExcessiveContextDataRule` gains a fifth detection method: individual oversized string values. A large payload stored in a single custom property (embedded SVG/HTML markup, a base64-encoded image, a serialized dataset) flattens to one path-value pair, so it registered as a single data point at depth 1 and sailed past all four structure-based checks — a 35,000-character string passed linting untouched. The rule now measures `len()` of every string value under `custom.*` and flags any exceeding the new `max_value_length` threshold (default: 10000 characters, configurable via kwargs like the other four thresholds).
+- `ExcessiveContextDataRule` gains a fifth detection method: individual oversized string values. A large payload stored in a single custom property (embedded SVG/HTML markup, a base64-encoded image, a serialized dataset) flattens to one path-value pair, so it registered as a single data point at depth 1 and sailed past all four structure-based checks — a 35,000-character string passed linting untouched. The rule now measures `len()` of every string value under `custom.*` and flags any exceeding the new `max_value_length` threshold (default: 10000 characters, configurable via kwargs like the other four thresholds). [910daa2]
 
 ## [0.6.3] - 2026-07-08
 
