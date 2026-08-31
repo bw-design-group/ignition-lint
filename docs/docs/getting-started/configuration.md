@@ -141,6 +141,20 @@ A representative `rule_config.json` for a project that wants strict naming, perf
       "max_data_points": 1000
     }
   },
+  "PropertyPersistenceRule": {
+    "enabled": true,
+    "kwargs": {
+      "expected_persistent": false,
+      "severity": "warning"
+    }
+  },
+  "PropertyAccessRule": {
+    "enabled": true,
+    "kwargs": {
+      "expected_access": "PRIVATE",
+      "severity": "warning"
+    }
+  },
   "PylintScriptRule": {
     "enabled": true,
     "kwargs": {

@@ -93,7 +93,7 @@ See [Whitelist guide](./whitelist.md) for details.
 
 ### Auto-fix
 
-Rules that support it can rewrite the view to resolve violations (e.g. [NamePatternRule](../rules/naming/name-pattern.md) renames components, [UnusedCustomPropertiesRule](../rules/properties/unused-custom-properties.md) deletes unused property definitions). Pick **one** mode:
+Rules that support it can rewrite the view to resolve violations (e.g. [NamePatternRule](../rules/naming/name-pattern.md) renames components, [UnusedCustomPropertiesRule](../rules/properties/unused-custom-properties.md) deletes unused property definitions, [PropertyPersistenceRule](../rules/properties/property-persistence.md) and [PropertyAccessRule](../rules/properties/property-access.md) normalize `propConfig` metadata on custom properties). Pick **one** mode:
 
 | Flag | Description |
 | --- | --- |

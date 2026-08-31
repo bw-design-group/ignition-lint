@@ -18,7 +18,6 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../s
 # ConfigurableTestFramework is used indirectly via test_config_framework.py
 
 
-
 def discover_and_run_unit_tests(test_pattern=None, verbosity=2):
 	"""Discover and run unit tests from the unit/ directory."""
 	test_dir = Path(__file__).parent / "unit"
@@ -96,7 +95,6 @@ def run_specific_test_file(test_file, verbosity=2):
 	except (ImportError, AttributeError, TypeError) as e:
 		print(f"Error loading test module {module_name}: {e}")
 		return False
-
 
 
 def list_available_tests():
@@ -209,7 +207,10 @@ def main():
 
 	# Test execution options
 	parser.add_argument("--run-unit", action="store_true", help="Run unit tests")
-	parser.add_argument("--run-integration", action="store_true", help="Run integration tests (includes configuration-driven tests)")
+	parser.add_argument(
+		"--run-integration", action="store_true",
+		help="Run integration tests (includes configuration-driven tests)"
+	)
 	parser.add_argument("--run-all", action="store_true", help="Run all available tests")
 
 	# Specific test execution

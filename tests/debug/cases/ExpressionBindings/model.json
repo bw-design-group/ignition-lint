@@ -334,14 +334,6 @@
         "value_type": "str"
       },
       {
-        "name": "transformPolling",
-        "node_type": "property",
-        "path": "custom.transformPolling",
-        "persistent": false,
-        "value": null,
-        "value_type": "NoneType"
-      },
-      {
         "name": "expressionPolling",
         "node_type": "property",
         "path": "custom.expressionPolling",
@@ -354,6 +346,14 @@
         "name": "expressionStructurePolling",
         "node_type": "property",
         "path": "custom.expressionStructurePolling",
+        "persistent": false,
+        "value": null,
+        "value_type": "NoneType"
+      },
+      {
+        "name": "transformPolling",
+        "node_type": "property",
+        "path": "custom.transformPolling",
         "persistent": false,
         "value": null,
         "value_type": "NoneType"

@@ -629,7 +629,9 @@ class ViewModelBuilder:
 		if self._propconfig_cache is None:
 			self._build_propconfig_cache()
 
-		for prop_path in self._propconfig_cache:
+		# Sorted so node order (and the golden model.json files) is deterministic
+		# across runs; the cache is a set and hash order varies per process.
+		for prop_path in sorted(self._propconfig_cache):
 			if not (prop_path.startswith('custom.') or prop_path.startswith('params.')):
 				continue
 

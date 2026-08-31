@@ -74,6 +74,18 @@
         "tag_binding"
       ]
     },
+    "PropertyAccessRule": {
+      "applicable_node_count": 11,
+      "target_types": [
+        "all"
+      ]
+    },
+    "PropertyPersistenceRule": {
+      "applicable_node_count": 11,
+      "target_types": [
+        "all"
+      ]
+    },
     "PylintScriptRule": {
       "applicable_node_count": 0,
       "target_types": [

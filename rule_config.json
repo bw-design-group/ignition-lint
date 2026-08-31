@@ -89,6 +89,26 @@
       "_severity_comment": "Optional: Set to 'warning' if you want to detect these patterns without blocking builds. Use 'error' (default) for strict enforcement to prevent brittle view structure dependencies."
     }
   },
+  "PropertyPersistenceRule": {
+    "enabled": false,
+    "kwargs": {
+      "_comment": "Opt-in optimization rule: validates the 'persistent' flag on BOUND properties. persistent=true on a bound prop stores the last designer binding result in view.json, causing git diff churn with no runtime benefit. Inert unless expected_persistent is set.",
+      "expected_persistent": false,
+      "_exempt_comment": "Tag bindings are exempt by default: they never create the property key when the tag is missing. Tokens: expr, expr-struct, property, query, tag, tag.direct, tag.indirect, tag.expression. Pass [] to check everything.",
+      "exempt_binding_types": ["tag"],
+      "severity": "warning"
+    }
+  },
+  "PropertyAccessRule": {
+    "enabled": false,
+    "kwargs": {
+      "_comment": "Opt-in optimization rule: validates the 'access' mode of user-configured custom properties (view-level custom.* and component custom.*). PRIVATE props are never sent to the client, cutting websocket traffic for gateway-side staging data. Never touches props.* or params.*. Inert unless expected_access is set.",
+      "expected_access": "PRIVATE",
+      "_exempt_comment": "Prop paths to skip: bare keys ('custom.theme') match at any level, or fully-qualified paths.",
+      "exempt_props": [],
+      "severity": "warning"
+    }
+  },
   "ComponentReferenceValidationRule": {
     "enabled": true,
     "kwargs": {
@@ -108,7 +128,9 @@
       "UnusedCustomPropertiesRule": "error - dead code that should be removed",
       "ExcessiveContextDataRule": "error - architectural issue, data should be in databases",
       "BadComponentReferenceRule": "error (configurable) - brittle view structure dependencies that break during refactoring",
-      "ComponentReferenceValidationRule": "error - references to non-existent components cause runtime errors"
+      "ComponentReferenceValidationRule": "error - references to non-existent components cause runtime errors",
+      "PropertyPersistenceRule": "configurable - opt-in optimization rule, inert unless expected_persistent is set; 'warning' recommended while adopting",
+      "PropertyAccessRule": "configurable - opt-in optimization rule, inert unless expected_access is set; 'warning' recommended while adopting"
     },
     "note": "Most rule severity levels are fixed, but NamePatternRule and BadComponentReferenceRule allow user configuration.",
     "NamePatternRule_node_types": {
