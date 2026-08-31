@@ -93,14 +93,16 @@ See [Whitelist guide](./whitelist.md) for details.
 
 ### Auto-fix
 
-Rules that support it can rewrite the view to resolve violations (e.g. [NamePatternRule](../rules/naming/name-pattern.md) renames components, [UnusedCustomPropertiesRule](../rules/properties/unused-custom-properties.md) deletes unused property definitions). Pick **one** mode:
+Rules that support it can rewrite the view to resolve violations (e.g. [NamePatternRule](../rules/naming/name-pattern.md) renames components, [UnusedCustomPropertiesRule](../rules/properties/unused-custom-properties.md) deletes unused property definitions, [PropertyPersistenceRule](../rules/properties/property-persistence.md) and [PropertyAccessRule](../rules/properties/property-access.md) normalize `propConfig` metadata on custom properties). Pick **one** mode:
 
 | Flag | Description |
 | --- | --- |
 | `--fix` | Apply **safe** fixes — isolated edits with no ripple effects |
 | `--fix-unsafe` | Apply **all** fixes, including unsafe ones that rewrite references (binding/script mentions of a renamed component). Enables fix mode on its own — do not also pass `--fix` |
 | `--fix-dry-run` | **Preview** what would be fixed without modifying any file |
-| `--fix-rules <names>` | Comma-separated list of rules whose fixes to apply (default: all fixable rules) |
+| `--fix-rules <names>` | Comma-separated list of rules whose fixes to apply (default: all fixable rules). Overrides `allow_fix: false` in config for the named rules; unrecognized names print a warning |
+
+Fix participation can also live in the config: per-rule [`allow_fix: false`](../getting-started/configuration.md#detection-only-rules-allow_fix) keeps a rule detection-only, so a pre-commit hook can run plain `--fix` and the shared config decides which rules auto-repair.
 
 The three modes are mutually exclusive choices: `--fix` for safe-only, `--fix-unsafe` to include reference rewrites, `--fix-dry-run` to preview. After fixes are applied, the rules are re-evaluated once on the fixed view so the reported results reflect the post-fix state, not the violations that were just fixed.
 

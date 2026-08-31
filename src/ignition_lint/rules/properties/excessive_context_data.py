@@ -19,6 +19,8 @@ DETECTION METHODS:
 2. Property Breadth: Detects too many sibling properties at the same level
 3. Nesting Depth: Detects overly deep nesting structures
 4. Data Points: Detects total volume of data stored in custom properties
+5. Value Length: Detects individual oversized string values (e.g., embedded markup,
+   encoded images, serialized datasets)
 """
 
 import re
@@ -33,8 +35,8 @@ class ExcessiveContextDataRule(LintingRule):
 	"""Detects excessive context data in custom properties using multiple detection methods."""
 
 	def __init__(
-		self, max_array_size=50, max_sibling_properties=50, max_nesting_depth=5, max_data_points=1000,
-		severity="error"
+		self, *, max_array_size=50, max_sibling_properties=50, max_nesting_depth=5, max_data_points=1000,
+		max_value_length=10000, severity="error"
 	):
 		"""
 		Initialize the rule.
@@ -44,6 +46,7 @@ class ExcessiveContextDataRule(LintingRule):
 			max_sibling_properties: Maximum sibling properties at the same level (default: 50)
 			max_nesting_depth: Maximum nesting depth in custom properties (default: 5)
 			max_data_points: Maximum total data points in custom properties (default: 1000)
+			max_value_length: Maximum character length for a single string value (default: 10000)
 			severity: Severity level - "error" (default) or "warning"
 		"""
 		super().__init__(set(), severity)  # Empty set - we process flattened JSON directly
@@ -51,6 +54,7 @@ class ExcessiveContextDataRule(LintingRule):
 		self.max_sibling_properties = max_sibling_properties
 		self.max_nesting_depth = max_nesting_depth
 		self.max_data_points = max_data_points
+		self.max_value_length = max_value_length
 		self.flattened_json: Dict[str, Any] = {}
 
 	@property
@@ -72,6 +76,7 @@ class ExcessiveContextDataRule(LintingRule):
 		self._detect_excessive_breadth()
 		self._detect_excessive_depth()
 		self._detect_excessive_data_points()
+		self._detect_large_values()
 
 	def _detect_large_arrays(self):
 		"""Scan flattened JSON for large arrays in custom properties."""
@@ -184,3 +189,27 @@ class ExcessiveContextDataRule(LintingRule):
 				f"Maximum recommended: {self.max_data_points} data points."
 			)
 			self.add_violation(message)
+
+	def _detect_large_values(self):
+		"""Detect individual oversized string values in custom properties.
+
+		A single scalar (embedded markup, an encoded image, a serialized dataset)
+		flattens to one path-value pair, so it is invisible to the structure-based
+		detectors above — its size has to be measured directly.
+		"""
+		for path, value in self.flattened_json.items():
+			if not path.startswith('custom.'):
+				continue
+			if not isinstance(value, str):
+				continue
+
+			value_length = len(value)
+			if value_length > self.max_value_length:
+				property_name = re.sub(r'\[\d+\]', '', path).replace('custom.', '', 1)
+				message = (
+					f"{path}: Custom property '{property_name}' contains a string value of "
+					f"{value_length} characters. Large values should be stored in external resources "
+					f"or databases, not view JSON. "
+					f"Maximum recommended: {self.max_value_length} characters."
+				)
+				self.add_violation(message)

@@ -395,8 +395,11 @@ def create_rules_from_config(config: dict) -> tuple:
 	Create rule instances for every registered rule.
 
 	All registered rules run by default. The user's config provides per-rule
-	overrides: `kwargs` to customize behavior, or `enabled: false` to opt out.
-	Rules absent from the config run with default kwargs.
+	overrides: `kwargs` to customize behavior, `enabled: false` to opt out, or
+	`allow_fix: false` to keep a fixable rule's violations detection-only (the
+	rule still reports, but --fix and --fix-dry-run skip it). Rules absent from
+	the config run with default kwargs and allow_fix=true. An explicit
+	--fix-rules on the CLI overrides allow_fix (applied in setup_linter).
 
 	Args:
 		config: Configuration dictionary from config file (may be empty)
@@ -438,14 +441,22 @@ def create_rules_from_config(config: dict) -> tuple:
 			continue
 
 		kwargs = rule_config.get('kwargs', {})
+		allow_fix = rule_config.get('allow_fix', True)
 
 		try:
-			rules.append(rule_class.create_from_config(kwargs))
+			if not isinstance(allow_fix, bool):
+				raise ValueError(f"allow_fix must be true or false; got {allow_fix!r}")
+			rule = rule_class.create_from_config(kwargs)
+			if hasattr(rule, 'allow_fix'):
+				rule.allow_fix = allow_fix
+			elif 'allow_fix' in rule_config:
+				print(f"Note: allow_fix has no effect on {rule_name} (rule does not support auto-fix)")
+			rules.append(rule)
 			statuses.append({
 				"name": rule_name,
 				"state": "loaded",
 				"source": source,
-				"detail": None,
+				"detail": "allow_fix=false" if not allow_fix else None,
 			})
 		except (TypeError, ValueError, AttributeError) as e:
 			print(f"Error creating rule {rule_name}: {e}")
@@ -477,7 +488,8 @@ def _print_rule_breakdown(statuses: list, config_path: str) -> None:
 	print(f"✅ Loaded {len(loaded)} rules:")
 	for status in loaded:
 		source = f"config: {config_path}" if status["source"] == "config" else "defaults"
-		print(f"  • {status['name']:<{name_width}}  ({source})")
+		extra = f", {status['detail']}" if status["detail"] else ""
+		print(f"  • {status['name']:<{name_width}}  ({source}{extra})")
 
 	for status in disabled:
 		print(f"  ⊘ {status['name']:<{name_width}}  (skipped: {status['detail']})")
@@ -736,6 +748,23 @@ def setup_linter(args) -> LintEngine:
 		if not rules:
 			print("❌ No valid rules configured")
 			sys.exit(1)
+
+		# Explicit --fix-rules overrides allow_fix=false for the rules it names.
+		fix_rules_arg = getattr(args, 'fix_rules', None)
+		if fix_rules_arg:
+			requested = {name.strip() for name in fix_rules_arg.split(',')}
+			loaded_names = {rule.__class__.__name__ for rule in rules}
+			for rule in rules:
+				if rule.__class__.__name__ in requested and hasattr(rule, 'allow_fix'):
+					rule.allow_fix = True
+			for name in sorted(requested - loaded_names):
+				print(
+					f"⚠️  --fix-rules: '{name}' does not match any loaded rule; its fixes cannot apply"
+				)
+			for name in sorted(requested & loaded_names):
+				rule = next(r for r in rules if r.__class__.__name__ == name)
+				if not hasattr(rule, 'allow_fix'):
+					print(f"⚠️  --fix-rules: '{name}' does not support auto-fix")
 
 		lint_engine = LintEngine(rules, debug_output_dir=args.debug_output)
 
