@@ -11,7 +11,7 @@ Static analysis for Ignition Perspective `view.json` files. Catches naming incon
 
 ## What it does
 
-Ignition Lint parses Perspective view definitions, builds an object model of components, bindings, and scripts, and runs a configurable set of rules over that model. Rules are visitor-pattern classes you can extend; the framework ships with seven built-in rules covering the most common pitfalls in Perspective views.
+Ignition Lint parses Perspective view definitions, builds an object model of components, bindings, and scripts, and runs a configurable set of rules over that model. Rules are visitor-pattern classes you can extend; the framework ships with nine built-in rules covering the most common pitfalls in Perspective views.
 
 ## When to use it
 
@@ -29,6 +29,8 @@ Ignition Lint parses Perspective view definitions, builds an object model of com
 | [PollingIntervalRule](./rules/performance/polling-interval.md) | Performance | `now()` polling intervals below a configurable minimum |
 | [UnusedCustomPropertiesRule](./rules/properties/unused-custom-properties.md) | Properties | Custom properties and view parameters defined but never referenced |
 | [ExcessiveContextDataRule](./rules/properties/excessive-context-data.md) | Properties | Large datasets stored in custom properties (arrays, breadth, depth, total volume) |
+| [PropertyPersistenceRule](./rules/properties/property-persistence.md) | Properties | Bound properties whose `persistent` flag stores designer results in view.json (git churn) — opt-in |
+| [PropertyAccessRule](./rules/properties/property-access.md) | Properties | Custom properties whose `access` mode doesn't match the project standard (e.g. staging data not PRIVATE) — opt-in |
 | [PylintScriptRule](./rules/scripts/pylint-script.md) | Scripts | Pylint findings across every script in the view |
 
 ## Where to start

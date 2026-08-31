@@ -54,6 +54,8 @@ const sidebars: SidebarsConfig = {
           items: [
             'rules/properties/unused-custom-properties',
             'rules/properties/excessive-context-data',
+            'rules/properties/property-persistence',
+            'rules/properties/property-access',
           ],
         },
         {
@@ -92,6 +94,8 @@ const sidebars: SidebarsConfig = {
           items: [
             'reference/properties/unused-custom-properties',
             'reference/properties/excessive-context-data',
+            'reference/properties/property-persistence',
+            'reference/properties/property-access',
           ],
         },
         {
