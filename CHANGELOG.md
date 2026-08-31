@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- `PropertyPersistenceRule` (#84) — opt-in rule validating the `persistent` flag on bound properties. With `expected_persistent: false`, flags bound props that store the designer's last binding result in view.json (pure git-diff churn — the binding recomputes at runtime); `--fix` sets `persistent: false` and deletes the stale stored value, mirroring the established manual cleanup workflow. With `expected_persistent: true`, flags non-persistent bound props and persistent props missing a stored default (no auto-fix). Tag bindings are exempt by default (`exempt_binding_types: ["tag"]`) because they never create the property key when the tag is missing; the exemption list is fully user-overridable, including per-mode tokens (`tag.indirect`). Checks view-level and component-level `propConfig`, hard-scoped to `custom.*` entries. Inert unless `expected_persistent` is configured.
+- `PropertyAccessRule` (#84) — opt-in rule validating the `access` mode (PUBLIC/PROTECTED/PRIVATE) of user-configured custom properties, view-level and component-level. Non-PRIVATE custom props are synchronized to the client DOM; gateway-side staging datasets should be PRIVATE to cut websocket traffic. The rule (and its `--fix`, which sets or removes the `access` declaration) is hard-scoped to `custom.*` propConfig entries — it never touches component `props.*` (marking e.g. a table's `props.data` PRIVATE would stop it rendering) or `params.*` (the view's public interface). Per-prop exemptions via `exempt_props`, matching by bare name at any level (`"data"`), prop key, or fully-qualified path, with anchored `*`/`?` wildcards (brackets stay literal). Inert unless `expected_access` is configured.
+- `rules/properties/propconfig_scan.py` — shared flattened-JSON scanner for propConfig metadata (persistence, access, binding type/tag mode, param direction) at both view and component level, used by both new rules. Scans flattened JSON directly because the object model only carries propConfig metadata for view-level properties.
+
+### Fixed
+- Golden `model.json` files no longer reorder between regenerations: the builder emitted propConfig-only view properties in Python set (hash) order, which varies per process, so every `scripts/generate_debug_files.py` run churned unrelated golden diffs. The cache is now iterated in sorted order.
+
 ## [0.6.3] - 2026-07-08
 
 ### Fixed
