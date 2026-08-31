@@ -215,6 +215,9 @@ class FixableMixin:
 
 	The mixin manages a list of Fix objects that the rule populates during node visits.
 	Fixes are collected by the LintEngine after rule processing.
+
+	The per-rule `allow_fix` config key (default true) is applied to the instance
+	by the CLI; when false, fix context is refused so the rule generates no fixes.
 	"""
 
 	def __init__(self, *args, **kwargs):
@@ -222,6 +225,7 @@ class FixableMixin:
 		self._fixes: List[Fix] = []
 		self._json_context = None  # Set by LintEngine when fix mode is active
 		self._path_translator = None  # Set by LintEngine when fix mode is active
+		self.allow_fix = True
 
 	def add_fix(self, fix: Fix):
 		"""Add a fix to the collection."""
@@ -239,8 +243,11 @@ class FixableMixin:
 		"""
 		Set the JSON context needed for generating fixes.
 
-		Called by LintEngine when fix mode is active.
+		Called by LintEngine when fix mode is active. Refused when allow_fix
+		is false, so the rule generates no fixes and dry-run stays honest.
 		"""
+		if not self.allow_fix:
+			return
 		self._json_context = json_data
 		self._path_translator = path_translator
 

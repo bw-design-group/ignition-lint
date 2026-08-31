@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- Per-rule `allow_fix` config key (#124) — sits alongside `enabled` (default `true`). When `false`, a fixable rule stays detection-only: violations still report, but the rule refuses fix context, so `--fix` skips it and `--fix-dry-run` never advertises its fixes. Lets one shared config drive fix policy (e.g. a pre-commit hook running plain `--fix` that auto-repairs unused properties but never renames components). An explicit `--fix-rules` on the CLI overrides `allow_fix: false` for the rules it names; non-boolean values are a per-rule config error; the key is ignored with a notice on rules without fix support.
+- `--fix-rules` now warns when a supplied name matches no loaded rule (typo, or a rule disabled in config) instead of silently applying nothing.
+
 ## [0.6.3] - 2026-07-08
 
 ### Fixed
