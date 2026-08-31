@@ -120,6 +120,7 @@
     }
   },
   "_info": {
+    "_allow_fix": "Optional per-rule key alongside 'enabled' (default true). Set \"allow_fix\": false to keep a fixable rule detection-only: it still reports violations, but --fix and --fix-dry-run skip it. An explicit --fix-rules on the CLI overrides it for the rules named.",
     "_description": "Rule severity levels are defined by rule developers:",
     "rule_severities": {
       "NamePatternRule": "configurable per node type - naming conventions can be strict (error) or lenient (warning) based on component type",
