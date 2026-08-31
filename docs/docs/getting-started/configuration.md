@@ -14,6 +14,7 @@ Rules are configured through a JSON file (default name: `rule_config.json`). Eac
 {
   "<RuleName>": {
     "enabled": true,
+    "allow_fix": true,
     "kwargs": {
       "<option>": <value>
     }
@@ -24,6 +25,7 @@ Rules are configured through a JSON file (default name: `rule_config.json`). Eac
 | Field | Type | Required | Description |
 | --- | --- | --- | --- |
 | `enabled` | bool | Yes | Whether to run the rule |
+| `allow_fix` | bool | No | Whether `--fix` may apply this rule's fixes (default `true`; only meaningful on fixable rules) |
 | `kwargs` | object | No | Keyword arguments forwarded to the rule's `__init__` |
 
 Anything inside `kwargs` is passed straight to the rule's constructor. See the per-rule pages under **Rules** in the sidebar for the options each rule accepts.
@@ -168,6 +170,31 @@ Set `enabled: false` (or omit the rule entirely):
   }
 }
 ```
+
+## Detection-only rules (`allow_fix`)
+
+Set `allow_fix: false` to keep a fixable rule's violations detection-only — the rule still reports, but `--fix` and `--fix-dry-run` skip it entirely:
+
+```json
+{
+  "NamePatternRule": {
+    "enabled": true,
+    "allow_fix": false,
+    "kwargs": { "convention": "PascalCase" }
+  },
+  "UnusedCustomPropertiesRule": {
+    "enabled": true
+  }
+}
+```
+
+With this config, `--fix` deletes unused properties but never renames components. This lets one shared config drive different fix policies per rule — e.g. a pre-commit hook that runs plain `--fix` and auto-repairs only what the team trusts.
+
+Notes:
+
+- Absent means `true`, so existing configs behave exactly as before.
+- An explicit `--fix-rules <name>` on the CLI overrides `allow_fix: false` for the rules it names.
+- Non-boolean values are a config error for that rule (reported, rule skipped); the key is ignored with a notice on rules that don't support auto-fix.
 
 ## Multiple configs per project
 
