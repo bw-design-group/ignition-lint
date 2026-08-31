@@ -20,7 +20,7 @@ Custom properties on a Perspective view are meant to hold **configuration**, not
 `error` by default — excessive data in view JSON causes real performance and memory problems, so the rule errs on the side of blocking CI. Configurable via the `severity` option.
 
 ## What it checks
-The rule operates on the flattened JSON representation of the view and runs four independent detection methods, each scoped to keys that start with `custom.`:
+The rule operates on the flattened JSON representation of the view and runs five independent detection methods, each scoped to keys that start with `custom.`:
 
 | Method | What it detects | Default threshold |
 | --- | --- | --- |
@@ -28,15 +28,18 @@ The rule operates on the flattened JSON representation of the view and runs four
 | Property breadth | Too many sibling properties under any `custom.*` parent | `max_sibling_properties = 50` |
 | Nesting depth | Custom property paths nested deeper than the threshold | `max_nesting_depth = 5` |
 | Total data points | Total count of all flattened paths under `custom.*` | `max_data_points = 1000` |
+| Value length | A single string value under `custom.*` that is too long | `max_value_length = 10000` |
 
-Because the four checks run independently, a single view can produce up to four violations from this rule.
+The first four checks measure the **structure** of the custom-property tree; the fifth measures the **size of individual values**, catching payloads that flatten to a single path — embedded SVG/HTML markup, base64-encoded images, serialized datasets — and are therefore invisible to the structural checks.
+
+Because the checks run independently, a single view can produce violations from several methods at once.
 
 ## Why it matters
 Embedding large datasets in `view.json` causes a chain reaction of problems. The gateway has to parse and hold the full JSON document in memory every time the view loads, model building (and therefore linting) slows down proportionally to the document size, and the file balloons in your version control history. Worse, it conflates two separate concerns: a view file is supposed to describe a UI, not be a dump of the data the UI displays. Once the data is baked into the view, refreshing it requires a redeploy — so the data goes stale, gets duplicated across views, and becomes a maintenance liability. Datasets belong behind named queries or the tag historian, where they can be cached, paginated, and updated independently of the UI.
 
 ## Configuration
 
-The rule accepts five options grouped into two categories below. All thresholds are independent — disabling one detection method requires setting its threshold high enough that it cannot be exceeded; there is no single on/off switch per method.
+The rule accepts six options grouped into two categories below. All thresholds are independent — disabling one detection method requires setting its threshold high enough that it cannot be exceeded; there is no single on/off switch per method.
 
 ### Detection thresholds
 
@@ -66,12 +69,19 @@ Maximum allowed depth for any `custom.*` path, measured as `len(parts) - 1` afte
 
 Maximum allowed count of total flattened paths under `custom.*`. Flattening produces an entry for every leaf **and** every intermediate path component, so deeply nested objects accumulate counts faster than shallow flat ones. At most one violation is emitted per file from this method.
 
+---
+
+#### `max_value_length`
+**Type:** `int` &nbsp;·&nbsp; **Default:** `10000`
+
+Maximum allowed character length for any single string value stored under `custom.*`, measured with `len()` on the flattened leaf value. Only string values are checked — numbers, booleans, and container placeholders have no meaningful character length. Each value that exceeds this threshold emits its own violation. The threshold is exclusive: a value of exactly `max_value_length` characters passes.
+
 ### Severity
 
 #### `severity`
 **Type:** `"warning" | "error"` &nbsp;·&nbsp; **Default:** `"error"`
 
-Severity for every violation emitted by this rule (all four detection methods share the same severity). Set to `"warning"` during legacy migrations or initial adoption so the rule reports but does not break CI.
+Severity for every violation emitted by this rule (all five detection methods share the same severity). Set to `"warning"` during legacy migrations or initial adoption so the rule reports but does not break CI.
 
 ## Detection methods in detail
 
@@ -111,6 +121,15 @@ The rule counts every flattened path that starts with `custom.`. Because flatten
 
 ```
 custom: Contains <N> total data points across all custom properties. Large volumes of data should be stored in databases, not view JSON. Maximum recommended: <max_data_points> data points.
+```
+
+### 5. Value length
+The rule iterates every flattened path under `custom.*` whose value is a string and compares `len(value)` against `max_value_length`. Non-string values are skipped. Unlike the structural methods, this catches a payload that flattens to a **single** path-value pair — an embedded SVG or HTML document, a base64-encoded image, a serialized JSON blob — which registers as just one data point at depth 1 and would otherwise pass every other check. Each offending value emits its own violation; `<property_name>` is the path with array indices and the leading `custom.` stripped.
+
+**Violation message format:**
+
+```
+<path>: Custom property '<property_name>' contains a string value of <N> characters. Large values should be stored in external resources or databases, not view JSON. Maximum recommended: <max_value_length> characters.
 ```
 
 ## Examples
@@ -167,12 +186,26 @@ Deep object trees produce a single depth violation for the deepest path:
 ### Problematic code: Excessive data points
 This violation fires when the **total** number of flattened paths under `custom.*` crosses `max_data_points`. A single property with hundreds of nested objects can trip it on its own, even when no individual array, breadth, or depth threshold is breached.
 
+### Problematic code: Oversized value
+A single custom property holding a large embedded payload — inline SVG markup, a base64-encoded image, a serialized dataset — trips the value-length check even though it is structurally just one property:
+
+```json
+{
+  "custom": {
+    "svgContent": "<svg xmlns=\"http://www.w3.org/2000/svg\" ... tens of thousands of characters ... </svg>"
+  }
+}
+```
+
+Store the asset as a project resource (e.g. an image or embedded view) or fetch it at runtime instead of inlining it into `view.json`.
+
 ## Auto-fix support
 This rule does not provide auto-fixes — moving data out of a view is a semantic refactor that the rule cannot perform safely. The replacement strategy depends on where the data should live (named query, tag historian, message handler), and only a developer can make that call.
 
 ## Edge cases & exemptions
 - Properties outside `custom.*` (e.g., `params.*`, `propConfig.*`, `props.*`) are not analyzed.
-- Each detection method runs independently; one fixture can produce up to 4 violations from this rule.
+- Each detection method runs independently; the same property can be reported by multiple methods.
+- The value-length method only measures string values; numbers, booleans, and empty-container placeholders are skipped.
 - Array size is computed as `max_index + 1`; sparse arrays are not handled specially — only the highest observed index matters.
 - The depth method reports only the **deepest** path even if many paths exceed the threshold (one violation per file from this method).
 - The data-points method counts intermediate path components produced by JSON flattening, not just leaf values, so deeply nested objects accumulate counts faster than wide flat ones.

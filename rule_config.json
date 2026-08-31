@@ -77,7 +77,8 @@
       "max_sibling_properties": 50,
       "max_nesting_depth": 5,
       "max_data_points": 1000,
-      "_comment": "Detects excessive context data in custom properties using 4 methods: (1) max_array_size: arrays with too many items, (2) max_sibling_properties: too many properties at the same level, (3) max_nesting_depth: overly deep nesting, (4) max_data_points: total volume of data stored in custom properties."
+      "max_value_length": 10000,
+      "_comment": "Detects excessive context data in custom properties using 5 methods: (1) max_array_size: arrays with too many items, (2) max_sibling_properties: too many properties at the same level, (3) max_nesting_depth: overly deep nesting, (4) max_data_points: total volume of data stored in custom properties, (5) max_value_length: individual oversized string values (embedded markup, encoded images, serialized datasets)."
     }
   },
   "BadComponentReferenceRule": {
