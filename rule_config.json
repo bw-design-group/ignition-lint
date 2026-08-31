@@ -77,7 +77,8 @@
       "max_sibling_properties": 50,
       "max_nesting_depth": 5,
       "max_data_points": 1000,
-      "_comment": "Detects excessive context data in custom properties using 4 methods: (1) max_array_size: arrays with too many items, (2) max_sibling_properties: too many properties at the same level, (3) max_nesting_depth: overly deep nesting, (4) max_data_points: total volume of data stored in custom properties."
+      "max_value_length": 10000,
+      "_comment": "Detects excessive context data in custom properties using 5 methods: (1) max_array_size: arrays with too many items, (2) max_sibling_properties: too many properties at the same level, (3) max_nesting_depth: overly deep nesting, (4) max_data_points: total volume of data stored in custom properties, (5) max_value_length: individual oversized string values (embedded markup, encoded images, serialized datasets)."
     }
   },
   "BadComponentReferenceRule": {
@@ -86,6 +87,26 @@
       "_comment": "Detects brittle component references like .getSibling(), .getParent(), .getChild(), .parent, .children that create tight coupling to view structure. Use view.custom properties or message handling instead.",
       "severity": "error",
       "_severity_comment": "Optional: Set to 'warning' if you want to detect these patterns without blocking builds. Use 'error' (default) for strict enforcement to prevent brittle view structure dependencies."
+    }
+  },
+  "PropertyPersistenceRule": {
+    "enabled": false,
+    "kwargs": {
+      "_comment": "Opt-in optimization rule: validates the 'persistent' flag on BOUND properties. persistent=true on a bound prop stores the last designer binding result in view.json, causing git diff churn with no runtime benefit. Inert unless expected_persistent is set.",
+      "expected_persistent": false,
+      "_exempt_comment": "Tag bindings are exempt by default: they never create the property key when the tag is missing. Tokens: expr, expr-struct, property, query, tag, tag.direct, tag.indirect, tag.expression. Pass [] to check everything.",
+      "exempt_binding_types": ["tag"],
+      "severity": "warning"
+    }
+  },
+  "PropertyAccessRule": {
+    "enabled": false,
+    "kwargs": {
+      "_comment": "Opt-in optimization rule: validates the 'access' mode of user-configured custom properties (view-level custom.* and component custom.*). PRIVATE props are never sent to the client, cutting websocket traffic for gateway-side staging data. Never touches props.* or params.*. Inert unless expected_access is set.",
+      "expected_access": "PRIVATE",
+      "_exempt_comment": "Prop paths to skip: bare keys ('custom.theme') match at any level, or fully-qualified paths.",
+      "exempt_props": [],
+      "severity": "warning"
     }
   },
   "ComponentReferenceValidationRule": {
@@ -108,7 +129,9 @@
       "UnusedCustomPropertiesRule": "error - dead code that should be removed",
       "ExcessiveContextDataRule": "error - architectural issue, data should be in databases",
       "BadComponentReferenceRule": "error (configurable) - brittle view structure dependencies that break during refactoring",
-      "ComponentReferenceValidationRule": "error - references to non-existent components cause runtime errors"
+      "ComponentReferenceValidationRule": "error - references to non-existent components cause runtime errors",
+      "PropertyPersistenceRule": "configurable - opt-in optimization rule, inert unless expected_persistent is set; 'warning' recommended while adopting",
+      "PropertyAccessRule": "configurable - opt-in optimization rule, inert unless expected_access is set; 'warning' recommended while adopting"
     },
     "note": "Most rule severity levels are fixed, but NamePatternRule and BadComponentReferenceRule allow user configuration.",
     "NamePatternRule_node_types": {
