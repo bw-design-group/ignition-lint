@@ -1,12 +1,18 @@
 ---
-title: PylintScriptRule
-sidebar_label: PylintScriptRule
+title: PerspectiveScriptPylintRule
+sidebar_label: PerspectiveScriptPylintRule
 description: Runs pylint on every Python script embedded in a Perspective view.
 ---
 
-# PylintScriptRule
+# PerspectiveScriptPylintRule
 
 Runs the full [pylint](https://pylint.readthedocs.io/) static analyzer over every Python script embedded in a Perspective `view.json` — event handlers, message handlers, custom methods, and transform scripts. This is the project's primary defense against script bugs that would otherwise only show up at runtime in the Ignition gateway.
+
+:::note Renamed in this release
+This rule was previously called `PylintScriptRule`. The old name still works in configs and `--fix-rules` (it is resolved with a one-line deprecation notice), but new configs should use `PerspectiveScriptPylintRule`. Its project-library counterpart is [LibraryScriptPylintRule](./library-script-pylint.md), which has its own independent `pylintrc` and `category_mapping`.
+:::
+
+**Domain:** `perspective` (Perspective `view.json` files only).
 
 **Severity:** `error` by default for Fatal and Error pylint categories; `warning` for Warning, Convention, and Refactor. Each category can be remapped independently via `category_mapping`.
 
@@ -18,7 +24,7 @@ The simplest setup — accept the defaults:
 
 ```json
 {
-  "PylintScriptRule": {
+  "PerspectiveScriptPylintRule": {
     "enabled": true
   }
 }
@@ -34,7 +40,7 @@ For projects that want CI to fail on style violations too, not just bugs:
 
 ```json
 {
-  "PylintScriptRule": {
+  "PerspectiveScriptPylintRule": {
     "enabled": true,
     "kwargs": {
       "category_mapping": {
@@ -55,7 +61,7 @@ For projects that are still cleaning up legacy scripts and only want the build t
 
 ```json
 {
-  "PylintScriptRule": {
+  "PerspectiveScriptPylintRule": {
     "enabled": true,
     "kwargs": {
       "category_mapping": {
@@ -76,7 +82,7 @@ For projects that keep their pylint config somewhere non-standard:
 
 ```json
 {
-  "PylintScriptRule": {
+  "PerspectiveScriptPylintRule": {
     "enabled": true,
     "kwargs": {
       "pylintrc": "ci/pylint/perspective.pylintrc"
@@ -93,7 +99,7 @@ When linting many views at once, batch mode runs pylint a single time across all
 
 ```json
 {
-  "PylintScriptRule": {
+  "PerspectiveScriptPylintRule": {
     "enabled": true,
     "kwargs": {
       "batch_mode": true
@@ -119,7 +125,7 @@ For the precise JSON path each node type maps to, see the [reference's script ty
 
 ### Correct code
 
-A clean event handler from `tests/cases/AllScriptTypes/view.json` passes pylint under the default configuration:
+A clean event handler from `tests/cases/views/AllScriptTypes/view.json` passes pylint under the default configuration:
 
 ```json
 {
@@ -141,7 +147,7 @@ The script is tab-indented (required so the source is valid Python after the wra
 
 ### Problematic code
 
-A real event handler from `tests/cases/PylintViolations/view.json` triggers four different pylint categories at once:
+A real event handler from `tests/cases/views/PylintViolations/view.json` triggers four different pylint categories at once:
 
 ```json
 {
@@ -203,5 +209,6 @@ For the full lookup sequence (including how absolute and relative `pylintrc` pat
 
 ## See also
 
-- [Full PylintScriptRule reference](../../reference/scripts/pylint-script.md) — every option, the full pylintrc resolution order, debug output, and edge cases
+- [Full PerspectiveScriptPylintRule reference](../../reference/scripts/pylint-script.md) — every option, the full pylintrc resolution order, debug output, and edge cases
+- [LibraryScriptPylintRule](./library-script-pylint.md) — the same idea for project-library `code.py` modules
 - [Configuration overview](../../getting-started/configuration.md) — the `rule_config.json` schema

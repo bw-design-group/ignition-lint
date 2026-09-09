@@ -88,7 +88,7 @@ class TestMyRule(BaseRuleTest):
 
 | Attribute / method | Purpose |
 | --- | --- |
-| `self.test_cases_dir` | Path to `tests/cases/` |
+| `self.test_cases_dir` | Path to `tests/cases/views/` |
 | `self.assert_rule_passes(view, config, rule_name)` | Asserts no violations |
 | `self.assert_rule_fails(view, config, rule_name, expected_count=None)` | Asserts at least one violation (or an exact count) |
 | `self.run_rule_on_view(view_content, config, rule_name)` | Run the rule and return its violations |
@@ -139,10 +139,10 @@ view = load_test_view("PascalCase")
 
 ## Case fixtures
 
-`tests/cases/` holds real view.json files used by both unit tests and integration tests. Each case is a directory:
+`tests/cases/views/` holds real view.json files used by both unit tests and integration tests. Each case is a directory:
 
 ```
-tests/cases/
+tests/cases/views/
 ├── PascalCase/
 │   └── view.json          # Valid PascalCase example
 ├── MixedCase/
@@ -181,7 +181,7 @@ Each JSON file contains a list of test cases:
 [
   {
     "name": "PascalCase positive",
-    "view": "tests/cases/PascalCase/view.json",
+    "view": "tests/cases/views/PascalCase/view.json",
     "config": {
       "NamePatternRule": {
         "enabled": true,
@@ -193,7 +193,7 @@ Each JSON file contains a list of test cases:
   },
   {
     "name": "MixedCase negative",
-    "view": "tests/cases/MixedCase/view.json",
+    "view": "tests/cases/views/MixedCase/view.json",
     "config": {
       "NamePatternRule": {
         "enabled": true,

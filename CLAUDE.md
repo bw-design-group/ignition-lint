@@ -340,7 +340,7 @@ For detailed instructions on releasing new versions, see [RELEASING.md](RELEASIN
 ## Architecture Overview
 
 ### Core Framework
-Ignition Lint is a Python framework for analyzing Ignition Perspective view.json files using an object model approach with the visitor pattern.
+Ignition Lint is a Python framework for analyzing Ignition resources using an object model approach with the visitor pattern. Resources are grouped into **lint domains** (`common/domain.py`, `domains/`): `perspective` (view.json) and `scripting` (project library `script-python/**/code.py`). Each domain declares a `DomainSpec` (file matcher + loader → `LoadedFile`) and gets its own `LintEngine`; every rule declares its `domain`, and the flat `rule_config.json` is routed per domain by rule name (rule names are unique; the config never mentions domains). Adding a domain must never require editing `cli.py` or `linter.py` (see docs/docs/developing/architecture.md → "Adding a domain"). Never call the scripting domain "scripts": that word already means the embedded-script node set (`ALL_SCRIPTS`, `ScriptRule`).
 
 **Key architectural components:**
 - **JSON Flattening** (`common/flatten_json.py`): Converts hierarchical JSON to path-value pairs
@@ -356,14 +356,18 @@ src/ignition_lint/
 ├── linter.py          # Main linting engine
 ├── common/
 │   └── flatten_json.py # JSON flattening utilities
+├── common/
+│   └── domain.py       # LintDomain, LoadedFile, DomainSpec (leaf module)
+├── domains/            # DomainRegistry + perspective.py / scripting.py specs
 ├── model/
-│   ├── builder.py     # ViewModelBuilder - constructs object model
-│   └── node_types.py  # Node type definitions (Component, Binding, Script, etc.)
+│   ├── builder.py     # ViewModelBuilder - constructs object model from view.json
+│   ├── script_builder.py # ScriptModelBuilder - ScriptModule/ScriptPackage nodes from code.py
+│   └── node_types.py  # Node type definitions (Component, Binding, Script, ScriptModule, etc.)
 └── rules/
-    ├── common.py      # Base LintingRule class
-    ├── name_pattern.py # Component naming rules
-    ├── polling_interval.py # Polling interval validation
-    └── lint_script.py # Script quality rules via pylint
+    ├── common.py      # Base LintingRule class (with `domain` attr)
+    ├── naming/        # NamePatternRule, LibraryNamePatternRule (scripting)
+    ├── performance/   # PollingIntervalRule
+    └── scripts/       # PerspectiveScriptPylintRule, LibraryScriptPylintRule, pylint_support.py
 ```
 
 ### Object Model Node Types
@@ -421,18 +425,19 @@ This codebase follows TDD principles:
 - `tests/unit/`: One file per rule, fast isolated tests
 - `tests/integration/`: Multi-component and CLI integration tests
 - `tests/fixtures/`: Shared test utilities and base classes
-- `tests/cases/`: Sample view.json files for testing
+- `tests/cases/views/`: Sample view.json files (perspective domain); `tests/cases/scripting/<Pkg>/code.py`: library-module fixtures (scripting domain)
 - `tests/configs/`: JSON configuration files for config-driven tests
 
 ### Key Test Utilities
 - `BaseRuleTest`: Base class for rule unit tests
 - `get_test_config()`: Helper for creating rule configurations
 - `create_mock_view()`: Generate test view.json content
-- `load_test_view()`: Load test cases from `tests/cases/`
+- `load_test_view()`: Load view fixtures from `tests/cases/views/`
+- `load_test_script()`: Load library-module fixtures from `tests/cases/scripting/`
 
 ## Configuration System
 
-Rules are configured via JSON files (default: `rule_config.json`):
+Rules are configured via a flat JSON file (default: `rule_config.json`); each rule is routed to its lint domain automatically:
 
 ```json
 {
@@ -448,13 +453,22 @@ Rules are configured via JSON files (default: `rule_config.json`):
     "kwargs": {
       "minimum_interval": 10000
     }
+  },
+  "LibraryScriptPylintRule": {
+    "enabled": true,
+    "kwargs": {
+      "pylintrc": ".config/.ignition-library-pylintrc"
+    }
+  },
+  "LibraryNamePatternRule": {
+    "enabled": true
   }
 }
 ```
 
 ### Pylint Category Mapping
 
-The `PylintScriptRule` supports configurable category mapping to control how Pylint's message categories map to ignition-lint severity levels.
+`PerspectiveScriptPylintRule` (formerly `PylintScriptRule`; the old name is a deprecated alias) and `LibraryScriptPylintRule` support configurable category mapping to control how Pylint's message categories map to ignition-lint severity levels.
 
 **Pylint Categories:**
 - **F** (Fatal): Prevents analysis - syntax errors, import failures
@@ -466,7 +480,7 @@ The `PylintScriptRule` supports configurable category mapping to control how Pyl
 **Default mapping** (Fatal/Error → error, Warning/Convention/Refactor → warning):
 ```json
 {
-  "PylintScriptRule": {
+  "PerspectiveScriptPylintRule": {
     "enabled": true,
     "kwargs": {
       "pylintrc": ".config/.pylintrc",
@@ -485,7 +499,7 @@ The `PylintScriptRule` supports configurable category mapping to control how Pyl
 **Strict mode** (everything is an error):
 ```json
 {
-  "PylintScriptRule": {
+  "PerspectiveScriptPylintRule": {
     "enabled": true,
     "kwargs": {
       "pylintrc": ".config/.pylintrc",
@@ -503,7 +517,7 @@ The `PylintScriptRule` supports configurable category mapping to control how Pyl
 
 **Output format** - violations are grouped by category with mapping legend:
 ```
-❌ PylintScriptRule (error):
+❌ PerspectiveScriptPylintRule (error):
 
   📚 Category Mapping:
     Fatal (F) → Error

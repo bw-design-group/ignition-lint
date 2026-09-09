@@ -24,7 +24,7 @@ python scripts/generate_debug_files.py --list
 python scripts/generate_debug_files.py --clean
 ```
 
-Each test case directory under `tests/cases/` gets a `debug/` subdirectory containing:
+Each test case directory under `tests/cases/views/` gets a `debug/` subdirectory containing:
 
 | File | Purpose |
 | --- | --- |
@@ -48,11 +48,11 @@ Use when: you're auditing rule coverage or wondering why a rule didn't fire. Sta
 
 Some rules write their own debug artifacts:
 
-### `PylintScriptRule`
+### `PerspectiveScriptPylintRule`
 
 Saves the combined script (the temp file pylint actually analyzes) to `tests/debug/` (when running from `tests/`) or `.ignition-lint/debug/` (otherwise). The file is saved automatically whenever pylint reports any issues, with the filename derived from a timestamp + PID. Set `debug=true` in the rule config to also save when there are no issues.
 
-See [PylintScriptRule](../rules/scripts/pylint-script.md) for the full debug-file format.
+See [PerspectiveScriptPylintRule](../rules/scripts/pylint-script.md) for the full debug-file format.
 
 ## Golden file testing
 
@@ -91,7 +91,25 @@ When you change something that affects model building:
 ign-lint --config rule_config.json --files "**/view.json" --debug-output ./analysis
 ```
 
-For each file linted, ignition-lint writes the flattened JSON and model under `./analysis/<filename>/`.
+For each file linted, ignition-lint writes one folder that mirrors the file's location relative to the working directory, holding the same three artifacts as the golden files:
+
+```
+analysis/
+├── .ignition-lint-debug                  # marker: this directory is managed by ign-lint
+├── views/Dashboard/
+│   ├── flattened.json
+│   ├── model.json
+│   └── stats.json
+├── views/Login/
+│   └── ...
+└── ignition/script-python/general/config/ # scripting domain: no flattened.json
+    ├── model.json
+    └── stats.json
+```
+
+Because every Perspective view is literally named `view.json`, keying on the folder is what keeps a thousand views from overwriting each other.
+
+**Cleanup.** At the start of every run ign-lint removes the previous run's entries from the directory, so stale folders for deleted views do not accumulate. Two safeguards: only directories containing the `.ignition-lint-debug` marker (i.e. ones ign-lint created) are cleaned, and entries modified in the last five seconds are kept so parallel pre-commit batches writing to the same directory do not erase each other. Point `--debug-output` at a dedicated folder; never at a folder holding other files.
 
 ## Debug-nodes flag
 

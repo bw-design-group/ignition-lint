@@ -104,7 +104,7 @@ For exact algorithms (regexes, normalization, and how depth/breadth are counted)
 
 ### Problematic code: Excessive array size
 
-The fixture `tests/cases/BadContextData/view.json` parks a giant lookup table inside a custom property. The structure looks like:
+The fixture `tests/cases/views/BadContextData/view.json` parks a giant lookup table inside a custom property. The structure looks like:
 
 ```json
 {

@@ -78,7 +78,7 @@ If you want the linter to surface polling smells without blocking the build (use
 
 ### Problematic code
 
-`tests/cases/ExpressionBindings/view.json` contains several real violations. A bare `now()` on a component prop binding:
+`tests/cases/views/ExpressionBindings/view.json` contains several real violations. A bare `now()` on a component prop binding:
 
 ```json
 {

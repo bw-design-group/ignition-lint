@@ -1,6 +1,6 @@
 # Ignition Lint
 
-Static analysis for Ignition Perspective `view.json` files. Catches naming inconsistencies, performance problems, broken component references, dead custom properties, and Python errors in embedded scripts — before they hit the gateway.
+Static analysis for Ignition projects: Perspective `view.json` files and the project script library (`script-python/**/code.py`). Catches naming inconsistencies, performance problems, broken component references, dead custom properties, and Python errors in embedded and library scripts — before they hit the gateway.
 
 ## Why
 
@@ -31,7 +31,9 @@ ign-lint --config rule_config.json --files "views/**/view.json"
 | `PollingIntervalRule` | `now()` polling intervals below a configurable minimum |
 | `UnusedCustomPropertiesRule` | Custom properties and view parameters defined but never referenced |
 | `ExcessiveContextDataRule` | Large datasets stored in custom properties (arrays, breadth, depth, total volume) |
-| `PylintScriptRule` | Pylint findings across every script in the view |
+| `PerspectiveScriptPylintRule` | Pylint findings across every script embedded in the view (formerly `PylintScriptRule`) |
+| `LibraryScriptPylintRule` | Pylint findings in project-library `code.py` modules, with an independent pylintrc (`scripting` domain) |
+| `LibraryNamePatternRule` | Naming conventions for library packages and modules (`scripting` domain) |
 
 Every rule is configurable. Severity is per-rule (error or warning). Several rules support auto-fix.
 
