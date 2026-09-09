@@ -56,8 +56,11 @@ try:
 	from .common.path_translator import PathTranslator
 	from .common.fix_engine import FixEngine
 	from .common.fix_operations import FixOperationType
-	from .linter import LintEngine
+	from .common.domain import DomainSpec, LintDomain
+	from .domains import classify_file, default_globs, get_spec
+	from .linter import LintEngine, LintResults, merge_lint_results, DEBUG_OUTPUT_MARKER
 	from .rules import RULES_MAP
+	from .rules.registry import get_rules_for_domain, resolve_rule_name
 except ImportError:
 	# Fall back to absolute imports (when run directly or from tests)
 	current_dir = Path(__file__).parent
@@ -70,8 +73,11 @@ except ImportError:
 	from ignition_lint.common.path_translator import PathTranslator
 	from ignition_lint.common.fix_engine import FixEngine
 	from ignition_lint.common.fix_operations import FixOperationType
-	from ignition_lint.linter import LintEngine
+	from ignition_lint.common.domain import DomainSpec, LintDomain
+	from ignition_lint.domains import classify_file, default_globs, get_spec
+	from ignition_lint.linter import LintEngine, LintResults, merge_lint_results, DEBUG_OUTPUT_MARKER
 	from ignition_lint.rules import RULES_MAP
+	from ignition_lint.rules.registry import get_rules_for_domain, resolve_rule_name
 
 
 def cleanup_debug_files() -> None:
@@ -137,6 +143,40 @@ def cleanup_debug_files() -> None:
 			except OSError:
 				# Silently ignore errors
 				pass
+
+
+def cleanup_debug_output_dir(debug_output_dir: str, min_age_seconds: float = 5.0) -> int:
+	"""
+	Remove previous runs' artifacts from a --debug-output directory.
+
+	Only directories carrying the ign-lint marker file are touched, so pointing
+	--debug-output at an arbitrary existing folder never deletes user data. Entries
+	newer than ``min_age_seconds`` are kept: they belong to a parallel batch (pre-commit
+	runs several processes against the same directory). Returns the number removed.
+	"""
+	import shutil
+	import time
+
+	root = Path(debug_output_dir)
+	if not root.is_dir() or not (root / DEBUG_OUTPUT_MARKER).exists():
+		return 0
+
+	now = time.time()
+	removed = 0
+	for entry in root.iterdir():
+		if entry.name == DEBUG_OUTPUT_MARKER:
+			continue
+		try:
+			if now - entry.stat().st_mtime < min_age_seconds:
+				continue
+			if entry.is_dir() and not entry.is_symlink():
+				shutil.rmtree(entry)
+			else:
+				entry.unlink()
+			removed += 1
+		except OSError:
+			continue
+	return removed
 
 
 def cleanup_old_batch_files(output_path: Path) -> None:
@@ -390,9 +430,53 @@ def generate_whitelist(patterns: List[str], output_file: str, append: bool = Fal
 		sys.exit(1)
 
 
-def create_rules_from_config(config: dict) -> tuple:
+def _resolve_alias_keys(config: dict) -> dict:
 	"""
-	Create rule instances for every registered rule.
+	Return ``config`` with deprecated rule names replaced by their canonical names.
+
+	Prints one deprecation line per alias. When both the alias and the canonical
+	name are present the canonical entry wins and the alias entry is dropped.
+	"""
+	resolved = {}
+	for rule_name, rule_config in config.items():
+		canonical, was_alias = resolve_rule_name(rule_name)
+		if not was_alias:
+			resolved.setdefault(canonical, rule_config)
+			continue
+		if canonical in config:
+			print(
+				f"⚠️  Config: '{rule_name}' is a deprecated alias of '{canonical}' and both are present; "
+				f"using '{canonical}' and ignoring '{rule_name}'"
+			)
+			continue
+		print(f"⚠️  Config: rule name '{rule_name}' is deprecated; use '{canonical}' instead")
+		resolved[canonical] = rule_config
+	return resolved
+
+
+def _split_config_by_domain(config: dict) -> Dict[LintDomain, dict]:
+	"""
+	Route each rule entry of a flat config to the domain its rule class declares.
+
+	Rule names are unique across domains, so the config file needs no domain
+	grouping. Keys starting with ``_`` are comments and skipped; deprecated rule
+	names are resolved with a deprecation notice; unknown rule names are reported.
+	"""
+	per_domain: Dict[LintDomain, dict] = {domain: {} for domain in LintDomain}
+	for rule_name, rule_config in _resolve_alias_keys(config).items():
+		if rule_name.startswith("_") or not isinstance(rule_config, dict):
+			continue
+		rule_class = RULES_MAP.get(rule_name)
+		if rule_class is None:
+			print(f"Unknown rule in config: {rule_name}")
+			continue
+		per_domain[rule_class.domain][rule_name] = rule_config
+	return per_domain
+
+
+def create_rules_from_config(config: dict, domain: Optional[LintDomain] = None) -> tuple:
+	"""
+	Create rule instances for every registered rule (of one domain, when given).
 
 	All registered rules run by default. The user's config provides per-rule
 	overrides: `kwargs` to customize behavior, `enabled: false` to opt out, or
@@ -402,7 +486,10 @@ def create_rules_from_config(config: dict) -> tuple:
 	--fix-rules on the CLI overrides allow_fix (applied in setup_linter).
 
 	Args:
-		config: Configuration dictionary from config file (may be empty)
+		config: Rule-config dictionary (already routed per domain by
+			_split_config_by_domain when ``domain`` is given; may be empty)
+		domain: Restrict to rules of this domain. None (legacy callers) means every
+			registered rule; alias/unknown keys are then reported here.
 
 	Returns:
 		Tuple of (rules, statuses):
@@ -414,16 +501,21 @@ def create_rules_from_config(config: dict) -> tuple:
 						  source : "config" if user supplied kwargs, else "defaults"
 						  detail : optional error/skip detail (str or None)
 	"""
-	# Always-on warning for config keys that don't resolve to a known rule.
-	for rule_name, rule_config in config.items():
-		if rule_name.startswith("_") or not isinstance(rule_config, dict):
-			continue
-		if rule_name not in RULES_MAP:
-			print(f"Unknown rule in config: {rule_name}")
+	if domain is None:
+		# Whole-registry callers: resolve aliases and report unknown rules here.
+		config = _resolve_alias_keys(config)
+		for rule_name, rule_config in config.items():
+			if rule_name.startswith("_") or not isinstance(rule_config, dict):
+				continue
+			if rule_name not in RULES_MAP:
+				print(f"Unknown rule in config: {rule_name}")
+		candidates = dict(RULES_MAP)
+	else:
+		candidates = get_rules_for_domain(domain)
 
 	rules = []
 	statuses = []
-	for rule_name, rule_class in RULES_MAP.items():
+	for rule_name, rule_class in candidates.items():
 		rule_config = config.get(rule_name, {})
 		if not isinstance(rule_config, dict):
 			rule_config = {}
@@ -471,7 +563,7 @@ def create_rules_from_config(config: dict) -> tuple:
 	return rules, statuses
 
 
-def _print_rule_breakdown(statuses: list, config_path: str) -> None:
+def _print_rule_breakdown(statuses: list, config_path: str, domain_label: Optional[str] = None) -> None:
 	"""
 	Print a per-rule breakdown showing each registered rule's source.
 
@@ -485,7 +577,8 @@ def _print_rule_breakdown(statuses: list, config_path: str) -> None:
 	errored = [s for s in statuses if s["state"] == "error"]
 
 	name_width = max((len(s["name"]) for s in statuses), default=0)
-	print(f"✅ Loaded {len(loaded)} rules:")
+	scope = f" for {domain_label} files" if domain_label else ""
+	print(f"✅ Loaded {len(loaded)} rules{scope}:")
 	for status in loaded:
 		source = f"config: {config_path}" if status["source"] == "config" else "defaults"
 		extra = f", {status['detail']}" if status["detail"] else ""
@@ -508,33 +601,52 @@ def get_view_file(file_path: Path) -> Dict[str, Any]:
 		return {}
 
 
-def collect_files(args, whitelist: set) -> tuple[List[Path], List[Path]]:
+def flatten_collected_files(files_by_domain: Dict[LintDomain, List[Path]]) -> List[Path]:
+	"""All collected paths across domains, in domain then collection order."""
+	return [path for paths in files_by_domain.values() for path in paths]
+
+
+def collect_files(args, whitelist: set) -> tuple[Dict[LintDomain, List[Path]], List[Path]]:
 	"""
-	Collect files to process based on arguments.
+	Collect files to process, grouped by the lint domain each file belongs to.
+
+	Explicit paths are classified through the domain registry; a path no domain
+	recognises is reported and skipped. In glob mode the user's globs (or, on a bare
+	run, the union of every domain's default globs) are expanded and filtered the
+	same way.
 
 	Args:
 		args: Command-line arguments
 		whitelist: Set of absolute file paths to ignore
 
 	Returns:
-		Tuple of (files_to_process, whitelisted_files)
+		Tuple of (files_by_domain, whitelisted_files). ``files_by_domain`` only has
+		keys for domains that received at least one file.
 	"""
-	files_to_process = []
+	files_by_domain: Dict[LintDomain, List[Path]] = {}
 	files_ignored = []
 	seen: set = set()
 
-	def record(file_path: Path):
-		"""Whitelist-check and de-duplicate a resolved file, recording it appropriately."""
+	def record(file_path: Path, *, warn_unknown: bool):
+		"""Classify, whitelist-check and de-duplicate a file, recording it under its domain."""
 		abs_path = file_path.resolve()
 		if abs_path in seen:
 			return
 		seen.add(abs_path)
+		spec = classify_file(file_path)
+		if spec is None:
+			if warn_unknown:
+				print(
+					f"⚠️  Skipped {file_path}: not a recognised Ignition resource "
+					f"(view.json, script-python code.py)"
+				)
+			return
 		if abs_path in whitelist:
 			files_ignored.append(file_path)
 			# Always print when a file is skipped (not just verbose mode)
 			print(f"🔒 Skipped (whitelisted): {file_path}")
 			return
-		files_to_process.append(file_path)
+		files_by_domain.setdefault(spec.domain, []).append(file_path)
 
 	# Explicit file paths arrive via two argparse destinations that MUST be merged, not
 	# treated as either/or. When pre-commit invokes `--files PATH1 PATH2 PATH3`, argparse
@@ -565,24 +677,26 @@ def collect_files(args, whitelist: set) -> tuple[List[Path], List[Path]]:
 			if not file_path.exists():
 				print(f"Warning: File {filename} does not exist")
 				continue
-			record(file_path)
+			record(file_path, warn_unknown=True)
 	else:
-		# Glob mode: args.files is a comma-separated list of globs, or the default.
-		patterns = args.files if args.files else "**/view.json"
+		# Glob mode: args.files is a comma-separated list of globs, or every domain's defaults.
+		patterns = args.files if args.files else ",".join(default_globs())
 		for file_pattern in patterns.split(","):
 			pattern = file_pattern.strip()
+			if not pattern:
+				continue
 			for file_path_str in glob.glob(pattern, recursive=True):
 				file_path = Path(file_path_str)
-				# Only include view.json files specifically
-				if not file_path.exists() or file_path.name != "view.json":
+				if not file_path.is_file():
 					continue
-				record(file_path)
+				# Globs may match anything; only files some domain recognises are linted.
+				record(file_path, warn_unknown=False)
 
 	# Print summary if verbose mode
 	if files_ignored and args.verbose:
 		print(f"\n📊 Whitelist Summary: {len(files_ignored)} files skipped")
 
-	return files_to_process, files_ignored
+	return files_by_domain, files_ignored
 
 
 def print_rule_violations(rule_name: str, violations: list, custom_formatted_output: str = None):
@@ -697,9 +811,9 @@ def print_statistics(file_path: Path, stats: Dict[str, Any], verbose: bool = Fal
 				print(f"    {rule_name}: {coverage['applicable_node_count']} nodes ({target_types})")
 
 
-def print_rule_analysis(lint_engine: LintEngine, flattened_json: Dict[str, Any]):
-	"""Print detailed rule impact analysis."""
-	analysis = lint_engine.analyze_rule_impact(flattened_json)
+def print_rule_analysis(lint_engine: LintEngine):
+	"""Print detailed rule impact analysis for the engine's most recently loaded file."""
+	analysis = lint_engine.analyze_rule_impact()
 
 	print("\n🔍 Rule Impact Analysis:")
 	for rule_name, rule_data in analysis.items():
@@ -716,9 +830,9 @@ def print_rule_analysis(lint_engine: LintEngine, flattened_json: Dict[str, Any])
 		print()
 
 
-def print_debug_nodes(lint_engine: LintEngine, flattened_json: Dict[str, Any], debug_node_types: List[str]):
-	"""Print debug information for specific node types."""
-	debug_nodes = lint_engine.debug_nodes(flattened_json, debug_node_types or [])
+def print_debug_nodes(lint_engine: LintEngine, debug_node_types: List[str]):
+	"""Print debug information for specific node types of the most recently loaded file."""
+	debug_nodes = lint_engine.debug_nodes(None, debug_node_types or [])
 	if debug_node_types:
 		print(f"\n🔧 Debug info for node types: {', '.join(debug_node_types)}")
 	else:
@@ -733,10 +847,37 @@ def print_debug_nodes(lint_engine: LintEngine, flattened_json: Dict[str, Any], d
 		print(f"     ... and {len(debug_nodes) - 10} more nodes")
 
 
-def setup_linter(args) -> LintEngine:
-	"""Set up the linting engine with rules from configuration."""
+def _apply_fix_rules_override(args, rules: list) -> None:
+	"""Explicit --fix-rules overrides allow_fix=false for the rules it names."""
+	fix_rules_arg = getattr(args, 'fix_rules', None)
+	if not fix_rules_arg:
+		return
+	requested = {resolve_rule_name(name.strip())[0] for name in fix_rules_arg.split(',') if name.strip()}
+	loaded_names = {rule.__class__.__name__ for rule in rules}
+	for rule in rules:
+		if rule.__class__.__name__ in requested and hasattr(rule, 'allow_fix'):
+			rule.allow_fix = True
+	for name in sorted(requested - loaded_names):
+		print(f"⚠️  --fix-rules: '{name}' does not match any loaded rule; its fixes cannot apply")
+	for name in sorted(requested & loaded_names):
+		rule = next(r for r in rules if r.__class__.__name__ == name)
+		if not hasattr(rule, 'allow_fix'):
+			print(f"⚠️  --fix-rules: '{name}' does not support auto-fix")
+
+
+def setup_linter(args, domains: List[LintDomain]) -> Dict[LintDomain, LintEngine]:
+	"""
+	Build one LintEngine per domain that has files to lint.
+
+	Exits when the configuration cannot be read, or when no domain ends up with any
+	rule. A domain with zero configured rules is skipped with a note when other
+	domains still have rules.
+	"""
+	engines: Dict[LintDomain, LintEngine] = {}
+
 	if args.stats_only:
-		lint_engine = LintEngine([], debug_output_dir=args.debug_output)
+		for domain in domains:
+			engines[domain] = LintEngine([], debug_output_dir=args.debug_output)
 	else:
 		config = load_config(args.config)
 		if config is None:
@@ -744,44 +885,91 @@ def setup_linter(args) -> LintEngine:
 			sys.exit(1)
 
 		print(f"🔧 Loaded configuration from {args.config}")
-		rules, rule_statuses = create_rules_from_config(config)
-		if not rules:
+		sections = _split_config_by_domain(config)
+
+		for domain in domains:
+			display_name = get_spec(domain).display_name
+			rules, rule_statuses = create_rules_from_config(sections.get(domain, {}), domain)
+			if not rules:
+				print(f"ℹ️  No rules configured for {display_name} files; skipping that domain")
+				continue
+			_apply_fix_rules_override(args, rules)
+			engines[domain] = LintEngine(rules, debug_output_dir=args.debug_output)
+			if args.verbose:
+				_print_rule_breakdown(rule_statuses, args.config, display_name)
+
+		if not engines:
 			print("❌ No valid rules configured")
 			sys.exit(1)
-
-		# Explicit --fix-rules overrides allow_fix=false for the rules it names.
-		fix_rules_arg = getattr(args, 'fix_rules', None)
-		if fix_rules_arg:
-			requested = {name.strip() for name in fix_rules_arg.split(',')}
-			loaded_names = {rule.__class__.__name__ for rule in rules}
-			for rule in rules:
-				if rule.__class__.__name__ in requested and hasattr(rule, 'allow_fix'):
-					rule.allow_fix = True
-			for name in sorted(requested - loaded_names):
-				print(
-					f"⚠️  --fix-rules: '{name}' does not match any loaded rule; its fixes cannot apply"
-				)
-			for name in sorted(requested & loaded_names):
-				rule = next(r for r in rules if r.__class__.__name__ == name)
-				if not hasattr(rule, 'allow_fix'):
-					print(f"⚠️  --fix-rules: '{name}' does not support auto-fix")
-
-		lint_engine = LintEngine(rules, debug_output_dir=args.debug_output)
-
-		if args.verbose:
-			_print_rule_breakdown(rule_statuses, args.config)
 
 	# Inform about debug output
 	if args.debug_output:
 		print(f"🔍 Debug output will be saved to: {args.debug_output}")
 
-	return lint_engine
+	return engines
+
+
+_FIX_UNAVAILABLE_NOTED: set = set()
+
+
+def _fix_rule_filter(args) -> Optional[List[str]]:
+	"""Canonical rule names from --fix-rules, or None when not given."""
+	fix_rules_arg = getattr(args, 'fix_rules', None)
+	if not fix_rules_arg:
+		return None
+	return [resolve_rule_name(name.strip())[0] for name in fix_rules_arg.split(',') if name.strip()]
+
+
+def _note_fix_unavailable(spec: DomainSpec) -> None:
+	"""Print, once per domain per run, that fix mode does nothing for non-JSON files."""
+	if spec.domain not in _FIX_UNAVAILABLE_NOTED:
+		_FIX_UNAVAILABLE_NOTED.add(spec.domain)
+		print(f"ℹ️  Auto-fix is not available for {spec.display_name} files; linting only")
+
+
+def _handle_fixes(lint_results, loaded, file_path: Path, spec: DomainSpec, *, lint_engine: LintEngine, args):
+	"""
+	Apply or preview fixes for a file and return the results to report.
+
+	Fixes are applied BEFORE reporting so the reported results reflect the post-fix
+	state rather than the violations we just fixed (see issue #94). Only JSON-backed
+	domains support fixes; others get a one-time note per run.
+	"""
+	if loaded.json_data is None:
+		_note_fix_unavailable(spec)
+		return lint_results
+
+	dry_run = getattr(args, 'fix_dry_run', False)
+	safe_only = not getattr(args, 'fix_unsafe', False)
+	rule_filter = _fix_rule_filter(args)
+
+	if dry_run:
+		# Dry run: nothing is mutated, so the pre-fix results stand.
+		# Report them first, then preview what would be fixed.
+		report_file_results(lint_results, lint_engine)
+		print_fix_dry_run(lint_results.fixes, file_path, safe_only, rule_filter)
+		return None
+
+	# Apply fixes, then re-evaluate ONCE on the fixed document to produce accurate
+	# output. The re-evaluation collects no fixes (fix_mode=False) and never calls
+	# apply_fixes again, so there is no multi-pass fix loop.
+	fix_engine = FixEngine(PathTranslator(loaded.json_data))
+	fix_result = fix_engine.apply_fixes(lint_results.fixes, safe_only=safe_only, rule_filter=rule_filter)
+	apply_and_report_fixes(fix_result, loaded.json_data, file_path)
+	if fix_result.applied_count > 0:
+		_, lint_results = lint_engine.process_file(file_path, spec, enable_timing=False, fix_mode=False)
+	return lint_results
 
 
 def process_single_file(
-	file_path: Path, lint_engine: LintEngine, args, timer: Optional[PerformanceTimer] = None
+	file_path: Path, spec: DomainSpec, lint_engine: LintEngine, args, timer: Optional[PerformanceTimer] = None
 ) -> tuple[int, int, Optional[FileTimings], Optional[Any]]:
-	"""Process a single view file and return the warning and error counts plus lint results."""
+	"""
+	Lint one file of any domain and return (warnings, errors, timings, lint_results).
+
+	The domain spec loads the file; everything after that is generic. Fix handling is
+	gated on the loader having produced a JSON document, never on the domain's name.
+	"""
 	if not file_path.exists():
 		print(f"⚠️  File {file_path} does not exist, skipping")
 		return 0, 0, None, None
@@ -789,131 +977,76 @@ def process_single_file(
 	# Print file header before any processing
 	print(f"\n📄 Evaluating file:\n    {file_path}")
 
-	# Initialize timers if profiling is enabled
 	file_timer = PerformanceTimer() if timer else None
-	file_read_ms = 0.0
-	flatten_ms = 0.0
-	model_build_ms = 0.0
-	rule_exec_ms = 0.0
-
-	# Start overall file timing
 	if file_timer:
 		file_timer.start()
-
-	# Time file reading
-	if file_timer:
 		timer.start()
-	json_data = read_json_file(file_path)
-	if file_timer:
-		file_read_ms = timer.stop()
 
-	if not json_data:
-		print(f"❌ Failed to read file, skipping")
-		return 0, 0, None, None
+	# --fix-unsafe (and --fix-dry-run) imply fix mode on their own, so the flags act as
+	# a choice between "safe only" (--fix) and "include unsafe" (--fix-unsafe).
+	fix_mode = not args.stats_only and (
+		getattr(args, 'fix_dry_run', False) or getattr(args, 'fix', False) or
+		getattr(args, 'fix_unsafe', False)
+	)
 
-	# Time JSON flattening
-	if file_timer:
-		timer.start()
-	flattened_json = flatten_json(json_data)
-	if file_timer:
-		flatten_ms = timer.stop()
-
-	if not flattened_json:
-		print(f"❌ Failed to parse file, skipping")
-		return 0, 0, None, None
-
-	# Time model building
-	if file_timer:
-		timer.start()
-	stats = lint_engine.get_model_statistics(flattened_json)
-	if file_timer:
-		model_build_ms = timer.stop()
-
-	print_statistics(file_path, stats, args.verbose or args.stats_only)
-
-	# Show rule analysis if requested
-	if args.analyze_rules and not args.stats_only:
-		print_rule_analysis(lint_engine, flattened_json)
-
-	# Show debug node info if requested
-	if args.debug_nodes is not None:
-		print_debug_nodes(lint_engine, flattened_json, args.debug_nodes)
-
-	# Run linting (unless stats-only mode)
-	file_timings = None
-	if not args.stats_only:
-		# Set up fix context if fix mode is active. --fix-unsafe (and
-		# --fix-dry-run) imply fix mode on their own, so the flags act as a
-		# choice between "safe only" (--fix) and "include unsafe" (--fix-unsafe)
-		# rather than requiring --fix to be passed alongside.
-		dry_run = getattr(args, 'fix_dry_run', False)
-		fix_mode = dry_run or getattr(args, 'fix', False) or getattr(args, 'fix_unsafe', False)
-		path_translator = None
-		if fix_mode:
-			path_translator = PathTranslator(json_data)
-
-		# Time rule execution
-		if file_timer:
-			timer.start()
-		lint_results = lint_engine.process(
-			flattened_json, source_file_path=str(file_path), enable_timing=bool(file_timer),
-			json_data=json_data if fix_mode else None, path_translator=path_translator
+	try:
+		loaded, lint_results = lint_engine.process_file(
+			file_path, spec, enable_timing=bool(file_timer), fix_mode=fix_mode
 		)
-		if file_timer:
-			rule_exec_ms = timer.stop()
+	except (OSError, ValueError, json.JSONDecodeError) as e:
+		print(f"❌ Failed to read file, skipping: {e}")
+		return 0, 0, None, None
+	load_and_rules_ms = timer.stop() if file_timer else 0.0
 
-		# Preserve the first-pass rule timings; any post-fix re-evaluation runs
-		# without timing so it would otherwise clobber the profiling record.
-		rule_timings = lint_results.rule_timings
+	if not loaded.nodes and spec.domain == LintDomain.PERSPECTIVE and not loaded.flattened_json:
+		print("❌ Failed to parse file, skipping")
+		return 0, 0, None, None
 
-		# Handle fixes if fix mode is active and there are fixes. Fixes are
-		# applied BEFORE reporting so the reported results reflect the post-fix
-		# state rather than the violations we just fixed (see issue #94).
-		if fix_mode and lint_results.fixes:
-			fix_engine = FixEngine(path_translator)
-			safe_only = not getattr(args, 'fix_unsafe', False)
-			rule_filter = None
-			if getattr(args, 'fix_rules', None):
-				rule_filter = [r.strip() for r in args.fix_rules.split(',')]
+	print_statistics(file_path, lint_engine.get_model_statistics(loaded), args.verbose or args.stats_only)
 
-			if dry_run:
-				# Dry run: nothing is mutated, so the pre-fix results stand.
-				# Report them first, then preview what would be fixed.
-				file_warnings, file_errors = report_file_results(lint_results, lint_engine)
-				print_fix_dry_run(lint_results.fixes, file_path, safe_only, rule_filter)
-			else:
-				# Apply fixes, then re-evaluate ONCE on the fixed view to produce
-				# accurate output. The re-evaluation collects no fixes
-				# (json_data=None) and never calls apply_fixes again, so there is
-				# no multi-pass fix loop.
-				fix_result = fix_engine.apply_fixes(
-					lint_results.fixes, safe_only=safe_only, rule_filter=rule_filter
-				)
-				apply_and_report_fixes(fix_result, json_data, file_path)
+	if args.analyze_rules and not args.stats_only:
+		print_rule_analysis(lint_engine)
+	if args.debug_nodes is not None:
+		print_debug_nodes(lint_engine, args.debug_nodes)
 
-				if fix_result.applied_count > 0:
-					flattened_json = flatten_json(json_data)
-					lint_results = lint_engine.process(
-						flattened_json, source_file_path=str(file_path), enable_timing=False,
-						json_data=None, path_translator=None
-					)
+	if args.stats_only:
+		return 0, 0, None, None
 
-				file_warnings, file_errors = report_file_results(lint_results, lint_engine)
+	# Preserve the first-pass rule timings; any post-fix re-evaluation runs
+	# without timing so it would otherwise clobber the profiling record.
+	rule_timings = lint_results.rule_timings
+
+	if fix_mode and loaded.json_data is None:
+		_note_fix_unavailable(spec)
+
+	if fix_mode and lint_results.fixes:
+		reported = _handle_fixes(lint_results, loaded, file_path, spec, lint_engine=lint_engine, args=args)
+		if reported is None:
+			# Dry run already printed the pre-fix results.
+			file_warnings = sum(len(v) for v in lint_results.warnings.values())
+			file_errors = sum(len(v) for v in lint_results.errors.values())
 		else:
+			lint_results = reported
 			file_warnings, file_errors = report_file_results(lint_results, lint_engine)
+	else:
+		file_warnings, file_errors = report_file_results(lint_results, lint_engine)
 
-		# Create timing record if profiling
-		if file_timer:
-			total_duration = file_timer.stop()
-			file_timings = FileTimings(
-				file_path=str(file_path), total_duration_ms=total_duration, file_read_ms=file_read_ms,
-				json_flatten_ms=flatten_ms, model_build_ms=model_build_ms,
-				rule_execution_ms=rule_exec_ms, rule_timings=rule_timings
-			)
+	file_timings = None
+	if file_timer:
+		load_ms = loaded.timings
+		rule_exec_ms = sum(rule_timings.values())
+		model_build_ms = load_ms.get('model_build_ms')
+		if model_build_ms is None:
+			# Loader without JSON phases: attribute the whole load to model building.
+			model_build_ms = max(load_and_rules_ms - rule_exec_ms, 0.0)
+		file_timings = FileTimings(
+			file_path=str(file_path), total_duration_ms=file_timer.stop(),
+			file_read_ms=load_ms.get('file_read_ms',
+							0.0), json_flatten_ms=load_ms.get('json_flatten_ms', 0.0),
+			model_build_ms=model_build_ms, rule_execution_ms=rule_exec_ms, rule_timings=rule_timings
+		)
 
-		return file_warnings, file_errors, file_timings, lint_results
-
-	return 0, 0, None, None
+	return file_warnings, file_errors, file_timings, lint_results
 
 
 def format_rule_violations_for_file(rule_name: str, violations: list, custom_formatted_output: str = None) -> str:
@@ -953,17 +1086,11 @@ def format_rule_violations_for_file(rule_name: str, violations: list, custom_for
 
 def write_results_file(
 	output_path: Path, results: List[Dict], total_warnings: int, total_errors: int, processed_files: int,
-	files_with_issues: int, finalize_results=None, whitelisted_files: List[Path] = None, lint_engine=None
+	files_with_issues: int, finalize_results=None, whitelisted_files: List[Path] = None
 ):
 	"""Write linting results to an output file with detailed warnings and errors."""
 	# Ensure parent directory exists
 	output_path.parent.mkdir(parents=True, exist_ok=True)
-
-	# Get rule instances for custom formatting
-	rule_instances = {}
-	if lint_engine:
-		for rule in lint_engine.rules:
-			rule_instances[rule.__class__.__name__] = rule
 
 	with open(output_path, 'w', encoding='utf-8') as f:
 		f.write("=" * LINE_WIDTH + "\n")
@@ -1343,9 +1470,54 @@ def print_final_summary(
 		sys.exit(0)
 
 
+def _report_finalize_results(finalize_results: LintResults, file_count: int) -> tuple[int, int]:
+	"""
+	Print batch-finalization results and return (warnings, errors) counted.
+
+	Only non-empty when rules ran in batch mode. With a single file the results are
+	shown in the standard per-file format (the file header was already printed);
+	with several files they get their own section.
+	"""
+	if not (finalize_results.warnings or finalize_results.errors):
+		return 0, 0
+
+	warning_count = sum(len(w) for w in finalize_results.warnings.values())
+	error_count = sum(len(e) for e in finalize_results.errors.values())
+
+	if file_count == 1:
+		if warning_count > 0:
+			print(f"\n⚠️ Found {warning_count} warnings:")
+			for rule_name, warning_list in finalize_results.warnings.items():
+				if warning_list:
+					print(f"  📋 {rule_name} (warning):")
+					for warning in warning_list:
+						print(f"    • {warning}")
+		if error_count > 0:
+			print(f"\n❌ Found {error_count} errors:")
+			for rule_name, error_list in finalize_results.errors.items():
+				if error_list:
+					print(f"  📋 {rule_name} (error):")
+					for error in error_list:
+						print(f"    • {error}")
+	else:
+		print("\n" + "=" * 80)
+		print("📦 Batch Rule Results (All Files)")
+		print("=" * 80)
+		for rule_name, warning_list in finalize_results.warnings.items():
+			for warning in warning_list:
+				print(f"⚠️ {rule_name}: {warning}")
+		for rule_name, error_list in finalize_results.errors.items():
+			for error in error_list:
+				print(f"❌ {rule_name}: {error}")
+
+	return warning_count, error_count
+
+
 def main():
-	"""Main function to lint Ignition view.json files for style inconsistencies."""
-	parser = argparse.ArgumentParser(description="Lint Ignition JSON files")
+	"""Main function to lint Ignition resource files for style inconsistencies."""
+	parser = argparse.ArgumentParser(
+		description="Lint Ignition Perspective views and project script library modules"
+	)
 	parser.add_argument(
 		"--version",
 		action="version",
@@ -1361,8 +1533,9 @@ def main():
 		default=None,
 		help=(
 			"A SINGLE value: one file, a glob, or a comma-separated list of them "
-			"(e.g. --files \"**/view.json\" or --files \"a/view.json,b/view.json\"; "
-			"default: **/view.json). To lint several files, prefer positional arguments "
+			"(e.g. --files \"**/view.json\", --files \"**/script-python/**/code.py\" or "
+			"--files \"a/view.json,b/view.json\"; default: **/view.json). To lint several files, "
+			"prefer positional arguments "
 			"(ignition-lint FILE1 FILE2 ...). Passing multiple space-separated paths after "
 			"--files is deprecated."
 		),
@@ -1400,7 +1573,7 @@ def main():
 	parser.add_argument(
 		"filenames",
 		nargs="*",
-		help="Filenames to check (from pre-commit)",
+		help="Files to check: Perspective view.json and/or script-python code.py (pre-commit passes these)",
 	)
 	parser.add_argument(
 		"--timing-output",
@@ -1479,6 +1652,10 @@ def main():
 
 	# Clean up old debug files from previous runs
 	cleanup_debug_files()
+	if args.debug_output:
+		removed = cleanup_debug_output_dir(args.debug_output)
+		if removed and args.verbose:
+			print(f"🧹 Removed {removed} stale debug-output entries from {args.debug_output}")
 
 	# Load whitelist if specified and not disabled
 	whitelist = set()
@@ -1491,17 +1668,20 @@ def main():
 	elif args.no_whitelist and args.verbose:
 		print("ℹ️  Whitelist disabled via --no-whitelist")
 
-	# Set up the linting engine
-	lint_engine = setup_linter(args)
-
-	# Collect files to process (excludes whitelisted files)
-	file_paths, whitelisted_files = collect_files(args, whitelist)
+	# Collect files to process (excludes whitelisted files), grouped by domain
+	files_by_domain, whitelisted_files = collect_files(args, whitelist)
+	file_paths = flatten_collected_files(files_by_domain)
 	if not file_paths:
 		print("❌ No files specified or found")
 		sys.exit(0)
 
+	# One engine per domain that has files
+	engines = setup_linter(args, list(files_by_domain))
+
 	if args.verbose:
 		print(f"📁 Processing {len(file_paths)} files")
+		for domain, paths in files_by_domain.items():
+			print(f"   • {get_spec(domain).display_name}: {len(paths)}")
 
 	# Initialize timing collector if timing output is requested
 	timing_collector = TimingCollector() if args.timing_output else None
@@ -1518,85 +1698,48 @@ def main():
 	processed_files = 0
 	results_buffer = []  # Collect results for file output
 
-	for file_path in file_paths:
-		file_warnings, file_errors, file_timings, lint_results = process_single_file(
-			file_path, lint_engine, args, performance_timer
-		)
+	for domain, domain_paths in files_by_domain.items():
+		if domain not in engines:
+			continue
+		spec = get_spec(domain)
+		for file_path in domain_paths:
+			file_warnings, file_errors, file_timings, lint_results = process_single_file(
+				file_path, spec, engines[domain], args, performance_timer
+			)
 
-		# Track timing if enabled
-		if timing_collector and file_timings:
-			timing_collector.add_file_timing(file_timings)
+			# Track timing if enabled
+			if timing_collector and file_timings:
+				timing_collector.add_file_timing(file_timings)
 
-		# Collect results for output file if specified
-		if args.results_output and not args.stats_only:
-			results_buffer.append({
-				'file': str(file_path),
-				'warnings': file_warnings,
-				'errors': file_errors,
-				'lint_results': lint_results  # Include detailed messages
-			})
+			# Collect results for output file if specified
+			if args.results_output and not args.stats_only:
+				results_buffer.append({
+					'file': str(file_path),
+					'warnings': file_warnings,
+					'errors': file_errors,
+					'lint_results': lint_results  # Include detailed messages
+				})
 
-		# All functions now return tuples, no need to check for -1
-		processed_files += 1
-		total_warnings += file_warnings
-		total_errors += file_errors
-		if file_warnings > 0 or file_errors > 0:
-			files_with_issues += 1
+			# All functions now return tuples, no need to check for -1
+			processed_files += 1
+			total_warnings += file_warnings
+			total_errors += file_errors
+			if file_warnings > 0 or file_errors > 0:
+				files_with_issues += 1
 
-	# Finalize batch rules (e.g., PylintScriptRule in batch mode)
-	# NOTE: In non-batch mode (default), rules process per-file and finalize() returns empty results
-	# This section only produces output for rules running in batch mode (processing all files together)
+	# Finalize batch rules (e.g., PerspectiveScriptPylintRule in batch mode) across every engine.
+	# NOTE: In non-batch mode (default), rules process per-file and finalize() returns empty results.
 	finalize_results = None
 	if not args.stats_only:
-		finalize_results = lint_engine.finalize_batch_rules(enable_timing=bool(performance_timer))
-
-		# Process finalization results (only non-empty when rules run in batch mode)
-		if finalize_results.warnings or finalize_results.errors:
-			finalize_warning_count = sum(len(w) for w in finalize_results.warnings.values())
-			finalize_error_count = sum(len(e) for e in finalize_results.errors.values())
-
-			# If only one file was processed, show batch results in standard format
-			# (File path already shown in file header)
-			if len(file_paths) == 1:
-				# Print warnings
-				if finalize_warning_count > 0:
-					print(f"\n⚠️ Found {finalize_warning_count} warnings:")
-					for rule_name, warning_list in finalize_results.warnings.items():
-						if warning_list:
-							print(f"  📋 {rule_name} (warning):")
-							for warning in warning_list:
-								print(f"    • {warning}")
-								total_warnings += 1
-
-				# Print errors
-				if finalize_error_count > 0:
-					print(f"\n❌ Found {finalize_error_count} errors:")
-					for rule_name, error_list in finalize_results.errors.items():
-						if error_list:
-							print(f"  📋 {rule_name} (error):")
-							for error in error_list:
-								print(f"    • {error}")
-								total_errors += 1
-			else:
-				# Multiple files: show batch results in separate section
-				print("\n" + "=" * 80)
-				print("📦 Batch Rule Results (All Files)")
-				print("=" * 80)
-
-				# Print warnings and errors
-				for rule_name, warning_list in finalize_results.warnings.items():
-					for warning in warning_list:
-						print(f"⚠️ {rule_name}: {warning}")
-						total_warnings += 1
-
-				for rule_name, error_list in finalize_results.errors.items():
-					for error in error_list:
-						print(f"❌ {rule_name}: {error}")
-						total_errors += 1
-
-			# Update files_with_issues count if finalization found issues
-			if finalize_results.has_errors or finalize_results.warnings:
-				files_with_issues = max(files_with_issues, 1)  # At least one file had issues
+		finalize_results = merge_lint_results([
+			engine.finalize_batch_rules(enable_timing=bool(performance_timer))
+			for engine in engines.values()
+		])
+		finalize_warnings, finalize_errors = _report_finalize_results(finalize_results, len(file_paths))
+		total_warnings += finalize_warnings
+		total_errors += finalize_errors
+		if finalize_warnings or finalize_errors:
+			files_with_issues = max(files_with_issues, 1)  # At least one file had issues
 
 	# Stop timing if enabled
 	if timing_collector:
@@ -1614,7 +1757,7 @@ def main():
 		results_path = make_unique_output_path(Path(args.results_output))
 		write_results_file(
 			results_path, results_buffer, total_warnings, total_errors, processed_files, files_with_issues,
-			finalize_results, whitelisted_files, lint_engine
+			finalize_results, whitelisted_files
 		)
 		print("\n" + f"📝 Results written to: {results_path}")
 
