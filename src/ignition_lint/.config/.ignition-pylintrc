@@ -94,11 +94,15 @@ disable=
         using-f-string-in-unsupported-version,
         f-string-without-interpolation,
         raise-missing-from,
+        # split/rsplit take maxsplit positionally only in Jython 2.7; the suggested maxsplit= kwarg is a TypeError
+        use-maxsplit-arg,
 
         # ========================================
         # Ignition-specific - dynamic module/member access
         # ========================================
         c-extension-no-member,
+        # ignition-lint aggregates every script of a view into one file, so imports are legitimately not at the top
+        import-outside-toplevel,
         import-error,
         import-self,
         no-member,
