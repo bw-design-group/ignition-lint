@@ -103,6 +103,8 @@ Available node types:
 - `message_handler`
 - `custom_method`
 - `transform`
+- `property_change_script`
+- `view` — the view itself (name and parent folders, derived from the `view.json` location)
 
 ## Full example
 

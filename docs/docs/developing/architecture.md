@@ -72,6 +72,8 @@ src/ignition_lint/model/node_types.py
 | `CUSTOM_METHOD` | `CustomMethodScript` | component custom methods |
 | `TRANSFORM` | `TransformScript` | script transforms inside bindings |
 | `EVENT_HANDLER` | `EventHandlerScript` | event handler scripts |
+| `PROPERTY_CHANGE_SCRIPT` | `PropertyChangeScript` | `onChange` scripts on custom/params properties |
+| `VIEW` | `View` | the view itself — name and folder path derived from the view.json location, not its contents |
 
 Convenience sets:
 
@@ -79,6 +81,8 @@ Convenience sets:
 - `ALL_SCRIPTS` — every script type
 
 Each node class adds type-specific attributes: `Component.name`, `ExpressionBinding.expression`, `TagBinding.tag_path` / `mode` / `references`, `ScriptNode.script` and `get_formatted_script()`, etc.
+
+The `View` node is the one node not built from the flattened JSON. `ViewModelBuilder.build_model` accepts the optional `source_file_path` of the view.json and derives the view name (the directory containing `view.json`) and its folder path (every directory between the views root and the view directory) from it — see `common/view_path.py`. The views root is the `views` directory under `com.inductiveautomation.perspective`, falling back to the first bare `views` segment. With no root in the path the view is still named after its directory, but no folders are reported. It is built last so it can also summarize the view: `root_container_type` (the root component's type), `default_size` (the view's `props.defaultSize`, when declared) and `node_counts` / `total_nodes` over every other modeled node. Callers that build a model without a path get an empty `view` collection.
 
 ## Phase 3 — Rule execution (visitor pattern)
 

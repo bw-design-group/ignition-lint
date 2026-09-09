@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- `view` node type — the object model now exposes the view itself, with `name` (the directory containing `view.json`), `folder_path` (every directory between the views root and the view directory) and `view_path` (`Folder/Sub/Name`). Derived from the file location rather than the JSON contents: the views root is `com.inductiveautomation.perspective/views`, falling back to the first bare `views` directory; with no root the view is still named after its directory but no folders are reported. The node also summarizes the view: `root_container_type` (the root component's type, e.g. `ia.container.flex`), `default_size` (the view's `props.defaultSize` as a `width`/`height` dict, each `None` when not declared; no platform default is assumed) and `node_counts` / `total_nodes` over every other modeled node. `LintEngine.process` already received the source path, so the node appears wherever a path is supplied (CLI, `--stats-only`, `--debug-nodes view`, `--analyze-rules`); callers that build a model without a path get an empty `view` collection.
+- `NamePatternRule` can target `"view"` to enforce a naming convention on the view name and every parent folder below the views root, e.g. PascalCase views and folders instead of Title Case. Folder violations are labelled `Folder name` and share the `view` configuration, including a `"view"` entry in `node_type_specific_rules` (use a `pattern` there to allow more than one style). Opt-in: existing configs targeting components are unaffected, and leaving `view` untargeted skips the checks. No auto-fix is offered for view or folder renames. `rule_config.json` gains a `view` example.
+- `tests/cases/ViewNaming/views/` fixtures with nested view folders exercising the new node type; golden files regenerated to include the `view` collection.
+
 ## [0.6.4] - 2026-08-31
 
 ### Added

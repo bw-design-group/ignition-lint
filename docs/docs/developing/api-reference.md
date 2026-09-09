@@ -254,6 +254,8 @@ from ignition_lint.model.node_types import (
     MessageHandlerScript,
     CustomMethodScript,
     TransformScript,
+    PropertyChangeScript,
+    View,
 )
 ```
 
@@ -274,6 +276,8 @@ from ignition_lint.model.node_types import (
 | `"message_handler"` | `MessageHandlerScript` |
 | `"custom_method"` | `CustomMethodScript` |
 | `"transform"` | `TransformScript` |
+| `"property_change_script"` | `PropertyChangeScript` |
+| `"view"` | `View` |
 
 ### Sets
 
@@ -308,6 +312,8 @@ Type-specific attributes (most common):
 | `CustomMethodScript` | `+ name`, `params` |
 | `TransformScript` | `+ binding_path` |
 | `EventHandlerScript` | `+ event_type`, `scope` |
+| `PropertyChangeScript` | `+ property_path` |
+| `View` | `name`, `folder_path` (list[str]), `view_path` (`Folder/Sub/Name`), `views_root_found`, `source_file`, `root_container_type` (e.g. `ia.container.flex`), `default_size` (`{"width", "height"}` from `props.defaultSize`; each `None` when not declared), `node_counts` (dict[str, int] by node type), `total_nodes` |
 
 `get_formatted_script()` on script nodes returns runnable Python with the appropriate indentation and (for custom methods) function definition.
 
