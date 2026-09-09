@@ -43,10 +43,11 @@ If all tests pass ✅, you're ready to start developing!
 
 ### What is ignition-lint?
 
-`ignition-lint` is a linting tool for Ignition Perspective views (JSON files). It validates:
+`ignition-lint` is a linting tool for Ignition projects — Perspective views (JSON files) and the project script library (`code.py` modules). It validates:
 - **Component naming conventions** (PascalCase, camelCase, snake_case, etc.)
 - **Polling intervals** in expression bindings
-- **Script quality** using pylint
+- **Script quality** using pylint, for both embedded view scripts and library modules
+- **Library package/module naming**
 - **Custom rules** you can create
 
 ### Test-First Philosophy
@@ -88,11 +89,15 @@ tests/
 │   ├── test_helpers.py                 # Helper functions
 │   └── mock_data.py                    # Mock data generators
 │
-├── cases/                              # Test view.json files
-│   ├── PascalCase/view.json            # Example with PascalCase naming
-│   ├── camelCase/view.json             # Example with camelCase naming
-│   ├── snake_case/view.json            # Example with snake_case naming
-│   └── ExpressionBindings/view.json    # Example with expression bindings
+├── cases/                              # Fixtures, one folder per lint domain (docker mounts each into the Designer)
+│   ├── views/                          # Perspective view.json fixtures
+│   │   ├── PascalCase/view.json        # Example with PascalCase naming
+│   │   ├── camelCase/view.json         # Example with camelCase naming
+│   │   └── ExpressionBindings/view.json
+│   └── scripting/                      # Project-library modules (mounted as package TestCases)
+│       ├── clean/code.py               # Passes LibraryScriptPylintRule
+│       ├── violations/code.py          # Predictable E/W/C/R pylint hits
+│       └── badModule_name/code.py      # LibraryNamePatternRule violation
 │
 ├── configs/                           # JSON test configurations
 │   ├── component_naming_tests.json     # Component naming test config
@@ -629,7 +634,8 @@ Use tags in configuration-driven tests to organize by:
 tests/unit/test_[rule_name].py           # Unit tests for specific rule
 tests/integration/test_[feature].py      # Integration tests for feature area
 tests/fixtures/[utility_name].py        # Shared utilities
-tests/cases/[scenario]/view.json         # Test view files
+tests/cases/views/[scenario]/view.json   # Perspective fixtures
+tests/cases/scripting/[Pkg]/code.py      # Script-library fixtures
 tests/configs/[rule]_tests.json         # Configuration-driven tests
 ```
 

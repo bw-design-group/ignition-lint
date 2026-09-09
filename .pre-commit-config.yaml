@@ -22,9 +22,15 @@ repos:
       # Quick pylint on changed files only
       - id: pylint-quick
         name: pylint (changed files only)
-        entry: pylint
+        # Run inside the poetry env so `ignition_lint` resolves to src/, not to a
+        # previously installed release (a system pylint reports no-name-in-module
+        # for every API added since that release).
+        entry: poetry run pylint
         language: system
         types: [python]
+        # Fixture scripts under tests/cases are Ignition (Jython 2.7) modules with
+        # intentional violations; they are linted by ignition-lint's own rules, not this hook.
+        exclude: ^tests/cases/
         args: [
           "--rcfile=.config/.pylintrc",
           "--msg-template=\"{path}({line}): [{obj}] {msg} ({symbol})\"",

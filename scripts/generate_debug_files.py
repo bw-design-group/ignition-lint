@@ -3,7 +3,7 @@
 """
 Generate debug files for test cases.
 
-This script processes all test cases in tests/cases/ and generates debug files
+This script processes all Perspective test cases in tests/cases/views/ and generates debug files
 (flattened JSON, model state, statistics) in tests/debug/cases/{case_name}/ to avoid
 conflicts with Ignition gateway overwriting files in the mounted test cases directory.
 
@@ -32,7 +32,7 @@ from ignition_lint.rules import RULES_MAP
 def get_test_cases() -> List[Path]:
 	"""Get all test case directories that contain view.json files."""
 	# From scripts directory, go up one level to repo root, then to tests/cases
-	cases_dir = Path(__file__).parent.parent / 'tests' / 'cases'
+	cases_dir = Path(__file__).parent.parent / 'tests' / 'cases' / 'views'
 	test_cases = []
 
 	for case_dir in cases_dir.iterdir():

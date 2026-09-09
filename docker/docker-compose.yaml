@@ -9,7 +9,10 @@ services:
     volumes:
       - ./ignition-data:/workdir
       - ./backups/gateway.gwbk:/restore.gwbk
-      - ../tests/cases:/workdir/projects/Testing/com.inductiveautomation.perspective/views/TestCases
+      # Test fixtures, one mount per lint domain, so packages/views authored in the Designer
+      # land in the repo (Perspective views as folder TestCases, library scripts as package TestCases)
+      - ../tests/cases/views:/workdir/projects/Testing/com.inductiveautomation.perspective/views/TestCases
+      - ../tests/cases/scripting:/workdir/projects/Testing/ignition/script-python/TestCases
     labels:
       traefik.enable: "true"
       traefik.hostname: "ignition-lint"
