@@ -10,6 +10,7 @@ conflicts with Ignition gateway overwriting files in the mounted test cases dire
 Usage:
   python scripts/generate_debug_files.py                    # Generate for all test cases
   python scripts/generate_debug_files.py PascalCase         # Generate for specific test case
+  python scripts/generate_debug_files.py "ViewNaming/views/PascalFolder/PascalView"  # Nested case (path under tests/cases)
   python scripts/generate_debug_files.py --clean            # Remove all debug directories
   python scripts/generate_debug_files.py --list             # List available test cases
 """
@@ -28,18 +29,21 @@ from ignition_lint.common.flatten_json import read_json_file, flatten_json
 from ignition_lint.linter import LintEngine
 from ignition_lint.rules import RULES_MAP
 
+CASES_DIR = Path(__file__).parent.parent / 'tests' / 'cases'
+
+
+def case_key(case_dir: Path) -> str:
+	"""
+	Identify a test case by its path relative to tests/cases, e.g. 'PascalCase' or
+	'ViewNaming/views/Title Case Folder/Title Case View'. Used for the debug directory,
+	the CLI argument, and the repo-relative source path handed to the model builder.
+	"""
+	return case_dir.relative_to(CASES_DIR).as_posix()
+
 
 def get_test_cases() -> List[Path]:
-	"""Get all test case directories that contain view.json files."""
-	# From scripts directory, go up one level to repo root, then to tests/cases
-	cases_dir = Path(__file__).parent.parent / 'tests' / 'cases'
-	test_cases = []
-
-	for case_dir in cases_dir.iterdir():
-		if case_dir.is_dir() and (case_dir / 'view.json').exists():
-			test_cases.append(case_dir)
-
-	return sorted(test_cases)
+	"""Get all test case directories (at any depth under tests/cases) that contain a view.json."""
+	return sorted(view_file.parent for view_file in CASES_DIR.rglob('view.json'))
 
 
 def create_lint_engine() -> LintEngine:
@@ -65,12 +69,13 @@ def create_lint_engine() -> LintEngine:
 def generate_debug_files_for_case(case_dir: Path, lint_engine: LintEngine) -> bool:
 	"""Generate debug files for a specific test case."""
 	view_file = case_dir / 'view.json'
-	# Create debug files in tests/debug/cases/{case_name}/ instead of in the test case directory
+	key = case_key(case_dir)
+	# Create debug files in tests/debug/cases/{key}/ instead of in the test case directory
 	repo_root = Path(__file__).parent.parent
-	debug_dir = repo_root / 'tests' / 'debug' / 'cases' / case_dir.name
+	debug_dir = repo_root / 'tests' / 'debug' / 'cases' / key
 
 	if not view_file.exists():
-		print(f"❌ No view.json found in {case_dir.name}")
+		print(f"❌ No view.json found in {key}")
 		return False
 
 	try:
@@ -78,9 +83,11 @@ def generate_debug_files_for_case(case_dir: Path, lint_engine: LintEngine) -> bo
 		json_data = read_json_file(view_file)
 		flattened_json = flatten_json(json_data)
 
-		# Build the model
+		# Build the model. The source path is given relative to the repo root so the
+		# View node's name/folder path is machine-independent (mirrors test_golden_files.py).
+		golden_source_path = (Path('tests', 'cases') / key / 'view.json').as_posix()
 		lint_engine.flattened_json = flattened_json
-		lint_engine.view_model = lint_engine.get_view_model()
+		lint_engine.view_model = lint_engine.get_view_model(golden_source_path)
 
 		# Create debug directory (including parent directories)
 		debug_dir.mkdir(parents=True, exist_ok=True)
@@ -95,16 +102,16 @@ def generate_debug_files_for_case(case_dir: Path, lint_engine: LintEngine) -> bo
 			json.dump(serialized_model, f, indent=2, sort_keys=True)
 
 		# Save statistics
-		stats = lint_engine.get_model_statistics(flattened_json)
+		stats = lint_engine.get_model_statistics(flattened_json, golden_source_path)
 		with open(debug_dir / 'stats.json', 'w', encoding='utf-8') as f:
 			json.dump(stats, f, indent=2, sort_keys=True)
 
 		# Save a README explaining the debug files
-		readme_content = f"""# Debug Golden Output Files for {case_dir.name}
+		readme_content = f"""# Debug Golden Output Files for {key}
 Regenerate these files whenever the view.json is updated or when model builder logic changes.
 These files help developers diagnose issues with the model building and rule application processes.
 
-This directory contains debug information generated from `tests/cases/{case_dir.name}/view.json`:
+This directory contains debug information generated from `tests/cases/{key}/view.json`:
 
 ## Files
 
@@ -116,7 +123,7 @@ This directory contains debug information generated from `tests/cases/{case_dir.
 
 These files were generated using:
 ```bash
-python scripts/generate_debug_files.py {case_dir.name}
+python scripts/generate_debug_files.py {key}
 ```
 
 ## Usage
@@ -132,11 +139,11 @@ These files help developers understand:
 		with open(debug_dir / 'README.md', 'w', encoding='utf-8') as f:
 			f.write(readme_content)
 
-		print(f"✅ Generated debug files for {case_dir.name}")
+		print(f"✅ Generated debug files for {key}")
 		return True
 
 	except (OSError, PermissionError, TypeError, ValueError, json.JSONDecodeError) as e:
-		print(f"❌ Failed to generate debug files for {case_dir.name}: {e}")
+		print(f"❌ Failed to generate debug files for {key}: {e}")
 		return False
 
 
@@ -160,9 +167,9 @@ def list_test_cases():
 
 	print(f"Available test cases ({len(test_cases)}):")
 	for case_dir in test_cases:
-		debug_exists = (debug_cases_dir / case_dir.name).exists()
+		debug_exists = (debug_cases_dir / case_key(case_dir)).exists()
 		status = "🔍" if debug_exists else "  "
-		print(f"  {status} {case_dir.name}")
+		print(f"  {status} {case_key(case_dir)}")
 
 	print("\n🔍 = has debug files")
 
@@ -191,14 +198,14 @@ def main():
 		# Process specific test cases
 		test_cases_to_process = []
 		for case_name in args.test_cases:
-			case_dir = Path(__file__).parent.parent / 'tests' / 'cases' / case_name
+			case_dir = CASES_DIR / case_name
 			if case_dir in all_test_cases:
 				test_cases_to_process.append(case_dir)
 			else:
 				print(f"❌ Test case '{case_name}' not found")
 				print("Available test cases:")
 				for tc in all_test_cases:
-					print(f"  - {tc.name}")
+					print(f"  - {case_key(tc)}")
 				return 1
 	else:
 		# Process all test cases

@@ -4,6 +4,7 @@
     "ia.display.icon": 1
   },
   "model_keys": [
+    "view",
     "components",
     "bindings",
     "scripts",
@@ -21,7 +22,8 @@
   ],
   "node_type_counts": {
     "component": 2,
-    "property": 4
+    "property": 4,
+    "view": 1
   },
   "rule_coverage": {
     "BadComponentReferenceRule": {
@@ -52,7 +54,7 @@
       ]
     },
     "ExcessiveContextDataRule": {
-      "applicable_node_count": 6,
+      "applicable_node_count": 7,
       "target_types": [
         "all"
       ]
@@ -74,13 +76,13 @@
       ]
     },
     "PropertyAccessRule": {
-      "applicable_node_count": 6,
+      "applicable_node_count": 7,
       "target_types": [
         "all"
       ]
     },
     "PropertyPersistenceRule": {
-      "applicable_node_count": 6,
+      "applicable_node_count": 7,
       "target_types": [
         "all"
       ]
@@ -110,5 +112,5 @@
       ]
     }
   },
-  "total_nodes": 6
+  "total_nodes": 7
 }

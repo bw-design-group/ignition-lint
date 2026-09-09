@@ -30,7 +30,7 @@ class TestGoldenFiles(unittest.TestCase):
 	"""Test model generation against golden reference files."""
 
 	@classmethod
-	def setUpClass(cls): # pylint: disable=invalid-name
+	def setUpClass(cls):  # pylint: disable=invalid-name
 		"""Set up the test class."""
 		# Store rule classes for creating fresh engines
 		cls.rule_classes = []
@@ -52,23 +52,40 @@ class TestGoldenFiles(unittest.TestCase):
 		all_test_cases = []
 		cls.test_cases_with_golden_files = []
 
-		for case_dir in cls.test_cases_dir.iterdir():
-			if case_dir.is_dir() and (case_dir / 'view.json').exists():
-				all_test_cases.append(case_dir)
-				if (debug_cases_dir / case_dir.name).exists():
-					cls.test_cases_with_golden_files.append(case_dir)
+		for view_file in cls.test_cases_dir.rglob('view.json'):
+			case_dir = view_file.parent
+			all_test_cases.append(case_dir)
+			if (debug_cases_dir / cls._case_key(case_dir)).exists():
+				cls.test_cases_with_golden_files.append(case_dir)
 
 		all_test_cases.sort()
 		cls.test_cases_with_golden_files.sort()  # Ensure consistent order
 
 		# Validate that we have golden files for ALL test cases
-		missing_golden_files = [case.name for case in all_test_cases if case not in cls.test_cases_with_golden_files]
+		missing_golden_files = [
+			cls._case_key(case) for case in all_test_cases if case not in cls.test_cases_with_golden_files
+		]
 		if missing_golden_files:
 			raise RuntimeError(
 				f"Missing golden files for {len(missing_golden_files)} test case(s): {missing_golden_files}\n"
-				f"Generate them with: python scripts/generate_debug_files.py {' '.join(missing_golden_files)}\n"
+				f"Generate them with: python scripts/generate_debug_files.py {' '.join(repr(k) for k in missing_golden_files)}\n"
 				"run `./scripts/generate_debug_files.py` to generate for all cases."
 			)
+
+	@classmethod
+	def _case_key(cls, case_dir: Path) -> str:
+		"""Case identifier: path relative to tests/cases (nested cases keep their sub-path)."""
+		return case_dir.relative_to(cls.test_cases_dir).as_posix()
+
+	@classmethod
+	def _golden_source_path(cls, case_dir: Path) -> str:
+		"""
+		Source path used when building golden models.
+
+		Relative to the repo root so the derived View node (name, folder path)
+		is identical on every machine. Must match scripts/generate_debug_files.py.
+		"""
+		return (Path('tests', 'cases') / cls._case_key(case_dir) / 'view.json').as_posix()
 
 	def _create_fresh_lint_engine(self) -> LintEngine:
 		"""Create a fresh LintEngine instance to avoid state accumulation."""
@@ -94,9 +111,9 @@ class TestGoldenFiles(unittest.TestCase):
 
 			lint_engine = self._create_fresh_lint_engine()
 			lint_engine.flattened_json = flattened_json
-			lint_engine.view_model = lint_engine.get_view_model()
+			lint_engine.view_model = lint_engine.get_view_model(self._golden_source_path(case_dir))
 			model = lint_engine.serialize_view_model()
-			stats = lint_engine.get_model_statistics(flattened_json)
+			stats = lint_engine.get_model_statistics(flattened_json, self._golden_source_path(case_dir))
 
 			# Verify we got reasonable data
 			self.assertGreater(len(flattened_json), 0, f"No flattened data for {case_name}")
@@ -111,7 +128,7 @@ class TestGoldenFiles(unittest.TestCase):
 			)
 
 		for case_dir in self.test_cases_with_golden_files:
-			with self.subTest(test_case=case_dir.name):
+			with self.subTest(test_case=self._case_key(case_dir)):
 				self._assert_flattened_json_matches(case_dir)
 
 	def test_02_model_matches_golden(self):
@@ -122,7 +139,7 @@ class TestGoldenFiles(unittest.TestCase):
 			)
 
 		for case_dir in self.test_cases_with_golden_files:
-			with self.subTest(test_case=case_dir.name):
+			with self.subTest(test_case=self._case_key(case_dir)):
 				self._assert_model_matches(case_dir)
 
 	def test_03_stats_match_golden(self):
@@ -133,7 +150,7 @@ class TestGoldenFiles(unittest.TestCase):
 			)
 
 		for case_dir in self.test_cases_with_golden_files:
-			with self.subTest(test_case=case_dir.name):
+			with self.subTest(test_case=self._case_key(case_dir)):
 				self._assert_stats_match(case_dir)
 
 	def _assert_flattened_json_matches(self, case_dir: Path):
@@ -141,7 +158,7 @@ class TestGoldenFiles(unittest.TestCase):
 		view_file = case_dir / 'view.json'
 		# Updated path to tests/debug/cases/{case_name}/flattened.json
 		tests_dir = Path(__file__).parent.parent
-		golden_file = tests_dir / 'debug' / 'cases' / case_dir.name / 'flattened.json'
+		golden_file = tests_dir / 'debug' / 'cases' / self._case_key(case_dir) / 'flattened.json'
 
 		# Generate current flattened JSON
 		json_data = read_json_file(view_file)
@@ -154,13 +171,14 @@ class TestGoldenFiles(unittest.TestCase):
 		except FileNotFoundError:
 			self.fail(
 				f"Golden file missing: {golden_file}\n"
-				f"Generate it with: python scripts/generate_debug_files.py {case_dir.name}"
+				f"Generate it with: python scripts/generate_debug_files.py {self._case_key(case_dir)}"
 			)
 
 		# Compare
 		self.assertEqual(
-			current_flattened, expected_flattened, f"Flattened JSON mismatch for {case_dir.name}. "
-			f"Regenerate golden files with: python scripts/generate_debug_files.py {case_dir.name}"
+			current_flattened, expected_flattened,
+			f"Flattened JSON mismatch for {self._case_key(case_dir)}. "
+			f"Regenerate golden files with: python scripts/generate_debug_files.py {self._case_key(case_dir)}"
 		)
 
 	def _assert_model_matches(self, case_dir: Path):
@@ -168,7 +186,7 @@ class TestGoldenFiles(unittest.TestCase):
 		view_file = case_dir / 'view.json'
 		# Updated path to tests/debug/cases/{case_name}/model.json
 		tests_dir = Path(__file__).parent.parent
-		golden_file = tests_dir / 'debug' / 'cases' / case_dir.name / 'model.json'
+		golden_file = tests_dir / 'debug' / 'cases' / self._case_key(case_dir) / 'model.json'
 
 		# Generate current model with fresh lint engine
 		json_data = read_json_file(view_file)
@@ -176,7 +194,7 @@ class TestGoldenFiles(unittest.TestCase):
 
 		lint_engine = self._create_fresh_lint_engine()
 		lint_engine.flattened_json = flattened_json
-		lint_engine.view_model = lint_engine.get_view_model()
+		lint_engine.view_model = lint_engine.get_view_model(self._golden_source_path(case_dir))
 		current_model = lint_engine.serialize_view_model()
 
 		# Load golden file
@@ -186,25 +204,25 @@ class TestGoldenFiles(unittest.TestCase):
 		except FileNotFoundError:
 			self.fail(
 				f"Golden file missing: {golden_file}\n"
-				f"Generate it with: python scripts/generate_debug_files.py {case_dir.name}"
+				f"Generate it with: python scripts/generate_debug_files.py {self._case_key(case_dir)}"
 			)
 
 		# Compare models - use detailed comparison for better error messages
-		self._compare_models_detailed(current_model, expected_model, case_dir.name)
+		self._compare_models_detailed(current_model, expected_model, self._case_key(case_dir))
 
 	def _assert_stats_match(self, case_dir: Path):
 		"""Assert that statistics match the golden file."""
 		view_file = case_dir / 'view.json'
 		# Updated path to tests/debug/cases/{case_name}/stats.json
 		tests_dir = Path(__file__).parent.parent
-		golden_file = tests_dir / 'debug' / 'cases' / case_dir.name / 'stats.json'
+		golden_file = tests_dir / 'debug' / 'cases' / self._case_key(case_dir) / 'stats.json'
 
 		# Generate current stats with fresh lint engine
 		json_data = read_json_file(view_file)
 		flattened_json = flatten_json(json_data)
 
 		lint_engine = self._create_fresh_lint_engine()
-		current_stats = lint_engine.get_model_statistics(flattened_json)
+		current_stats = lint_engine.get_model_statistics(flattened_json, self._golden_source_path(case_dir))
 
 		# Load golden file
 		try:
@@ -213,7 +231,7 @@ class TestGoldenFiles(unittest.TestCase):
 		except FileNotFoundError:
 			self.fail(
 				f"Golden file missing: {golden_file}\n"
-				f"Generate it with: python scripts/generate_debug_files.py {case_dir.name}"
+				f"Generate it with: python scripts/generate_debug_files.py {self._case_key(case_dir)}"
 			)
 
 		# Compare key statistics (ignore rule_coverage which may vary with new rules)
@@ -222,8 +240,8 @@ class TestGoldenFiles(unittest.TestCase):
 		for stat_key in important_stats:
 			self.assertEqual(
 				current_stats.get(stat_key), expected_stats.get(stat_key),
-				f"Statistics mismatch for {case_dir.name}.{stat_key}. "
-				f"Regenerate golden files with: python scripts/generate_debug_files.py {case_dir.name}"
+				f"Statistics mismatch for {self._case_key(case_dir)}.{stat_key}. "
+				f"Regenerate golden files with: python scripts/generate_debug_files.py {self._case_key(case_dir)}"
 			)
 
 	def _compare_models_detailed(self, current: Dict[str, Any], expected: Dict[str, Any], case_name: str):

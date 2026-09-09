@@ -121,5 +121,28 @@
   "tag_bindings": {
     "count": 0,
     "nodes": []
+  },
+  "view": {
+    "count": 1,
+    "nodes": [
+      {
+        "default_size": {
+          "height": null,
+          "width": null
+        },
+        "folder_path": [],
+        "name": "kebab-case",
+        "node_counts": {
+          "component": 2,
+          "property": 7
+        },
+        "node_type": "view",
+        "path": "kebab-case",
+        "root_container_type": "ia.container.flex",
+        "total_nodes": 9,
+        "view_path": "kebab-case",
+        "views_root_found": false
+      }
+    ]
   }
 }

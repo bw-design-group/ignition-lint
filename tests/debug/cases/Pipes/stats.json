@@ -4,6 +4,7 @@
     "ia.input.button": 1
   },
   "model_keys": [
+    "view",
     "components",
     "bindings",
     "scripts",
@@ -26,7 +27,8 @@
     "expression_struct_binding": 2,
     "property": 25,
     "property_binding": 5,
-    "transform": 4
+    "transform": 4,
+    "view": 1
   },
   "rule_coverage": {
     "BadComponentReferenceRule": {
@@ -57,7 +59,7 @@
       ]
     },
     "ExcessiveContextDataRule": {
-      "applicable_node_count": 46,
+      "applicable_node_count": 47,
       "target_types": [
         "all"
       ]
@@ -79,13 +81,13 @@
       ]
     },
     "PropertyAccessRule": {
-      "applicable_node_count": 46,
+      "applicable_node_count": 47,
       "target_types": [
         "all"
       ]
     },
     "PropertyPersistenceRule": {
-      "applicable_node_count": 46,
+      "applicable_node_count": 47,
       "target_types": [
         "all"
       ]
@@ -115,5 +117,5 @@
       ]
     }
   },
-  "total_nodes": 46
+  "total_nodes": 47
 }

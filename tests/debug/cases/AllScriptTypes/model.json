@@ -292,5 +292,33 @@
   "tag_bindings": {
     "count": 0,
     "nodes": []
+  },
+  "view": {
+    "count": 1,
+    "nodes": [
+      {
+        "default_size": {
+          "height": null,
+          "width": null
+        },
+        "folder_path": [],
+        "name": "AllScriptTypes",
+        "node_counts": {
+          "component": 3,
+          "custom_method": 2,
+          "event_handler": 2,
+          "expression_binding": 3,
+          "message_handler": 1,
+          "property": 6,
+          "transform": 2
+        },
+        "node_type": "view",
+        "path": "AllScriptTypes",
+        "root_container_type": "ia.container.flex",
+        "total_nodes": 19,
+        "view_path": "AllScriptTypes",
+        "views_root_found": false
+      }
+    ]
   }
 }

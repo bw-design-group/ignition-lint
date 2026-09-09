@@ -6,6 +6,7 @@
     "ia.input.date-time-input": 1
   },
   "model_keys": [
+    "view",
     "components",
     "bindings",
     "scripts",
@@ -29,7 +30,8 @@
     "expression_struct_binding": 1,
     "property": 19,
     "property_binding": 2,
-    "property_change_script": 1
+    "property_change_script": 1,
+    "view": 1
   },
   "rule_coverage": {
     "BadComponentReferenceRule": {
@@ -60,7 +62,7 @@
       ]
     },
     "ExcessiveContextDataRule": {
-      "applicable_node_count": 37,
+      "applicable_node_count": 38,
       "target_types": [
         "all"
       ]
@@ -82,13 +84,13 @@
       ]
     },
     "PropertyAccessRule": {
-      "applicable_node_count": 37,
+      "applicable_node_count": 38,
       "target_types": [
         "all"
       ]
     },
     "PropertyPersistenceRule": {
-      "applicable_node_count": 37,
+      "applicable_node_count": 38,
       "target_types": [
         "all"
       ]
@@ -118,5 +120,5 @@
       ]
     }
   },
-  "total_nodes": 37
+  "total_nodes": 38
 }

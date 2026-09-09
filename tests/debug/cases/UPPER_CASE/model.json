@@ -121,5 +121,28 @@
   "tag_bindings": {
     "count": 0,
     "nodes": []
+  },
+  "view": {
+    "count": 1,
+    "nodes": [
+      {
+        "default_size": {
+          "height": null,
+          "width": null
+        },
+        "folder_path": [],
+        "name": "UPPER_CASE",
+        "node_counts": {
+          "component": 2,
+          "property": 7
+        },
+        "node_type": "view",
+        "path": "UPPER_CASE",
+        "root_container_type": "ia.container.flex",
+        "total_nodes": 9,
+        "view_path": "UPPER_CASE",
+        "views_root_found": false
+      }
+    ]
   }
 }

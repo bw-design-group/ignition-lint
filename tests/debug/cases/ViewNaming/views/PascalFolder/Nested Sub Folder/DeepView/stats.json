@@ -1,7 +1,7 @@
 {
   "components_by_type": {
     "ia.container.flex": 1,
-    "ia.input.button": 2
+    "ia.display.label": 1
   },
   "model_keys": [
     "view",
@@ -21,18 +21,13 @@
     "properties"
   ],
   "node_type_counts": {
-    "component": 3,
-    "custom_method": 2,
-    "event_handler": 2,
-    "expression_binding": 3,
-    "message_handler": 1,
-    "property": 6,
-    "transform": 2,
+    "component": 2,
+    "property": 3,
     "view": 1
   },
   "rule_coverage": {
     "BadComponentReferenceRule": {
-      "applicable_node_count": 10,
+      "applicable_node_count": 0,
       "target_types": [
         "custom_method",
         "event_handler",
@@ -45,7 +40,7 @@
       ]
     },
     "ComponentReferenceValidationRule": {
-      "applicable_node_count": 13,
+      "applicable_node_count": 2,
       "target_types": [
         "component",
         "custom_method",
@@ -59,19 +54,19 @@
       ]
     },
     "ExcessiveContextDataRule": {
-      "applicable_node_count": 20,
+      "applicable_node_count": 6,
       "target_types": [
         "all"
       ]
     },
     "NamePatternRule": {
-      "applicable_node_count": 3,
+      "applicable_node_count": 2,
       "target_types": [
         "component"
       ]
     },
     "PollingIntervalRule": {
-      "applicable_node_count": 3,
+      "applicable_node_count": 0,
       "target_types": [
         "expression_binding",
         "expression_struct_binding",
@@ -81,19 +76,19 @@
       ]
     },
     "PropertyAccessRule": {
-      "applicable_node_count": 20,
+      "applicable_node_count": 6,
       "target_types": [
         "all"
       ]
     },
     "PropertyPersistenceRule": {
-      "applicable_node_count": 20,
+      "applicable_node_count": 6,
       "target_types": [
         "all"
       ]
     },
     "PylintScriptRule": {
-      "applicable_node_count": 7,
+      "applicable_node_count": 0,
       "target_types": [
         "custom_method",
         "event_handler",
@@ -103,7 +98,7 @@
       ]
     },
     "UnusedCustomPropertiesRule": {
-      "applicable_node_count": 19,
+      "applicable_node_count": 5,
       "target_types": [
         "component",
         "custom_method",
@@ -117,5 +112,5 @@
       ]
     }
   },
-  "total_nodes": 20
+  "total_nodes": 6
 }

@@ -7,11 +7,11 @@
     "count": 2,
     "nodes": [
       {
-        "name": "Icon Title Case",
+        "name": "StatusLabel",
         "node_type": "component",
-        "path": "root.root.children[0].Icon Title Case",
+        "path": "root.root.children[0].StatusLabel",
         "properties_count": 0,
-        "type": "ia.display.icon"
+        "type": "ia.display.label"
       },
       {
         "name": "root",
@@ -43,20 +43,20 @@
     "nodes": []
   },
   "properties": {
-    "count": 4,
+    "count": 3,
     "nodes": [
       {
         "name": "basis",
         "node_type": "property",
-        "path": "root.root.children.Icon Title Case.position.basis",
+        "path": "root.root.children.StatusLabel.position.basis",
         "value": "30px",
         "value_type": "str"
       },
       {
-        "name": "path",
+        "name": "text",
         "node_type": "property",
-        "path": "root.root.children.Icon Title Case.props.path",
-        "value": "material/insert_emoticon",
+        "path": "root.root.children.StatusLabel.props.text",
+        "value": "PascalCase folder and view",
         "value_type": "str"
       },
       {
@@ -65,14 +65,6 @@
         "path": "root.root.props.direction",
         "value": "column",
         "value_type": "str"
-      },
-      {
-        "name": "ViewParam",
-        "node_type": "property",
-        "path": "params.ViewParam",
-        "persistent": true,
-        "value": null,
-        "value_type": "NoneType"
       }
     ]
   },
@@ -108,18 +100,20 @@
           "height": null,
           "width": null
         },
-        "folder_path": [],
-        "name": "Title Case",
+        "folder_path": [
+          "PascalFolder"
+        ],
+        "name": "PascalView",
         "node_counts": {
           "component": 2,
-          "property": 4
+          "property": 3
         },
         "node_type": "view",
-        "path": "Title Case",
+        "path": "PascalFolder/PascalView",
         "root_container_type": "ia.container.flex",
-        "total_nodes": 6,
-        "view_path": "Title Case",
-        "views_root_found": false
+        "total_nodes": 5,
+        "view_path": "PascalFolder/PascalView",
+        "views_root_found": true
       }
     ]
   }

@@ -308,5 +308,28 @@
   "tag_bindings": {
     "count": 0,
     "nodes": []
+  },
+  "view": {
+    "count": 1,
+    "nodes": [
+      {
+        "default_size": {
+          "height": null,
+          "width": null
+        },
+        "folder_path": [],
+        "name": "MixedCase",
+        "node_counts": {
+          "component": 19,
+          "property": 17
+        },
+        "node_type": "view",
+        "path": "MixedCase",
+        "root_container_type": "ia.container.coord",
+        "total_nodes": 36,
+        "view_path": "MixedCase",
+        "views_root_found": false
+      }
+    ]
   }
 }

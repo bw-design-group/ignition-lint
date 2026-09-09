@@ -515,5 +515,33 @@
   "tag_bindings": {
     "count": 0,
     "nodes": []
+  },
+  "view": {
+    "count": 1,
+    "nodes": [
+      {
+        "default_size": {
+          "height": null,
+          "width": null
+        },
+        "folder_path": [],
+        "name": "Pipes",
+        "node_counts": {
+          "component": 2,
+          "event_handler": 1,
+          "expression_binding": 7,
+          "expression_struct_binding": 2,
+          "property": 25,
+          "property_binding": 5,
+          "transform": 4
+        },
+        "node_type": "view",
+        "path": "Pipes",
+        "root_container_type": "ia.container.coord",
+        "total_nodes": 46,
+        "view_path": "Pipes",
+        "views_root_found": false
+      }
+    ]
   }
 }

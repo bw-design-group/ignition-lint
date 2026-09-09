@@ -2120,5 +2120,36 @@
         "tag_path": "{tag}/Live Analysis/Current State/Line State Type"
       }
     ]
+  },
+  "view": {
+    "count": 1,
+    "nodes": [
+      {
+        "default_size": {
+          "height": 1145,
+          "width": 1200
+        },
+        "folder_path": [],
+        "name": "LineDashboard",
+        "node_counts": {
+          "component": 19,
+          "custom_method": 2,
+          "event_handler": 9,
+          "expression_binding": 9,
+          "expression_struct_binding": 4,
+          "message_handler": 1,
+          "property": 136,
+          "property_binding": 22,
+          "tag_binding": 5,
+          "transform": 9
+        },
+        "node_type": "view",
+        "path": "LineDashboard",
+        "root_container_type": "ia.container.flex",
+        "total_nodes": 216,
+        "view_path": "LineDashboard",
+        "views_root_found": false
+      }
+    ]
   }
 }

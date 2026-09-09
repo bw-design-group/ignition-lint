@@ -1347,5 +1347,34 @@
   "tag_bindings": {
     "count": 0,
     "nodes": []
+  },
+  "view": {
+    "count": 1,
+    "nodes": [
+      {
+        "default_size": {
+          "height": 600,
+          "width": null
+        },
+        "folder_path": [],
+        "name": "BadComponentReferences",
+        "node_counts": {
+          "component": 38,
+          "custom_method": 2,
+          "event_handler": 8,
+          "expression_binding": 11,
+          "expression_struct_binding": 1,
+          "message_handler": 2,
+          "property": 73,
+          "property_binding": 10
+        },
+        "node_type": "view",
+        "path": "BadComponentReferences",
+        "root_container_type": "ia.container.flex",
+        "total_nodes": 145,
+        "view_path": "BadComponentReferences",
+        "views_root_found": false
+      }
+    ]
   }
 }

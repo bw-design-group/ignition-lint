@@ -1425,5 +1425,33 @@
   "tag_bindings": {
     "count": 0,
     "nodes": []
+  },
+  "view": {
+    "count": 1,
+    "nodes": [
+      {
+        "default_size": {
+          "height": 1080,
+          "width": 1397
+        },
+        "folder_path": [],
+        "name": "BadContextData",
+        "node_counts": {
+          "component": 13,
+          "event_handler": 1,
+          "expression_binding": 2,
+          "expression_struct_binding": 1,
+          "property": 150,
+          "property_binding": 10,
+          "transform": 2
+        },
+        "node_type": "view",
+        "path": "BadContextData",
+        "root_container_type": "ia.container.flex",
+        "total_nodes": 179,
+        "view_path": "BadContextData",
+        "views_root_found": false
+      }
+    ]
   }
 }

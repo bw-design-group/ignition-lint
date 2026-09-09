@@ -135,5 +135,28 @@
   "tag_bindings": {
     "count": 0,
     "nodes": []
+  },
+  "view": {
+    "count": 1,
+    "nodes": [
+      {
+        "default_size": {
+          "height": null,
+          "width": null
+        },
+        "folder_path": [],
+        "name": "ExtensionFunctions",
+        "node_counts": {
+          "component": 4,
+          "property": 7
+        },
+        "node_type": "view",
+        "path": "ExtensionFunctions",
+        "root_container_type": "ia.container.flex",
+        "total_nodes": 11,
+        "view_path": "ExtensionFunctions",
+        "views_root_found": false
+      }
+    ]
   }
 }
