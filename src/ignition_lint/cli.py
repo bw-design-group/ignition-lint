@@ -697,9 +697,9 @@ def print_statistics(file_path: Path, stats: Dict[str, Any], verbose: bool = Fal
 				print(f"    {rule_name}: {coverage['applicable_node_count']} nodes ({target_types})")
 
 
-def print_rule_analysis(lint_engine: LintEngine, flattened_json: Dict[str, Any]):
+def print_rule_analysis(lint_engine: LintEngine, flattened_json: Dict[str, Any], source_file_path: str = None):
 	"""Print detailed rule impact analysis."""
-	analysis = lint_engine.analyze_rule_impact(flattened_json)
+	analysis = lint_engine.analyze_rule_impact(flattened_json, source_file_path)
 
 	print("\n🔍 Rule Impact Analysis:")
 	for rule_name, rule_data in analysis.items():
@@ -716,9 +716,12 @@ def print_rule_analysis(lint_engine: LintEngine, flattened_json: Dict[str, Any])
 		print()
 
 
-def print_debug_nodes(lint_engine: LintEngine, flattened_json: Dict[str, Any], debug_node_types: List[str]):
+def print_debug_nodes(
+	lint_engine: LintEngine, flattened_json: Dict[str, Any], debug_node_types: List[str],
+	source_file_path: str = None
+):
 	"""Print debug information for specific node types."""
-	debug_nodes = lint_engine.debug_nodes(flattened_json, debug_node_types or [])
+	debug_nodes = lint_engine.debug_nodes(flattened_json, debug_node_types or [], source_file_path)
 	if debug_node_types:
 		print(f"\n🔧 Debug info for node types: {', '.join(debug_node_types)}")
 	else:
@@ -825,7 +828,7 @@ def process_single_file(
 	# Time model building
 	if file_timer:
 		timer.start()
-	stats = lint_engine.get_model_statistics(flattened_json)
+	stats = lint_engine.get_model_statistics(flattened_json, str(file_path))
 	if file_timer:
 		model_build_ms = timer.stop()
 
@@ -833,11 +836,11 @@ def process_single_file(
 
 	# Show rule analysis if requested
 	if args.analyze_rules and not args.stats_only:
-		print_rule_analysis(lint_engine, flattened_json)
+		print_rule_analysis(lint_engine, flattened_json, str(file_path))
 
 	# Show debug node info if requested
 	if args.debug_nodes is not None:
-		print_debug_nodes(lint_engine, flattened_json, args.debug_nodes)
+		print_debug_nodes(lint_engine, flattened_json, args.debug_nodes, str(file_path))
 
 	# Run linting (unless stats-only mode)
 	file_timings = None

@@ -24,6 +24,7 @@ class NodeType(Enum):
 	EVENT_HANDLER = "event_handler"
 	PROPERTY_CHANGE_SCRIPT = "property_change_script"
 	PROPERTY = "property"
+	VIEW = "view"
 
 
 # Grouped node types - defined outside the enum to avoid enum member confusion
@@ -348,6 +349,53 @@ class Property(ViewNode):
 		if self.private_access is not None:
 			attrs['private_access'] = self.private_access
 		return attrs
+
+
+class View(ViewNode):
+	"""
+	Represents the view itself: its name and where it sits in the project's view tree.
+
+	Unlike every other node this is derived from the view.json file location rather
+	than its contents. ``path`` is the slash-separated view path (``Folder/Sub/Name``)
+	so violations read naturally in reports.
+	"""
+
+	def __init__(
+		self, name: str, folder_path: List[str] = None, *, source_file: str = None,
+		views_root_found: bool = False, root_container_type: str = None, node_counts: Dict[str, int] = None,
+		default_size: Dict[str, Any] = None
+	):
+		self.name = name
+		self.folder_path = list(folder_path or [])
+		self.source_file = source_file
+		self.views_root_found = views_root_found
+		self.root_container_type = root_container_type  # e.g. 'ia.container.flex'; None if the view has no root
+		self.node_counts = dict(node_counts or {})  # NodeType value -> count of nodes inside the view
+		# props.defaultSize; always carries both keys, each None when the view does not declare it
+		self.default_size = {'width': None, 'height': None, **(default_size or {})}
+		super().__init__(self.view_path, NodeType.VIEW)
+
+	@property
+	def view_path(self) -> str:
+		"""Slash-separated view path relative to the views root, e.g. ``Folder/Sub/ViewName``."""
+		return "/".join(self.folder_path + [self.name])
+
+	@property
+	def total_nodes(self) -> int:
+		"""Number of modeled nodes inside the view (components, bindings, scripts, properties)."""
+		return sum(self.node_counts.values())
+
+	def _get_serializable_attrs(self) -> Dict[str, Any]:
+		return {
+			'name': self.name,
+			'folder_path': self.folder_path,
+			'view_path': self.view_path,
+			'views_root_found': self.views_root_found,
+			'root_container_type': self.root_container_type,
+			'default_size': self.default_size,
+			'node_counts': self.node_counts,
+			'total_nodes': self.total_nodes,
+		}
 
 
 class NodeUtils:

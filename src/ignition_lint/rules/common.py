@@ -60,6 +60,9 @@ class NodeVisitor(ABC):
 	def visit_property(self, node: ViewNode):
 		"""Visit a property node."""
 
+	def visit_view(self, node: ViewNode):
+		"""Visit the view node (name and folder path derived from the file location)."""
+
 
 class LintingRule(NodeVisitor):
 	"""Base class for linting rules with simplified interface and self-processing capability."""

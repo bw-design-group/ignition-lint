@@ -9,7 +9,7 @@ import time
 from pathlib import Path
 from typing import Dict, List, Any, NamedTuple, Optional
 from .rules.common import LintingRule
-from .model.builder import ViewModelBuilder
+from .model.builder import ViewModelBuilder, NODE_COLLECTIONS
 from .model.node_types import NodeType, NodeUtils
 
 
@@ -31,6 +31,7 @@ class LintEngine:
 		self.rules = rules
 		self.model_builder = ViewModelBuilder()
 		self.flattened_json = {}
+		self.source_file_path: Optional[str] = None
 		self.view_model = {}
 		self.debug_output_dir = debug_output_dir
 
@@ -38,9 +39,30 @@ class LintEngine:
 		if self.debug_output_dir:
 			Path(self.debug_output_dir).mkdir(parents=True, exist_ok=True)
 
-	def get_view_model(self) -> Dict[str, List[Any]]:
-		"""Return the structured view model."""
-		return self.model_builder.build_model(self.flattened_json)
+	def get_view_model(self, source_file_path: Optional[str] = None) -> Dict[str, List[Any]]:
+		"""
+		Return the structured view model.
+
+		Args:
+			source_file_path: Path of the view.json being modeled. When given, the model
+				includes a 'view' node carrying the view name and folder path derived
+				from the file location.
+		"""
+		return self.model_builder.build_model(self.flattened_json, source_file_path=source_file_path)
+
+	def _ensure_model(self, flattened_json: Dict[str, Any], source_file_path: Optional[str]):
+		"""Build the object model, reusing the current one when both inputs are unchanged."""
+		if self.flattened_json is not flattened_json or self.source_file_path != source_file_path:
+			self.flattened_json = flattened_json
+			self.source_file_path = source_file_path
+			self.view_model = self.get_view_model(source_file_path)
+
+	def _rule_nodes(self) -> List[Any]:
+		"""Flatten the model into the list of nodes rules are run against."""
+		all_nodes = []
+		for collection_name in NODE_COLLECTIONS:
+			all_nodes.extend(self.view_model.get(collection_name, []))
+		return all_nodes
 
 	def process(
 		self, flattened_json: Dict[str, Any], source_file_path: Optional[str] = None,
@@ -51,32 +73,19 @@ class LintEngine:
 
 		Args:
 			flattened_json: The flattened JSON data to lint.
-			source_file_path: Optional path to the source file being linted.
+			source_file_path: Optional path to the source file being linted. Also the
+				source of the 'view' node (view name and folder path).
 			enable_timing: Whether to time rule execution.
 			json_data: Optional original JSON data (needed for fix mode).
 			path_translator: Optional PathTranslator instance (needed for fix mode).
 		"""
-		# Build the object model (only if flattened_json changed)
-		if self.flattened_json is not flattened_json:
-			self.flattened_json = flattened_json
-			self.view_model = self.get_view_model()
+		self._ensure_model(flattened_json, source_file_path)
 
 		# Save debug information if debug output directory is configured
 		if self.debug_output_dir and source_file_path:
 			self._save_debug_files(source_file_path)
 
-		# Collect all nodes in a flat list, excluding generic collections to avoid duplicates
-		# Generic collections ('bindings', 'scripts', 'event_handlers') are convenience collections
-		# that contain the same nodes as specific collections, causing duplicates
-		specific_collections = [
-			'components', 'message_handlers', 'custom_methods', 'expression_bindings',
-			'expression_struct_bindings', 'property_bindings', 'tag_bindings', 'query_bindings',
-			'script_transforms', 'event_handlers', 'property_change_scripts', 'properties'
-		]
-		all_nodes = []
-		for collection_name in specific_collections:
-			if collection_name in self.view_model:
-				all_nodes.extend(self.view_model[collection_name])
+		all_nodes = self._rule_nodes()
 
 		warnings = {}
 		errors = {}
@@ -216,21 +225,11 @@ class LintEngine:
 			custom_formatted_errors=custom_formatted_errors,
 		)
 
-	def get_model_statistics(self, flattened_json: Dict[str, Any]) -> Dict[str, Any]:
+	def get_model_statistics(self, flattened_json: Dict[str, Any],
+					source_file_path: Optional[str] = None) -> Dict[str, Any]:
 		"""Get statistics about the parsed model for debugging/analysis."""
-		self.flattened_json = flattened_json
-		self.view_model = self.get_view_model()
-
-		# Get all nodes for analysis, excluding generic collections to avoid duplicates
-		specific_collections = [
-			'components', 'message_handlers', 'custom_methods', 'expression_bindings',
-			'expression_struct_bindings', 'property_bindings', 'tag_bindings', 'query_bindings',
-			'script_transforms', 'event_handlers', 'property_change_scripts', 'properties'
-		]
-		all_nodes = []
-		for collection_name in specific_collections:
-			if collection_name in self.view_model:
-				all_nodes.extend(self.view_model[collection_name])
+		self._ensure_model(flattened_json, source_file_path)
+		all_nodes = self._rule_nodes()
 
 		# Count by individual node types
 		node_type_counts = {}
@@ -278,10 +277,12 @@ class LintEngine:
 
 		return coverage
 
-	def debug_nodes(self, flattened_json: Dict[str, Any], node_types: List[str] = None) -> List[Dict]:
+	def debug_nodes(
+		self, flattened_json: Dict[str, Any], node_types: List[str] = None,
+		source_file_path: Optional[str] = None
+	) -> List[Dict]:
 		"""Get detailed information about nodes for debugging."""
-		self.flattened_json = flattened_json
-		self.view_model = self.get_view_model()
+		self._ensure_model(flattened_json, source_file_path)
 
 		all_nodes = []
 		for node_list in self.view_model.values():
@@ -305,10 +306,10 @@ class LintEngine:
 		# Return serialized node information
 		return [node.serialize() for node in all_nodes]
 
-	def analyze_rule_impact(self, flattened_json: Dict[str, Any]) -> Dict[str, Dict]:
+	def analyze_rule_impact(self, flattened_json: Dict[str, Any],
+				source_file_path: Optional[str] = None) -> Dict[str, Dict]:
 		"""Analyze which nodes each rule would target."""
-		self.flattened_json = flattened_json
-		self.view_model = self.get_view_model()
+		self._ensure_model(flattened_json, source_file_path)
 
 		all_nodes = []
 		for node_list in self.view_model.values():
@@ -348,6 +349,8 @@ class LintEngine:
 		"""Get a brief summary of what a node represents."""
 		if node.node_type == NodeType.COMPONENT:
 			return f"Component '{node.name}' of type '{getattr(node, 'type', 'unknown')}'"
+		if node.node_type == NodeType.VIEW:
+			return f"View '{node.name}' in folder '{'/'.join(node.folder_path) or '(views root)'}'"
 		if node.node_type == NodeType.EXPRESSION_BINDING:
 			expr_preview = node.expression[:50] + '...' if len(node.expression) > 50 else node.expression
 			return f"Expression: {expr_preview}"
@@ -380,7 +383,7 @@ class LintEngine:
 				json.dump(serialized_model, f, indent=2, sort_keys=True)
 
 			# Save model statistics
-			stats = self.get_model_statistics(self.flattened_json)
+			stats = self.get_model_statistics(self.flattened_json, self.source_file_path)
 			stats_file = Path(self.debug_output_dir) / f"{source_name}_stats.json"
 			with open(stats_file, 'w', encoding='utf-8') as f:
 				json.dump(stats, f, indent=2, sort_keys=True)

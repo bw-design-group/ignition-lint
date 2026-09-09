@@ -13,6 +13,7 @@ from .node_types import (
 	TransformScript,
 	EventHandlerScript,
 	Property,
+	View,
 )
 
 __all__ = [
@@ -27,4 +28,5 @@ __all__ = [
 	"TransformScript",
 	"EventHandlerScript",
 	"Property",
+	"View",
 ]
