@@ -1,6 +1,6 @@
 # pylint: disable=import-error
 """
-Unit tests for PylintScriptRule category mapping feature.
+Unit tests for PerspectiveScriptPylintRule category mapping feature.
 
 Tests cover:
 - Default category mapping (F/E → error, W/C/R → warning)
@@ -19,15 +19,15 @@ import os
 # Add parent directory to path for imports
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..')))
 
-from src.ignition_lint.rules.scripts.lint_script import PylintScriptRule, PylintViolation
+from src.ignition_lint.rules.scripts.lint_script import PerspectiveScriptPylintRule, PylintViolation
 
 
 class TestPylintCategoryMapping(unittest.TestCase):
-	"""Test suite for PylintScriptRule category mapping."""
+	"""Test suite for PerspectiveScriptPylintRule category mapping."""
 
 	def test_default_category_mapping(self):
 		"""Test that default category mapping is F/E → error, W/C/R → warning."""
-		rule = PylintScriptRule()
+		rule = PerspectiveScriptPylintRule()
 
 		# Verify default mapping
 		self.assertEqual(rule.category_mapping['F'], 'error')
@@ -45,7 +45,7 @@ class TestPylintCategoryMapping(unittest.TestCase):
 			'C': 'error',
 			'R': 'error',
 		}
-		rule = PylintScriptRule(category_mapping=custom_mapping)
+		rule = PerspectiveScriptPylintRule(category_mapping=custom_mapping)
 
 		# Verify custom mapping
 		self.assertEqual(rule.category_mapping['F'], 'error')
@@ -63,7 +63,7 @@ class TestPylintCategoryMapping(unittest.TestCase):
 			'C': 'warning',
 			'R': 'warning',
 		}
-		rule = PylintScriptRule(category_mapping=custom_mapping)
+		rule = PerspectiveScriptPylintRule(category_mapping=custom_mapping)
 
 		# Verify custom mapping
 		self.assertEqual(rule.category_mapping['F'], 'error')
@@ -87,7 +87,7 @@ class TestPylintCategoryMapping(unittest.TestCase):
 
 	def test_structured_violation_storage(self):
 		"""Test that violations are stored in structured format."""
-		rule = PylintScriptRule()
+		rule = PerspectiveScriptPylintRule()
 
 		# Create test violations
 		violation1 = PylintViolation(
@@ -106,7 +106,7 @@ class TestPylintCategoryMapping(unittest.TestCase):
 
 	def test_get_category_grouped_violations_empty(self):
 		"""Test category grouping with no violations."""
-		rule = PylintScriptRule()
+		rule = PerspectiveScriptPylintRule()
 		rule.pylint_violations = []
 
 		grouped = rule.get_category_grouped_violations()
@@ -115,7 +115,7 @@ class TestPylintCategoryMapping(unittest.TestCase):
 
 	def test_get_category_grouped_violations_single_category(self):
 		"""Test category grouping with violations from one category."""
-		rule = PylintScriptRule()
+		rule = PerspectiveScriptPylintRule()
 		rule.pylint_violations = [
 			PylintViolation(
 				category='E', code='E0602', message="Undefined variable 'x'", path='script1', line=5
@@ -133,7 +133,7 @@ class TestPylintCategoryMapping(unittest.TestCase):
 
 	def test_get_category_grouped_violations_multiple_categories(self):
 		"""Test category grouping with violations from multiple categories."""
-		rule = PylintScriptRule()
+		rule = PerspectiveScriptPylintRule()
 		rule.pylint_violations = [
 			PylintViolation(category='F', code='F0401', message="Cannot import", path='s1', line=1),
 			PylintViolation(category='E', code='E0602', message="Undefined", path='s2', line=2),
@@ -164,7 +164,7 @@ class TestPylintCategoryMapping(unittest.TestCase):
 			'C': 'warning',
 			'R': 'warning',
 		}
-		rule = PylintScriptRule(category_mapping=custom_mapping)
+		rule = PerspectiveScriptPylintRule(category_mapping=custom_mapping)
 		rule.pylint_violations = [
 			PylintViolation(category='W', code='W0611', message="Unused import", path='s1', line=1),
 		]
@@ -176,7 +176,7 @@ class TestPylintCategoryMapping(unittest.TestCase):
 
 	def test_get_category_grouped_violations_formatting(self):
 		"""Test that grouped violations format messages correctly."""
-		rule = PylintScriptRule()
+		rule = PerspectiveScriptPylintRule()
 		rule.pylint_violations = [
 			PylintViolation(
 				category='E', code='E0602', message="Undefined variable 'x'",
@@ -195,7 +195,7 @@ class TestPylintCategoryMapping(unittest.TestCase):
 
 	def test_category_order_in_grouped_output(self):
 		"""Test that categories are ordered F, E, W, C, R in grouped output."""
-		rule = PylintScriptRule()
+		rule = PerspectiveScriptPylintRule()
 		# Add violations in random order
 		rule.pylint_violations = [
 			PylintViolation(category='R', code='R0913', message="msg", path='s', line=1),
@@ -213,7 +213,7 @@ class TestPylintCategoryMapping(unittest.TestCase):
 
 	def test_batch_mode_preserves_violations(self):
 		"""Test that batch mode doesn't reset violations between files."""
-		rule = PylintScriptRule(batch_mode=True)
+		rule = PerspectiveScriptPylintRule(batch_mode=True)
 
 		# Add violation from first file
 		rule.pylint_violations = [
@@ -233,7 +233,7 @@ class TestPylintCategoryMapping(unittest.TestCase):
 
 	def test_non_batch_mode_resets_violations(self):
 		"""Test that non-batch mode resets violations between files."""
-		rule = PylintScriptRule(batch_mode=False)
+		rule = PerspectiveScriptPylintRule(batch_mode=False)
 
 		# Add violation
 		rule.pylint_violations = [
@@ -248,7 +248,7 @@ class TestPylintCategoryMapping(unittest.TestCase):
 
 	def test_backward_compatibility_errors_warnings_lists(self):
 		"""Test that errors and warnings lists still work for backward compatibility."""
-		rule = PylintScriptRule()
+		rule = PerspectiveScriptPylintRule()
 
 		# Manually add violations with different severities
 		rule.add_violation("Error message", severity="error")
@@ -262,7 +262,7 @@ class TestPylintCategoryMapping(unittest.TestCase):
 
 	def test_unknown_category_fallback(self):
 		"""Test that unknown categories fall back to rule's default severity when used directly."""
-		rule = PylintScriptRule(severity="warning")
+		rule = PerspectiveScriptPylintRule(severity="warning")
 
 		# Manually add a violation with unknown category using add_violation
 		# (which should use the default severity)
@@ -276,7 +276,7 @@ class TestPylintCategoryMapping(unittest.TestCase):
 
 	def test_multiple_violations_same_category(self):
 		"""Test multiple violations in same category are grouped together."""
-		rule = PylintScriptRule()
+		rule = PerspectiveScriptPylintRule()
 		rule.pylint_violations = [
 			PylintViolation(category='E', code='E0602', message="Undefined 'x'", path='s1', line=1),
 			PylintViolation(category='E', code='E1101', message="No member", path='s2', line=2),
@@ -290,7 +290,7 @@ class TestPylintCategoryMapping(unittest.TestCase):
 
 	def test_category_names_mapping(self):
 		"""Test that category codes map to correct human-readable names."""
-		rule = PylintScriptRule()
+		rule = PerspectiveScriptPylintRule()
 		rule.pylint_violations = [
 			PylintViolation(category='F', code='F0001', message="msg", path='s', line=1),
 			PylintViolation(category='E', code='E0001', message="msg", path='s', line=1),
@@ -314,7 +314,7 @@ class TestPylintCategoryMappingIntegration(unittest.TestCase):
 
 	def test_parse_pylint_output_extracts_category(self):
 		"""Test that _parse_pylint_output extracts category and code correctly."""
-		rule = PylintScriptRule()
+		rule = PerspectiveScriptPylintRule()
 
 		# Mock pylint output
 		pylint_output = """test.py:5:10: E0602: Undefined variable 'x' (undefined-variable)
@@ -341,7 +341,7 @@ test.py:1:0: C0114: Missing module docstring (missing-module-docstring)"""
 	def test_print_category_grouped_output(self, mock_stdout):
 		"""Test that category-grouped output prints correctly using format_violations_grouped."""
 		# Create rule with violations
-		rule = PylintScriptRule()
+		rule = PerspectiveScriptPylintRule()
 		rule.pylint_violations = [
 			PylintViolation(
 				category='E', code='E0602', message="Undefined variable 'x'", path='root.Button.script',
@@ -376,7 +376,7 @@ test.py:1:0: C0114: Missing module docstring (missing-module-docstring)"""
 	def test_print_category_grouped_output_severity_icons(self, mock_stdout):
 		"""Test that correct category labels are used in output."""
 		# Create rule with error and warning
-		rule = PylintScriptRule()
+		rule = PerspectiveScriptPylintRule()
 		rule.pylint_violations = [
 			PylintViolation(category='E', code='E0602', message="Error", path='s', line=1),
 			PylintViolation(category='W', code='W0611', message="Warning", path='s', line=2),
