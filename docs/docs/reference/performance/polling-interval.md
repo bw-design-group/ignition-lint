@@ -92,7 +92,7 @@ The behavior is:
 `now(11000)` is at or above the default `minimum_interval` of 10000 ms, so the rule passes. `now(0)` is also valid (polling disabled), and any expression that does not call `now` at all is ignored.
 
 ### Problematic code
-The fixture `tests/cases/ExpressionBindings/view.json` contains five real polling violations under the default configuration. One of them lives on the `BadPollingDateTimeInput` component:
+The fixture `tests/cases/views/ExpressionBindings/view.json` contains five real polling violations under the default configuration. One of them lives on the `BadPollingDateTimeInput` component:
 
 ```json
 {

@@ -88,7 +88,7 @@ class TestMyRule(BaseRuleTest):
 
 | Attribute / method | Purpose |
 | --- | --- |
-| `self.test_cases_dir` | Path to `tests/cases/` |
+| `self.test_cases_dir` | Path to `tests/cases/views/` |
 | `self.assert_rule_passes(view, config, rule_name)` | Asserts no violations |
 | `self.assert_rule_fails(view, config, rule_name, expected_count=None)` | Asserts at least one violation (or an exact count) |
 | `self.run_rule_on_view(view_content, config, rule_name)` | Run the rule and return its violations |
@@ -131,7 +131,7 @@ self.assertEqual(len(errors), 0)
 
 ### `load_test_view(case_name) → str`
 
-Loads a fixture from `tests/cases/<case_name>/view.json`:
+Loads a fixture from `tests/cases/views/<case_name>/view.json`:
 
 ```python
 view = load_test_view("PascalCase")
@@ -139,10 +139,10 @@ view = load_test_view("PascalCase")
 
 ## Case fixtures
 
-`tests/cases/` holds real view.json files used by both unit tests and integration tests. Each case is a directory:
+`tests/cases/views/` holds real view.json files used by both unit tests and integration tests. Each case is a directory:
 
 ```
-tests/cases/
+tests/cases/views/
 ├── PascalCase/
 │   └── view.json          # Valid PascalCase example
 ├── MixedCase/
@@ -156,7 +156,7 @@ tests/cases/
 
 When adding a fixture for a new rule:
 
-1. Create `tests/cases/<MyCase>/view.json` with the minimum structure that exercises the rule
+1. Create `tests/cases/views/<MyCase>/view.json` with the minimum structure that exercises the rule
 2. Reference it from your unit tests via `self.test_cases_dir / "<MyCase>" / "view.json"`
 3. Regenerate debug files: `python scripts/generate_debug_files.py <MyCase>`
 4. Commit both the fixture and its generated `debug/` artifacts
@@ -181,7 +181,7 @@ Each JSON file contains a list of test cases:
 [
   {
     "name": "PascalCase positive",
-    "view": "tests/cases/PascalCase/view.json",
+    "view": "tests/cases/views/PascalCase/view.json",
     "config": {
       "NamePatternRule": {
         "enabled": true,
@@ -193,7 +193,7 @@ Each JSON file contains a list of test cases:
   },
   {
     "name": "MixedCase negative",
-    "view": "tests/cases/MixedCase/view.json",
+    "view": "tests/cases/views/MixedCase/view.json",
     "config": {
       "NamePatternRule": {
         "enabled": true,
@@ -210,7 +210,7 @@ Run them via `python test_runner.py --run-config`.
 
 ## Golden-file tests
 
-`tests/unit/test_golden_files.py` validates that the model-building pipeline produces consistent output. For every case under `tests/cases/<Name>/`:
+`tests/unit/test_golden_files.py` validates that the model-building pipeline produces consistent output. For every case under `tests/cases/views/<Name>/`:
 
 - `flattened.json` — flattening output
 - `model.json` — serialized object model

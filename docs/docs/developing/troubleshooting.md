@@ -187,7 +187,7 @@ self.assert_rule_passes(view, self.rule_config, "MyRule")
 If no fixture matches your scenario, add one:
 
 ```bash
-mkdir tests/cases/MyScenario
+mkdir tests/cases/views/MyScenario
 # create view.json with the structure you need
 python scripts/generate_debug_files.py MyScenario
 ```
@@ -329,7 +329,7 @@ ign-lint --files path/to/view.json --debug-nodes expression_binding property
 
 ```bash
 python scripts/generate_debug_files.py MyTestCase
-ls tests/cases/MyTestCase/debug/
+ls tests/cases/views/MyTestCase/debug/
 # flattened.json   model.json   stats.json
 ```
 
@@ -344,7 +344,7 @@ from pathlib import Path
 
 rule_class = get_all_rules()["MyRule"]
 engine = LintEngine(config_path="rule_config.json")
-report = engine.lint_file(Path("tests/cases/PascalCase/view.json"))
+report = engine.lint_file(Path("tests/cases/views/PascalCase/view.json"))
 print(report)
 ```
 

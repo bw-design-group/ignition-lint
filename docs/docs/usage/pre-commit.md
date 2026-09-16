@@ -26,7 +26,41 @@ Install hooks:
 pre-commit install
 ```
 
-The hook automatically runs on `view.json` files. It uses ignition-lint's bundled `.ignition-lint-precommit.json` (warnings-favored config) by default.
+The hook automatically runs on `view.json` files. Its default `--config=.ignition-lint-precommit.json` resolves against your repository first; when no such file exists there, ign-lint falls back to the copy bundled in the package (warnings-favored, both domains) and says so in its output. Drop a `.ignition-lint-precommit.json` in your repository root to override it without touching the hook args.
+
+### Linting the script library too
+
+A second hook, `ign-lint-scripting`, runs the same `ign-lint` entry point on staged project-library modules (`ignition/script-python/**/code.py`). Files are dispatched to the `scripting` domain by type, so the rules that run are the scripting-domain rules from the same config (`LibraryScriptPylintRule`, `LibraryNamePatternRule`), with their own `pylintrc`:
+
+```yaml
+repos:
+  - repo: https://github.com/bw-design-group/ignition-lint
+    rev: v0.7.0
+    hooks:
+      - id: ign-lint
+      - id: ign-lint-scripting
+```
+
+Keeping the two domains as separate hooks is deliberate. Each hook fails on its own line in the pre-commit summary and in PR checks, so a reviewer can tell at a glance whether a commit broke a view or a library module, and library linting can be adopted (or given a different config) without touching the view hook. The CLI itself accepts a mixed list, so a single hook with `types_or: [json, python]` and `files: (view\.json|script-python/.*code\.py)$` also works if you prefer one results file.
+
+Replacing a plain `pylint` hook with `ign-lint-scripting`: point `LibraryScriptPylintRule`'s `pylintrc` kwarg at the rcfile the old hook used so findings stay identical, and note that `--ignore-warnings` lets W/C/R pylint categories through, whereas a raw `pylint` hook with `fail-on=E,F,W,C,R` blocked on all of them. Use a strict `category_mapping` (every category → `error`) or drop `--ignore-warnings` on this hook to keep the old strictness.
+
+Local-hook equivalent:
+
+```yaml
+  - repo: local
+    hooks:
+      - id: ign-lint-scripting
+        name: Ignition Lint (script library)
+        entry: ign-lint
+        language: python
+        types: [python]
+        files: script-python/.*code\.py$
+        args: ['--config=rule_config.json']
+        pass_filenames: true
+        additional_dependencies:
+          - 'git+https://github.com/bw-design-group/ignition-lint@v0.7.0'
+```
 
 :::note How files reach the hook
 Pre-commit passes the staged `view.json` paths to the hook as **positional arguments**
@@ -80,8 +114,8 @@ A common pattern is one config for pre-commit (warnings-favored, fast) and a sep
 
 ```
 project/
-├── .pre-commit-config.yaml         # references pre-commit-config.json
-├── pre-commit-config.json          # warning severity, lighter rule set
+├── .pre-commit-config.yaml         # references .ignition-lint-precommit.json
+├── .ignition-lint-precommit.json   # warning severity, lighter rule set (overrides the bundled default)
 └── rule_config.json                # full strictness, used in CI
 ```
 
@@ -128,7 +162,7 @@ Test fixtures often contain intentional violations. Exclude them:
 ```yaml
 hooks:
   - id: ign-lint
-    exclude: '^tests/.*|.*test.*\.json$'
+    exclude: '^tests/'  # only the tests directory; a pattern like '.*test.*' would also skip views such as LatestStatus
 ```
 
 ## Running manually
@@ -172,7 +206,7 @@ Use sparingly — `--no-verify` skips ALL pre-commit hooks, not just ignition-li
 
 ## Setting up a custom configuration
 
-Sample `pre-commit-config.json` favoring warnings:
+Sample `.ignition-lint-precommit.json` favoring warnings, covering both domains:
 
 ```json
 {
@@ -189,7 +223,19 @@ Sample `pre-commit-config.json` favoring warnings:
       "minimum_interval": 5000
     }
   },
-  "PylintScriptRule": {
+  "PerspectiveScriptPylintRule": {
+    "enabled": true,
+    "kwargs": {
+      "category_mapping": {
+        "F": "error",
+        "E": "error",
+        "W": "warning",
+        "C": "warning",
+        "R": "warning"
+      }
+    }
+  },
+  "LibraryScriptPylintRule": {
     "enabled": true,
     "kwargs": {
       "category_mapping": {

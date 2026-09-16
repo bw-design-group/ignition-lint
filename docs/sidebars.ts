@@ -33,7 +33,7 @@ const sidebars: SidebarsConfig = {
         {
           type: 'category',
           label: 'Naming',
-          items: ['rules/naming/name-pattern'],
+          items: ['rules/naming/name-pattern', 'rules/naming/library-name-pattern'],
         },
         {
           type: 'category',
@@ -61,7 +61,7 @@ const sidebars: SidebarsConfig = {
         {
           type: 'category',
           label: 'Scripts',
-          items: ['rules/scripts/pylint-script'],
+          items: ['rules/scripts/pylint-script', 'rules/scripts/library-script-pylint'],
         },
       ],
     },
@@ -73,7 +73,7 @@ const sidebars: SidebarsConfig = {
         {
           type: 'category',
           label: 'Naming',
-          items: ['reference/naming/name-pattern'],
+          items: ['reference/naming/name-pattern', 'reference/naming/library-name-pattern'],
         },
         {
           type: 'category',
@@ -101,7 +101,7 @@ const sidebars: SidebarsConfig = {
         {
           type: 'category',
           label: 'Scripts',
-          items: ['reference/scripts/pylint-script'],
+          items: ['reference/scripts/pylint-script', 'reference/scripts/library-script-pylint'],
         },
       ],
     },

@@ -1,12 +1,26 @@
 - id: ign-lint
   name: Ignition Lint
-  description: "Lints Ignition Perspective JSON files for style consistency and common issues"
+  description: "Lints Ignition Perspective view.json files for style consistency and common issues"
   entry: ign-lint
   language: python
   types: [json]
   files: view\.json$
   # No --files here: pre-commit appends the staged view.json paths as positional arguments
   # (pass_filenames). --files is for glob mode (standalone runs), not an explicit file list.
+  args: ['--config=.ignition-lint-precommit.json']
+  pass_filenames: true
+  minimum_pre_commit_version: '2.9.0'
+  additional_dependencies: []
+
+- id: ign-lint-scripting
+  name: Ignition Lint (script library)
+  description: "Lints Ignition project script library modules (script-python/**/code.py) with the scripting-domain rules"
+  entry: ign-lint
+  language: python
+  types: [python]
+  files: script-python/.*code\.py$
+  # Same entry point: files are dispatched to the scripting domain by type, and only the
+  # scripting rules (LibraryScriptPylintRule, LibraryNamePatternRule) from the config run.
   args: ['--config=.ignition-lint-precommit.json']
   pass_filenames: true
   minimum_pre_commit_version: '2.9.0'

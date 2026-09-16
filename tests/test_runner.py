@@ -119,7 +119,7 @@ def list_available_tests():
 
 	# List test case directories
 	print("\n3. Test Cases Directory Structure:")
-	cases_dir = base_dir / "cases"
+	cases_dir = base_dir / "cases" / "views"
 	if cases_dir.exists():
 		for case_dir in sorted(cases_dir.iterdir()):
 			if case_dir.is_dir():
@@ -140,7 +140,7 @@ def setup_test_environment():
 		base_dir / "fixtures",
 		base_dir / "configs",
 		base_dir / "results",
-		base_dir / "cases"  # In case it doesn't exist
+		base_dir / "cases" / "views"  # In case it doesn't exist
 	]
 
 	for dir_path in dirs_to_create:

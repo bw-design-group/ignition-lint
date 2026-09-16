@@ -75,7 +75,7 @@ class ConfigurableTestFramework:
 		if config_dir is None:
 			config_dir = tests_dir / "integration" / "configs"
 		if test_cases_dir is None:
-			test_cases_dir = tests_dir / "cases"
+			test_cases_dir = tests_dir / "cases" / "views"
 
 		self.config_dir = config_dir
 		self.test_cases_dir = test_cases_dir

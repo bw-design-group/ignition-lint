@@ -43,7 +43,7 @@ Create `rule_config.json` in your project root:
       "minimum_interval": 10000
     }
   },
-  "PylintScriptRule": {
+  "PerspectiveScriptPylintRule": {
     "enabled": true
   }
 }

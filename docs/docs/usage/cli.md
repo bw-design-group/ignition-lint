@@ -16,14 +16,23 @@ ign-lint [FILE ...] [--files <pattern>] [options]
 
 ## Selecting which files to lint
 
+`ign-lint` lints two kinds of Ignition resource, and every file is dispatched by type to its **lint domain**:
+
+| File | Domain | Rules |
+| --- | --- | --- |
+| `view.json` | `perspective` | Perspective view rules |
+| `ignition/script-python/**/code.py` (or a `code.py` with a sibling `resource.json`) | `scripting` | `LibraryScriptPylintRule`, `LibraryNamePatternRule` |
+
+Anything else is skipped with a note. A bare `ign-lint` run only searches for `view.json`; library scripts are opt-in through an explicit path, a `--files` glob, or the `ign-lint-scripting` pre-commit hook.
+
 There are **two distinct ways** to tell ignition-lint which files to check. Pick one — they
 are different input modes, not meant to be combined.
 
 ### 1. Explicit file list (positional arguments)
 
-Pass concrete file paths directly. They are used verbatim — no globbing, no `view.json` name
-filtering. This is what pre-commit's `pass_filenames` appends, and what you want when you
-already know the exact files.
+Pass concrete file paths directly. They are used verbatim — no globbing. Each file is
+classified into its domain; unrecognised files are reported and skipped. This is what
+pre-commit's `pass_filenames` appends, and what you want when you already know the exact files.
 
 ```bash
 # Single file
@@ -31,13 +40,16 @@ ign-lint path/to/view.json
 
 # Several explicit files
 ign-lint views/Home/view.json views/Login/view.json views/Admin/view.json
+
+# A library module (scripting domain)
+ign-lint ignition/script-python/General/Config/code.py
 ```
 
 ### 2. Glob mode (`--files`)
 
 `--files` takes a **single value**: one glob (or a comma-separated list of globs). The pattern
 is expanded by ignition-lint's own globber — not the shell — and results are filtered to
-`view.json`. Use this for standalone audits and CI full-repository scans.
+files some domain recognises. Use this for standalone audits and CI full-repository scans.
 
 ```bash
 # One glob (quote it so the shell doesn't expand it!)
@@ -45,6 +57,9 @@ ign-lint --files "**/view.json"
 
 # Multiple globs — comma-separated in ONE value
 ign-lint --files "views/**/view.json,components/**/view.json"
+
+# Both domains in one run
+ign-lint --files "**/view.json,**/script-python/**/code.py"
 ```
 
 :::warning `--files` is not repeatable
@@ -73,7 +88,7 @@ ign-lint --config rule_config.json --files "**/view.json" --verbose
 
 | Flag | Description |
 | --- | --- |
-| `--files <pattern>` | A **single** glob, or a comma-separated list of globs, expanded by ignition-lint's globber and filtered to `view.json` (default: `**/view.json`). **Not repeatable** — a second `--files` overrides the first. For an explicit set of files, pass them as positional arguments instead. See [Selecting which files to lint](#selecting-which-files-to-lint). |
+| `--files <pattern>` | A **single** glob, or a comma-separated list of globs, expanded by ignition-lint's globber and filtered to recognised resource files (default: `**/view.json`). **Not repeatable** — a second `--files` overrides the first. For an explicit set of files, pass them as positional arguments instead. See [Selecting which files to lint](#selecting-which-files-to-lint). |
 | `--config <path>` | Path to a `rule_config.json`. If omitted, every registered rule runs with defaults. |
 
 ### Whitelist
@@ -97,7 +112,7 @@ Rules that support it can rewrite the view to resolve violations (e.g. [NamePatt
 
 | Flag | Description |
 | --- | --- |
-| `--fix` | Apply **safe** fixes — isolated edits with no ripple effects |
+| `--fix` | Apply **safe** fixes — isolated edits with no ripple effects. Only JSON-backed domains (Perspective) support fixes; library scripts are linted with a one-line note |
 | `--fix-unsafe` | Apply **all** fixes, including unsafe ones that rewrite references (binding/script mentions of a renamed component). Enables fix mode on its own — do not also pass `--fix` |
 | `--fix-dry-run` | **Preview** what would be fixed without modifying any file |
 | `--fix-rules <names>` | Comma-separated list of rules whose fixes to apply (default: all fixable rules). Overrides `allow_fix: false` in config for the named rules; unrecognized names print a warning |
@@ -119,6 +134,8 @@ ign-lint --config rule_config.json --files "**/view.json" --fix-dry-run
 # Only apply fixes from specific rules
 ign-lint --config rule_config.json --files "**/view.json" --fix --fix-rules NamePatternRule
 ```
+
+`--fix-rules` accepts the deprecated `PylintScriptRule` name as an alias of `PerspectiveScriptPylintRule`.
 
 See [NamePatternRule → What `--fix` does](../rules/naming/name-pattern.md#what---fix-does) and [UnusedCustomPropertiesRule → What `--fix` does](../rules/properties/unused-custom-properties.md#what---fix-does) for how safe vs. unsafe fixes are classified.
 
@@ -167,7 +184,7 @@ Summary:
   Total issues: 2
 ```
 
-Each violation includes the JSON path inside the view, the rule name, the severity, and the message. For pylint-detected issues the format is grouped by category — see [PylintScriptRule](../rules/scripts/pylint-script.md).
+Each violation includes the JSON path inside the view, the rule name, the severity, and the message. For pylint-detected issues the format is grouped by category — see [PerspectiveScriptPylintRule](../rules/scripts/pylint-script.md) and [LibraryScriptPylintRule](../rules/scripts/library-script-pylint.md).
 
 ## Patterns and globbing
 
