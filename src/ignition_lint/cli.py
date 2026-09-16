@@ -7,6 +7,8 @@ import os
 import sys
 import argparse
 import glob
+import shutil
+import time
 from pathlib import Path
 from typing import List, Dict, Any, Optional
 
@@ -58,7 +60,10 @@ try:
 	from .common.fix_operations import FixOperationType
 	from .common.domain import DomainSpec, LintDomain
 	from .domains import classify_file, default_globs, get_spec
-	from .linter import LintEngine, LintResults, merge_lint_results, DEBUG_OUTPUT_MARKER
+	from .linter import (
+		LintEngine, LintResults, merge_lint_results, DEBUG_OUTPUT_MARKER, read_debug_output_manifest,
+		write_debug_output_manifest
+	)
 	from .rules import RULES_MAP
 	from .rules.registry import get_rules_for_domain, resolve_rule_name
 except ImportError:
@@ -75,7 +80,10 @@ except ImportError:
 	from ignition_lint.common.fix_operations import FixOperationType
 	from ignition_lint.common.domain import DomainSpec, LintDomain
 	from ignition_lint.domains import classify_file, default_globs, get_spec
-	from ignition_lint.linter import LintEngine, LintResults, merge_lint_results, DEBUG_OUTPUT_MARKER
+	from ignition_lint.linter import (
+		LintEngine, LintResults, merge_lint_results, DEBUG_OUTPUT_MARKER, read_debug_output_manifest,
+		write_debug_output_manifest
+	)
 	from ignition_lint.rules import RULES_MAP
 	from ignition_lint.rules.registry import get_rules_for_domain, resolve_rule_name
 
@@ -87,8 +95,6 @@ def cleanup_debug_files() -> None:
 	Debug files are Python scripts saved by PylintScriptRule for troubleshooting.
 	This removes files from previous runs (different PIDs) while preserving recent files.
 	"""
-	import time
-
 	# Determine debug directory using same logic as PylintScriptRule
 	cwd = os.getcwd()
 	debug_dir = None
@@ -145,37 +151,53 @@ def cleanup_debug_files() -> None:
 				pass
 
 
+def _prune_empty_parents(path: Path, root: Path) -> None:
+	"""Remove now-empty ancestors of ``path`` up to, but excluding, ``root``."""
+	current = path
+	while current != root and root in current.parents:
+		try:
+			current.rmdir()
+		except OSError:
+			return
+		current = current.parent
+
+
 def cleanup_debug_output_dir(debug_output_dir: str, min_age_seconds: float = 5.0) -> int:
 	"""
-	Remove previous runs' artifacts from a --debug-output directory.
+	Remove the previous run's folders from a --debug-output directory.
 
-	Only directories carrying the ign-lint marker file are touched, so pointing
-	--debug-output at an arbitrary existing folder never deletes user data. Entries
-	newer than ``min_age_seconds`` are kept: they belong to a parallel batch (pre-commit
-	runs several processes against the same directory). Returns the number removed.
+	Only folders listed in the marker manifest, i.e. ones ign-lint itself wrote, are
+	removed; nothing else in the directory is ever touched. Folders written within
+	``min_age_seconds`` are kept and carried over to the next run, since they belong to a
+	parallel batch (pre-commit runs several processes against the same directory).
+	Returns the number of folders removed.
 	"""
-	import shutil
-	import time
-
 	root = Path(debug_output_dir)
-	if not root.is_dir() or not (root / DEBUG_OUTPUT_MARKER).exists():
+	marker = root / DEBUG_OUTPUT_MARKER
+	if not root.is_dir() or not marker.exists():
 		return 0
 
+	root_resolved = root.resolve()
 	now = time.time()
+	kept: List[str] = []
 	removed = 0
-	for entry in root.iterdir():
-		if entry.name == DEBUG_OUTPUT_MARKER:
-			continue
+	for entry in read_debug_output_manifest(marker):
+		target = root / entry
 		try:
-			if now - entry.stat().st_mtime < min_age_seconds:
+			if target.is_symlink() or not target.is_dir():
 				continue
-			if entry.is_dir() and not entry.is_symlink():
-				shutil.rmtree(entry)
-			else:
-				entry.unlink()
+			resolved = target.resolve()
+			if root_resolved not in resolved.parents:
+				continue
+			if now - target.stat().st_mtime < min_age_seconds:
+				kept.append(entry)
+				continue
+			shutil.rmtree(target)
 			removed += 1
+			_prune_empty_parents(resolved.parent, root_resolved)
 		except OSError:
 			continue
+	write_debug_output_manifest(marker, kept)
 	return removed
 
 
@@ -187,8 +209,6 @@ def cleanup_old_batch_files(output_path: Path) -> None:
 	It removes batch files from previous runs (identified by different PIDs) but
 	preserves files from the current run (same PID or very recent).
 	"""
-	import time
-
 	if not output_path.parent.exists():
 		return
 
@@ -287,16 +307,28 @@ def make_unique_output_path(original_path: Path) -> Path:
 		batch_num += 1
 
 
+BUNDLED_CONFIG_DIR = Path(__file__).parent / '.config'
+DEFAULT_PRECOMMIT_CONFIG_NAME = '.ignition-lint-precommit.json'
+
+
 def load_config(config_path: str) -> Optional[dict]:
 	"""
 	Load configuration from a JSON file.
 
 	Returns the parsed dict on success (which may legitimately be empty when
 	the user wants to run all rules with default kwargs), or None if the file
-	cannot be read or parsed.
+	cannot be read or parsed. When the requested file is the default pre-commit
+	config and does not exist in the working directory, the copy bundled with
+	the package is used, so the shipped hooks work in any consumer repository.
 	"""
+	path = Path(config_path)
+	if not path.exists() and path.name == DEFAULT_PRECOMMIT_CONFIG_NAME:
+		bundled = BUNDLED_CONFIG_DIR / DEFAULT_PRECOMMIT_CONFIG_NAME
+		if bundled.exists():
+			print(f"ℹ️  {config_path} not found; using the bundled default {bundled}")
+			path = bundled
 	try:
-		with open(config_path, 'r', encoding='utf-8') as f:
+		with open(path, 'r', encoding='utf-8') as f:
 			return json.load(f)
 	except (FileNotFoundError, json.JSONDecodeError) as e:
 		print(f"Error loading config file {config_path}: {e}")
@@ -852,7 +884,14 @@ def _apply_fix_rules_override(args, rules: list) -> None:
 	fix_rules_arg = getattr(args, 'fix_rules', None)
 	if not fix_rules_arg:
 		return
-	requested = {resolve_rule_name(name.strip())[0] for name in fix_rules_arg.split(',') if name.strip()}
+	requested = set()
+	for raw_name in (name.strip() for name in fix_rules_arg.split(',')):
+		if not raw_name:
+			continue
+		canonical, was_alias = resolve_rule_name(raw_name)
+		if was_alias:
+			print(f"⚠️  --fix-rules: rule name '{raw_name}' is deprecated; use '{canonical}' instead")
+		requested.add(canonical)
 	loaded_names = {rule.__class__.__name__ for rule in rules}
 	for rule in rules:
 		if rule.__class__.__name__ in requested and hasattr(rule, 'allow_fix'):
@@ -875,6 +914,10 @@ def setup_linter(args, domains: List[LintDomain]) -> Dict[LintDomain, LintEngine
 	"""
 	engines: Dict[LintDomain, LintEngine] = {}
 
+	if args.debug_output and Path(args.debug_output).exists() and not Path(args.debug_output).is_dir():
+		print(f"❌ --debug-output target is not a directory: {args.debug_output}")
+		sys.exit(1)
+
 	if args.stats_only:
 		for domain in domains:
 			engines[domain] = LintEngine([], debug_output_dir=args.debug_output)
@@ -891,7 +934,9 @@ def setup_linter(args, domains: List[LintDomain]) -> Dict[LintDomain, LintEngine
 			display_name = get_spec(domain).display_name
 			rules, rule_statuses = create_rules_from_config(sections.get(domain, {}), domain)
 			if not rules:
-				print(f"ℹ️  No rules configured for {display_name} files; skipping that domain")
+				print(
+					f"ℹ️  No rules configured for {display_name} files; they will be listed as skipped"
+				)
 				continue
 			_apply_fix_rules_override(args, rules)
 			engines[domain] = LintEngine(rules, debug_output_dir=args.debug_output)
@@ -1437,11 +1482,13 @@ def apply_and_report_fixes(fix_result, json_data, file_path):
 
 def print_final_summary(
 	processed_files: int, total_warnings: int, total_errors: int, files_with_issues: int, stats_only: bool,
-	ignore_warnings: bool = False
+	ignore_warnings: bool = False, skipped_files: int = 0
 ):
 	"""Print the final summary of the linting process."""
 	print("\n📈 Summary:")
 	print(f"  Files processed: {processed_files}")
+	if skipped_files:
+		print(f"  ⏭️  Files skipped (no rules for their domain): {skipped_files}")
 
 	if not stats_only:
 		total_issues = total_warnings + total_errors
@@ -1696,12 +1743,16 @@ def main():
 	total_errors = 0
 	files_with_issues = 0
 	processed_files = 0
+	skipped_files = 0
 	results_buffer = []  # Collect results for file output
 
 	for domain, domain_paths in files_by_domain.items():
-		if domain not in engines:
-			continue
 		spec = get_spec(domain)
+		if domain not in engines:
+			for file_path in domain_paths:
+				print(f"⏭️  Skipped (no rules configured for {spec.display_name} files): {file_path}")
+			skipped_files += len(domain_paths)
+			continue
 		for file_path in domain_paths:
 			file_warnings, file_errors, file_timings, lint_results = process_single_file(
 				file_path, spec, engines[domain], args, performance_timer
@@ -1769,7 +1820,8 @@ def main():
 
 	# Print final summary
 	print_final_summary(
-		processed_files, total_warnings, total_errors, files_with_issues, args.stats_only, args.ignore_warnings
+		processed_files, total_warnings, total_errors, files_with_issues, args.stats_only, args.ignore_warnings,
+		skipped_files
 	)
 
 

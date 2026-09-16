@@ -244,5 +244,62 @@ class TestExtensibilityProof(unittest.TestCase):
 			self.rule_registry._validated_rules.discard('NoSelectStarRule')  # pylint: disable=protected-access
 
 
+class TestCliReviewFixes(unittest.TestCase):
+	"""Behaviour pinned down by the PR #130 review: bundled default config, skipped domains, alias notice."""
+
+	def test_bundled_precommit_config_is_used_when_missing_from_cwd(self):
+		"""The shipped hooks pass --config=.ignition-lint-precommit.json; it must work from any consumer repo."""
+		with tempfile.TemporaryDirectory() as tmp:
+			view_dir = Path(tmp) / 'views' / 'Dashboard'
+			view_dir.mkdir(parents=True)
+			view_dir.joinpath('view.json').write_text((VIEWS_DIR / 'PascalCase' /
+									'view.json').read_text(encoding='utf-8'),
+									encoding='utf-8')
+			result = subprocess.run([
+				sys.executable,
+				str(MAIN_PY), '--config=.ignition-lint-precommit.json', 'views/Dashboard/view.json'
+			], capture_output=True, text=True, timeout=120, check=False, cwd=tmp)
+			self.assertNotIn('No valid configuration found', result.stdout)
+			self.assertIn('using the bundled default', result.stdout)
+			self.assertIn('Files processed: 1', result.stdout)
+
+	def test_other_missing_config_still_fails(self):
+		"""Only the default pre-commit config name falls back to the bundled copy."""
+		result = _run_cli(['--config', 'does-not-exist.json', str(VIEWS_DIR / 'PascalCase' / 'view.json')])
+		self.assertEqual(result.returncode, 1)
+		self.assertIn('No valid configuration found', result.stdout)
+
+	def test_files_of_a_domain_without_rules_are_reported_as_skipped(self):
+		"""A domain with every rule disabled lists its files as skipped instead of dropping them silently."""
+		with tempfile.TemporaryDirectory() as tmp:
+			config = {
+				name: {
+					'enabled': False
+				}
+				for name in cli.RULES_MAP
+				if name not in ('LibraryScriptPylintRule', 'LibraryNamePatternRule')
+			}
+			cfg = Path(tmp) / 'scripting_only.json'
+			cfg.write_text(json.dumps(config), encoding='utf-8')
+			view = str(VIEWS_DIR / 'PascalCase' / 'view.json')
+			script = str(SCRIPTING_DIR / 'clean' / 'code.py')
+			result = _run_cli(['--config', str(cfg), view, script])
+			self.assertIn(
+				f'Skipped (no rules configured for Perspective view files): {view}', result.stdout
+			)
+			self.assertIn('Files skipped (no rules for their domain): 1', result.stdout)
+			self.assertIn('Files processed: 1', result.stdout)
+
+	def test_fix_rules_alias_prints_deprecation_notice(self):
+		"""--fix-rules PylintScriptRule keeps working and says the name is deprecated."""
+		result = _run_cli([
+			'--config', 'rule_config.json', '--fix-dry-run', '--fix-rules', 'PylintScriptRule',
+			str(VIEWS_DIR / 'PylintViolations' / 'view.json')
+		])
+		self.assertIn(
+			"rule name 'PylintScriptRule' is deprecated; use 'PerspectiveScriptPylintRule'", result.stdout
+		)
+
+
 if __name__ == '__main__':
 	unittest.main()
