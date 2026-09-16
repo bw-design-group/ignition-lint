@@ -363,5 +363,28 @@
   "tag_bindings": {
     "count": 0,
     "nodes": []
+  },
+  "view": {
+    "count": 1,
+    "nodes": [
+      {
+        "default_size": {
+          "height": null,
+          "width": null
+        },
+        "folder_path": [],
+        "name": "inconsistentCase",
+        "node_counts": {
+          "component": 7,
+          "property": 36
+        },
+        "node_type": "view",
+        "path": "inconsistentCase",
+        "root_container_type": "ia.container.flex",
+        "total_nodes": 43,
+        "view_path": "inconsistentCase",
+        "views_root_found": true
+      }
+    ]
   }
 }

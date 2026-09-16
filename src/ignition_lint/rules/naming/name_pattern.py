@@ -275,6 +275,7 @@ class NamePatternRule(FixableMixin, LintingRule):
 			NodeType.MESSAGE_HANDLER: lambda node: getattr(node, 'message_type', ''),
 			NodeType.CUSTOM_METHOD: lambda node: getattr(node, 'name', ''),
 			NodeType.PROPERTY: lambda node: getattr(node, 'name', ''),
+			NodeType.VIEW: lambda node: getattr(node, 'name', ''),
 			# EVENT_HANDLER is intentionally omitted - event names are framework-defined (e.g., onActionPerformed)
 		}
 
@@ -318,6 +319,12 @@ class NamePatternRule(FixableMixin, LintingRule):
 					rules['pattern'] = pattern
 					if 'pattern_description' not in rules:
 						rules['pattern_description'] = conv_info['description']
+
+	def _default_skip_names(self, node_type: NodeType) -> Set[str]:
+		"""The implicit ``root`` exemption covers the root component and property, never a view or folder."""
+		if node_type == NodeType.VIEW and not self.config.skip_names:
+			return set()
+		return self.skip_names
 
 	def _get_node_specific_config(self, node_type: NodeType, key: str, default_value):
 		"""Get a configuration value that might be overridden for a specific node type."""
@@ -385,23 +392,30 @@ class NamePatternRule(FixableMixin, LintingRule):
 
 		return False
 
-	def _validate_name(self, node: ViewNode, name: str) -> list:
+	def _validate_name(self, node: ViewNode, name: str, label: str = "Name") -> list:
 		"""
 		Validate a name according to the rules and return a list of error messages.
 		Returns empty list if validation passes.
+
+		Args:
+			node: The node whose type selects the applicable configuration
+			name: The name to validate
+			label: Noun used in messages ("Name" for the node's own name, "Folder name" for view folders)
 		"""
 		errors = []
 		node_type = node.node_type
 
 		# Skip validation for certain names
-		skip_names = self._get_node_specific_config(node_type, 'skip_names', self.skip_names)
+		skip_names = self._get_node_specific_config(
+			node_type, 'skip_names', self._default_skip_names(node_type)
+		)
 		if name in skip_names:
 			return errors
 
 		# Check forbidden names
 		forbidden_names = self._get_node_specific_config(node_type, 'forbidden_names', self.forbidden_names)
 		if name in forbidden_names:
-			errors.append(f"Name '{name}' is forbidden for {node_type.value}")
+			errors.append(f"{label} '{name}' is forbidden for {node_type.value}")
 			return errors
 
 		# Check length constraints
@@ -410,13 +424,13 @@ class NamePatternRule(FixableMixin, LintingRule):
 
 		if len(name) < min_length:
 			errors.append(
-				f"Name '{name}' is too short (minimum {min_length} characters) for {node_type.value}"
+				f"{label} '{name}' is too short (minimum {min_length} characters) for {node_type.value}"
 			)
 			return errors
 
 		if max_length and len(name) > max_length:
 			errors.append(
-				f"Name '{name}' is too long (maximum {max_length} characters) for {node_type.value}"
+				f"{label} '{name}' is too long (maximum {max_length} characters) for {node_type.value}"
 			)
 			return errors
 
@@ -428,7 +442,7 @@ class NamePatternRule(FixableMixin, LintingRule):
 
 		processed_name = self._process_abbreviations(name, node_type)
 		if not re.match(pattern, processed_name):
-			error_msg = f"Name '{name}' doesn't follow {pattern_description} for {node_type.value}"
+			error_msg = f"{label} '{name}' doesn't follow {pattern_description} for {node_type.value}"
 
 			# Check if we should show suggestions
 			# suggestion_convention is used for custom patterns, convention for predefined patterns
@@ -494,22 +508,31 @@ class NamePatternRule(FixableMixin, LintingRule):
 		"""Generic visit method that handles all node types."""
 		name = self._extract_name_from_node(node)
 		if name:
-			validation_errors = self._validate_name(node, name)
-			for error in validation_errors:
-				# Use node-specific severity if available, otherwise fall back to global severity
-				node_severity = self._get_node_specific_config(
-					node.node_type, 'severity', self.severity
-				)
-				violation_msg = f"{node.path}: {error}"
-				self.add_violation(violation_msg, node_severity)
+			self._report_name_violations(node, name)
 
-				# Generate fix for component naming violations when fix context is available
-				if node.node_type == NodeType.COMPONENT and self.has_fix_context:
-					self._generate_component_fix(node, name, violation_msg)
+	def _report_name_violations(self, node: ViewNode, name: str, label: str = "Name"):
+		"""Validate one name attached to a node and record any violations (and component fixes)."""
+		for error in self._validate_name(node, name, label):
+			# Use node-specific severity if available, otherwise fall back to global severity
+			node_severity = self._get_node_specific_config(node.node_type, 'severity', self.severity)
+			violation_msg = f"{node.path}: {error}"
+			self.add_violation(violation_msg, node_severity)
+
+			# Generate fix for component naming violations when fix context is available
+			if node.node_type == NodeType.COMPONENT and self.has_fix_context:
+				self._generate_component_fix(node, name, violation_msg)
 
 	# Specific visit methods that delegate to the generic method
 	def visit_component(self, node: ViewNode):
 		self.visit_generic(node)
+
+	def visit_view(self, node: ViewNode):
+		"""Validate the view name and, unless ``check_view_folders`` is false on the ``view`` entry, every parent folder."""
+		self.visit_generic(node)
+		if not self._get_node_specific_config(NodeType.VIEW, 'check_view_folders', True):
+			return
+		for folder_name in getattr(node, 'folder_path', []):
+			self._report_name_violations(node, folder_name, label="Folder name")
 
 	def visit_message_handler(self, node: ViewNode):
 		self.visit_generic(node)
