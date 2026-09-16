@@ -14,7 +14,7 @@ See the [user guide](../../rules/naming/name-pattern.md). This page is the compl
 :::
 
 ## Purpose
-Validates that names attached to view nodes (components, properties, custom methods, and message handlers) match a configured naming convention or regex pattern. The same rule instance can apply different conventions, length limits, and severities per node type.
+Validates that names attached to view nodes (components, properties, custom methods, and message handlers) match a configured naming convention or regex pattern. When the `view` node type is targeted it also validates the view's own name and each parent folder name in the project's view tree. The same rule instance can apply different conventions, length limits, and severities per node type.
 
 ## Severity
 `warning` by default — naming violations are stylistic and rarely block runtime behavior, so the rule defers to teams that want to escalate them. Configurable via the `severity` option (or per node type inside `node_type_specific_rules`).
@@ -22,13 +22,14 @@ Validates that names attached to view nodes (components, properties, custom meth
 ## What it checks
 For every node whose `node_type` is in `target_node_types`, the rule:
 
-- Extracts the node's name (`meta.name` for components, the property key for properties, `name`/`message_type` for scripts).
+- Extracts the node's name (`meta.name` for components, the property key for properties, `name`/`message_type` for scripts, the directory containing `view.json` for the view).
 - Skips the name if it appears in `skip_names` (defaults to `{'root'}` for properties — components inherit the same default through the `_get_node_specific_config` lookup).
 - Reports a violation if the name appears in `forbidden_names`.
 - Reports a violation if `len(name) < min_length` or (when set) `len(name) > max_length`.
 - Reports a violation if the name does not match the active regex (`pattern` from `convention`, the `custom_pattern` override, or a per-node override).
 - Skips properties that are CSS, position, or SVG path data — see [Edge cases & exemptions](#edge-cases--exemptions).
 - Optionally suggests a corrected name (using `suggestion_convention` or the active `convention`) and, when fix mode is active, emits a `Fix` to rename the component.
+- For `view` nodes, additionally validates every entry of `folder_path` with the same `view` configuration, labelling those messages `Folder name` instead of `Name`.
 
 Event handler nodes are intentionally never validated — Ignition defines those names (`onActionPerformed`, etc.).
 
@@ -59,6 +60,8 @@ Raw regex pattern. Overrides `convention` when set. The rule applies it as-is vi
 **Type:** `set[NodeType] | list[str]` &nbsp;·&nbsp; **Default:** `{NodeType.COMPONENT}`
 
 Node types this rule applies to. Strings like `"component"` are converted to `NodeType` enums during config preprocessing. When `node_type_specific_rules` is set and `target_node_types` is omitted, target types are auto-derived from the keys of `node_type_specific_rules`.
+
+Include `"view"` to validate the view's own name and every parent folder — see [View and folder names](#view-and-folder-names).
 
 ---
 
@@ -135,7 +138,7 @@ Default severity for emitted violations. Per-node `severity` keys inside `node_t
 ### Advanced
 
 #### `name_extractors`
-**Type:** `dict[NodeType, Callable[[ViewNode], str]] | None` &nbsp;·&nbsp; **Default:** Built-in extractors for `COMPONENT`, `MESSAGE_HANDLER`, `CUSTOM_METHOD`, `PROPERTY`
+**Type:** `dict[NodeType, Callable[[ViewNode], str]] | None` &nbsp;·&nbsp; **Default:** Built-in extractors for `COMPONENT`, `MESSAGE_HANDLER`, `CUSTOM_METHOD`, `PROPERTY`, `VIEW`
 
 Custom callables for extracting a name from a node. Each callable receives the `ViewNode` and returns the name string (or `None` to skip). Override only if you're adding a new node type or you need to extract names from a non-standard attribute. Cannot be set via `rule_config.json` — programmatic API only.
 
@@ -232,6 +235,40 @@ A combined PascalCase/SCREAMING_SNAKE_CASE pattern is a common real-world overri
 }
 ```
 
+## View and folder names
+
+The `view` node is the only node not built from the view.json contents. `ViewModelBuilder` derives it from the file's location (`common/view_path.py`):
+
+- **View name** — the directory that contains `view.json`.
+- **Folder path** — every directory between the views root and the view directory. View folders are plain directories with no resource files.
+- **Views root** — the `views` directory directly under `com.inductiveautomation.perspective` (an exported Ignition project). If that layout is absent, the first bare `views` segment in the path is used. If neither exists the view is still named after its directory but `folder_path` is empty and `views_root_found` is `False`, so working-directory names are never reported as folders.
+
+The node's `path` (the prefix on every violation message) is the slash-separated view path, e.g. `Screens/Line1/Overview`. The node also carries `root_container_type`, `default_size` and per-type `node_counts`, which this rule does not use but other rules can.
+
+Given `views/Title Case Folder/Title Case View/view.json` and this config:
+
+```json
+{
+  "NamePatternRule": {
+    "enabled": true,
+    "kwargs": {
+      "convention": "PascalCase",
+      "target_node_types": ["view"],
+      "severity": "error"
+    }
+  }
+}
+```
+
+the rule reports two violations:
+
+```
+Title Case Folder/Title Case View: Name 'Title Case View' doesn't follow PascalCase for view (suggestion: 'TitleCaseView')
+Title Case Folder/Title Case View: Folder name 'Title Case Folder' doesn't follow PascalCase for view (suggestion: 'TitleCaseFolder')
+```
+
+Folders always share the `view` configuration, including any `"view"` entry in `node_type_specific_rules`; there is no way to check the view name without its folders. A `pattern` override on `view` (e.g. `^([A-Z][a-zA-Z0-9]*|[A-Z][a-z]*(\\s[A-Z][a-z]*)*)$` for PascalCase or Title Case) is the way to allow more than one style on the tree. A badly named folder is reported once per view inside it, because each `view.json` is linted independently. No `Fix` is ever emitted for view or folder names. The fixtures under `tests/cases/views/Naming/` exercise these cases.
+
 ## Examples
 
 ### Valid
@@ -297,6 +334,7 @@ Run against `convention: "PascalCase"`, every name except `GoodLabelName` produc
 - Forbidden name: `<path>: Name '<name>' is forbidden for <node_type>`
 - Too short: `<path>: Name '<name>' is too short (minimum <min_length> characters) for <node_type>`
 - Too long: `<path>: Name '<name>' is too long (maximum <max_length> characters) for <node_type>`
+- View folder (any of the above): `<view_path>: Folder name '<folder>' ... for view`
 
 ## Auto-fix support
 `NamePatternRule` inherits `FixableMixin` and emits `Fix` objects only for `COMPONENT` violations and only when the `LintEngine` is invoked with `json_data` and a `path_translator` (i.e. fix mode is active). A fix is generated when `_suggest_name` returns a name that is non-empty and different from the current one.

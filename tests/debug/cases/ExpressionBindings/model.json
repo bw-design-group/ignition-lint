@@ -432,5 +432,34 @@
   "tag_bindings": {
     "count": 0,
     "nodes": []
+  },
+  "view": {
+    "count": 1,
+    "nodes": [
+      {
+        "default_size": {
+          "height": null,
+          "width": null
+        },
+        "folder_path": [],
+        "name": "ExpressionBindings",
+        "node_counts": {
+          "component": 4,
+          "custom_method": 1,
+          "event_handler": 1,
+          "expression_binding": 8,
+          "expression_struct_binding": 1,
+          "property": 19,
+          "property_binding": 2,
+          "property_change_script": 1
+        },
+        "node_type": "view",
+        "path": "ExpressionBindings",
+        "root_container_type": "ia.container.flex",
+        "total_nodes": 37,
+        "view_path": "ExpressionBindings",
+        "views_root_found": true
+      }
+    ]
   }
 }

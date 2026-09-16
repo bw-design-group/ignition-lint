@@ -106,6 +106,7 @@ class LintEngine:
 		self.rules = rules
 		self.model_builder = ViewModelBuilder()
 		self.flattened_json: Dict[str, Any] = {}
+		self.source_file_path: Optional[str] = None
 		self.view_model: Dict[str, List[Any]] = {}
 		self.last_loaded: Optional[LoadedFile] = None
 		self.debug_output_dir = debug_output_dir
@@ -115,15 +116,33 @@ class LintEngine:
 
 	# ------------------------------------------------------------------ loading
 
-	def get_view_model(self) -> Dict[str, List[Any]]:
-		"""Build the Perspective view model from ``self.flattened_json``."""
-		return self.model_builder.build_model(self.flattened_json)
+	def get_view_model(self, source_file_path: Optional[str] = None) -> Dict[str, List[Any]]:
+		"""
+		Build the Perspective view model from ``self.flattened_json``.
 
-	def _load_view(self, flattened_json: Dict[str, Any], json_data=None) -> LoadedFile:
-		"""Perspective-only loader used by ``process()``; reuses the model when the input is unchanged."""
-		if self.flattened_json is not flattened_json or not self.view_model:
+		Args:
+			source_file_path: Path of the view.json being modeled. When given, the model
+				includes a 'view' node carrying the view name and folder path derived
+				from the file location.
+		"""
+		return self.model_builder.build_model(self.flattened_json, source_file_path=source_file_path)
+
+	def _load_view(
+		self, flattened_json: Dict[str, Any], json_data=None, *, source_file_path: Optional[str] = None
+	) -> LoadedFile:
+		"""
+		Perspective-only loader used by ``process()`` and the dict form of the analysis helpers.
+
+		Reuses the current model when both the flattened JSON (by identity) and the source
+		path are unchanged; the path matters because it is what the 'view' node is built from.
+		"""
+		if (
+			self.flattened_json is not flattened_json or self.source_file_path != source_file_path or
+			not self.view_model
+		):
 			self.flattened_json = flattened_json
-			self.view_model = self.get_view_model()
+			self.source_file_path = source_file_path
+			self.view_model = self.get_view_model(source_file_path)
 		loaded = LoadedFile(
 			nodes=collect_nodes(self.view_model), model=self.view_model, flattened_json=flattened_json,
 			json_data=json_data
@@ -131,9 +150,10 @@ class LintEngine:
 		self.last_loaded = loaded
 		return loaded
 
-	def _set_loaded(self, loaded: LoadedFile) -> None:
+	def _set_loaded(self, loaded: LoadedFile, source_file_path: Optional[str] = None) -> None:
 		self.last_loaded = loaded
 		self.flattened_json = loaded.flattened_json
+		self.source_file_path = source_file_path
 		self.view_model = loaded.model
 
 	# ------------------------------------------------------------------ linting
@@ -147,7 +167,7 @@ class LintEngine:
 		loader returned a JSON document, so non-JSON domains simply never see fixes.
 		"""
 		loaded = spec.load(Path(path))
-		self._set_loaded(loaded)
+		self._set_loaded(loaded, str(path))
 
 		if self.debug_output_dir:
 			self._save_debug_files(str(path))
@@ -169,12 +189,13 @@ class LintEngine:
 
 		Args:
 			flattened_json: The flattened JSON data to lint.
-			source_file_path: Optional path to the source file being linted.
+			source_file_path: Optional path to the source file being linted. Also the
+				source of the 'view' node (view name and folder path).
 			enable_timing: Whether to time rule execution.
 			json_data: Optional original JSON data (needed for fix mode).
 			path_translator: Optional PathTranslator instance (needed for fix mode).
 		"""
-		loaded = self._load_view(flattened_json, json_data)
+		loaded = self._load_view(flattened_json, json_data, source_file_path=source_file_path)
 
 		if self.debug_output_dir and source_file_path:
 			self._save_debug_files(source_file_path)
@@ -310,26 +331,28 @@ class LintEngine:
 
 	# --------------------------------------------------------------- analysis
 
-	def _nodes_for_analysis(self, source=None) -> Tuple[List[Any], Dict[str, List[Any]]]:
+	def _nodes_for_analysis(self, source=None,
+				source_file_path: Optional[str] = None) -> Tuple[List[Any], Dict[str, List[Any]]]:
 		"""
 		Resolve ``source`` to ``(nodes, model)``.
 
 		``source`` may be a LoadedFile, a flattened Perspective view (dict) or None for the
-		most recently loaded file.
+		most recently loaded file. ``source_file_path`` only applies to the dict form and
+		is what gives the model its 'view' node.
 		"""
 		if isinstance(source, LoadedFile):
 			self._set_loaded(source)
 			return source.nodes, source.model
 		if isinstance(source, dict):
-			loaded = self._load_view(source)
+			loaded = self._load_view(source, source_file_path=source_file_path)
 			return loaded.nodes, loaded.model
 		if self.last_loaded is not None:
 			return self.last_loaded.nodes, self.last_loaded.model
 		return [], {}
 
-	def get_model_statistics(self, source=None) -> Dict[str, Any]:
+	def get_model_statistics(self, source=None, source_file_path: Optional[str] = None) -> Dict[str, Any]:
 		"""Get statistics about the parsed model for debugging/analysis."""
-		all_nodes, model = self._nodes_for_analysis(source)
+		all_nodes, model = self._nodes_for_analysis(source, source_file_path)
 
 		node_type_counts = {}
 		for node_type in NodeType:
@@ -366,9 +389,10 @@ class LintEngine:
 				coverage[rule_name] = {'target_types': ['all'], 'applicable_node_count': len(all_nodes)}
 		return coverage
 
-	def debug_nodes(self, source=None, node_types: List[str] = None) -> List[Dict]:
+	def debug_nodes(self, source=None, node_types: List[str] = None,
+			source_file_path: Optional[str] = None) -> List[Dict]:
 		"""Get detailed information about nodes for debugging."""
-		_, model = self._nodes_for_analysis(source)
+		_, model = self._nodes_for_analysis(source, source_file_path)
 		all_nodes = [node for node_list in model.values() for node in node_list]
 
 		if node_types:
@@ -385,9 +409,9 @@ class LintEngine:
 
 		return [node.serialize() for node in all_nodes]
 
-	def analyze_rule_impact(self, source=None) -> Dict[str, Dict]:
+	def analyze_rule_impact(self, source=None, source_file_path: Optional[str] = None) -> Dict[str, Dict]:
 		"""Analyze which nodes each rule would target."""
-		_, model = self._nodes_for_analysis(source)
+		_, model = self._nodes_for_analysis(source, source_file_path)
 		all_nodes = [node for node_list in model.values() for node in node_list]
 
 		analysis = {}
@@ -420,6 +444,8 @@ class LintEngine:
 		"""Get a brief summary of what a node represents."""
 		if node.node_type == NodeType.COMPONENT:
 			return f"Component '{node.name}' of type '{getattr(node, 'type', 'unknown')}'"
+		if node.node_type == NodeType.VIEW:
+			return f"View '{node.name}' in folder '{'/'.join(node.folder_path) or '(views root)'}'"
 		if node.node_type == NodeType.EXPRESSION_BINDING:
 			expr_preview = node.expression[:50] + '...' if len(node.expression) > 50 else node.expression
 			return f"Expression: {expr_preview}"

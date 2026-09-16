@@ -137,5 +137,28 @@
   "tag_bindings": {
     "count": 0,
     "nodes": []
+  },
+  "view": {
+    "count": 1,
+    "nodes": [
+      {
+        "default_size": {
+          "height": null,
+          "width": null
+        },
+        "folder_path": [],
+        "name": "camelCase",
+        "node_counts": {
+          "component": 2,
+          "property": 9
+        },
+        "node_type": "view",
+        "path": "camelCase",
+        "root_container_type": "ia.container.flex",
+        "total_nodes": 11,
+        "view_path": "camelCase",
+        "views_root_found": true
+      }
+    ]
   }
 }

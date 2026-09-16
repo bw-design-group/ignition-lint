@@ -2,7 +2,7 @@
 Regenerate these files whenever the view.json is updated or when model builder logic changes.
 These files help developers diagnose issues with the model building and rule application processes.
 
-This directory contains debug information generated from `tests/cases/UPPER_CASE/view.json`:
+This directory contains debug information generated from `tests/cases/views/UPPER_CASE/view.json`:
 
 ## Files
 

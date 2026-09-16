@@ -56,6 +56,13 @@
           "min_length": 2,
           "severity": "error",
           "_severity_comment": "Custom methods: Use 'error' for consistent Python-style method naming"
+        },
+        "view": {
+          "convention": "PascalCase",
+          "min_length": 3,
+          "severity": "error",
+          "_severity_comment": "Views AND every parent folder below the views root: Use 'error' to keep the project view tree consistent (e.g. PascalCase, not Title Case). Derived from the view.json location, not its contents. Remove this entry to skip view/folder checks entirely.",
+          "_pattern_comment": "To allow more than one style on the view tree, replace 'convention' with a pattern, e.g. PascalCase or Title Case: \"pattern\": \"^([A-Z][a-zA-Z0-9]*|[A-Z][a-z]*(\\\\s[A-Z][a-z]*)*)$\", \"pattern_description\": \"PascalCase or Title Case\", \"suggestion_convention\": \"PascalCase\""
         }
       },
       "_pattern_example_comment": "Example using custom pattern with suggestion_convention:",
@@ -179,15 +186,17 @@
       "component": "User-defined component names (PascalCase)",
       "property": "User-defined custom property names (camelCase)",
       "message_handler": "User-defined message type names (kebab-case)",
-      "custom_method": "User-defined custom method names (snake_case)"
+      "custom_method": "User-defined custom method names (snake_case)",
+      "view": "View name (directory containing view.json) and its parent folder names (PascalCase). Views root is com.inductiveautomation.perspective/views or the first 'views' directory; with no root only the view name is checked."
     },
     "NamePatternRule_config": {
-      "severity": "Configurable per node type: 'error' or 'warning'. Each node type (component, property, message_handler, custom_method) can have its own severity level.",
+      "severity": "Configurable per node type: 'error' or 'warning'. Each node type (component, property, message_handler, custom_method, view) can have its own severity level.",
       "severity_use_cases": {
         "component_error": "Recommended - Strictly enforce component naming standards (PascalCase) as these are visible throughout the application",
         "property_warning": "Recommended - Allow flexibility in custom property naming while still providing guidance",
         "message_handler_warning": "Recommended - Allow flexibility in message type naming to accommodate team conventions",
-        "custom_method_error": "Recommended - Enforce Python-style method naming (snake_case) for consistency with Ignition scripting"
+        "custom_method_error": "Recommended - Enforce Python-style method naming (snake_case) for consistency with Ignition scripting",
+        "view_error": "Recommended - View and folder names appear in navigation, page config, and embedded-view paths; renaming later means moving directories and updating every reference (no auto-fix is offered)"
       },
       "configuration_example": "Set severity per node type in node_type_specific_rules: {\"component\": {\"convention\": \"PascalCase\", \"severity\": \"error\"}, \"property\": {\"convention\": \"camelCase\", \"severity\": \"warning\"}}",
       "granularity": "Per-node-type severity allows fine-grained control - enforce strict standards where it matters (components, methods) while allowing flexibility elsewhere (properties, message handlers)",
