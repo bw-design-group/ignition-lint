@@ -55,7 +55,11 @@ The rule must be constructible with no arguments (registry contract).
 4. Inline fallback `--disable=all --enable=unused-import,undefined-variable,syntax-error,invalid-name`.
 
 ### The bundled rcfile
-Derived from the Perspective rcfile with these differences: `additional-builtins=system,unicode,long` (no view-scope or project-specific names), `ignored-modules=com.inductiveautomation,java,javax,org`, `jobs=1`, and the WebDev `do*.py` ignore list removed. Everything else (Python 2.7 compatibility disables, naming regexes, complexity limits) is identical.
+Derived from the Perspective rcfile. The effective differences are: `additional-builtins` declares `system`, `unicode`, `long` and the Jython 2.7 builtins (`xrange`, `basestring`, `raw_input`, `reduce`, `cmp`, `unichr`, `file`, `execfile`, `reload`, `apply`, `buffer`, `intern`, `coerce`, `StandardError`) but none of the view-scope or project-specific names; `ignored-modules=com.inductiveautomation,java,javax,org`; `jobs=1`; the WebDev `do*.py` `ignore` list is removed; and `import-outside-toplevel` stays enabled (the Perspective rcfile disables it because a view's scripts are aggregated into one module). Naming regexes, complexity limits and the Python 2.7 compatibility disables are the same in both.
+
+If pylint cannot start with the resolved rcfile (for example `jobs=abc`), the rule reports one `F0001` violation quoting pylint's message instead of aborting the run. Messages pylint raises about the configuration itself (`E0015 unrecognized-option`) are reported without a line number and name the rcfile, never a line of the module.
+
+Library modules are Jython 2.7 sources linted by a Python 3 pylint. Python-2-only syntax such as `print "x"`, `except Exception, e:` or backtick repr stops parsing at the first occurrence: pylint emits a single `E0001` syntax error and nothing else in that file is linted. Python-2 builtins are fine because the bundled rcfile declares them.
 
 ## Output format
 ```

@@ -78,7 +78,7 @@ Names that exist at runtime but not in the file — gateway-scoped globals, name
 }
 ```
 
-Top-level library packages do **not** need to be listed: when the module lives under a `script-python` folder, the rule discovers its sibling top-level packages (`General`, `Widgets`, …) and declares them automatically. The `system` module and the Jython builtins `unicode`/`long` come from the bundled rcfile.
+Top-level library packages do **not** need to be listed: when the module lives under a `script-python` folder, the rule discovers its sibling top-level packages (`General`, `Widgets`, …) and declares them automatically. The `system` module and the Jython 2.7 builtins (`unicode`, `long`, `xrange`, `basestring`, `raw_input`, `reduce`, `cmp`, `unichr`, `file`, `execfile`, `reload`, `apply`, `buffer`, `intern`, `coerce`, `StandardError`) come from the bundled rcfile; your own rcfile's `additional-builtins` is read the way pylint reads it (INI or TOML, inline comments allowed) and merged with these.
 
 ## What it lints
 
@@ -88,7 +88,9 @@ One `code.py` at a time, directly on the real file, so line numbers in the outpu
 
 ### Correct code
 
-`tests/cases/scripting/clean/code.py` uses `system.tag.readBlocking`, `long` and `unicode` and passes cleanly under the bundled rcfile.
+`tests/cases/scripting/clean/code.py` uses `system.tag.readBlocking`, `long`, `unicode`, `basestring` and `xrange` and passes cleanly under the bundled rcfile.
+
+These are Jython 2.7 modules linted by a Python 3 pylint. Python-2-only *syntax* (`print "x"`, `except Exception, e:`, backticks) stops the parser: you get a single `E0001` syntax error and nothing else in that file is linted until it is fixed. Python-2 *builtins* are declared in the bundled rcfile, so `xrange` or `basestring` do not produce undefined-variable errors.
 
 ### Problematic code
 
@@ -101,8 +103,8 @@ One `code.py` at a time, directly on the real file, so line numbers in the outpu
       • Line 19: Undefined variable 'undefined_helper' (undefined-variable) (E0602)
 
     Pylint - Warning (W):
-      • Line 11: Unused import json (unused-import) (W0611)
       • Line 24: Unused variable 'scratch' (unused-variable) (W0612)
+      • Line 11: Unused import json (unused-import) (W0611)
 
     Pylint - Convention (C):
       • Line 13: Constant name "badConstant" doesn't conform to ... (invalid-name) (C0103)
@@ -112,7 +114,7 @@ Because each file is exactly one module, lines are not prefixed with a script pa
 
 ## Pylintrc
 
-Resolution order: the `pylintrc` kwarg (absolute, or relative to the working directory) → `.config/.ignition-library-pylintrc` walking up from the working directory → the bundled `.config/.ignition-library-pylintrc` inside the installed package → a minimal inline ruleset. The bundled file is derived from the Perspective one but pre-declares only `system`, `unicode` and `long` as builtins and never assumes view-scope names such as `self` or `event`.
+Resolution order: the `pylintrc` kwarg (absolute, or relative to the working directory) → `.config/.ignition-library-pylintrc` walking up from the working directory → the bundled `.config/.ignition-library-pylintrc` inside the installed package → a minimal inline ruleset. The bundled file is derived from the Perspective one but pre-declares only `system` and the Jython 2.7 builtins, never view-scope names such as `self` or `event`. An rcfile pylint cannot start with (a bad option value) is reported as one fatal `F0001` violation rather than aborting the run.
 
 ## Common gotchas
 
