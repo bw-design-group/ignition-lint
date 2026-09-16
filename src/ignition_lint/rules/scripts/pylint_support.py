@@ -9,6 +9,7 @@ and rendering violations grouped by pylint category with a configurable severity
 import os
 import re
 import sys
+import tempfile
 from dataclasses import dataclass
 from io import StringIO
 from typing import Dict, Iterable, List, Optional, Tuple
@@ -35,7 +36,10 @@ CATEGORY_NAMES = {
 CATEGORY_ORDER = ('F', 'E', 'W', 'C', 'R')
 
 # ``path:line:col: CODE: message`` as emitted by pylint's text reporter.
-MESSAGE_PATTERN = re.compile(r'.*:(\d+):\d+: ([EWCRF]\d+): (.+)')
+MESSAGE_PATTERN = re.compile(r'(.*?):(\d+):\d+: ([EWCRF]\d+): (.+)')
+
+# Synthetic code for "pylint itself could not run" (bad rcfile option, argparse error).
+PYLINT_RUN_ERROR_CODE = 'F0001'
 
 # Directory holding the rcfiles shipped inside the package (``ignition_lint/.config``).
 BUNDLED_CONFIG_DIR = os.path.join(
@@ -106,39 +110,120 @@ def build_pylint_args(rcfile: Optional[str], targets: Iterable[str], extra: Iter
 	return args
 
 
+class PylintRunError(RuntimeError):
+	"""pylint refused to run (typically an invalid option value in the rcfile); ``output`` holds what it printed."""
+
+	def __init__(self, output: str):
+		super().__init__(output.strip().splitlines()[-1] if output.strip() else "pylint exited before linting")
+		self.output = output
+
+
+def _run_capturing(args: List[str]) -> Tuple[Optional[lint.Run], str]:
+	"""Run pylint in-process with both streams captured; ``(None, output)`` when it bailed out."""
+	pylint_output = StringIO()
+	old_stdout, old_stderr = sys.stdout, sys.stderr
+	try:
+		sys.stdout = pylint_output
+		sys.stderr = pylint_output
+		run = lint.Run(args, reporter=TextReporter(pylint_output), exit=False)
+	except SystemExit:
+		return None, pylint_output.getvalue()
+	finally:
+		sys.stdout, sys.stderr = old_stdout, old_stderr
+	return run, pylint_output.getvalue()
+
+
 def run_pylint(args: List[str]) -> str:
 	"""
 	Run pylint in-process and return everything it printed.
 
 	stdout/stderr are swapped for the duration: with ``--output-format=text`` pylint writes
 	to the configured reporter, but warnings about the rcfile itself still go to the real
-	streams, and those must not leak into the CLI output.
+	streams, and those must not leak into the CLI output. ``exit=False`` only covers the
+	post-lint exit; an argparse error still raises ``SystemExit``, which is turned into a
+	``PylintRunError`` carrying the captured text so the caller can report it.
 	"""
-	pylint_output = StringIO()
-	old_stdout, old_stderr = sys.stdout, sys.stderr
+	run, output = _run_capturing(args)
+	if run is None:
+		raise PylintRunError(output)
+	return output
+
+
+def read_rcfile_list_option(rcfile: Optional[str], option: str) -> List[str]:
+	"""
+	Effective value of a list-valued option exactly as pylint parses ``rcfile``.
+
+	Goes through pylint's own configuration loader (against an empty probe module with every
+	checker disabled), so INI and TOML rcfiles, inline comments and multi-line values all come
+	out as pylint sees them. Needed because a value passed on the command line *replaces* the
+	rcfile's, so extending e.g. ``additional-builtins`` requires merging with the rcfile's
+	list. ``[]`` when the rcfile is missing, rejected by pylint, or does not set the option.
+	"""
+	if not rcfile or not os.path.exists(rcfile):
+		return []
+	with tempfile.NamedTemporaryFile(prefix="ign_rc_probe_", suffix=".py", delete=False) as handle:
+		probe = handle.name
 	try:
-		sys.stdout = pylint_output
-		sys.stderr = pylint_output
-		lint.Run(args, reporter=TextReporter(pylint_output), exit=False)
+		# ``--disable=all`` alone makes pylint exit with "No files to lint"; one cheap check keeps it running.
+		run, _ = _run_capturing([
+			'--rcfile', rcfile, '--disable=all', '--enable=syntax-error', '--jobs=1', '--score=no', probe
+		])
 	finally:
-		sys.stdout, sys.stderr = old_stdout, old_stderr
-	return pylint_output.getvalue()
+		try:
+			os.remove(probe)
+		except OSError:
+			pass
+	if run is None:
+		return []
+	value = getattr(run.linter.config, option.replace('-', '_'), None)
+	if value is None:
+		return []
+	if isinstance(value, str):
+		value = [value]
+	return [str(item).strip() for item in value if str(item).strip()]
 
 
-def parse_pylint_messages(output: str) -> List[Tuple[int, str, str, str]]:
-	"""Parse text-reporter output into ``(line, code, category, message)`` tuples."""
+def _same_file(first: str, second: str) -> bool:
+	try:
+		return os.path.realpath(first) == os.path.realpath(second)
+	except (OSError, ValueError):
+		return False
+
+
+def parse_pylint_messages(output: str, target: Optional[str] = None) -> List[Tuple[int, str, str, str]]:
+	"""
+	Parse text-reporter output into ``(line, code, category, message)`` tuples.
+
+	When ``target`` (the linted file) is given, messages pylint attributes to another path,
+	its own configuration diagnostics such as ``E0015 unrecognized-option`` reported against
+	the rcfile, come back with line ``0`` and the offending path folded into the message,
+	so they are never pinned to a line of the user's code.
+	"""
 	messages: List[Tuple[int, str, str, str]] = []
 	for line in output.splitlines():
 		match = MESSAGE_PATTERN.match(line)
 		if not match:
 			continue
+		path, line_text, code, message = match.groups()
 		try:
-			line_num = int(match.group(1))
+			line_num = int(line_text)
 		except ValueError:
 			continue
-		code = match.group(2)
-		messages.append((line_num, code, code[0], match.group(3)))
+		if target is not None and not _same_file(path, target
+							) and os.path.basename(path) != os.path.basename(target):
+			messages.append((0, code, code[0], f"{message} [in {path}]"))
+			continue
+		messages.append((line_num, code, code[0], message))
 	return messages
+
+
+def run_error_violation(error: PylintRunError, rcfile: Optional[str], path: str) -> PylintViolation:
+	"""One fatal violation describing why pylint could not run, so the run continues and the user sees the cause."""
+	source = f" with {rcfile}" if rcfile else ""
+	return PylintViolation(
+		category='F', code=PYLINT_RUN_ERROR_CODE, message=f"pylint could not run{source}: {error}", path=path,
+		line=0
+	)
 
 
 class PylintCategoryMixin:
@@ -168,7 +253,8 @@ class PylintCategoryMixin:
 	def _format_violation(self, violation: PylintViolation) -> str:
 		location = self._format_violation_path(violation.path)
 		prefix = f"{location}: " if location else ""
-		return f"{prefix}Line {violation.line}: {violation.message} ({violation.code})"
+		where = f"Line {violation.line}: " if violation.line > 0 else ""
+		return f"{prefix}{where}{violation.message} ({violation.code})"
 
 	def get_category_grouped_violations(self) -> Dict[str, Dict[str, object]]:
 		"""

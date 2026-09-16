@@ -112,13 +112,66 @@ class TestLibraryScriptPylintRule(unittest.TestCase):
 		self.assertEqual(rule.warnings, [""])
 
 	def test_read_rcfile_list_option(self):
-		"""Test read rcfile list option."""
+		"""Values come out exactly as pylint parses them: INI, inline comments, multi-line, TOML."""
 		with tempfile.TemporaryDirectory() as tmp:
 			rc = Path(tmp) / 'rc'
 			rc.write_text("[VARIABLES]\nadditional-builtins=a, b,\n\tc\n", encoding='utf-8')
 			self.assertEqual(read_rcfile_list_option(str(rc), 'additional-builtins'), ['a', 'b', 'c'])
-			self.assertEqual(read_rcfile_list_option(str(rc), 'missing'), [])
+			self.assertEqual(read_rcfile_list_option(str(rc), 'missing-option'), [])
 			self.assertEqual(read_rcfile_list_option(None, 'additional-builtins'), [])
+
+			commented = Path(tmp) / 'commented.rc'
+			commented.write_text("[VARIABLES]\nadditional-builtins=system  # ignition\n", encoding='utf-8')
+			self.assertEqual(read_rcfile_list_option(str(commented), 'additional-builtins'), ['system'])
+
+			toml = Path(tmp) / 'pyproject.toml'
+			toml.write_text(
+				'[tool.pylint.variables]\nadditional-builtins=["system", "shared"]\n', encoding='utf-8'
+			)
+			self.assertEqual(
+				read_rcfile_list_option(str(toml), 'additional-builtins'), ['system', 'shared']
+			)
+
+			bare = Path(tmp) / 'bare.rc'
+			bare.write_text("[MAIN]\njobs=1\n", encoding='utf-8')
+			self.assertEqual(read_rcfile_list_option(str(bare), 'additional-builtins'), [])
+
+	def test_inline_comment_on_rcfile_builtins_keeps_system_defined(self):
+		"""The rcfile's builtins survive the merge onto the command line, comments and all."""
+		with tempfile.TemporaryDirectory() as tmp:
+			rc = Path(tmp) / 'lib.rc'
+			rc.write_text(
+				"[MESSAGES CONTROL]\ndisable=all\nenable=undefined-variable\n"
+				"[VARIABLES]\nadditional-builtins=system  # ignition\n", encoding='utf-8'
+			)
+			rule, _ = _lint(SCRIPTING_DIR / 'clean' / 'code.py', pylintrc=str(rc))
+			self.assertEqual([v for v in rule.pylint_violations if "'system'" in v.message], [])
+
+	def test_invalid_rcfile_value_becomes_one_fatal_violation(self):
+		"""A bad option value no longer kills the process with exit 32 and no message."""
+		with tempfile.TemporaryDirectory() as tmp:
+			rc = Path(tmp) / 'bad.rc'
+			rc.write_text("[MAIN]\njobs=abc\n", encoding='utf-8')
+			rule, results = _lint(SCRIPTING_DIR / 'clean' / 'code.py', pylintrc=str(rc))
+			self.assertEqual(len(rule.pylint_violations), 1)
+			violation = rule.pylint_violations[0]
+			self.assertEqual((violation.category, violation.line), ('F', 0))
+			self.assertIn('pylint could not run', violation.message)
+			self.assertIn('--jobs', violation.message)
+			self.assertIn('Pylint - Fatal (F):', results.custom_formatted_errors[RULE])
+			self.assertNotIn('Line 0', results.custom_formatted_errors[RULE])
+
+	def test_rcfile_diagnostics_are_not_pinned_to_module_lines(self):
+		"""pylint's own configuration messages carry no line and name the rcfile."""
+		with tempfile.TemporaryDirectory() as tmp:
+			rc = Path(tmp) / 'odd.rc'
+			rc.write_text("[MAIN]\nfoo-unknown-option=1\n", encoding='utf-8')
+			rule, results = _lint(SCRIPTING_DIR / 'clean' / 'code.py', pylintrc=str(rc))
+			config_msgs = [v for v in rule.pylint_violations if v.code == 'E0015']
+			self.assertEqual(len(config_msgs), 1)
+			self.assertEqual(config_msgs[0].line, 0)
+			self.assertIn('odd.rc', config_msgs[0].message)
+			self.assertNotIn('Line 1: Unrecognized option', results.custom_formatted_errors[RULE])
 
 
 if __name__ == '__main__':

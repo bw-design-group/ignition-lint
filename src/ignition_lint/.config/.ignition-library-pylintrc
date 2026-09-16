@@ -382,7 +382,7 @@ dummy-variables-rgx=^\*{0,2}(_$|unused_|dummy_)
 # unicode - Provided by python 2.7
 # long - Provided by python 2.7
 # double - Provided by Ignition
-additional-builtins=system,unicode,long
+additional-builtins=system,unicode,long,xrange,basestring,raw_input,reduce,cmp,unichr,file,execfile,reload,apply,buffer,intern,coerce,StandardError
 
 # List of strings which can identify a callback function by name. A callback
 # name must start or end with one of those strings.

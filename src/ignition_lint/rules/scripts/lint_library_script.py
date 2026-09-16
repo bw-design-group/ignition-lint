@@ -9,7 +9,6 @@ scripts, so when the module lives under a ``script-python`` folder its sibling t
 packages are discovered and declared as builtins automatically.
 """
 
-import configparser
 import os
 import tempfile
 from typing import List, Optional
@@ -20,35 +19,19 @@ from ...model.node_types import NodeType, ScriptModule
 from ...model.script_builder import ScriptModelBuilder
 from .pylint_support import (
 	PylintCategoryMixin,
+	PylintRunError,
 	PylintViolation,
 	build_pylint_args,
 	parse_pylint_messages,
+	read_rcfile_list_option,
 	resolve_pylintrc,
+	run_error_violation,
 	run_pylint,
 )
 
 LIBRARY_PYLINTRC_NAME = ".ignition-library-pylintrc"
 
-
-def read_rcfile_list_option(rcfile: Optional[str], option: str) -> List[str]:
-	"""
-	Read a comma-separated list option from an INI-style pylintrc, ``[]`` when absent.
-
-	Needed because a value passed on the command line *replaces* the rcfile's value, so
-	extending ``additional-builtins`` requires merging with what the rcfile declares.
-	"""
-	if not rcfile:
-		return []
-	parser = configparser.RawConfigParser(strict=False)
-	try:
-		parser.read(rcfile, encoding='utf-8')
-	except (configparser.Error, OSError, UnicodeDecodeError):
-		return []
-	for section in parser.sections():
-		if parser.has_option(section, option):
-			raw = parser.get(section, option)
-			return [item.strip() for item in raw.replace('\n', ',').split(',') if item.strip()]
-	return []
+__all__ = ["LibraryScriptPylintRule", "LIBRARY_PYLINTRC_NAME", "read_rcfile_list_option"]
 
 
 class LibraryScriptPylintRule(PylintCategoryMixin, LintingRule):
@@ -120,6 +103,9 @@ class LibraryScriptPylintRule(PylintCategoryMixin, LintingRule):
 		try:
 			extra = self._builtins_args(target)
 			output = run_pylint(build_pylint_args(self.pylintrc, [target], extra=extra))
+		except PylintRunError as error:
+			self.pylint_violations.append(run_error_violation(error, self.pylintrc, module.path))
+			return
 		finally:
 			if temp_path:
 				try:
@@ -127,7 +113,7 @@ class LibraryScriptPylintRule(PylintCategoryMixin, LintingRule):
 				except OSError:
 					pass
 
-		for line_num, code, category, message in parse_pylint_messages(output):
+		for line_num, code, category, message in parse_pylint_messages(output, target=target):
 			self.pylint_violations.append(
 				PylintViolation(
 					category=category, code=code, message=message, path=module.path, line=line_num
