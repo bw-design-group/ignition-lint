@@ -51,11 +51,28 @@ class TestResolveViewLocation(unittest.TestCase):
 		self.assertEqual(location.folders, ('Folder',))
 		self.assertEqual(location.name, 'View')
 
-	def test_first_bare_views_segment_wins(self):
-		"""With only bare views/ segments, the first one is the root; deeper ones are folders."""
+	def test_nearest_bare_views_segment_wins(self):
+		"""With only bare views/ segments, the one nearest the file is the root."""
 		location = resolve_view_location('views/Screens/views/Detail/view.json')
-		self.assertEqual(location.folders, ('Screens', 'views'))
+		self.assertEqual(location.folders, ())
 		self.assertEqual(location.name, 'Detail')
+		self.assertTrue(location.views_root_found)
+
+	def test_parent_directory_named_views_is_not_the_root(self):
+		"""A checkout or workspace called views/ above the project never becomes the views root."""
+		location = resolve_view_location('/home/x/views/proj/ignition/perspective/views/Foo/view.json')
+		self.assertEqual(location.name, 'Foo')
+		self.assertEqual(location.folders, ())
+		location = resolve_view_location('data/projects/views/ignition/views/Folder/MyView/view.json')
+		self.assertEqual(location.folders, ('Folder',))
+
+	def test_parent_references_are_normalised(self):
+		"""``..`` segments never show up as folder names."""
+		location = resolve_view_location(
+			'proj/com.inductiveautomation.perspective/views/Folder/../Other/MyView/view.json'
+		)
+		self.assertEqual(location.folders, ('Other',))
+		self.assertEqual(location.name, 'MyView')
 
 	def test_no_anchor_falls_back_to_parent_directory(self):
 		"""Unanchored paths still name the view after its directory but report no folders."""
@@ -70,11 +87,10 @@ class TestResolveViewLocation(unittest.TestCase):
 		self.assertEqual(location.folders, ())
 		self.assertFalse(location.views_root_found)
 
-	def test_file_directly_inside_views_root(self):
-		"""view.json sitting directly in views/ is treated as unanchored (views is the view name)."""
-		location = resolve_view_location('project/views/view.json')
-		self.assertEqual(location.name, 'views')
-		self.assertFalse(location.views_root_found)
+	def test_file_directly_inside_views_root_has_no_view(self):
+		"""view.json sitting directly in the views root is not a view Ignition would write; no node."""
+		self.assertIsNone(resolve_view_location('project/views/view.json'))
+		self.assertIsNone(resolve_view_location('com.inductiveautomation.perspective/views/view.json'))
 
 	def test_accepts_path_objects(self):
 		"""Path instances work the same as strings."""

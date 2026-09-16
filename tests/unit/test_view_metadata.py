@@ -18,7 +18,7 @@ from ignition_lint.model.node_types import NodeType, View
 from ignition_lint.rules.common import LintingRule
 
 CASES_DIR = Path(__file__).parent.parent / 'cases' / 'views'
-# tests/cases/views is the first bare 'views' segment, so it is the views root and 'Naming' is a view folder.
+# tests/cases/views is the bare 'views' segment nearest the fixtures, so it is the views root and 'Naming' is a view folder.
 NESTED_VIEW = CASES_DIR / 'Naming' / 'Title Case Folder' / 'Title Case View' / 'view.json'
 
 

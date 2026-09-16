@@ -2,8 +2,8 @@
 """
 Unit tests for NamePatternRule applied to the view itself and its parent folders.
 
-Test views live under tests/cases/views/Naming/. ``tests/cases/views`` is the first bare
-``views`` segment on the path, so it stands in for the Perspective views root; ``Naming``
+Test views live under tests/cases/views/Naming/. ``tests/cases/views`` is the bare ``views``
+segment nearest the files, so it stands in for the Perspective views root; ``Naming``
 and everything below it are view folders (plain directories).
 """
 
@@ -152,6 +152,56 @@ class TestViewNamingAlongsideComponents(BaseRuleTest):
 		self.assertEqual(self.get_error_count(RULE), 0)
 		self.assertEqual(self.get_warning_count(RULE), 2)
 		self.assertTrue(all("for view" in message for message in self.get_warnings_for_rule(RULE)))
+
+	def test_check_view_folders_false_validates_only_the_view_name(self):
+		"""``check_view_folders: false`` on the view entry leaves folders alone."""
+		config = get_test_config(
+			RULE,
+			node_type_specific_rules={"view": {
+				"convention": "PascalCase",
+				"check_view_folders": False
+			}}, severity="error"
+		)
+		view_file = load_test_view(self.test_cases_dir, TITLE_VIEW)
+		self.assert_rule_fails(view_file, config, RULE, expected_error_count=1)
+		self.assertIn("Name 'Title Case View'", self.get_errors_for_rule(RULE)[0])
+
+	def test_skip_names_on_view_entry_exempts_a_folder(self):
+		"""A folder listed in the view entry's skip_names is not reported; the view name still is."""
+		config = get_test_config(
+			RULE, node_type_specific_rules={
+				"view": {
+					"convention": "PascalCase",
+					"skip_names": ["Title Case Folder"]
+				}
+			}, severity="error"
+		)
+		view_file = load_test_view(self.test_cases_dir, TITLE_VIEW)
+		self.assert_rule_fails(view_file, config, RULE, expected_error_count=1)
+		self.assertIn("Name 'Title Case View'", self.get_errors_for_rule(RULE)[0])
+
+	def test_root_is_not_exempt_for_views_and_folders(self):
+		"""The implicit ``root`` skip is for the root component, not for a folder or view named root."""
+		import tempfile  # pylint: disable=import-outside-toplevel
+		from pathlib import Path  # pylint: disable=import-outside-toplevel
+		from ignition_lint.domains import PERSPECTIVE_SPEC  # pylint: disable=import-outside-toplevel
+		from ignition_lint.linter import LintEngine  # pylint: disable=import-outside-toplevel
+		from ignition_lint.model.node_types import NodeType  # pylint: disable=import-outside-toplevel
+		from ignition_lint.rules.naming.name_pattern import NamePatternRule  # pylint: disable=import-outside-toplevel
+		with tempfile.TemporaryDirectory() as tmp:
+			view_dir = Path(tmp) / 'views' / 'root' / 'RootyView'
+			view_dir.mkdir(parents=True)
+			(view_dir / 'view.json').write_text(
+				'{"root": {"meta": {"name": "root"}, "type": "ia.container.flex", "children": []}}',
+				encoding='utf-8'
+			)
+			rule = NamePatternRule(
+				convention='PascalCase', target_node_types={NodeType.VIEW}, severity='error'
+			)
+			_, results = LintEngine([rule]).process_file(view_dir / 'view.json', PERSPECTIVE_SPEC)
+			messages = results.errors.get(RULE, [])
+			self.assertEqual(len(messages), 1, messages)
+			self.assertIn("Folder name 'root'", messages[0])
 
 	def test_no_fix_is_generated_for_views(self):
 		"""Renaming a view means renaming directories; the rule never offers a fix for it, even in fix mode."""

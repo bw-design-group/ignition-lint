@@ -96,9 +96,23 @@ Views and folders share one configuration. To give them a different convention f
 }
 ```
 
-Not ready to enforce view names yet? Leave `view` out of `target_node_types` (or out of `node_type_specific_rules`) and only components are checked.
+Not ready to enforce view names yet? Leave `view` out of `target_node_types` (or out of `node_type_specific_rules`) and only components are checked. To check view names but leave folders alone while a tree is being renamed, set `"check_view_folders": false` on the `view` entry; to exempt specific folders, list them in the `view` entry's `skip_names` (it matches folder names as well as the view name):
 
-The views root is located automatically from the file path (`com.inductiveautomation.perspective/views`, or the first `views` directory). If no root is found the view is still named after its directory, but no folders are checked — so linting a lone `view.json` in a scratch directory never reports your working-directory names as folders.
+```json
+{
+  "NamePatternRule": {
+    "enabled": true,
+    "kwargs": {
+      "node_type_specific_rules": {
+        "component": { "convention": "PascalCase" },
+        "view": { "convention": "PascalCase", "skip_names": ["Legacy Screens"] }
+      }
+    }
+  }
+}
+```
+
+The views root is located automatically from the file path: `com.inductiveautomation.perspective/views` when present, otherwise the `views` directory nearest the view (so a checkout or workspace folder that happens to be called `views` is never taken for the root). If no root is found the view is still named after its directory, but no folders are checked — so linting a lone `view.json` in a scratch directory never reports your working-directory names as folders. A `view.json` sitting directly inside the views root is not a view Ignition would write and produces no `view` node.
 
 ### Allow PascalCase OR SCREAMING_SNAKE_CASE on components
 
@@ -224,7 +238,8 @@ A few things are deliberately exempt from validation, because the names are fram
 - Position properties: `x`, `y`, `width`, `height`, etc. under `.position.`
 - SVG path data: properties named `d` inside `props.elements`
 - Properties whose name starts with `_` (treated as private)
-- View folders when no views root can be found in the file path (the view name is still checked)
+- View folders when no views root can be found in the file path (the view name is still checked), when `check_view_folders` is `false` on the `view` entry, or when the folder name is listed in the `view` entry's `skip_names`
+- The implicit `root` exemption applies to the root component and property only; a view or folder named `root` is checked like any other
 
 If your view has names that look like they should be flagged but aren't, check the [reference page's edge cases section](../../reference/naming/name-pattern.md#edge-cases--exemptions).
 

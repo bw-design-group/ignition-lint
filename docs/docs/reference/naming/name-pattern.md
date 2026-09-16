@@ -241,7 +241,7 @@ The `view` node is the only node not built from the view.json contents. `ViewMod
 
 - **View name** — the directory that contains `view.json`.
 - **Folder path** — every directory between the views root and the view directory. View folders are plain directories with no resource files.
-- **Views root** — the `views` directory directly under `com.inductiveautomation.perspective` (an exported Ignition project). If that layout is absent, the first bare `views` segment in the path is used. If neither exists the view is still named after its directory but `folder_path` is empty and `views_root_found` is `False`, so working-directory names are never reported as folders.
+- **Views root** — the `views` directory directly under `com.inductiveautomation.perspective` (an exported Ignition project). If that layout is absent, the bare `views` segment nearest the file is used, so a parent directory that happens to be called `views` never turns the intermediate path into folders. If neither exists the view is still named after its directory but `folder_path` is empty and `views_root_found` is `False`, so working-directory names are never reported as folders. A `view.json` directly inside the views root yields no `view` node. `..` segments are normalised before the path is split.
 
 The node's `path` (the prefix on every violation message) is the slash-separated view path, e.g. `Screens/Line1/Overview`. The node also carries `root_container_type`, `default_size` and per-type `node_counts`, which this rule does not use but other rules can.
 
@@ -267,7 +267,7 @@ Title Case Folder/Title Case View: Name 'Title Case View' doesn't follow PascalC
 Title Case Folder/Title Case View: Folder name 'Title Case Folder' doesn't follow PascalCase for view (suggestion: 'TitleCaseFolder')
 ```
 
-Folders always share the `view` configuration, including any `"view"` entry in `node_type_specific_rules`; there is no way to check the view name without its folders. A `pattern` override on `view` (e.g. `^([A-Z][a-zA-Z0-9]*|[A-Z][a-z]*(\\s[A-Z][a-z]*)*)$` for PascalCase or Title Case) is the way to allow more than one style on the tree. A badly named folder is reported once per view inside it, because each `view.json` is linted independently. No `Fix` is ever emitted for view or folder names. The fixtures under `tests/cases/views/Naming/` exercise these cases.
+Folders share the `view` configuration, including any `"view"` entry in `node_type_specific_rules`. Two escape hatches exist on that entry: `"check_view_folders": false` validates the view name only, and `skip_names` exempts individual folder names as well as the view name. The default `skip_names` exemption of `root` does not apply to views or folders. A `pattern` override on `view` (e.g. `^([A-Z][a-zA-Z0-9]*|[A-Z][a-z]*(\\s[A-Z][a-z]*)*)$` for PascalCase or Title Case) is the way to allow more than one style on the tree. A badly named folder is reported once per view inside it, because each `view.json` is linted independently. No `Fix` is ever emitted for view or folder names. The fixtures under `tests/cases/views/Naming/` exercise these cases.
 
 ## Examples
 

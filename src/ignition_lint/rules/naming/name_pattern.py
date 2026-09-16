@@ -320,6 +320,12 @@ class NamePatternRule(FixableMixin, LintingRule):
 					if 'pattern_description' not in rules:
 						rules['pattern_description'] = conv_info['description']
 
+	def _default_skip_names(self, node_type: NodeType) -> Set[str]:
+		"""The implicit ``root`` exemption covers the root component and property, never a view or folder."""
+		if node_type == NodeType.VIEW and not self.config.skip_names:
+			return set()
+		return self.skip_names
+
 	def _get_node_specific_config(self, node_type: NodeType, key: str, default_value):
 		"""Get a configuration value that might be overridden for a specific node type."""
 		if node_type in self.node_type_specific_rules:
@@ -400,7 +406,9 @@ class NamePatternRule(FixableMixin, LintingRule):
 		node_type = node.node_type
 
 		# Skip validation for certain names
-		skip_names = self._get_node_specific_config(node_type, 'skip_names', self.skip_names)
+		skip_names = self._get_node_specific_config(
+			node_type, 'skip_names', self._default_skip_names(node_type)
+		)
 		if name in skip_names:
 			return errors
 
@@ -519,8 +527,10 @@ class NamePatternRule(FixableMixin, LintingRule):
 		self.visit_generic(node)
 
 	def visit_view(self, node: ViewNode):
-		"""Validate the view name and every parent folder below the views root with the 'view' config."""
+		"""Validate the view name and, unless ``check_view_folders`` is false on the ``view`` entry, every parent folder."""
 		self.visit_generic(node)
+		if not self._get_node_specific_config(NodeType.VIEW, 'check_view_folders', True):
+			return
 		for folder_name in getattr(node, 'folder_path', []):
 			self._report_name_violations(node, folder_name, label="Folder name")
 
