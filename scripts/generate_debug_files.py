@@ -104,7 +104,7 @@ def generate_debug_files_for_case(case_dir: Path, lint_engine: LintEngine) -> bo
 Regenerate these files whenever the view.json is updated or when model builder logic changes.
 These files help developers diagnose issues with the model building and rule application processes.
 
-This directory contains debug information generated from `tests/cases/{case_dir.name}/view.json`:
+This directory contains debug information generated from `tests/cases/views/{case_dir.name}/view.json`:
 
 ## Files
 

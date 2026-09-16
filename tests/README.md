@@ -771,7 +771,7 @@ def test_with_debugger(self):
 **"View file not found":**
 ```bash
 # Check if test case exists
-ls tests/cases/
+ls tests/cases/views/
 python test_runner.py --list
 ```
 

@@ -78,7 +78,7 @@ The tests validate:
 
 When you change something that affects model building:
 
-1. Update the test case (`tests/cases/<Name>/view.json`) or the model code
+1. Update the test case (`tests/cases/views/<Name>/view.json`) or the model code
 2. Regenerate the debug files: `python scripts/generate_debug_files.py <CaseName>`
 3. Review the diff — does it match what you expected?
 4. Run golden file tests to confirm no regressions in other cases: `python -m unittest unit.test_golden_files -v`
@@ -109,7 +109,7 @@ analysis/
 
 Because every Perspective view is literally named `view.json`, keying on the folder is what keeps a thousand views from overwriting each other.
 
-**Cleanup.** At the start of every run ign-lint removes the previous run's entries from the directory, so stale folders for deleted views do not accumulate. Two safeguards: only directories containing the `.ignition-lint-debug` marker (i.e. ones ign-lint created) are cleaned, and entries modified in the last five seconds are kept so parallel pre-commit batches writing to the same directory do not erase each other. Point `--debug-output` at a dedicated folder; never at a folder holding other files.
+**Cleanup.** At the start of every run ign-lint removes the folders the previous run wrote, so stale folders for deleted views do not accumulate. The `.ignition-lint-debug` marker doubles as the manifest: it lists every folder ign-lint wrote, and only those listed folders are ever deleted. ign-lint only creates the marker in a directory it created itself or found empty; if you point `--debug-output` at a directory that already holds other files, ign-lint writes into it, prints a warning, and never cleans it. Folders written in the last five seconds are kept for the next run so parallel pre-commit batches sharing one directory do not erase each other; if you use `--debug-output` from a hook, prefer `require_serial: true` so one process owns the directory.
 
 ## Debug-nodes flag
 
