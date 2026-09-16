@@ -21,4 +21,14 @@ def format_setpoint(value):
 	"""Render a setpoint for display, tolerating Jython's long and unicode types."""
 	if isinstance(value, (int, long)):
 		return unicode(value)
+	if isinstance(value, basestring):
+		return unicode(value)
 	return unicode(round(value, 2))
+
+
+def read_setpoints(tag_paths):
+	"""Read several tags in one call, indexing by position the Jython 2 way."""
+	values = []
+	for index in xrange(len(tag_paths)):
+		values.append(read_setpoint(tag_paths[index]))
+	return values

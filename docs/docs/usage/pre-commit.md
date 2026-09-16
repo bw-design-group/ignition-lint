@@ -26,7 +26,7 @@ Install hooks:
 pre-commit install
 ```
 
-The hook automatically runs on `view.json` files. It uses ignition-lint's bundled `.ignition-lint-precommit.json` (warnings-favored config) by default.
+The hook automatically runs on `view.json` files. Its default `--config=.ignition-lint-precommit.json` resolves against your repository first; when no such file exists there, ign-lint falls back to the copy bundled in the package (warnings-favored, both domains) and says so in its output. Drop a `.ignition-lint-precommit.json` in your repository root to override it without touching the hook args.
 
 ### Linting the script library too
 
@@ -114,8 +114,8 @@ A common pattern is one config for pre-commit (warnings-favored, fast) and a sep
 
 ```
 project/
-├── .pre-commit-config.yaml         # references pre-commit-config.json
-├── pre-commit-config.json          # warning severity, lighter rule set
+├── .pre-commit-config.yaml         # references .ignition-lint-precommit.json
+├── .ignition-lint-precommit.json   # warning severity, lighter rule set (overrides the bundled default)
 └── rule_config.json                # full strictness, used in CI
 ```
 
@@ -162,7 +162,7 @@ Test fixtures often contain intentional violations. Exclude them:
 ```yaml
 hooks:
   - id: ign-lint
-    exclude: '^tests/.*|.*test.*\.json$'
+    exclude: '^tests/'  # only the tests directory; a pattern like '.*test.*' would also skip views such as LatestStatus
 ```
 
 ## Running manually
@@ -206,7 +206,7 @@ Use sparingly — `--no-verify` skips ALL pre-commit hooks, not just ignition-li
 
 ## Setting up a custom configuration
 
-Sample `pre-commit-config.json` favoring warnings, covering both domains:
+Sample `.ignition-lint-precommit.json` favoring warnings, covering both domains:
 
 ```json
 {

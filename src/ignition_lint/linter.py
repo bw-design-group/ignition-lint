@@ -62,22 +62,74 @@ def merge_lint_results(results: List[LintResults]) -> LintResults:
 	)
 
 
-# Marker written into a --debug-output directory so cleanup only ever touches directories
-# ign-lint created itself.
+# Marker written into a --debug-output directory ign-lint created (or found empty). Lines after
+# the header list the folders the last run wrote; cleanup removes exactly those and nothing else.
 DEBUG_OUTPUT_MARKER = ".ignition-lint-debug"
+_DEBUG_OUTPUT_MARKER_HEADER = (
+	"# Created by ign-lint --debug-output. The lines below list folders written by the last run;\n"
+	"# they are removed at the start of the next run. Do not store anything else in this directory.\n"
+)
+_UNOWNED_DEBUG_DIRS_WARNED: set = set()
 
 
 def prepare_debug_output_dir(debug_output_dir: str) -> Path:
-	"""Create a --debug-output directory (if needed) and mark it as owned by ign-lint."""
+	"""
+	Create a --debug-output directory and mark it as owned by ign-lint.
+
+	Only a directory ign-lint creates, or one that is already empty, receives the marker.
+	A pre-existing directory holding other files is written into but never marked, so
+	cleanup never touches it; a warning says so once per process.
+	"""
 	path = Path(debug_output_dir)
-	path.mkdir(parents=True, exist_ok=True)
+	if path.exists() and not path.is_dir():
+		raise NotADirectoryError(f"--debug-output target is not a directory: {debug_output_dir}")
 	marker = path / DEBUG_OUTPUT_MARKER
-	if not marker.exists():
-		marker.write_text(
-			"Created by ign-lint --debug-output. Entries here are regenerated on every run; "
-			"do not store anything else in this directory.\n", encoding='utf-8'
-		)
+	if marker.exists():
+		return path
+	if path.is_dir() and any(path.iterdir()):
+		key = str(path.resolve())
+		if key not in _UNOWNED_DEBUG_DIRS_WARNED:
+			_UNOWNED_DEBUG_DIRS_WARNED.add(key)
+			print(
+				f"⚠️  --debug-output directory '{debug_output_dir}' already contains other files; "
+				"ign-lint will write into it but will not clean it between runs"
+			)
+		return path
+	path.mkdir(parents=True, exist_ok=True)
+	marker.write_text(_DEBUG_OUTPUT_MARKER_HEADER, encoding='utf-8')
 	return path
+
+
+def read_debug_output_manifest(marker: Path) -> List[str]:
+	"""Return the relative folders listed in a marker file, de-duplicated and confined to the directory."""
+	entries: List[str] = []
+	try:
+		lines = marker.read_text(encoding='utf-8').splitlines()
+	except OSError:
+		return entries
+	for line in lines:
+		entry = line.strip()
+		if not entry or entry.startswith('#'):
+			continue
+		parts = Path(entry).parts
+		if Path(entry).is_absolute() or '..' in parts or entry in entries:
+			continue
+		entries.append(entry)
+	return entries
+
+
+def write_debug_output_manifest(marker: Path, entries: List[str]) -> None:
+	"""Rewrite a marker file with its header and the given relative folders."""
+	marker.write_text(_DEBUG_OUTPUT_MARKER_HEADER + "".join(f"{entry}\n" for entry in entries), encoding='utf-8')
+
+
+def record_debug_output_entry(debug_output_dir: str, relative_dir: Path) -> None:
+	"""Append one written folder to the marker manifest when the directory is ign-lint owned."""
+	marker = Path(debug_output_dir) / DEBUG_OUTPUT_MARKER
+	if not marker.exists():
+		return
+	with open(marker, 'a', encoding='utf-8') as f:
+		f.write(f"{relative_dir.as_posix()}\n")
 
 
 def debug_output_subdir(source_file_path: str) -> Path:
@@ -470,7 +522,8 @@ class LintEngine:
 		plain names, so the layout matches the golden files in ``tests/debug/cases/``.
 		"""
 		try:
-			target_dir = Path(self.debug_output_dir) / debug_output_subdir(source_file_path)
+			subdir = debug_output_subdir(source_file_path)
+			target_dir = Path(self.debug_output_dir) / subdir
 			target_dir.mkdir(parents=True, exist_ok=True)
 
 			if self.flattened_json:
@@ -482,6 +535,7 @@ class LintEngine:
 
 			with open(target_dir / 'stats.json', 'w', encoding='utf-8') as f:
 				json.dump(self.get_model_statistics(), f, indent=2, sort_keys=True)
+			record_debug_output_entry(self.debug_output_dir, subdir)
 
 			shown = os.path.relpath(target_dir)
 			if shown.startswith('..'):

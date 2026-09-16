@@ -131,7 +131,7 @@ self.assertEqual(len(errors), 0)
 
 ### `load_test_view(case_name) → str`
 
-Loads a fixture from `tests/cases/<case_name>/view.json`:
+Loads a fixture from `tests/cases/views/<case_name>/view.json`:
 
 ```python
 view = load_test_view("PascalCase")
@@ -156,7 +156,7 @@ tests/cases/views/
 
 When adding a fixture for a new rule:
 
-1. Create `tests/cases/<MyCase>/view.json` with the minimum structure that exercises the rule
+1. Create `tests/cases/views/<MyCase>/view.json` with the minimum structure that exercises the rule
 2. Reference it from your unit tests via `self.test_cases_dir / "<MyCase>" / "view.json"`
 3. Regenerate debug files: `python scripts/generate_debug_files.py <MyCase>`
 4. Commit both the fixture and its generated `debug/` artifacts
@@ -210,7 +210,7 @@ Run them via `python test_runner.py --run-config`.
 
 ## Golden-file tests
 
-`tests/unit/test_golden_files.py` validates that the model-building pipeline produces consistent output. For every case under `tests/cases/<Name>/`:
+`tests/unit/test_golden_files.py` validates that the model-building pipeline produces consistent output. For every case under `tests/cases/views/<Name>/`:
 
 - `flattened.json` — flattening output
 - `model.json` — serialized object model

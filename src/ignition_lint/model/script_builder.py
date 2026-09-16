@@ -45,7 +45,8 @@ class ScriptModelBuilder:
 		"""
 		Directory names that make up the dotted module path.
 
-		With a ``script-python`` ancestor these are the folders between it and ``code.py``.
+		With a ``script-python`` ancestor these are the folders between it and ``code.py``
+		(empty when the file sits directly in ``script-python``, which Ignition never writes).
 		Without one (e.g. fixtures checked out on their own) only the parent folder name is
 		used, so the working directory never leaks into module or package names.
 		"""
@@ -75,7 +76,10 @@ class ScriptModelBuilder:
 
 		parts = self.module_parts(resolved)
 		if not parts:
-			parts = [resolved.parent.name]
+			raise ValueError(
+				f"{file_path} sits directly inside '{self.LIBRARY_DIR}'; Ignition library modules live in a "
+				f"named folder ({self.LIBRARY_DIR}/<Package>/{self.MODULE_FILE})"
+			)
 
 		if self.library_root is not None:
 			for depth in range(1, len(parts)):

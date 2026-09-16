@@ -395,5 +395,31 @@ test.py:1:0: C0114: Missing module docstring (missing-module-docstring)"""
 		self.assertIn("Pylint - Warning (W)", output['warnings'])
 
 
+class TestInvalidRcfile(unittest.TestCase):
+	"""A bad option value in the rcfile is reported, not fatal to the process."""
+
+	def test_invalid_rcfile_value_is_one_fatal_violation(self):
+		"""Test invalid rcfile value is one fatal violation."""
+		import tempfile  # pylint: disable=import-outside-toplevel
+		from src.ignition_lint.model.node_types import EventHandlerScript  # pylint: disable=import-outside-toplevel
+		with tempfile.TemporaryDirectory() as tmp:
+			rc = os.path.join(tmp, 'bad.rc')
+			with open(rc, 'w', encoding='utf-8') as handle:
+				handle.write("[MAIN]\njobs=abc\n")
+			rule = PerspectiveScriptPylintRule(pylintrc=rc)
+			rule.set_source_file('view.json')
+			node = EventHandlerScript(
+				'root.Button.onActionPerformed', 'component', 'onActionPerformed', '\tx = 1\n'
+			)
+			rule.process_nodes([node])
+			self.assertEqual(len(rule.pylint_violations), 1)
+			violation = rule.pylint_violations[0]
+			self.assertEqual((violation.category, violation.code, violation.line), ('F', 'F0001', 0))
+			self.assertIn('--jobs', violation.message)
+			rendered = rule.format_violations_grouped()['errors']
+			self.assertIn('Pylint - Fatal (F):', rendered)
+			self.assertNotIn('Line 0', rendered)
+
+
 if __name__ == '__main__':
 	unittest.main()

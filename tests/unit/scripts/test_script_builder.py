@@ -126,5 +126,21 @@ class TestScriptModelBuilder(unittest.TestCase):
 		self.assertNotIn(NodeType.SCRIPT_MODULE, COMPONENT_REFERENCE_NODES)
 
 
+class TestModuleDirectlyUnderLibraryRoot(unittest.TestCase):
+	"""``script-python/code.py`` is not an Ignition layout and must not become a module named ``script-python``."""
+
+	def test_build_from_file_rejects_module_directly_under_root(self):
+		"""Test build from file rejects module directly under root."""
+		with tempfile.TemporaryDirectory() as tmp:
+			root = Path(tmp) / 'ignition' / 'script-python'
+			root.mkdir(parents=True)
+			target = root / 'code.py'
+			target.write_text('X = 1\n', encoding='utf-8')
+			self.assertEqual(ScriptModelBuilder.module_parts(target), [])
+			with self.assertRaises(ValueError) as caught:
+				ScriptModelBuilder().build_from_file(target)
+			self.assertIn("directly inside 'script-python'", str(caught.exception))
+
+
 if __name__ == '__main__':
 	unittest.main()

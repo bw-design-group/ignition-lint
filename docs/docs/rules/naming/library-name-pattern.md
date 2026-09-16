@@ -106,12 +106,12 @@ Many existing projects carry PascalCase library folders (`General`, `Widgets`, �
     • badModule_name: Name 'badModule_name' doesn't follow snake_case for script_module (suggestion: 'badmodule_name')
 ```
 
-A package is surfaced by every module beneath it, so the rule reports each package **once per run**, under the first file that revealed it. Module names are reported per file.
+A package is surfaced by every module beneath it, so the rule reports each package **once per process**, under the first file that revealed it. Module names are reported per file. pre-commit may split a large set of staged files across several processes, in which case a package can be reported once per batch; set `require_serial: true` on the hook if you need exactly one report.
 
 ## What gets skipped
 
 - Package nodes are only produced when the file lives under a `script-python` folder. Fixtures checked out on their own (like `tests/cases/scripting`) yield module names only.
-- Everything `NamePatternRule` skips (`skip_names`, abbreviations, …) applies unchanged.
+- Everything `NamePatternRule` skips (`skip_names`, abbreviations, …) applies unchanged. The supported kwargs are the ones documented for `NamePatternRule` (`convention`, `custom_pattern`, `suggestion_convention`, `target_node_types`, `node_type_specific_rules`, `severity`, and the `config` options `skip_names`, `forbidden_names`, `min_length`, `max_length`, `allowed_abbreviations`, `auto_detect_abbreviations`); unknown kwargs are accepted for backward compatibility and ignored, so check spelling if an option seems to have no effect.
 
 ## See also
 

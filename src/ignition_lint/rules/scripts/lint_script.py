@@ -19,10 +19,12 @@ from ...common.fix_operations import Fix, FixOperation, FixOperationType
 from ...model.node_types import ScriptNode, NodeType
 from .pylint_support import (
 	PylintCategoryMixin,
+	PylintRunError,
 	PylintViolation,
 	build_pylint_args,
 	parse_pylint_messages,
 	resolve_pylintrc,
+	run_error_violation,
 	run_pylint,
 )
 
@@ -274,7 +276,9 @@ class PerspectiveScriptPylintRule(PylintCategoryMixin, FixableMixin, ScriptRule)
 		try:
 			temp_file_path = self._create_temp_file(combined_content)
 			pylint_output = self._run_pylint_on_file(temp_file_path)
-			self._parse_pylint_output(pylint_output, line_map, path_to_issues)
+			self._parse_pylint_output(pylint_output, line_map, path_to_issues, target=temp_file_path)
+		except PylintRunError as e:
+			self.pylint_violations.append(run_error_violation(e, self.pylintrc, ''))
 		except (OSError, IOError) as e:
 			error_msg = f"Error with file operations during pylint: {str(e)}"
 			self._handle_pylint_error(error_msg, path_to_issues)
@@ -414,10 +418,16 @@ class PerspectiveScriptPylintRule(PylintCategoryMixin, FixableMixin, ScriptRule)
 		return run_pylint(args)
 
 	def _parse_pylint_output(
-		self, output: str, line_map: Dict[int, str], path_to_issues: Dict[str, List[str]]
+		self, output: str, line_map: Dict[int, str], path_to_issues: Dict[str, List[str]],
+		target: Optional[str] = None
 	) -> None:
-		"""Parse pylint output and map issues back to original scripts."""
-		for line_num, code, category, message in parse_pylint_messages(output):
+		"""Parse pylint output and map issues back to original scripts; configuration diagnostics keep no line."""
+		for line_num, code, category, message in parse_pylint_messages(output, target=target):
+			if line_num == 0:
+				self.pylint_violations.append(
+					PylintViolation(category=category, code=code, message=message, path='', line=0)
+				)
+				continue
 			script_path = self._find_script_for_line(line_num, line_map)
 			if not script_path or script_path not in path_to_issues:
 				continue

@@ -24,7 +24,7 @@ Validates the names of project-library packages (`NodeType.SCRIPT_PACKAGE`) and 
 | Default `convention` | `None` (falls back to PascalCase without suggestions) | `"snake_case"` (with suggestions) |
 | Name extractors | component/property/method/handler | adds `script_package` and `script_module` → `node.name` |
 | `supports_fix` | `True` (component renames) | `False` |
-| Dedup | none needed | `_reported_package_paths` — each package path reported once per rule instance (one CLI run) |
+| Dedup | none needed | `_reported_package_paths` — each package path reported once per rule instance, i.e. once per process; pre-commit batches are separate processes unless the hook sets `require_serial: true` |
 
 `target_node_types` is auto-derived from `node_type_specific_rules` keys when given, as in the parent; `preprocess_config` converts `"script_package"`/`"script_module"` strings to `NodeType` members.
 
