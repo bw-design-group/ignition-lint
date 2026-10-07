@@ -67,6 +67,9 @@ class NodeVisitor(ABC):
 	def visit_script_package(self, node: ViewNode):
 		"""Visit a project-library package node (scripting domain)."""
 
+	def visit_view(self, node: ViewNode):
+		"""Visit the view node (name and folder path derived from the file location)."""
+
 
 class LintingRule(NodeVisitor):
 	"""Base class for linting rules with simplified interface and self-processing capability."""

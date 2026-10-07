@@ -2,37 +2,43 @@
 
 import time
 from pathlib import Path
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Optional, Union
 
 from ..common.domain import DomainSpec, LintDomain, LoadedFile
 from ..common.flatten_json import flatten_json, read_json_file
-from ..model.builder import ViewModelBuilder
+from ..model.builder import ViewModelBuilder, NODE_COLLECTIONS
 from ..model.node_types import ViewNode
 
 VIEW_FILE_NAME = "view.json"
 
-# Collections that together hold every node exactly once. The builder also fills
-# convenience collections ('bindings', 'scripts') that repeat these nodes.
-SPECIFIC_COLLECTIONS = (
-	'components', 'message_handlers', 'custom_methods', 'expression_bindings', 'expression_struct_bindings',
-	'property_bindings', 'tag_bindings', 'query_bindings', 'script_transforms', 'event_handlers',
-	'property_change_scripts', 'properties'
-)
-
 
 def collect_nodes(model: Dict[str, List[ViewNode]]) -> List[ViewNode]:
-	"""Flatten a view model into a de-duplicated node list in stable collection order."""
+	"""
+	Flatten a view model into a de-duplicated node list in stable collection order.
+
+	Iterates ``NODE_COLLECTIONS`` (which includes 'view'); the builder's convenience
+	collections ('bindings', 'scripts') repeat those nodes and are skipped.
+	"""
 	nodes: List[ViewNode] = []
-	for collection_name in SPECIFIC_COLLECTIONS:
+	for collection_name in NODE_COLLECTIONS:
 		nodes.extend(model.get(collection_name, []))
 	return nodes
 
 
-def load_view_json(json_data: Any, flattened_json: Dict[str, Any] = None) -> LoadedFile:
-	"""Build a :class:`LoadedFile` from an already-parsed view document."""
+def load_view_json(
+	json_data: Any, flattened_json: Dict[str, Any] = None, source_file_path: Optional[Union[str, Path]] = None
+) -> LoadedFile:
+	"""
+	Build a :class:`LoadedFile` from an already-parsed view document.
+
+	``source_file_path`` is where the 'view' node (view name, folder path) comes from;
+	without it the model has an empty 'view' collection.
+	"""
 	if flattened_json is None:
 		flattened_json = flatten_json(json_data)
-	model = ViewModelBuilder().build_model(flattened_json)
+	model = ViewModelBuilder().build_model(
+		flattened_json, source_file_path=str(source_file_path) if source_file_path else None
+	)
 	return LoadedFile(nodes=collect_nodes(model), model=model, flattened_json=flattened_json, json_data=json_data)
 
 
@@ -43,7 +49,7 @@ def load_view_file(path: Path) -> LoadedFile:
 	read_done = time.perf_counter()
 	flattened_json = flatten_json(json_data)
 	flatten_done = time.perf_counter()
-	loaded = load_view_json(json_data, flattened_json)
+	loaded = load_view_json(json_data, flattened_json, source_file_path=path)
 	loaded.timings = {
 		'file_read_ms': (read_done - started) * 1000.0,
 		'json_flatten_ms': (flatten_done - read_done) * 1000.0,

@@ -456,5 +456,34 @@
         "tag_path": "[default]{1}/Nested Tag"
       }
     ]
+  },
+  "view": {
+    "count": 1,
+    "nodes": [
+      {
+        "default_size": {
+          "height": null,
+          "width": null
+        },
+        "folder_path": [],
+        "name": "AllNodeTypes",
+        "node_counts": {
+          "component": 1,
+          "expression_binding": 7,
+          "expression_struct_binding": 1,
+          "property": 22,
+          "property_binding": 1,
+          "query_binding": 1,
+          "tag_binding": 3,
+          "transform": 1
+        },
+        "node_type": "view",
+        "path": "AllNodeTypes",
+        "root_container_type": "ia.container.flex",
+        "total_nodes": 37,
+        "view_path": "AllNodeTypes",
+        "views_root_found": true
+      }
+    ]
   }
 }

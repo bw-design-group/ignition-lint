@@ -1,0 +1,121 @@
+{
+  "bindings": {
+    "count": 0,
+    "nodes": []
+  },
+  "components": {
+    "count": 2,
+    "nodes": [
+      {
+        "name": "StatusLabel",
+        "node_type": "component",
+        "path": "root.root.children[0].StatusLabel",
+        "properties_count": 0,
+        "type": "ia.display.label"
+      },
+      {
+        "name": "root",
+        "node_type": "component",
+        "path": "root.root",
+        "properties_count": 0,
+        "type": "ia.container.flex"
+      }
+    ]
+  },
+  "custom_methods": {
+    "count": 0,
+    "nodes": []
+  },
+  "event_handlers": {
+    "count": 0,
+    "nodes": []
+  },
+  "expression_bindings": {
+    "count": 0,
+    "nodes": []
+  },
+  "expression_struct_bindings": {
+    "count": 0,
+    "nodes": []
+  },
+  "message_handlers": {
+    "count": 0,
+    "nodes": []
+  },
+  "properties": {
+    "count": 3,
+    "nodes": [
+      {
+        "name": "basis",
+        "node_type": "property",
+        "path": "root.root.children.StatusLabel.position.basis",
+        "value": "30px",
+        "value_type": "str"
+      },
+      {
+        "name": "text",
+        "node_type": "property",
+        "path": "root.root.children.StatusLabel.props.text",
+        "value": "Title Case folder and view",
+        "value_type": "str"
+      },
+      {
+        "name": "direction",
+        "node_type": "property",
+        "path": "root.root.props.direction",
+        "value": "column",
+        "value_type": "str"
+      }
+    ]
+  },
+  "property_bindings": {
+    "count": 0,
+    "nodes": []
+  },
+  "property_change_scripts": {
+    "count": 0,
+    "nodes": []
+  },
+  "query_bindings": {
+    "count": 0,
+    "nodes": []
+  },
+  "script_transforms": {
+    "count": 0,
+    "nodes": []
+  },
+  "scripts": {
+    "count": 0,
+    "nodes": []
+  },
+  "tag_bindings": {
+    "count": 0,
+    "nodes": []
+  },
+  "view": {
+    "count": 1,
+    "nodes": [
+      {
+        "default_size": {
+          "height": null,
+          "width": null
+        },
+        "folder_path": [
+          "Naming",
+          "Title Case Folder"
+        ],
+        "name": "Title Case View",
+        "node_counts": {
+          "component": 2,
+          "property": 3
+        },
+        "node_type": "view",
+        "path": "Naming/Title Case Folder/Title Case View",
+        "root_container_type": "ia.container.flex",
+        "total_nodes": 5,
+        "view_path": "Naming/Title Case Folder/Title Case View",
+        "views_root_found": true
+      }
+    ]
+  }
+}

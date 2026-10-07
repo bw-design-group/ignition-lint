@@ -175,5 +175,33 @@
   "tag_bindings": {
     "count": 0,
     "nodes": []
+  },
+  "view": {
+    "count": 1,
+    "nodes": [
+      {
+        "default_size": {
+          "height": null,
+          "width": null
+        },
+        "folder_path": [],
+        "name": "PylintViolations",
+        "node_counts": {
+          "component": 2,
+          "custom_method": 1,
+          "event_handler": 1,
+          "expression_binding": 1,
+          "message_handler": 1,
+          "property": 2,
+          "transform": 1
+        },
+        "node_type": "view",
+        "path": "PylintViolations",
+        "root_container_type": "ia.container.flex",
+        "total_nodes": 9,
+        "view_path": "PylintViolations",
+        "views_root_found": true
+      }
+    ]
   }
 }

@@ -16,6 +16,7 @@ from .node_types import (
 	Property,
 	ScriptModule,
 	ScriptPackage,
+	View,
 )
 
 __all__ = [
@@ -33,4 +34,5 @@ __all__ = [
 	"Property",
 	"ScriptModule",
 	"ScriptPackage",
+	"View",
 ]

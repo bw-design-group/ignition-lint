@@ -182,7 +182,7 @@ class ConfigurableTestFramework:
 			# Run linting
 			lint_engine = LintEngine(rules)
 			flattened_json = flatten_file(view_file_path)
-			lint_results = lint_engine.process(flattened_json)
+			lint_results = lint_engine.process(flattened_json, source_file_path=str(view_file_path))
 
 			# Combine warnings and errors for backward compatibility
 			actual_errors = {}

@@ -1,0 +1,12 @@
+{
+  "custom": {},
+  "params": {},
+  "props": {},
+  "root.root.children[0].StatusLabel.meta.name": "StatusLabel",
+  "root.root.children[0].StatusLabel.position.basis": "30px",
+  "root.root.children[0].StatusLabel.props.text": "PascalCase view inside a Title Case sub folder",
+  "root.root.children[0].StatusLabel.type": "ia.display.label",
+  "root.root.meta.name": "root",
+  "root.root.props.direction": "column",
+  "root.root.type": "ia.container.flex"
+}

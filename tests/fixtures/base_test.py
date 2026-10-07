@@ -80,7 +80,7 @@ class BaseRuleTest(unittest.TestCase):
 
 		lint_engine = self.create_lint_engine(rule_configs)
 		flattened_json = flatten_file(view_file)
-		self.last_results = lint_engine.process(flattened_json)
+		self.last_results = lint_engine.process(flattened_json, source_file_path=str(view_file))
 		return self.last_results
 
 	def run_lint_on_mock_view(self, mock_view_content: str, rule_configs: Dict[str, Dict[str, Any]]):
@@ -379,7 +379,7 @@ class BaseIntegrationTest(unittest.TestCase):
 		# Run linting
 		lint_engine = LintEngine(rules)
 		flattened_json = flatten_file(view_file)
-		return lint_engine.process(flattened_json)
+		return lint_engine.process(flattened_json, source_file_path=str(view_file))
 
 	def assert_total_errors(self, errors: Dict[str, List[str]], expected_total: int):
 		"""Assert the total number of errors across all rules."""

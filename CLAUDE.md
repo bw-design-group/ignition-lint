@@ -378,6 +378,7 @@ src/ignition_lint/
 - **CustomMethodScript**: Custom component methods
 - **TransformScript**: Script transforms in bindings
 - **EventHandlerScript**: Event handler scripts
+- **View**: The view itself — name and parent folder path derived from the view.json location (not its contents)
 
 ### Rule Development Pattern
 Rules extend `LintingRule` and use the visitor pattern with automatic registration:

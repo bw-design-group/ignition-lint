@@ -7,6 +7,7 @@
     "ia.input.dropdown": 2
   },
   "model_keys": [
+    "view",
     "components",
     "bindings",
     "scripts",
@@ -30,7 +31,8 @@
     "expression_struct_binding": 1,
     "message_handler": 2,
     "property": 73,
-    "property_binding": 10
+    "property_binding": 10,
+    "view": 1
   },
   "rule_coverage": {
     "BadComponentReferenceRule": {
@@ -61,15 +63,38 @@
       ]
     },
     "ExcessiveContextDataRule": {
-      "applicable_node_count": 145,
+      "applicable_node_count": 146,
       "target_types": [
         "all"
+      ]
+    },
+    "LibraryNamePatternRule": {
+      "applicable_node_count": 0,
+      "target_types": [
+        "script_module",
+        "script_package"
+      ]
+    },
+    "LibraryScriptPylintRule": {
+      "applicable_node_count": 0,
+      "target_types": [
+        "script_module"
       ]
     },
     "NamePatternRule": {
       "applicable_node_count": 38,
       "target_types": [
         "component"
+      ]
+    },
+    "PerspectiveScriptPylintRule": {
+      "applicable_node_count": 12,
+      "target_types": [
+        "custom_method",
+        "event_handler",
+        "message_handler",
+        "property_change_script",
+        "transform"
       ]
     },
     "PollingIntervalRule": {
@@ -83,25 +108,15 @@
       ]
     },
     "PropertyAccessRule": {
-      "applicable_node_count": 145,
+      "applicable_node_count": 146,
       "target_types": [
         "all"
       ]
     },
     "PropertyPersistenceRule": {
-      "applicable_node_count": 145,
+      "applicable_node_count": 146,
       "target_types": [
         "all"
-      ]
-    },
-    "PylintScriptRule": {
-      "applicable_node_count": 12,
-      "target_types": [
-        "custom_method",
-        "event_handler",
-        "message_handler",
-        "property_change_script",
-        "transform"
       ]
     },
     "UnusedCustomPropertiesRule": {
@@ -119,5 +134,5 @@
       ]
     }
   },
-  "total_nodes": 145
+  "total_nodes": 146
 }

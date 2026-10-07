@@ -4,10 +4,12 @@ from a flattened JSON representation of an Ignition Perspective view. It include
 component types, bindings, event handlers, and other elements from the JSON data.
 """
 import re
-from typing import Dict, List, Any
+from typing import Dict, List, Any, Optional
 
+from ..common.view_path import resolve_view_location
 from .node_types import (
 	ViewNode,
+	View,
 	Component,
 	ExpressionBinding,
 	ExpressionStructBinding,
@@ -22,13 +24,28 @@ from .node_types import (
 	Property,
 )
 
+# Collections holding each node exactly once. The generic collections ('bindings',
+# 'scripts') repeat nodes from these, so rules and statistics iterate this list only.
+NODE_COLLECTIONS = [
+	'view', 'components', 'message_handlers', 'custom_methods', 'expression_bindings', 'expression_struct_bindings',
+	'property_bindings', 'tag_bindings', 'query_bindings', 'script_transforms', 'event_handlers',
+	'property_change_scripts', 'properties'
+]
+
 
 class ViewModelBuilder:
 	"""Builds a structured view model from flattened JSON."""
 
 	def __init__(self):
 		self.flattened_json = {}
-		self.model = {
+		self.model = self._empty_model()
+		self._propconfig_cache = None  # Cache for propConfig paths (performance optimization)
+
+	@staticmethod
+	def _empty_model() -> Dict[str, List[ViewNode]]:
+		"""Return a model dict with every collection present and empty."""
+		return {
+			'view': [],
 			'components': [],
 			'bindings': [],
 			'scripts': [],
@@ -44,7 +61,6 @@ class ViewModelBuilder:
 			'property_change_scripts': [],
 			'properties': []
 		}
-		self._propconfig_cache = None  # Cache for propConfig paths (performance optimization)
 
 	def _search_for_path_value(self, path: str, suffix: str = None, fallback: Any = None) -> Any:
 		"""Search for a value in the flattened JSON by path, optionally with a suffix."""
@@ -652,9 +668,53 @@ class ViewModelBuilder:
 		"""Return the structured view model."""
 		return self.model
 
-	def build_model(self, flattened_json: Dict[str, Any]) -> Dict[str, List[ViewNode]]:
+	def _count_nodes_by_type(self) -> Dict[str, int]:
+		"""Count the modeled nodes inside the view by NodeType value, sorted for stable output."""
+		counts: Dict[str, int] = {}
+		for collection_name in NODE_COLLECTIONS:
+			if collection_name == 'view':
+				continue
+			for node in self.model[collection_name]:
+				counts[node.node_type.value] = counts.get(node.node_type.value, 0) + 1
+		return dict(sorted(counts.items()))
+
+	def _root_container_type(self) -> Optional[str]:
+		"""Type of the view's root container: the one component that is not inside a children[] list."""
+		for component in self.model['components']:
+			if '.children[' not in component.path:
+				return component.type
+		return None
+
+	def _default_size(self) -> Dict[str, Any]:
+		"""The view's props.defaultSize as {'width', 'height'}; each value is None when not declared."""
+		return {key: self.flattened_json.get(f"props.defaultSize.{key}") for key in ('width', 'height')}
+
+	def _collect_view(self, source_file_path: Optional[str]):
+		"""
+		Add the View node when the file location is known. Runs after every other collection
+		so it can summarize them (node counts) alongside the name, folder path and root type.
+		"""
+		location = resolve_view_location(source_file_path)
+		if location is None:
+			return
+		self.model['view'].append(
+			View(
+				location.name, list(location.folders), source_file=str(source_file_path),
+				views_root_found=location.views_root_found,
+				root_container_type=self._root_container_type(),
+				node_counts=self._count_nodes_by_type(), default_size=self._default_size()
+			)
+		)
+
+	def build_model(self, flattened_json: Dict[str, Any],
+			source_file_path: Optional[str] = None) -> Dict[str, List[ViewNode]]:
 		"""
 		Parse the flattened JSON and build a structured model.
+
+		Args:
+			flattened_json: Path-value pairs produced by flatten_json.
+			source_file_path: Location of the view.json. When given, a View node is
+				added with the view name and folder path derived from it.
 
 		Returns:
 			Dict mapping node types to lists of those nodes
@@ -663,22 +723,7 @@ class ViewModelBuilder:
 		self._propconfig_cache = None  # Reset cache for new flattened_json
 
 		# Reset model to avoid accumulation from multiple calls
-		self.model = {
-			'components': [],
-			'bindings': [],
-			'scripts': [],
-			'event_handlers': [],
-			'message_handlers': [],
-			'custom_methods': [],
-			'expression_bindings': [],
-			'expression_struct_bindings': [],
-			'property_bindings': [],
-			'tag_bindings': [],
-			'query_bindings': [],
-			'script_transforms': [],
-			'property_change_scripts': [],
-			'properties': []
-		}
+		self.model = self._empty_model()
 
 		# First, identify components
 		self._collect_components()
@@ -700,5 +745,8 @@ class ViewModelBuilder:
 
 		# Process regular properties
 		self._collect_properties()
+
+		# Last: the view node summarizes everything collected above
+		self._collect_view(source_file_path)
 
 		return self.get_view_model()
