@@ -91,7 +91,7 @@ This rarely matters for Python scripts (Python is case-sensitive anyway), but is
 
 ### Problematic code
 
-From `tests/cases/BadComponentReferences/view.json`, the `BadButton.onActionPerformed` event handler:
+From `tests/cases/views/BadComponentReferences/view.json`, the `BadButton.onActionPerformed` event handler:
 
 ```python
 # Bad pattern 1: getSibling

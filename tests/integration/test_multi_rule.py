@@ -57,7 +57,7 @@ class TestMultipleRules(BaseIntegrationTest):
 					"minimum_interval": 5000
 				}
 			},
-			"PylintScriptRule": {
+			"PerspectiveScriptPylintRule": {
 				"enabled": True,
 				"kwargs": {}
 			}
@@ -242,7 +242,7 @@ class TestMultipleRules(BaseIntegrationTest):
 					"minimum_interval": 10000
 				}
 			},
-			"PylintScriptRule": {
+			"PerspectiveScriptPylintRule": {
 				"enabled": True,
 				"kwargs": {}
 			}

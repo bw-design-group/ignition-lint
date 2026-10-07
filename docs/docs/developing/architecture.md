@@ -1,16 +1,39 @@
 ---
 title: Architecture
 sidebar_label: Architecture
-description: How ignition-lint parses, models, and analyzes Perspective views
+description: How ignition-lint loads, models, and analyzes Ignition resources across lint domains
 ---
 
 # Architecture
 
 This page is the conceptual map of the framework. Read it before writing a custom rule — most rule bugs trace back to a misunderstanding of one of these components.
 
-## Pipeline
+## Lint domains
 
-A lint run flows through four phases:
+ignition-lint lints more than one kind of Ignition resource. Each kind is a **domain**, declared by a `DomainSpec` (`common/domain.py`) and registered in `domains/`:
+
+| Domain | Files | Loader | Node types | Rules |
+| --- | --- | --- | --- | --- |
+| `perspective` | `view.json` | flatten → `ViewModelBuilder` | components, bindings, scripts, properties | every Perspective rule |
+| `scripting` | `script-python/**/code.py` | `ScriptModelBuilder` | `script_package`, `script_module` | `LibraryScriptPylintRule`, `LibraryNamePatternRule` |
+
+A `DomainSpec` carries everything that varies per domain: `matches(path)` decides which files belong to it, `load(path)` turns a file into a `LoadedFile` (nodes, named model collections, and — for JSON domains — the flattened JSON and parsed document), and `default_globs` says what a bare run searches for. Every `LintingRule` declares its `domain` (default `PERSPECTIVE`); the CLI builds one `LintEngine` per domain that has files, configures it with the rules of that domain from the flat config file, and runs each file through `engine.process_file(path, spec)`. Features that only make sense for JSON (auto-fix, flattened statistics) are gated on what the loader returned, never on the domain's name.
+
+### Adding a domain
+
+Adding a domain is a pure addition — `cli.py` and `linter.py` do not change:
+
+1. Add a `LintDomain` member (`common/domain.py`); its value is the domain's display key in CLI output.
+2. Add node types to `NodeType` and node classes in `model/node_types.py` (never extend `ALL_SCRIPTS` — that set drives Perspective script rules), plus no-op `visit_<type>` methods on `NodeVisitor`.
+3. Write a loader/builder producing a `LoadedFile`, and a `DomainSpec` in `domains/<name>.py`; import it in `domains/__init__.py`.
+4. Write rules with `domain = LintDomain.<NAME>`; they are discovered like any other rule.
+5. Add fixtures under `tests/cases/<domain>/`, a bind mount in `docker/docker-compose.yaml`, and a docs page.
+
+`tests/integration/test_cli_scripting_domain.py::TestExtensibilityProof` registers a throwaway domain at runtime and drives the generic CLI path; it is the executable form of this checklist.
+
+## Pipeline (Perspective)
+
+A lint run on a view flows through four phases:
 
 ```
 view.json → flatten → build model → run rules → report
@@ -22,6 +45,8 @@ view.json → flatten → build model → run rules → report
 | Build model | `model/builder.py` | Object tree of typed nodes |
 | Run rules | `linter.py` + `rules/*` | Per-rule violations |
 | Report | `cli.py` | Grouped, severity-aware output |
+
+For the scripting domain the first two phases are replaced by `model/script_builder.py`, which reads a `code.py` and its sibling `resource.json` into a `ScriptModule` node plus one `ScriptPackage` node per enclosing folder under `script-python`.
 
 ## Phase 1 — Flattening
 
@@ -72,11 +97,14 @@ src/ignition_lint/model/node_types.py
 | `CUSTOM_METHOD` | `CustomMethodScript` | component custom methods |
 | `TRANSFORM` | `TransformScript` | script transforms inside bindings |
 | `EVENT_HANDLER` | `EventHandlerScript` | event handler scripts |
+| `PROPERTY_CHANGE_SCRIPT` | `PropertyChangeScript` | `onChange` scripts on custom properties |
+| `SCRIPT_MODULE` | `ScriptModule` | project-library module (`code.py`) — scripting domain |
+| `SCRIPT_PACKAGE` | `ScriptPackage` | project-library package folder — scripting domain |
 
 Convenience sets:
 
 - `ALL_BINDINGS` — every binding type
-- `ALL_SCRIPTS` — every script type
+- `ALL_SCRIPTS` — every Perspective embedded-script type (scripting-domain nodes are deliberately excluded)
 
 Each node class adds type-specific attributes: `Component.name`, `ExpressionBinding.expression`, `TagBinding.tag_path` / `mode` / `references`, `ScriptNode.script` and `get_formatted_script()`, etc.
 
@@ -120,6 +148,8 @@ class NodeVisitor:
     def visit_custom_method(self, node): pass
     def visit_transform(self, node): pass
     def visit_event_handler(self, node): pass
+    def visit_script_module(self, node): pass   # scripting domain
+    def visit_script_package(self, node): pass  # scripting domain
     def visit_generic(self, node): pass  # fallback
 ```
 
@@ -158,16 +188,15 @@ Use the most specific base class. A rule that only ever looks at scripts should 
 
 ## Lint engine
 
-`LintEngine` (`linter.py`) orchestrates the whole pipeline:
+`LintEngine` (`linter.py`) is domain-agnostic and orchestrates rule execution for one file at a time:
 
-1. Loads the configured rules from `rule_config.json`
-2. Flattens the view
-3. Builds the model
-4. For each rule, filters nodes by target types and calls visit methods
-5. Calls `post_process()` and `finalize()` hooks
-6. Collects violations and returns a structured report
+1. `process_file(path, spec)` asks the domain spec to load the file into a `LoadedFile`
+2. Fix context (original JSON + `PathTranslator`) is set up only when the loader returned a JSON document
+3. For each rule, filters nodes by target types and calls visit methods
+4. Calls `post_process()` and, after all files, `finalize()` hooks
+5. Collects violations and returns `LintResults`
 
-For batch runs (multiple files), the engine processes one file at a time but allows rules with `batch_mode=True` (currently only `PylintScriptRule`) to accumulate state across files and report once at the end.
+`process(flattened_json, ...)` remains as the Perspective-only entry point used by `BaseRuleTest`, the golden-file tests and `scripts/generate_debug_files.py`. The CLI keeps one engine per domain and merges their `finalize_batch_rules()` results; rules with `batch_mode=True` (currently only `PerspectiveScriptPylintRule`) accumulate state across files and report once at the end.
 
 ## Auto-fix
 
@@ -184,7 +213,7 @@ A `Fix` includes:
 | `is_safe` | Whether automated application is safe |
 | `safety_notes` | If unsafe, why |
 
-See `src/ignition_lint/common/fix_operations.py` for the full schema and `name_pattern.py` / `lint_script.py` for working examples.
+See `src/ignition_lint/common/fix_operations.py` for the full schema and `name_pattern.py` / `lint_script.py` for working examples. Fixes are only possible in JSON-backed domains; the engine never establishes fix context for a `LoadedFile` without `json_data`.
 
 ## Where rules live
 
@@ -192,11 +221,11 @@ See `src/ignition_lint/common/fix_operations.py` for the full schema and `name_p
 src/ignition_lint/rules/
 ├── common.py          # base classes (LintingRule, BindingRule, ScriptRule, FixableMixin)
 ├── registry.py        # auto-discovery
-├── naming/            # NamePatternRule
+├── naming/            # NamePatternRule, LibraryNamePatternRule (scripting)
 ├── structure/         # BadComponentReferenceRule, ComponentReferenceValidationRule
 ├── performance/       # PollingIntervalRule
-├── properties/        # UnusedCustomPropertiesRule, ExcessiveContextDataRule
-├── scripts/           # PylintScriptRule
+├── properties/        # UnusedCustomPropertiesRule, ExcessiveContextDataRule, PropertyPersistenceRule, PropertyAccessRule
+├── scripts/           # PerspectiveScriptPylintRule, LibraryScriptPylintRule (scripting), pylint_support.py (shared, not a rule)
 └── _examples/         # reference rules — excluded from auto-discovery
 ```
 

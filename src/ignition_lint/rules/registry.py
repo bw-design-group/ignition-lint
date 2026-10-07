@@ -8,8 +8,24 @@ to register new linting rules without modifying core framework files.
 import inspect
 import importlib
 from pathlib import Path
-from typing import Dict, Type, Set, Optional, List, Any
+from typing import Dict, Type, Set, Optional, List, Any, Tuple
+from ..common.domain import LintDomain
 from .common import LintingRule
+
+# Deprecated rule names -> canonical registered names. Aliases are resolved by the
+# config loader; they are deliberately NOT registered, since a second registry entry
+# would make the rule run twice.
+RULE_ALIASES: Dict[str, str] = {
+	"PylintScriptRule": "PerspectiveScriptPylintRule",
+}
+
+
+def resolve_rule_name(rule_name: str) -> Tuple[str, bool]:
+	"""Map a possibly-deprecated rule name to its canonical name. Returns (name, was_alias)."""
+	canonical = RULE_ALIASES.get(rule_name)
+	if canonical is None:
+		return rule_name, False
+	return canonical, True
 
 
 class RuleValidationError(Exception):
@@ -80,6 +96,10 @@ class RuleRegistry:
 	def list_rules(self) -> List[str]:
 		"""List all registered rule names."""
 		return list(self._rules.keys())
+
+	def get_rules_for_domain(self, domain: LintDomain) -> Dict[str, Type[LintingRule]]:
+		"""Registered rules whose ``domain`` attribute equals ``domain``."""
+		return {name: cls for name, cls in self._rules.items() if getattr(cls, 'domain', None) == domain}
 
 	def get_rule_metadata(self, rule_name: str) -> Optional[Dict[str, Any]]:
 		"""Get metadata for a specific rule. Computed lazily on first access."""
@@ -234,3 +254,8 @@ def get_all_rules() -> Dict[str, Type[LintingRule]]:
 def discover_rules() -> List[str]:
 	"""Discover and register all rules in the rules package."""
 	return _global_registry.discover_and_register_rules()
+
+
+def get_rules_for_domain(domain: LintDomain) -> Dict[str, Type[LintingRule]]:
+	"""Registered rules belonging to ``domain``."""
+	return _global_registry.get_rules_for_domain(domain)

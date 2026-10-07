@@ -2,6 +2,7 @@
 This module contains the core data models for representing Ignition view components and their properties.
 """
 from .builder import ViewModelBuilder
+from .script_builder import ScriptModelBuilder
 from .node_types import (
 	ViewNode,
 	Component,
@@ -13,10 +14,13 @@ from .node_types import (
 	TransformScript,
 	EventHandlerScript,
 	Property,
+	ScriptModule,
+	ScriptPackage,
 )
 
 __all__ = [
 	"ViewModelBuilder",
+	"ScriptModelBuilder",
 	"ViewNode",
 	"Component",
 	"ExpressionBinding",
@@ -27,4 +31,6 @@ __all__ = [
 	"TransformScript",
 	"EventHandlerScript",
 	"Property",
+	"ScriptModule",
+	"ScriptPackage",
 ]

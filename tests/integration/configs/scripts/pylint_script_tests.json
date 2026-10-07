@@ -1,5 +1,5 @@
 {
-  "test_suite_name": "PylintScriptRule Tests",
+  "test_suite_name": "PerspectiveScriptPylintRule Tests",
   "description": "Test cases for script linting with pylint",
   "test_cases": [
     {
@@ -7,14 +7,14 @@
       "description": "Basic script linting check",
       "view_file": "PascalCase/view.json",
       "rule_config": {
-        "PylintScriptRule": {
+        "PerspectiveScriptPylintRule": {
           "enabled": true,
           "kwargs": {}
         }
       },
       "expectations": [
         {
-          "rule_name": "PylintScriptRule",
+          "rule_name": "PerspectiveScriptPylintRule",
           "error_count": 0,
           "should_pass": true
         }

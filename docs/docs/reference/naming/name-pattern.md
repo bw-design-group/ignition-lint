@@ -236,7 +236,7 @@ A combined PascalCase/SCREAMING_SNAKE_CASE pattern is a common real-world overri
 
 ### Valid
 
-`tests/cases/PascalCase/view.json` passes a PascalCase rule for components:
+`tests/cases/views/PascalCase/view.json` passes a PascalCase rule for components:
 
 ```json
 {
@@ -275,7 +275,7 @@ The MixedCase fixture also demonstrates that abbreviations like `APIClient`, `HT
 
 ### Invalid
 
-A snippet from `tests/cases/inconsistentCase/view.json`:
+A snippet from `tests/cases/views/inconsistentCase/view.json`:
 
 ```json
 {

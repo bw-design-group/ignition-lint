@@ -24,6 +24,10 @@ class NodeType(Enum):
 	EVENT_HANDLER = "event_handler"
 	PROPERTY_CHANGE_SCRIPT = "property_change_script"
 	PROPERTY = "property"
+	# Scripting domain (project script library). Deliberately NOT part of ALL_SCRIPTS:
+	# that set drives Perspective embedded-script rules and component-reference checks.
+	SCRIPT_MODULE = "script_module"
+	SCRIPT_PACKAGE = "script_package"
 
 
 # Grouped node types - defined outside the enum to avoid enum member confusion
@@ -329,6 +333,59 @@ class PropertyChangeScript(ScriptNode):
 		base_attrs = super()._get_serializable_attrs()
 		base_attrs.update({'property_path': self.property_path})
 		return base_attrs
+
+
+class ScriptModule(ScriptNode):
+	"""
+	A project-library script module (``script-python/<Pkg>/<Name>/code.py``).
+
+	``path`` is the dotted module path Ignition scripts import it by (``General.Config``),
+	``name`` the last segment. Unlike embedded Perspective scripts the source is already a
+	complete module, so ``get_formatted_script`` returns it verbatim.
+	"""
+
+	def __init__(
+		self, path: str, name: str, script: str, *, kind: str = "library", file_path: str = None,
+		resource: Dict[str, Any] = None
+	):
+		super().__init__(path, NodeType.SCRIPT_MODULE, script)
+		self.name = name
+		self.kind = kind
+		self.file_path = file_path
+		self.resource = resource or {}
+		self.function_def = ""
+
+	def get_formatted_script(self) -> str:
+		"""Library modules are complete files; return the source unchanged."""
+		return self.script
+
+	def _get_serializable_attrs(self) -> Dict[str, Any]:
+		base_attrs = super()._get_serializable_attrs()
+		base_attrs.update({
+			'kind': self.kind,
+			'name': self.name,
+			'file_path': self.file_path,
+			'scope': self.resource.get('scope'),
+			'restricted': self.resource.get('restricted'),
+			'overridable': self.resource.get('overridable'),
+		})
+		return base_attrs
+
+
+class ScriptPackage(ViewNode):
+	"""
+	A project-library package (a folder under ``script-python`` that contains other
+	packages or modules). ``path`` is the dotted package path, ``name`` the last segment.
+	"""
+
+	def __init__(self, path: str, name: str, *, kind: str = "library", dir_path: str = None):
+		super().__init__(path, NodeType.SCRIPT_PACKAGE)
+		self.name = name
+		self.kind = kind
+		self.dir_path = dir_path
+
+	def _get_serializable_attrs(self) -> Dict[str, Any]:
+		return {'kind': self.kind, 'name': self.name, 'dir_path': self.dir_path}
 
 
 class Property(ViewNode):

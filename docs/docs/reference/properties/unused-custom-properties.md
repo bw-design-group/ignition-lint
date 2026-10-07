@@ -87,7 +87,7 @@ The rule executes in distinct phases against the model produced by the lint engi
 
 ### Correct code
 
-The view defines `customViewParam` and `viewParam`. Both have entries in `propConfig`, which the rule treats as binding-owner references that mark the properties as used. From `tests/cases/PreferredStyle/view.json`:
+The view defines `customViewParam` and `viewParam`. Both have entries in `propConfig`, which the rule treats as binding-owner references that mark the properties as used. From `tests/cases/views/PreferredStyle/view.json`:
 
 ```json
 {

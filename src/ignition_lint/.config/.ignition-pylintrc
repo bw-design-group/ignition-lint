@@ -94,11 +94,15 @@ disable=
         using-f-string-in-unsupported-version,
         f-string-without-interpolation,
         raise-missing-from,
+        # split/rsplit take maxsplit positionally only in Jython 2.7; the suggested maxsplit= kwarg is a TypeError
+        use-maxsplit-arg,
 
         # ========================================
         # Ignition-specific - dynamic module/member access
         # ========================================
         c-extension-no-member,
+        # ignition-lint aggregates every script of a view into one file, so imports are legitimately not at the top
+        import-outside-toplevel,
         import-error,
         import-self,
         no-member,
@@ -383,7 +387,7 @@ dummy-variables-rgx=^\*{0,2}(_$|unused_|dummy_)
 # unicode - Provided by python 2.7
 # long - Provided by python 2.7
 # double - Provided by Ignition
-additional-builtins=system,General,Components,DanPT,Views,Widgets,unicode,long,double,AnalysisTags
+additional-builtins=system,General,Components,DanPT,Views,Widgets,unicode,long,double,AnalysisTags,xrange,basestring,raw_input,reduce,cmp,unichr,file,execfile,reload,apply,buffer,intern,coerce,StandardError
 
 # List of strings which can identify a callback function by name. A callback
 # name must start or end with one of those strings.

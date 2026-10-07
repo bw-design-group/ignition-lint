@@ -1,6 +1,6 @@
 # pylint: disable=import-error,wrong-import-position,protected-access
 """
-Unit tests for PylintScriptRule trailing-whitespace (C0303) auto-fix.
+Unit tests for PerspectiveScriptPylintRule trailing-whitespace (C0303) auto-fix.
 
 Tests cover:
 - Static helper strips trailing whitespace
@@ -19,7 +19,7 @@ from collections import OrderedDict
 
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..')))
 
-from src.ignition_lint.rules.scripts.lint_script import PylintScriptRule
+from src.ignition_lint.rules.scripts.lint_script import PerspectiveScriptPylintRule
 from src.ignition_lint.common.fix_operations import FixOperationType
 from src.ignition_lint.common.path_translator import PathTranslator
 from src.ignition_lint.common.flatten_json import flatten_json
@@ -104,23 +104,23 @@ class TestStripTrailingWhitespace(unittest.TestCase):
 	def test_strips_spaces_and_tabs(self):
 		"""Should strip trailing spaces and tabs from each line."""
 		script = "\tx = 1   \n\ty = 2\t\n\tz = 3"
-		result = PylintScriptRule._strip_trailing_whitespace(script)
+		result = PerspectiveScriptPylintRule._strip_trailing_whitespace(script)
 		self.assertEqual(result, "\tx = 1\n\ty = 2\n\tz = 3")
 
 	def test_preserves_clean_script(self):
 		"""Should return identical string when no trailing whitespace exists."""
 		script = "\tx = 1\n\ty = 2"
-		result = PylintScriptRule._strip_trailing_whitespace(script)
+		result = PerspectiveScriptPylintRule._strip_trailing_whitespace(script)
 		self.assertEqual(result, script)
 
 	def test_handles_empty_string(self):
 		"""Should handle empty string without error."""
-		self.assertEqual(PylintScriptRule._strip_trailing_whitespace(""), "")
+		self.assertEqual(PerspectiveScriptPylintRule._strip_trailing_whitespace(""), "")
 
 	def test_handles_blank_lines(self):
 		"""Should strip whitespace-only lines to empty lines."""
 		script = "\tx = 1\n   \n\ty = 2"
-		result = PylintScriptRule._strip_trailing_whitespace(script)
+		result = PerspectiveScriptPylintRule._strip_trailing_whitespace(script)
 		self.assertEqual(result, "\tx = 1\n\n\ty = 2")
 
 
@@ -141,7 +141,7 @@ class TestNoFixWithoutContext(unittest.TestCase):
 		json_data = _make_view_with_event_handler(script)
 		flattened = flatten_json(json_data)
 
-		rule = PylintScriptRule(pylintrc=self.pylintrc)
+		rule = PerspectiveScriptPylintRule(pylintrc=self.pylintrc)
 		engine = LintEngine([rule])
 
 		# Process WITHOUT fix context
@@ -168,7 +168,7 @@ class TestGeneratesFixForTrailingWhitespace(unittest.TestCase):
 		flattened = flatten_json(json_data)
 		translator = PathTranslator(json_data)
 
-		rule = PylintScriptRule(pylintrc=self.pylintrc)
+		rule = PerspectiveScriptPylintRule(pylintrc=self.pylintrc)
 		engine = LintEngine([rule])
 
 		results = engine.process(
@@ -181,7 +181,7 @@ class TestGeneratesFixForTrailingWhitespace(unittest.TestCase):
 		self.assertGreater(len(results.fixes), 0)
 		fix = results.fixes[0]
 		self.assertTrue(fix.is_safe)
-		self.assertEqual(fix.rule_name, 'PylintScriptRule')
+		self.assertEqual(fix.rule_name, 'PerspectiveScriptPylintRule')
 		self.assertEqual(len(fix.operations), 1)
 		op = fix.operations[0]
 		self.assertEqual(op.operation, FixOperationType.SET_VALUE)
@@ -208,7 +208,7 @@ class TestOneFixPerScript(unittest.TestCase):
 		flattened = flatten_json(json_data)
 		translator = PathTranslator(json_data)
 
-		rule = PylintScriptRule(pylintrc=self.pylintrc)
+		rule = PerspectiveScriptPylintRule(pylintrc=self.pylintrc)
 		engine = LintEngine([rule])
 
 		results = engine.process(
@@ -219,7 +219,7 @@ class TestOneFixPerScript(unittest.TestCase):
 		)
 
 		# Exactly one fix, even though 3 lines have C0303
-		pylint_fixes = [f for f in results.fixes if f.rule_name == 'PylintScriptRule']
+		pylint_fixes = [f for f in results.fixes if f.rule_name == 'PerspectiveScriptPylintRule']
 		self.assertEqual(len(pylint_fixes), 1)
 
 
@@ -241,7 +241,7 @@ class TestFixApplicationEndToEnd(unittest.TestCase):
 		flattened = flatten_json(json_data)
 		translator = PathTranslator(json_data)
 
-		rule = PylintScriptRule(pylintrc=self.pylintrc)
+		rule = PerspectiveScriptPylintRule(pylintrc=self.pylintrc)
 		engine = LintEngine([rule])
 
 		# First pass: detect and fix
@@ -261,7 +261,7 @@ class TestFixApplicationEndToEnd(unittest.TestCase):
 		# Re-flatten and re-lint
 		flattened2 = flatten_json(json_data)
 		translator2 = PathTranslator(json_data)
-		rule2 = PylintScriptRule(pylintrc=self.pylintrc)
+		rule2 = PerspectiveScriptPylintRule(pylintrc=self.pylintrc)
 		engine2 = LintEngine([rule2])
 
 		results2 = engine2.process(
@@ -295,7 +295,7 @@ class TestProcessNodesResetsFixes(unittest.TestCase):
 		flattened = flatten_json(json_data)
 		translator = PathTranslator(json_data)
 
-		rule = PylintScriptRule(pylintrc=self.pylintrc)
+		rule = PerspectiveScriptPylintRule(pylintrc=self.pylintrc)
 		engine = LintEngine([rule])
 
 		# Process first file (produces fixes)

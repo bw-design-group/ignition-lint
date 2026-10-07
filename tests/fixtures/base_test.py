@@ -30,11 +30,12 @@ class BaseRuleTest(unittest.TestCase):
 		self.rule_config = None
 		self.last_results = None  # Store results from last run_lint call
 
-	def setUp(self): # pylint: disable=invalid-name
+	def setUp(self):  # pylint: disable=invalid-name
 		"""Set up test fixtures."""
 		# Get the tests directory (two levels up from fixtures)
 		tests_dir = Path(__file__).parent.parent
-		self.test_cases_dir = tests_dir / "cases"
+		self.test_cases_dir = tests_dir / "cases" / "views"
+		self.test_scripting_dir = tests_dir / "cases" / "scripting"
 		self.configs_dir = tests_dir / "configs"
 
 	def create_lint_engine(self, rule_configs: Dict[str, Dict[str, Any]]) -> LintEngine:
@@ -146,18 +147,25 @@ class BaseRuleTest(unittest.TestCase):
 		error_count = self.get_error_count(rule_name)
 		warning_count = self.get_warning_count(rule_name)
 		scope = f"rule '{rule_name}'" if rule_name else "all rules"
-		self.assertEqual(error_count + warning_count, 0,
-			f"Expected no issues for {scope} but found {error_count} errors and {warning_count} warnings")
+		self.assertEqual(
+			error_count + warning_count, 0,
+			f"Expected no issues for {scope} but found {error_count} errors and {warning_count} warnings"
+		)
 
 	def assert_rule_passes(self, view_file: Path, rule_configs: Dict[str, Dict[str, Any]], rule_name: str):
 		"""Assert that a rule passes (no errors) for a given view file. Warnings are allowed."""
 		self.run_lint_on_file(view_file, rule_configs)
 
 		error_count = self.get_error_count(rule_name)
-		self.assertEqual(error_count, 0, f"Rule {rule_name} should pass but found {error_count} errors: {self.get_errors_for_rule(rule_name)}")
+		self.assertEqual(
+			error_count, 0,
+			f"Rule {rule_name} should pass but found {error_count} errors: {self.get_errors_for_rule(rule_name)}"
+		)
 
 		if self.has_warnings(rule_name):
-			print(f"Note: Rule {rule_name} passed but produced warnings: {self.get_warnings_for_rule(rule_name)}")
+			print(
+				f"Note: Rule {rule_name} passed but produced warnings: {self.get_warnings_for_rule(rule_name)}"
+			)
 
 	def assert_rule_fails(
 		self, view_file: Path, rule_configs: Dict[str, Dict[str, Any]], rule_name: str,
@@ -192,8 +200,8 @@ class BaseRuleTest(unittest.TestCase):
 
 	def assert_violations(
 		self, view_file: Path, rule_configs: Dict[str, Dict[str, Any]], rule_name: str,
-		expected_warnings: int = 0, expected_errors: int = 0,
-		warning_patterns: list = None, error_patterns: list = None
+		expected_warnings: int = 0, expected_errors: int = 0, warning_patterns: list = None,
+		error_patterns: list = None
 	):
 		"""
 		Assert the total warnings and errors count for a rule with optional pattern matching.
@@ -315,7 +323,8 @@ class BaseIntegrationTest(unittest.TestCase):
 		"""Set up test fixtures."""
 		# Get the tests directory (two levels up from fixtures)
 		tests_dir = Path(__file__).parent.parent
-		self.test_cases_dir = tests_dir / "cases"
+		self.test_cases_dir = tests_dir / "cases" / "views"
+		self.test_scripting_dir = tests_dir / "cases" / "scripting"
 		self.configs_dir = tests_dir / "configs"
 
 	def run_multiple_rules(self, view_file: Path, rule_configs: Dict[str, Dict[str, Any]]) -> Dict[str, List[str]]:

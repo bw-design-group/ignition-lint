@@ -244,7 +244,7 @@ class MyFixableRule(FixableMixin, LintingRule):
 | Operates only on scripts | `ScriptRule` (auto-collects scripts; override `process_scripts(self, scripts)`) |
 | Provides auto-fixes | Add `FixableMixin` as the first parent: `class MyRule(FixableMixin, LintingRule):` |
 
-`ScriptRule` is the most specialized — you implement `process_scripts(scripts: dict[str, ScriptNode])` instead of individual `visit_*` methods. The framework collects scripts across the whole view first, then hands them to you in one batch. This is what enables `PylintScriptRule` to run pylint once across the whole view rather than once per script.
+`ScriptRule` is the most specialized — you implement `process_scripts(scripts: dict[str, ScriptNode])` instead of individual `visit_*` methods. The framework collects scripts across the whole view first, then hands them to you in one batch. This is what enables `PerspectiveScriptPylintRule` to run pylint once across the whole view rather than once per script.
 
 ## Where to put your rule
 

@@ -1,9 +1,9 @@
 {
   "_comment": "Configuration with rules enabled by default. Severity levels are defined by rule developers - users don't configure severity.",
-  "PylintScriptRule": {
+  "PerspectiveScriptPylintRule": {
     "enabled": true,
     "kwargs": {
-      "_comment": "Optional: Specify a custom pylintrc file path. If not specified, uses .config/.ignition-pylintrc",
+      "_comment": "Optional: Specify a custom pylintrc file path. If not specified, uses .config/.ignition-pylintrc (walking up from the working directory), then the copy bundled with ignition-lint.",
       "pylintrc": null,
       "_debug_comment": "Optional: Set debug: true to save script files even when there are no errors. Debug files are ALWAYS saved automatically when pylint finds errors, and are cleaned up at the start of each run.",
       "debug": false,
@@ -19,7 +19,8 @@
         "C": "warning",
         "R": "warning"
       }
-    }
+    },
+    "_comment": "Previously named PylintScriptRule; the old name still works but prints a deprecation notice."
   },
   "PollingIntervalRule": {
     "enabled": true,
@@ -95,7 +96,9 @@
       "_comment": "Opt-in optimization rule: validates the 'persistent' flag on BOUND properties. persistent=true on a bound prop stores the last designer binding result in view.json, causing git diff churn with no runtime benefit. Inert unless expected_persistent is set.",
       "expected_persistent": false,
       "_exempt_comment": "Tag bindings are exempt by default: they never create the property key when the tag is missing. Tokens: expr, expr-struct, property, query, tag, tag.direct, tag.indirect, tag.expression. Pass [] to check everything.",
-      "exempt_binding_types": ["tag"],
+      "exempt_binding_types": [
+        "tag"
+      ],
       "severity": "warning"
     }
   },
@@ -119,19 +122,57 @@
       "_validation_comment": "Set individual validation flags to false to disable checking specific reference types (expressions: {../Component.props.value}, property bindings: ../Component.props.enabled, scripts: self.getSibling('Component'))"
     }
   },
+  "LibraryScriptPylintRule": {
+    "enabled": true,
+    "kwargs": {
+      "_comment": "Optional: custom pylintrc for library modules. Defaults to .config/.ignition-library-pylintrc (walking up from the working directory), then the copy bundled with ignition-lint. Independent from the Perspective rule's pylintrc. Library files are opt-in: pass them explicitly, via --files globs, or through the ign-lint-scripting pre-commit hook.",
+      "pylintrc": null,
+      "debug": false,
+      "_additional_builtins_comment": "Optional: extra names pylint should treat as builtins (e.g. gateway-scoped globals). Top-level library packages beside the module are discovered automatically when the file lives under script-python/.",
+      "additional_builtins": [],
+      "_category_mapping_comment": "Optional: Map pylint message categories to severity levels. Default: F/E → error, W/C/R → warning.",
+      "category_mapping": {
+        "F": "error",
+        "E": "error",
+        "W": "warning",
+        "C": "warning",
+        "R": "warning"
+      }
+    }
+  },
+  "LibraryNamePatternRule": {
+    "enabled": true,
+    "kwargs": {
+      "_comment": "Naming conventions for library packages (folders under script-python) and modules (the folder holding code.py). Same options as NamePatternRule, keyed by the script_package and script_module node types.",
+      "node_type_specific_rules": {
+        "script_package": {
+          "convention": "snake_case",
+          "min_length": 2,
+          "severity": "error"
+        },
+        "script_module": {
+          "convention": "snake_case",
+          "min_length": 2,
+          "severity": "error"
+        }
+      }
+    }
+  },
   "_info": {
     "_allow_fix": "Optional per-rule key alongside 'enabled' (default true). Set \"allow_fix\": false to keep a fixable rule detection-only: it still reports violations, but --fix and --fix-dry-run skip it. An explicit --fix-rules on the CLI overrides it for the rules named.",
     "_description": "Rule severity levels are defined by rule developers:",
     "rule_severities": {
       "NamePatternRule": "configurable per node type - naming conventions can be strict (error) or lenient (warning) based on component type",
       "PollingIntervalRule": "error - performance issues that can cause system problems",
-      "PylintScriptRule": "error - syntax errors, undefined variables, etc.",
       "UnusedCustomPropertiesRule": "error - dead code that should be removed",
       "ExcessiveContextDataRule": "error - architectural issue, data should be in databases",
       "BadComponentReferenceRule": "error (configurable) - brittle view structure dependencies that break during refactoring",
       "ComponentReferenceValidationRule": "error - references to non-existent components cause runtime errors",
       "PropertyPersistenceRule": "configurable - opt-in optimization rule, inert unless expected_persistent is set; 'warning' recommended while adopting",
-      "PropertyAccessRule": "configurable - opt-in optimization rule, inert unless expected_access is set; 'warning' recommended while adopting"
+      "PropertyAccessRule": "configurable - opt-in optimization rule, inert unless expected_access is set; 'warning' recommended while adopting",
+      "PerspectiveScriptPylintRule": "error - syntax errors, undefined variables, etc.",
+      "LibraryScriptPylintRule": "configurable via category_mapping - syntax errors, undefined variables, etc. in project library modules",
+      "LibraryNamePatternRule": "configurable per node type - naming conventions for library packages and modules"
     },
     "note": "Most rule severity levels are fixed, but NamePatternRule and BadComponentReferenceRule allow user configuration.",
     "NamePatternRule_node_types": {
@@ -139,21 +180,6 @@
       "property": "User-defined custom property names (camelCase)",
       "message_handler": "User-defined message type names (kebab-case)",
       "custom_method": "User-defined custom method names (snake_case)"
-    },
-    "PylintScriptRule_config": {
-      "pylintrc": "Path to custom pylintrc file. Defaults to .config/ignition.pylintrc if not specified.",
-      "example_pylintrc": "\"pylintrc\": \"/path/to/custom.pylintrc\" or \"pylintrc\": \"relative/path/.pylintrc\"",
-      "category_mapping": "Maps pylint message categories (F/E/W/C/R) to ignition-lint severity levels (error/warning). Violations are grouped by category in output.",
-      "category_mapping_default": {
-        "F": "error (Fatal errors like import failures)",
-        "E": "error (Errors like undefined variables)",
-        "W": "warning (Warnings like unused variables)",
-        "C": "warning (Convention violations like naming)",
-        "R": "warning (Refactor suggestions like complexity)"
-      },
-      "example_strict": "To treat all violations as errors: {\"F\": \"error\", \"E\": \"error\", \"W\": \"error\", \"C\": \"error\", \"R\": \"error\"}",
-      "debug_dir": "Directory for pylint debug files. Defaults to .ignition-lint/debug/ in user repos, tests/debug/ in ignition-lint repo. Files are cleaned up at start of each run.",
-      "debug": "When true, always saves debug files. When false, only saves when violations found. Debug files help troubleshoot pylint issues."
     },
     "NamePatternRule_config": {
       "severity": "Configurable per node type: 'error' or 'warning'. Each node type (component, property, message_handler, custom_method) can have its own severity level.",
@@ -176,6 +202,22 @@
       "example_warning": "To use as warnings: \"kwargs\": {\"severity\": \"warning\"}",
       "forbidden_patterns": "Optional: Customize the list of forbidden patterns to detect. Defaults include .getSibling(), .getParent(), .getChild(), .parent, .children, and path traversal (../, ./)",
       "case_sensitive": "Optional: Set to false for case-insensitive pattern matching. Default: true"
-    }
+    },
+    "PerspectiveScriptPylintRule_config": {
+      "pylintrc": "Path to custom pylintrc file. Defaults to .config/.ignition-pylintrc if not specified.",
+      "example_pylintrc": "\"pylintrc\": \"/path/to/custom.pylintrc\" or \"pylintrc\": \"relative/path/.pylintrc\"",
+      "category_mapping": "Maps pylint message categories (F/E/W/C/R) to ignition-lint severity levels (error/warning). Violations are grouped by category in output.",
+      "category_mapping_default": {
+        "F": "error (Fatal errors like import failures)",
+        "E": "error (Errors like undefined variables)",
+        "W": "warning (Warnings like unused variables)",
+        "C": "warning (Convention violations like naming)",
+        "R": "warning (Refactor suggestions like complexity)"
+      },
+      "example_strict": "To treat all violations as errors: {\"F\": \"error\", \"E\": \"error\", \"W\": \"error\", \"C\": \"error\", \"R\": \"error\"}",
+      "debug_dir": "Directory for pylint debug files. Defaults to .ignition-lint/debug/ in user repos, tests/debug/ in ignition-lint repo. Files are cleaned up at start of each run.",
+      "debug": "When true, always saves debug files. When false, only saves when violations found. Debug files help troubleshoot pylint issues."
+    },
+    "_domains": "Rules are grouped internally by lint domain: Perspective view.json rules and scripting rules (LibraryScriptPylintRule, LibraryNamePatternRule) for ignition/script-python/**/code.py. Rule names are unique, so the config stays a flat map of rule name to settings; each rule is routed to its domain automatically."
   }
 }

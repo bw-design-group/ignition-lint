@@ -43,7 +43,7 @@ class TestGoldenFiles(unittest.TestCase):
 				print(f"Warning: Could not create rule {rule_name}: {e}")
 
 		# Get test cases directory
-		cls.test_cases_dir = Path(__file__).parent.parent / 'cases'
+		cls.test_cases_dir = Path(__file__).parent.parent / 'cases' / 'views'
 
 		# Get all test cases and validate golden files exist for all
 		tests_dir = Path(__file__).parent.parent

@@ -1,17 +1,23 @@
 ---
-title: PylintScriptRule (full reference)
-sidebar_label: PylintScriptRule
-description: Full technical reference for PylintScriptRule — every option, every category, every edge case the rule handles.
+title: PerspectiveScriptPylintRule (full reference)
+sidebar_label: PerspectiveScriptPylintRule
+description: Full technical reference for PerspectiveScriptPylintRule — every option, every category, every edge case the rule handles.
 toc_max_heading_level: 4
 ---
 
-# PylintScriptRule — full reference
+# PerspectiveScriptPylintRule — full reference
 
 :::tip[Looking for the short version?]
 
 See the [user guide](../../rules/scripts/pylint-script.md). This page is the complete technical reference — every constructor argument, every default, the full pylintrc resolution order, and every edge case the rule deliberately handles. Read it when you're debugging a violation, integrating with custom CI configuration, or extending the rule.
 
 :::
+
+## Naming
+`PylintScriptRule` is the pre-0.7 name and is kept as a Python alias (`rules.scripts.lint_script.PylintScriptRule`) and as a config/`--fix-rules` alias resolved by `rules.registry.RULE_ALIASES`. The alias is deliberately **not** registered as a second rule, so the rule never runs twice. Fixes emitted by the rule carry `rule_name="PerspectiveScriptPylintRule"`.
+
+## Domain
+`LintDomain.PERSPECTIVE`. The rule only runs on `view.json` files; the flat config routes it to the Perspective engine by its declared domain. Shared pylint plumbing (rcfile resolution, in-process execution, output parsing, category grouping) lives in `rules/scripts/pylint_support.py` and is reused by [LibraryScriptPylintRule](./library-script-pylint.md).
 
 ## Purpose
 Runs the full [pylint](https://pylint.readthedocs.io/) static analyzer over every Python script embedded in a Perspective `view.json` file. This is the project's primary defense against script-level bugs that would otherwise only surface at runtime in the Ignition gateway.
@@ -20,7 +26,7 @@ Runs the full [pylint](https://pylint.readthedocs.io/) static analyzer over ever
 `error` by default — pylint surfaces real bugs (undefined variables, syntax errors). Severity is granular per pylint category via `category_mapping`: by default Fatal (`F`) and Error (`E`) findings raise errors, while Warning (`W`), Convention (`C`), and Refactor (`R`) findings raise warnings. Each category can be remapped independently to either `error` or `warning`.
 
 ## What it checks
-PylintScriptRule visits every Python script that the model builder produces and submits the full set to pylint. Specifically it covers:
+PerspectiveScriptPylintRule visits every Python script that the model builder produces and submits the full set to pylint. Specifically it covers:
 
 - **Event handler scripts** (`onActionPerformed`, `onClick`, etc.) — `NodeType.EVENT_HANDLER`
 - **Message handler scripts** — `NodeType.MESSAGE_HANDLER`
@@ -117,7 +123,7 @@ Unknown categories (anything outside `F`, `E`, `W`, `C`, `R`) fall back to the r
 **Default (recommended) — bugs as errors, style as warnings:**
 ```json
 {
-  "PylintScriptRule": {
+  "PerspectiveScriptPylintRule": {
     "enabled": true,
     "kwargs": {}
   }
@@ -127,7 +133,7 @@ Unknown categories (anything outside `F`, `E`, `W`, `C`, `R`) fall back to the r
 **Strict — every pylint finding fails the build:**
 ```json
 {
-  "PylintScriptRule": {
+  "PerspectiveScriptPylintRule": {
     "enabled": true,
     "kwargs": {
       "category_mapping": {
@@ -145,7 +151,7 @@ Unknown categories (anything outside `F`, `E`, `W`, `C`, `R`) fall back to the r
 **Permissive — only fatal and error categories surface as errors, everything else is hidden as warnings (matches the default but pinned explicitly):**
 ```json
 {
-  "PylintScriptRule": {
+  "PerspectiveScriptPylintRule": {
     "enabled": true,
     "kwargs": {
       "pylintrc": ".config/.ignition-pylintrc",
@@ -164,7 +170,7 @@ Unknown categories (anything outside `F`, `E`, `W`, `C`, `R`) fall back to the r
 **Custom pylintrc with batch mode for faster CI runs:**
 ```json
 {
-  "PylintScriptRule": {
+  "PerspectiveScriptPylintRule": {
     "enabled": true,
     "kwargs": {
       "pylintrc": "ci/pylint/perspective.pylintrc",
@@ -178,7 +184,7 @@ Unknown categories (anything outside `F`, `E`, `W`, `C`, `R`) fall back to the r
 **Debug mode — always save the combined script for inspection:**
 ```json
 {
-  "PylintScriptRule": {
+  "PerspectiveScriptPylintRule": {
     "enabled": true,
     "kwargs": {
       "debug": true,
@@ -189,7 +195,7 @@ Unknown categories (anything outside `F`, `E`, `W`, `C`, `R`) fall back to the r
 ```
 
 ## Pylintrc resolution order
-`_resolve_pylintrc_path` runs the following lookup in order. The first hit wins:
+`resolve_pylintrc (rules/scripts/pylint_support.py)` runs the following lookup in order. The first hit wins:
 
 1. **Explicit absolute path** — if `pylintrc` was passed as an absolute path and the file exists, use it. If it does not exist, a warning is printed and the rule continues with the search below.
 2. **Explicit relative path** — if `pylintrc` was passed as a relative path, it is resolved against the current working directory (`os.getcwd()`). If the resolved path exists, use it. If it does not exist, a warning is printed and the rule continues with the search below.
@@ -213,7 +219,7 @@ For each visited node, the script body is fetched via `node.get_formatted_script
 
 ### Correct code
 
-A clean event handler from `tests/cases/AllScriptTypes/view.json`:
+A clean event handler from `tests/cases/views/AllScriptTypes/view.json`:
 
 ```json
 {
@@ -262,7 +268,7 @@ These all run through pylint without raising a finding under the default categor
 
 ### Problematic code
 
-A real event handler from `tests/cases/PylintViolations/view.json` that triggers several different categories at once:
+A real event handler from `tests/cases/views/PylintViolations/view.json` that triggers several different categories at once:
 
 ```json
 {
@@ -328,7 +334,7 @@ When linted under the default `category_mapping`, those scripts produce category
 Fatal (`F`) and Error (`E`) blocks are routed to the errors stream and fail the run; Warning (`W`), Convention (`C`), and Refactor (`R`) blocks are routed to the warnings stream and do not fail by default.
 
 ## Auto-fix support
-PylintScriptRule inherits `FixableMixin` and provides one auto-fix: it strips trailing whitespace (pylint code `C0303`) from script content. The fix is marked safe (`is_safe=True`), so it is applied under the default `--fix` policy that only applies safe fixes.
+PerspectiveScriptPylintRule inherits `FixableMixin` and provides one auto-fix: it strips trailing whitespace (pylint code `C0303`) from script content. The fix is marked safe (`is_safe=True`), so it is applied under the default `--fix` policy that only applies safe fixes.
 
 Implementation details, all verifiable in `_generate_trailing_whitespace_fixes`:
 
@@ -340,7 +346,7 @@ Implementation details, all verifiable in `_generate_trailing_whitespace_fixes`:
 No other pylint finding has an auto-fix: pylint reports symptoms, but the safe rewrite of (for example) "remove unused import" or "rename invalid identifier" requires more context than the rule has, so those are surfaced as violations only.
 
 ## Output format
-PylintScriptRule overrides `format_violations_grouped` so output is grouped by pylint category and routed to the appropriate severity stream. The shape is:
+PerspectiveScriptPylintRule overrides `format_violations_grouped` so output is grouped by pylint category and routed to the appropriate severity stream. The shape is:
 
 ```
     Pylint - Fatal (F):
@@ -389,6 +395,6 @@ The debug directory is cleaned at the start of each run: any leftover `*.py` fil
 - **The temp file is always cleaned up.** Whether or not findings were produced and whether or not a debug copy was saved, the original temp file in `/tmp/` is unlinked on exit.
 
 ## See also
-- [PylintScriptRule user guide](../../rules/scripts/pylint-script.md) — the short version
+- [PerspectiveScriptPylintRule user guide](../../rules/scripts/pylint-script.md) — the short version
 - [Configuration overview](../../getting-started/configuration.md)
 - [Debug output guide](../../usage/debug-output.md)

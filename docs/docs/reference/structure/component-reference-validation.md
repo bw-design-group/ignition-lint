@@ -235,7 +235,7 @@ The rule emits one of six message templates:
 
 ## Real-world example: `BadComponentReferences` test fixture
 
-The shipped `tests/cases/BadComponentReferences/view.json` deliberately mixes valid and invalid references so this rule can be regression-tested end-to-end. Notable broken references the rule catches:
+The shipped `tests/cases/views/BadComponentReferences/view.json` deliberately mixes valid and invalid references so this rule can be regression-tested end-to-end. Notable broken references the rule catches:
 
 - Line 273 / 406: `../NestedButton4.props.enabled` — `NestedButton4` does not exist as a sibling
 - Line 517: `self.getSibling("UnknownButton")` — `UnknownButton` is not a sibling of the calling component

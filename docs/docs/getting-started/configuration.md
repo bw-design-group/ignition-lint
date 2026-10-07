@@ -8,6 +8,40 @@ description: Configure rules, severity, and node-type targeting
 
 Rules are configured through a JSON file (default name: `rule_config.json`). Each top-level key is a rule class name; the value is an object with `enabled` and `kwargs`.
 
+## Lint domains
+
+Every rule belongs to a **lint domain** — the kind of Ignition resource it applies to. Rule names are unique, so the config stays a flat map and each rule is routed to its domain automatically; you never write the domain in the file.
+
+| Domain | Files | Rules |
+| --- | --- | --- |
+| `perspective` | `view.json` | `NamePatternRule`, `PollingIntervalRule`, `PerspectiveScriptPylintRule`, … |
+| `scripting` | `ignition/script-python/**/code.py` | `LibraryScriptPylintRule`, `LibraryNamePatternRule` |
+
+```json
+{
+  "PerspectiveScriptPylintRule": {
+    "enabled": true,
+    "kwargs": {
+      "pylintrc": ".config/.ignition-pylintrc"
+    }
+  },
+  "NamePatternRule": {
+    "enabled": true
+  },
+  "LibraryScriptPylintRule": {
+    "enabled": true,
+    "kwargs": {
+      "pylintrc": ".config/.ignition-library-pylintrc"
+    }
+  },
+  "LibraryNamePatternRule": {
+    "enabled": true
+  }
+}
+```
+
+Each domain has its own engine and rule set, so the two pylint rules carry independent `pylintrc` files and category mappings. `PylintScriptRule` is accepted as a deprecated alias of `PerspectiveScriptPylintRule` and prints one deprecation line per run.
+
 ## Schema
 
 ```json
@@ -69,7 +103,7 @@ You can override severity per rule:
 }
 ```
 
-`PylintScriptRule` is special — it uses a `category_mapping` dict that assigns severity per pylint category (`F`, `E`, `W`, `C`, `R`). See [PylintScriptRule](../rules/scripts/pylint-script.md) for details.
+The two pylint rules are special — they use a `category_mapping` dict that assigns severity per pylint category (`F`, `E`, `W`, `C`, `R`). See [PerspectiveScriptPylintRule](../rules/scripts/pylint-script.md) and [LibraryScriptPylintRule](../rules/scripts/library-script-pylint.md).
 
 ## Node-type targeting
 
@@ -104,6 +138,11 @@ Available node types:
 - `custom_method`
 - `transform`
 
+Scripting domain:
+
+- `script_package`
+- `script_module`
+
 ## Full example
 
 A representative `rule_config.json` for a project that wants strict naming, performance enforcement, and pylint as warnings:
@@ -114,7 +153,9 @@ A representative `rule_config.json` for a project that wants strict naming, perf
     "enabled": true,
     "kwargs": {
       "convention": "PascalCase",
-      "target_node_types": ["component"],
+      "target_node_types": [
+        "component"
+      ],
       "severity": "warning"
     }
   },
@@ -157,7 +198,7 @@ A representative `rule_config.json` for a project that wants strict naming, perf
       "severity": "warning"
     }
   },
-  "PylintScriptRule": {
+  "PerspectiveScriptPylintRule": {
     "enabled": true,
     "kwargs": {
       "pylintrc": ".config/.ignition-pylintrc",
@@ -167,6 +208,27 @@ A representative `rule_config.json` for a project that wants strict naming, perf
         "W": "warning",
         "C": "warning",
         "R": "warning"
+      }
+    }
+  },
+  "LibraryScriptPylintRule": {
+    "enabled": true,
+    "kwargs": {
+      "pylintrc": ".config/.ignition-library-pylintrc"
+    }
+  },
+  "LibraryNamePatternRule": {
+    "enabled": true,
+    "kwargs": {
+      "node_type_specific_rules": {
+        "script_package": {
+          "convention": "snake_case",
+          "severity": "error"
+        },
+        "script_module": {
+          "convention": "snake_case",
+          "severity": "error"
+        }
       }
     }
   }
@@ -179,7 +241,7 @@ Set `enabled: false` (or omit the rule entirely):
 
 ```json
 {
-  "PylintScriptRule": {
+  "PerspectiveScriptPylintRule": {
     "enabled": false
   }
 }

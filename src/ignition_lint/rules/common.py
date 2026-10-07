@@ -6,6 +6,7 @@ from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
 from typing import Set, List, Dict, Any, Literal, Optional
 from ..model.node_types import Property, ViewNode, NodeType, ScriptNode, ALL_BINDINGS, ALL_SCRIPTS
+from ..common.domain import LintDomain
 from ..common.fix_operations import Fix
 
 # Type definition for severity levels
@@ -60,9 +61,19 @@ class NodeVisitor(ABC):
 	def visit_property(self, node: ViewNode):
 		"""Visit a property node."""
 
+	def visit_script_module(self, node: ViewNode):
+		"""Visit a project-library script module node (scripting domain)."""
+
+	def visit_script_package(self, node: ViewNode):
+		"""Visit a project-library package node (scripting domain)."""
+
 
 class LintingRule(NodeVisitor):
 	"""Base class for linting rules with simplified interface and self-processing capability."""
+
+	# Which kind of Ignition resource this rule lints. Rules only run on files of their
+	# domain; the flat rule config is routed per domain by rule name.
+	domain: LintDomain = LintDomain.PERSPECTIVE
 
 	def __init__(
 		self, target_node_types: Set[NodeType] = None, severity: str = "error",

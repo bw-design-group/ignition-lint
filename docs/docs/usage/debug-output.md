@@ -24,7 +24,7 @@ python scripts/generate_debug_files.py --list
 python scripts/generate_debug_files.py --clean
 ```
 
-Each test case directory under `tests/cases/` gets a `debug/` subdirectory containing:
+Each test case directory under `tests/cases/views/` gets a `debug/` subdirectory containing:
 
 | File | Purpose |
 | --- | --- |
@@ -48,11 +48,11 @@ Use when: you're auditing rule coverage or wondering why a rule didn't fire. Sta
 
 Some rules write their own debug artifacts:
 
-### `PylintScriptRule`
+### `PerspectiveScriptPylintRule`
 
 Saves the combined script (the temp file pylint actually analyzes) to `tests/debug/` (when running from `tests/`) or `.ignition-lint/debug/` (otherwise). The file is saved automatically whenever pylint reports any issues, with the filename derived from a timestamp + PID. Set `debug=true` in the rule config to also save when there are no issues.
 
-See [PylintScriptRule](../rules/scripts/pylint-script.md) for the full debug-file format.
+See [PerspectiveScriptPylintRule](../rules/scripts/pylint-script.md) for the full debug-file format.
 
 ## Golden file testing
 
@@ -78,7 +78,7 @@ The tests validate:
 
 When you change something that affects model building:
 
-1. Update the test case (`tests/cases/<Name>/view.json`) or the model code
+1. Update the test case (`tests/cases/views/<Name>/view.json`) or the model code
 2. Regenerate the debug files: `python scripts/generate_debug_files.py <CaseName>`
 3. Review the diff — does it match what you expected?
 4. Run golden file tests to confirm no regressions in other cases: `python -m unittest unit.test_golden_files -v`
@@ -91,7 +91,25 @@ When you change something that affects model building:
 ign-lint --config rule_config.json --files "**/view.json" --debug-output ./analysis
 ```
 
-For each file linted, ignition-lint writes the flattened JSON and model under `./analysis/<filename>/`.
+For each file linted, ignition-lint writes one folder that mirrors the file's location relative to the working directory, holding the same three artifacts as the golden files:
+
+```
+analysis/
+├── .ignition-lint-debug                  # marker: this directory is managed by ign-lint
+├── views/Dashboard/
+│   ├── flattened.json
+│   ├── model.json
+│   └── stats.json
+├── views/Login/
+│   └── ...
+└── ignition/script-python/general/config/ # scripting domain: no flattened.json
+    ├── model.json
+    └── stats.json
+```
+
+Because every Perspective view is literally named `view.json`, keying on the folder is what keeps a thousand views from overwriting each other.
+
+**Cleanup.** At the start of every run ign-lint removes the folders the previous run wrote, so stale folders for deleted views do not accumulate. The `.ignition-lint-debug` marker doubles as the manifest: it lists every folder ign-lint wrote, and only those listed folders are ever deleted. ign-lint only creates the marker in a directory it created itself or found empty; if you point `--debug-output` at a directory that already holds other files, ign-lint writes into it, prints a warning, and never cleans it. Folders written in the last five seconds are kept for the next run so parallel pre-commit batches sharing one directory do not erase each other; if you use `--debug-output` from a hook, prefer `require_serial: true` so one process owns the directory.
 
 ## Debug-nodes flag
 

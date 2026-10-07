@@ -14,7 +14,7 @@ tests_dir = current_dir.parent
 project_root = tests_dir.parent
 sys.path.insert(0, str(project_root / "src"))
 
-from ignition_lint.cli import load_whitelist, generate_whitelist, collect_files
+from ignition_lint.cli import load_whitelist, generate_whitelist, collect_files, flatten_collected_files
 from argparse import Namespace
 
 
@@ -140,13 +140,9 @@ class TestFileFiltering(unittest.TestCase):
 		whitelist = {self.view1.resolve()}
 
 		# Create args with filenames (simulates pre-commit)
-		args = Namespace(
-			filenames=[str(self.view1), str(self.view2)],
-			files=None,
-			verbose=False
-		)
+		args = Namespace(filenames=[str(self.view1), str(self.view2)], files=None, verbose=False)
 
-		files, _ = collect_files(args, whitelist)
+		files = flatten_collected_files(collect_files(args, whitelist)[0])
 
 		# Only view2 should be collected (view1 is whitelisted)
 		self.assertEqual(len(files), 1)
@@ -158,13 +154,9 @@ class TestFileFiltering(unittest.TestCase):
 		whitelist = {self.view1.resolve(), self.view2.resolve()}
 
 		# Create args with glob pattern
-		args = Namespace(
-			filenames=[],
-			files=str(self.temp_path / "**" / "view.json"),
-			verbose=False
-		)
+		args = Namespace(filenames=[], files=str(self.temp_path / "**" / "view.json"), verbose=False)
 
-		files, _ = collect_files(args, whitelist)
+		files = flatten_collected_files(collect_files(args, whitelist)[0])
 
 		# Only view3 should be collected (view1 and view2 are whitelisted)
 		self.assertEqual(len(files), 1)
@@ -174,13 +166,9 @@ class TestFileFiltering(unittest.TestCase):
 		"""Empty whitelist processes all files."""
 		whitelist = set()
 
-		args = Namespace(
-			filenames=[str(self.view1), str(self.view2)],
-			files=None,
-			verbose=False
-		)
+		args = Namespace(filenames=[str(self.view1), str(self.view2)], files=None, verbose=False)
 
-		files, _ = collect_files(args, whitelist)
+		files = flatten_collected_files(collect_files(args, whitelist)[0])
 
 		# All files should be collected
 		self.assertEqual(len(files), 2)
@@ -194,13 +182,9 @@ class TestFileFiltering(unittest.TestCase):
 		cwd = os.getcwd()
 		try:
 			os.chdir(self.temp_path)
-			args = Namespace(
-				filenames=["view1/view.json"],
-				files=None,
-				verbose=False
-			)
+			args = Namespace(filenames=["view1/view.json"], files=None, verbose=False)
 
-			files, _ = collect_files(args, whitelist)
+			files = flatten_collected_files(collect_files(args, whitelist)[0])
 
 			# view1 should be filtered out
 			self.assertEqual(len(files), 0)
@@ -213,13 +197,9 @@ class TestFileFiltering(unittest.TestCase):
 		whitelist = {self.view1.resolve()}
 
 		# Use absolute path in args
-		args = Namespace(
-			filenames=[str(self.view1.resolve())],
-			files=None,
-			verbose=False
-		)
+		args = Namespace(filenames=[str(self.view1.resolve())], files=None, verbose=False)
 
-		files, _ = collect_files(args, whitelist)
+		files = flatten_collected_files(collect_files(args, whitelist)[0])
 
 		# view1 should be filtered out
 		self.assertEqual(len(files), 0)
@@ -228,14 +208,10 @@ class TestFileFiltering(unittest.TestCase):
 		"""Verbose mode reports whitelisted files."""
 		whitelist = {self.view1.resolve()}
 
-		args = Namespace(
-			filenames=[str(self.view1), str(self.view2)],
-			files=None,
-			verbose=True
-		)
+		args = Namespace(filenames=[str(self.view1), str(self.view2)], files=None, verbose=True)
 
 		# Capture output (don't test exact message, just ensure it runs)
-		files, _ = collect_files(args, whitelist)
+		files = flatten_collected_files(collect_files(args, whitelist)[0])
 
 		# Only view2 should be collected
 		self.assertEqual(len(files), 1)
@@ -271,9 +247,7 @@ class TestGenerateWhitelist(unittest.TestCase):
 		try:
 			os.chdir(self.temp_path)
 			generate_whitelist(
-				patterns=["views/legacy/*.json"],
-				output_file=str(output_file),
-				append=False,
+				patterns=["views/legacy/*.json"], output_file=str(output_file), append=False,
 				dry_run=False
 			)
 
@@ -297,9 +271,7 @@ class TestGenerateWhitelist(unittest.TestCase):
 			os.chdir(self.temp_path)
 			generate_whitelist(
 				patterns=["views/legacy/*.json", "views/deprecated/*.json"],
-				output_file=str(output_file),
-				append=False,
-				dry_run=False
+				output_file=str(output_file), append=False, dry_run=False
 			)
 
 			# Check file was created
@@ -326,9 +298,7 @@ class TestGenerateWhitelist(unittest.TestCase):
 
 			# Append to it
 			generate_whitelist(
-				patterns=["views/legacy/*.json"],
-				output_file=str(output_file),
-				append=True,
+				patterns=["views/legacy/*.json"], output_file=str(output_file), append=True,
 				dry_run=False
 			)
 
@@ -352,9 +322,7 @@ class TestGenerateWhitelist(unittest.TestCase):
 
 			# Append same pattern
 			generate_whitelist(
-				patterns=["views/legacy/*.json"],
-				output_file=str(output_file),
-				append=True,
+				patterns=["views/legacy/*.json"], output_file=str(output_file), append=True,
 				dry_run=False
 			)
 
@@ -373,9 +341,7 @@ class TestGenerateWhitelist(unittest.TestCase):
 		try:
 			os.chdir(self.temp_path)
 			generate_whitelist(
-				patterns=["views/legacy/*.json"],
-				output_file=str(output_file),
-				append=False,
+				patterns=["views/legacy/*.json"], output_file=str(output_file), append=False,
 				dry_run=True
 			)
 
@@ -392,9 +358,7 @@ class TestGenerateWhitelist(unittest.TestCase):
 		try:
 			os.chdir(self.temp_path)
 			generate_whitelist(
-				patterns=["views/legacy/*.json"],
-				output_file=str(output_file),
-				append=False,
+				patterns=["views/legacy/*.json"], output_file=str(output_file), append=False,
 				dry_run=False
 			)
 
@@ -414,10 +378,7 @@ class TestGenerateWhitelist(unittest.TestCase):
 		try:
 			os.chdir(self.temp_path)
 			generate_whitelist(
-				patterns=["views/**/*.json"],
-				output_file=str(output_file),
-				append=False,
-				dry_run=False
+				patterns=["views/**/*.json"], output_file=str(output_file), append=False, dry_run=False
 			)
 
 			# Read paths (skip comments and blank lines)

@@ -1852,7 +1852,7 @@ class TestUnusedCustomPropertiesRule(BaseRuleTest):  # pylint: disable=too-many-
 		"""Params an embedded view passes to its child view - statically typed
 		(props.params.X) or bound (propConfig['props.params.X']) - belong to the CHILD
 		view's interface and must never be linted in the containing view. Mirrors the
-		EmbeddedView component in tests/cases/BadComponentReferences/view.json.
+		EmbeddedView component in tests/cases/views/BadComponentReferences/view.json.
 		Only the containing view's own genuinely-unused param may be flagged."""
 		view_data = {
 			"params": {

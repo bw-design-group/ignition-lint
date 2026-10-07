@@ -139,6 +139,23 @@ def load_test_view(test_cases_dir: Path, case_name: str) -> Path:
 	return view_file
 
 
+def load_test_script(test_scripting_dir: Path, package_name: str) -> Path:
+	"""
+	Locate a scripting-domain fixture module.
+
+	Args:
+		test_scripting_dir: Path to ``tests/cases/scripting``
+		package_name: Fixture package folder (e.g. ``Violations``)
+
+	Returns:
+		Path to the package's ``code.py``
+	"""
+	script_file = test_scripting_dir / package_name / "code.py"
+	if not script_file.exists():
+		raise FileNotFoundError(f"Test script not found: {script_file}")
+	return script_file
+
+
 def create_mock_script(script_type: str, source_code: str, component_name: str = "TestComponent") -> str:
 	"""
 	Create a mock view.json with a script for testing script-based rules.
@@ -160,25 +177,27 @@ def create_mock_script(script_type: str, source_code: str, component_name: str =
 			"propConfig": {},
 			"props": {},
 			"root": {
-				"children": [
-					{
-						"meta": {"name": component_name},
-						"type": "ia.input.button",
-						"props": {"text": "Test Button"}
+				"children": [{
+					"meta": {
+						"name": component_name
+					},
+					"type": "ia.input.button",
+					"props": {
+						"text": "Test Button"
 					}
-				],
-				"meta": {"name": "root"},
+				}],
+				"meta": {
+					"name": "root"
+				},
 				"type": "ia.container.coord",
 				"scripts": {
-					"messageHandlers": [
-						{
-							"messageType": "test_message",
-							"script": source_code,
-							"pageScope": False,
-							"sessionScope": False,
-							"viewScope": True
-						}
-					]
+					"messageHandlers": [{
+						"messageType": "test_message",
+						"script": source_code,
+						"pageScope": False,
+						"sessionScope": False,
+						"viewScope": True
+					}]
 				}
 			}
 		}
@@ -191,23 +210,25 @@ def create_mock_script(script_type: str, source_code: str, component_name: str =
 			"propConfig": {},
 			"props": {},
 			"root": {
-				"children": [
-					{
-						"meta": {"name": component_name},
-						"type": "ia.input.button",
-						"props": {"text": "Test Button"},
-						"scripts": {
-							"customMethods": [
-								{
-									"name": "testMethod",
-									"params": [],
-									"script": source_code
-								}
-							]
-						}
+				"children": [{
+					"meta": {
+						"name": component_name
+					},
+					"type": "ia.input.button",
+					"props": {
+						"text": "Test Button"
+					},
+					"scripts": {
+						"customMethods": [{
+							"name": "testMethod",
+							"params": [],
+							"script": source_code
+						}]
 					}
-				],
-				"meta": {"name": "root"},
+				}],
+				"meta": {
+					"name": "root"
+				},
 				"type": "ia.container.coord"
 			}
 		}
@@ -221,26 +242,30 @@ def create_mock_script(script_type: str, source_code: str, component_name: str =
 				"root.children[0].props.text": {
 					"binding": {
 						"type": "property",
-						"config": {"path": "view.params.inputValue"},
-						"transforms": [
-							{
-								"type": "script",
-								"code": source_code
-							}
-						]
+						"config": {
+							"path": "view.params.inputValue"
+						},
+						"transforms": [{
+							"type": "script",
+							"code": source_code
+						}]
 					}
 				}
 			},
 			"props": {},
 			"root": {
-				"children": [
-					{
-						"meta": {"name": component_name},
-						"type": "ia.display.label",
-						"props": {"text": "Initial Text"}
+				"children": [{
+					"meta": {
+						"name": component_name
+					},
+					"type": "ia.display.label",
+					"props": {
+						"text": "Initial Text"
 					}
-				],
-				"meta": {"name": "root"},
+				}],
+				"meta": {
+					"name": "root"
+				},
 				"type": "ia.container.coord"
 			}
 		}
@@ -254,29 +279,35 @@ def create_mock_script(script_type: str, source_code: str, component_name: str =
 			"propConfig": {},
 			"props": {},
 			"root": {
-				"children": [
-					{
-						"meta": {"name": component_name},
-						"type": "ia.input.button",
-						"props": {"text": "Test Button"},
-						"events": {
-							"component": {
-								"onActionPerformed": {
-									"config": {
-										"script": source_code
-									},
-									"scope": "G",
-									"type": "script"
-								}
+				"children": [{
+					"meta": {
+						"name": component_name
+					},
+					"type": "ia.input.button",
+					"props": {
+						"text": "Test Button"
+					},
+					"events": {
+						"component": {
+							"onActionPerformed": {
+								"config": {
+									"script": source_code
+								},
+								"scope": "G",
+								"type": "script"
 							}
 						}
 					}
-				],
-				"meta": {"name": "root"},
+				}],
+				"meta": {
+					"name": "root"
+				},
 				"type": "ia.container.coord"
 			}
 		}
 	else:
-		raise ValueError(f"Unknown script type: {script_type}. Available: message_handler, custom_method, transform, event_handler")
+		raise ValueError(
+			f"Unknown script type: {script_type}. Available: message_handler, custom_method, transform, event_handler"
+		)
 
 	return json.dumps(view_data, indent=2)

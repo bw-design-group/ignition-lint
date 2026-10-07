@@ -7,12 +7,12 @@ Regression coverage for issue #99: property-change scripts live under
 ``<component>.propConfig.<property>.onChange.script`` (component-level). The model
 builder previously only collected event-handler scripts under ``.events.`` paths,
 so these onChange bodies were never built into any script node. As a result,
-script-oriented rules such as ``PylintScriptRule`` silently skipped them.
+script-oriented rules such as ``PerspectiveScriptPylintRule`` silently skipped them.
 
 These tests assert that:
   1. The builder emits a script node for each onChange script and registers it in
      the generic ``model['scripts']`` collection so existing script visitors see it.
-  2. ``PylintScriptRule`` actually lints onChange script bodies.
+  2. ``PerspectiveScriptPylintRule`` actually lints onChange script bodies.
 """
 import json
 
@@ -90,7 +90,7 @@ class TestPropertyChangeScripts(BaseRuleTest):
 		model = ViewModelBuilder().build_model(flattened)
 
 		# Every onChange handler should surface in the generic scripts collection so
-		# existing script visitors (e.g. PylintScriptRule) pick it up.
+		# existing script visitors (e.g. PerspectiveScriptPylintRule) pick it up.
 		onchange_scripts = [
 			node for node in model['scripts'] if isinstance(node, ScriptNode) and '.onChange' in node.path
 		]
@@ -108,17 +108,17 @@ class TestPropertyChangeScripts(BaseRuleTest):
 		)
 
 	def test_pylint_rule_lints_onchange_script_bodies(self):
-		"""PylintScriptRule must report violations found inside onChange bodies."""
+		"""PerspectiveScriptPylintRule must report violations found inside onChange bodies."""
 		view_file = create_temp_view_file(json.dumps(_build_view(), indent=2))
 		try:
-			rule_config = get_test_config("PylintScriptRule")
+			rule_config = get_test_config("PerspectiveScriptPylintRule")
 			results = self.run_lint_on_file(view_file, rule_config)
 		finally:
 			view_file.unlink(missing_ok=True)
 
-		# PylintScriptRule reports via custom-grouped output; undefined-variable
+		# PerspectiveScriptPylintRule reports via custom-grouped output; undefined-variable
 		# (E0602) maps to the "error" severity by default.
-		formatted_errors = results.custom_formatted_errors.get("PylintScriptRule", "")
+		formatted_errors = results.custom_formatted_errors.get("PerspectiveScriptPylintRule", "")
 
 		self.assertIn(
 			"E0602", formatted_errors,

@@ -1,0 +1,73 @@
+{
+  "_comment": "Default configuration used by the ign-lint and ign-lint-scripting pre-commit hooks. Favors warnings so commits are not blocked by style; override with args: ['--config=your-config.json']. Perspective rules apply to view.json, LibraryScriptPylintRule/LibraryNamePatternRule to script-python code.py.",
+  "PerspectiveScriptPylintRule": {
+    "enabled": true,
+    "kwargs": {
+      "category_mapping": {
+        "F": "error",
+        "E": "error",
+        "W": "warning",
+        "C": "warning",
+        "R": "warning"
+      }
+    }
+  },
+  "NamePatternRule": {
+    "enabled": true,
+    "kwargs": {
+      "node_type_specific_rules": {
+        "component": {
+          "convention": "PascalCase",
+          "severity": "warning"
+        },
+        "property": {
+          "convention": "camelCase",
+          "severity": "warning"
+        },
+        "custom_method": {
+          "convention": "snake_case",
+          "severity": "warning"
+        }
+      }
+    }
+  },
+  "PollingIntervalRule": {
+    "enabled": true,
+    "kwargs": {
+      "minimum_interval": 5000
+    }
+  },
+  "BadComponentReferenceRule": {
+    "enabled": true,
+    "kwargs": {
+      "severity": "warning"
+    }
+  },
+  "LibraryScriptPylintRule": {
+    "enabled": true,
+    "kwargs": {
+      "category_mapping": {
+        "F": "error",
+        "E": "error",
+        "W": "warning",
+        "C": "warning",
+        "R": "warning"
+      }
+    }
+  },
+  "LibraryNamePatternRule": {
+    "enabled": true,
+    "kwargs": {
+      "node_type_specific_rules": {
+        "script_package": {
+          "convention": "snake_case",
+          "severity": "warning"
+        },
+        "script_module": {
+          "convention": "snake_case",
+          "severity": "warning"
+        }
+      }
+    }
+  }
+}

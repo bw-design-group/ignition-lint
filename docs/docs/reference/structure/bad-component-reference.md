@@ -113,7 +113,7 @@ system.perspective.sendMessage(
 
 ### Problematic code: script with `.getSibling()`
 
-From `tests/cases/BadComponentReferences/view.json`, the `BadButton.onActionPerformed` event handler script:
+From `tests/cases/views/BadComponentReferences/view.json`, the `BadButton.onActionPerformed` event handler script:
 
 ```python
 # Bad pattern 1: getSibling

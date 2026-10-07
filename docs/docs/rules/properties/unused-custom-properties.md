@@ -93,7 +93,7 @@ A view-level custom property that is referenced from an expression binding passe
 }
 ```
 
-A property that has its own binding is also considered used — even if nothing else references it. From `tests/cases/PreferredStyle/view.json`:
+A property that has its own binding is also considered used — even if nothing else references it. From `tests/cases/views/PreferredStyle/view.json`:
 
 ```json
 {

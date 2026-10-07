@@ -1,6 +1,6 @@
 # pylint: disable=import-error
 """
-Unit tests for the PylintScriptRule.
+Unit tests for the PerspectiveScriptPylintRule.
 Tests script linting functionality.
 """
 
@@ -11,13 +11,13 @@ from fixtures.base_test import BaseRuleTest
 from fixtures.test_helpers import get_test_config, load_test_view
 
 
-class TestPylintScriptRule(BaseRuleTest):
+class TestPerspectiveScriptPylintRule(BaseRuleTest):
 	"""Test script linting with pylint."""
 	rule_config: Dict[str, Dict[str, Any]]  # Override base class to make non-optional
 
 	def setUp(self):  # pylint: disable=invalid-name
 		super().setUp()
-		self.rule_config = get_test_config("PylintScriptRule")
+		self.rule_config = get_test_config("PerspectiveScriptPylintRule")
 
 	def test_basic_script_linting(self):
 		"""Test basic script linting functionality."""
@@ -25,7 +25,7 @@ class TestPylintScriptRule(BaseRuleTest):
 		self.run_lint_on_file(view_file, self.rule_config)
 
 		# Just verify the rule runs without crashing
-		script_errors = self.get_errors_for_rule("PylintScriptRule")
+		script_errors = self.get_errors_for_rule("PerspectiveScriptPylintRule")
 		self.assertIsInstance(script_errors, list)
 
 	def test_multiple_view_files(self):
@@ -37,7 +37,7 @@ class TestPylintScriptRule(BaseRuleTest):
 				try:
 					view_file = load_test_view(self.test_cases_dir, case)
 					self.run_lint_on_file(view_file, self.rule_config)
-					script_errors = self.get_errors_for_rule("PylintScriptRule")
+					script_errors = self.get_errors_for_rule("PerspectiveScriptPylintRule")
 					self.assertIsInstance(script_errors, list)
 				except FileNotFoundError:
 					self.skipTest(f"Test case {case} not found")
@@ -229,7 +229,7 @@ for row in range(dataset.rowCount):
 		try:
 			# Run linting
 			self.run_lint_on_file(Path(view_file.name), self.rule_config)
-			errors = self.get_errors_for_rule("PylintScriptRule")
+			errors = self.get_errors_for_rule("PerspectiveScriptPylintRule")
 
 			# Should have at least one error
 			self.assertGreater(len(errors), 0, "Expected errors for mixed tabs/spaces")
@@ -293,7 +293,7 @@ for row in range(dataset.rowCount):
 		try:
 			# Run linting
 			self.run_lint_on_file(Path(view_file.name), self.rule_config)
-			errors = self.get_errors_for_rule("PylintScriptRule")
+			errors = self.get_errors_for_rule("PerspectiveScriptPylintRule")
 
 			# Should NOT have mixed tabs/spaces error
 			mixed_tabs_error_found = any(

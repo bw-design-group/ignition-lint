@@ -2,16 +2,16 @@
 title: Introduction
 sidebar_position: 1
 slug: /
-description: Static analysis for Ignition Perspective view.json files
+description: Static analysis for Ignition Perspective views and project script libraries
 ---
 
 # Ignition Lint
 
-Static analysis for Ignition Perspective `view.json` files. Catches naming inconsistencies, performance issues, dead custom properties, broken component references, and Python errors in scripts — before the gateway runs them.
+Static analysis for Ignition projects: Perspective `view.json` files and the project script library (`script-python/**/code.py`). Catches naming inconsistencies, performance issues, dead custom properties, broken component references, and Python errors in embedded and library scripts — before the gateway runs them.
 
 ## What it does
 
-Ignition Lint parses Perspective view definitions, builds an object model of components, bindings, and scripts, and runs a configurable set of rules over that model. Rules are visitor-pattern classes you can extend; the framework ships with nine built-in rules covering the most common pitfalls in Perspective views.
+Ignition Lint parses Perspective view definitions, builds an object model of components, bindings, and scripts, and runs a configurable set of rules over that model. Rules are visitor-pattern classes you can extend, grouped by **lint domain** (`perspective`, `scripting`); the framework ships with eleven built-in rules.
 
 ## When to use it
 
@@ -31,7 +31,9 @@ Ignition Lint parses Perspective view definitions, builds an object model of com
 | [ExcessiveContextDataRule](./rules/properties/excessive-context-data.md) | Properties | Large datasets stored in custom properties (arrays, breadth, depth, total volume) |
 | [PropertyPersistenceRule](./rules/properties/property-persistence.md) | Properties | Bound properties whose `persistent` flag stores designer results in view.json (git churn) — opt-in |
 | [PropertyAccessRule](./rules/properties/property-access.md) | Properties | Custom properties whose `access` mode doesn't match the project standard (e.g. staging data not PRIVATE) — opt-in |
-| [PylintScriptRule](./rules/scripts/pylint-script.md) | Scripts | Pylint findings across every script in the view |
+| [PerspectiveScriptPylintRule](./rules/scripts/pylint-script.md) | Scripts | Pylint findings across every script embedded in the view (formerly `PylintScriptRule`) |
+| [LibraryScriptPylintRule](./rules/scripts/library-script-pylint.md) | Scripting | Pylint findings in project-library `code.py` modules, with its own pylintrc |
+| [LibraryNamePatternRule](./rules/naming/library-name-pattern.md) | Scripting | Library package and module names that don't match a configured convention |
 
 ## Where to start
 
